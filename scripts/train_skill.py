@@ -24,14 +24,15 @@ from absl import app
 if not hasattr(jax, "device_put_replicated"):
   from jax.sharding import NamedSharding, PartitionSpec as P
 
-  def _device_put_replicated(x, devices):
-    mesh = jax.make_mesh((len(devices),), ("i",), devices=devices)
-    return jax.device_put(x, NamedSharding(mesh, P()))
-
+  # The old functions returned arrays with a leading per-device axis (pmap layout):
+  # replicated -> stack len(devices) copies; sharded -> stack the given shards.
   def _device_put_sharded(shards, devices):
     mesh = jax.make_mesh((len(devices),), ("i",), devices=devices)
-    return jax.device_put(jax.tree_util.tree_map(lambda *xs: jax.numpy.stack(xs), *shards),
-                          NamedSharding(mesh, P("i")))
+    stacked = jax.tree_util.tree_map(lambda *xs: jax.numpy.stack(xs), *shards)
+    return jax.device_put(stacked, NamedSharding(mesh, P("i")))
+
+  def _device_put_replicated(x, devices):
+    return _device_put_sharded([x] * len(devices), devices)
 
   jax.device_put_replicated = _device_put_replicated
   jax.device_put_sharded = _device_put_sharded
