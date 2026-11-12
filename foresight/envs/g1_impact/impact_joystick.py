@@ -34,6 +34,10 @@ def default_config() -> config_dict.ConfigDict:
   cfg = g1_joystick.default_config()
   cfg.episode_length = 300            # 6 s at 50 Hz; impacts need no more
   cfg.push_config.enable = False      # projectile is the only disturbance
+  # Constraint buffers: Playground sized njmax for its own pairs; add room for the
+  # projectile's 5 condim-3 pairs (4 rows each) plus margin.
+  cfg.njmax = 29 * 2 + 8 * 4 + 5 * 4 + 32
+  cfg.naconmax = 8 * 8192 * 2
   cfg.impact = config_dict.create(
       mass_range=[1.0, 8.0],          # kg
       speed_range=[1.0, 4.0],         # m/s
@@ -135,6 +139,8 @@ class ImpactJoystick(JoystickRobotSliced):
         "t_hit_true": t_launch + dist / speed,  # s from reset, straight-line estimate
         "impact_contact": jp.array(False),
         "fell": jp.array(False),
+        "fell_before_launch": jp.array(False),
+        "down_steps": jp.int32(0),
     })
     return state
 
@@ -163,7 +169,13 @@ class ImpactJoystick(JoystickRobotSliced):
     info = state.info
     info["proj_launched"] = info["proj_launched"] | launch_now
     info["impact_contact"] = info["impact_contact"] | touch
-    info["fell"] = info["fell"] | (self.get_gravity(state.data, "torso")[-1] < 0.0)
+    # Fall = torso up-vector below 0.5 for >= 10 consecutive control steps (0.2 s),
+    # which ignores the transient dip during an impact.
+    down = self.get_gravity(state.data, "torso")[-1] < 0.5
+    info["down_steps"] = jp.where(down, info["down_steps"] + 1, 0)
+    fell_now = info["down_steps"] >= 10
+    info["fell_before_launch"] = info["fell_before_launch"] | (fell_now & ~info["proj_launched"])
+    info["fell"] = info["fell"] | fell_now
     # Privileged object state for the perception module.
     info["obj_pos"] = self._proj_pos(state.data)
     info["obj_vel"] = self._proj_vel(state.data)

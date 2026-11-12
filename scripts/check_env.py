@@ -45,7 +45,9 @@ def main(_):
   dt = time.time() - t0
   print(f"{_STEPS.value} steps x {_N.value} envs: {dt:.1f}s "
         f"({_STEPS.value*_N.value/dt:.0f} env-steps/s incl. jit)")
-  print(f"launched {launched}/{_N.value}, torso contact {contact}/{_N.value}, fell {fell}/{_N.value}")
+  fbl = int(state.info["fell_before_launch"].sum())
+  print(f"launched {launched}/{_N.value}, contact {contact}/{_N.value}, "
+        f"fell {fell}/{_N.value} (of which before launch: {fbl})")
   print("impulse classes (N*s):", jp.round(state.info["proj_impulse"], 1))
   if contact == 0:
     print("WARNING: no torso contact; check capsule injection and launch aim.")
