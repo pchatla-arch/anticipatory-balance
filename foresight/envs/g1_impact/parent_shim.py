@@ -27,6 +27,12 @@ SUBSTITUTIONS = [
     # _post_init(): joint limits for "all joints after the base" must exclude the
     # projectile's free joint (joint index 30).
     ("jnt_range[1:]", "jnt_range[1:30]"),
+    # reset(): make the initial-state perturbations switchable via
+    # config.impact.reset_perturb (1.0 = Playground default, 0.0 = deterministic pose).
+    ("jax.random.uniform(key, (29,), minval=0.5, maxval=1.5)",
+     "(1.0 + self._config.impact.reset_perturb * (jax.random.uniform(key, (29,), minval=0.5, maxval=1.5) - 1.0))"),
+    ("jax.random.uniform(key, (6,), minval=-0.5, maxval=0.5)",
+     "self._config.impact.reset_perturb * jax.random.uniform(key, (6,), minval=-0.5, maxval=0.5)"),
 ]
 
 

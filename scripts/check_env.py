@@ -22,6 +22,8 @@ def main(_):
   cfg = default_config()
   cfg.impact.miss_fraction = 0.0     # force hits for the smoke test
   cfg.impact.launch_time_range = [0.3, 0.5]
+  cfg.impact.reset_perturb = 0.0   # zero action = default pose; keep the passive robot up
+  cfg.noise_config.level = 0.0
   env = ImpactJoystick(config=cfg)
   print("obs size:", env.observation_size, "action size:", env.action_size)
 

@@ -43,6 +43,7 @@ def default_config() -> config_dict.ConfigDict:
       miss_fraction=0.3,              # P(near-miss)
       miss_offset_range=[0.4, 0.8],   # lateral miss distance, m
       proj_radius=0.15,
+      reset_perturb=1.0,              # 0.0 = deterministic initial pose (eval, smoke test)
   )
   return cfg
 
@@ -116,8 +117,11 @@ class ImpactJoystick(JoystickRobotSliced):
     launch_xy = pelvis[:2] + dist * dir_xy + lateral * perp
     target_xy = pelvis[:2] + lateral * perp
     vel_xy = (target_xy - launch_xy) / jp.linalg.norm(target_xy - launch_xy) * speed
+    # Aim at the torso capsule (pelvis + ~0.25 m); fly level (gravcomp=1 on the body).
+    target_z = pelvis[2] + 0.25
     launch_pos = jp.array([launch_xy[0], launch_xy[1], height])
-    launch_vel = jp.array([vel_xy[0], vel_xy[1], 0.0])
+    flight_t = dist / speed
+    launch_vel = jp.array([vel_xy[0], vel_xy[1], (target_z - height) / flight_t])
 
     state.info.update({
         "proj_mass": mass,
