@@ -24,6 +24,9 @@ SUBSTITUTIONS = [
     # reset(): joint randomization uses an explicit (29,) sample and .at[7:]; make the
     # .at slice stop at the robot too.
     (".at[7:].set(", f".at[7:{NQ_ROBOT}].set("),
+    # _post_init(): joint limits for "all joints after the base" must exclude the
+    # projectile's free joint (joint index 30).
+    ("jnt_range[1:]", "jnt_range[1:30]"),
 ]
 
 
