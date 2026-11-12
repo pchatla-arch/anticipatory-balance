@@ -138,6 +138,11 @@ class ImpactJoystick(JoystickRobotSliced):
         "fell": jp.array(False),
         "fell_before_launch": jp.array(False),
         "down_steps": jp.int32(0),
+        # Privileged object state (filled every step; present at reset so the
+        # info pytree is identical across reset/step, as lax.scan requires).
+        "obj_pos": self._proj_pos(state.data),
+        "obj_vel": self._proj_vel(state.data),
+        "obj_rel_pos": self._proj_pos(state.data) - pelvis,
     })
     return state
 
