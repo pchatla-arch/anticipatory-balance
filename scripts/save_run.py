@@ -85,7 +85,10 @@ def main(_):
   if _LOG.value and os.path.exists(_LOG.value):
     shutil.copy(_LOG.value, os.path.join(out, "console.log"))
 
-  ckpts = sorted(glob.glob(os.path.join(_RUN.value, "checkpoints", "*")))
+  # Numeric step directories only (the folder also holds config.json), ordered by step.
+  ckpts = sorted((p for p in glob.glob(os.path.join(_RUN.value, "checkpoints", "*"))
+                  if os.path.isdir(p) and os.path.basename(p).isdigit()),
+                 key=lambda p: int(os.path.basename(p)))
   summary = {
       "run_dir_on_pod": os.path.abspath(_RUN.value),
       "final_checkpoint_on_pod": ckpts[-1] if ckpts else None,

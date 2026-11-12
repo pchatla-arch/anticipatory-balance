@@ -7,7 +7,7 @@ from foresight.envs.g1_impact import ImpactJoystick, default_config
 def main(_):
   cfg = default_config()
   cfg.impact.miss_fraction = 0.0
-  cfg.impact.launch_time_range = [0.3, 0.5]
+  cfg.impact.hit_time_range = [0.8, 1.0]
   cfg.impact.reset_perturb = 0.0
   cfg.noise_config.level = 0.0
   env = ImpactJoystick(config=cfg)
@@ -34,7 +34,7 @@ def main(_):
   print("min |proj-torso| (m):", mind.round(2), " (torso capsule r=0.09, proj r=0.15 -> contact if < ~0.24)")
   print("contact step:", c_step)
   print("fall step   :", f_step)
-  print("speed       :", np.array(st.info["proj_speed"]).round(1), " dist/speed ->", (np.array(st.info["t_hit_true"]) * 50).round(0), "steps")
+  print("speed       :", np.array(st.info["proj_speed"]).round(1), " dist/speed ->", (np.array(st.info["t_hit_nominal"]) * 50).round(0), "steps")
 
 
 if __name__ == "__main__":

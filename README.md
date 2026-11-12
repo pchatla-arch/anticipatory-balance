@@ -38,3 +38,24 @@ uv --no-config run python scripts/check_env.py
 Small artifacts (eval curves, plots, configs, console logs) are committed under `results/<run>/`
 via `scripts/save_run.py`; checkpoints stay on the pod volume and final skills are uploaded to a
 GitHub Release (`gh release upload`).
+
+## Session A (experiments E1–E6)
+
+All Session A code is tested on CPU against the real env (MJX backend) before the GPU run.
+
+| Script | Experiment | Output |
+|---|---|---|
+| `scripts/validate_contact.py` | E4 contact validation (base pinned): aim, timing, transferred impulse | `results/E4_contact/contact_table.csv` |
+| `scripts/train_skill.py --skill nominal/brace` | E1 nominal ×3 seeds, E5 BRACE skill | `logs/<tag>/.../checkpoints`, `results/<tag>/` via `save_run.py` |
+| `scripts/eval_fall_rate.py` | E2 reactive fall-rate surface over (mass, speed) + near-miss control | `results/E2_fall_rate/{episodes,grid}.csv`, heatmap |
+| `scripts/lip_overlay.py` | E3 LIP / capture-point prediction vs E2 | `results/E3_lip_overlay/` |
+| `scripts/eval_oracle_brace.py` | E6 oracle brace: fall rate and progress loss vs lead time, τ_brace | `results/E6_oracle/lead_curve.csv`, plot |
+| `scripts/run_session_a.sh` | runs all of the above in order, saves, commits, pushes | — |
+
+Env semantics worth knowing (see `impact_joystick.py` docstring): scenario fields
+(`proj_mass`, `proj_speed`, `proj_momentum = m·v`, `proj_is_miss`, `t_hit_nominal`) are
+sampled inputs; outcome fields (`impact_contact`, `contact_step`, `fell`, `term_reason`,
+`term_step`) are measured. The scenario is resampled at every episode start under
+Playground's autoreset, the launch is timed so the nominal arrival falls in
+`hit_time_range` (default 1.5–3.5 s of a 6 s episode, leaving a recovery window), and
+`info["brace_active"]` is the external mode switch (zero command + BRACE policy).

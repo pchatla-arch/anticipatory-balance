@@ -42,25 +42,29 @@ def make_domain_randomizer(torso_body_id: int, proj_body_id: int,
           body_mass[torso_body_id] + jax.random.uniform(key, minval=-1.0, maxval=1.0))
 
       # Projectile mass: U(mass_range) per environment (overrides the scene default).
+      # Inertia scales with mass for a fixed-radius sphere, so keep them consistent.
       rng, key = jax.random.split(rng)
       pm = jax.random.uniform(key, minval=mass_range[0], maxval=mass_range[1])
+      ratio = pm / model.body_mass[proj_body_id]
       body_mass = body_mass.at[proj_body_id].set(pm)
+      body_inertia = model.body_inertia.at[proj_body_id].set(
+          model.body_inertia[proj_body_id] * ratio)
 
       rng, key = jax.random.split(rng)
       qpos0 = model.qpos0.at[7:NQ_ROBOT].set(
           model.qpos0[7:NQ_ROBOT] + jax.random.uniform(key, (29,), minval=-0.05, maxval=0.05))
 
-      return pair_friction, dof_frictionloss, dof_armature, body_mass, qpos0
+      return pair_friction, dof_frictionloss, dof_armature, body_mass, body_inertia, qpos0
 
-    pf, fl, arm, bm, q0 = rand_dynamics(rng)
+    pf, fl, arm, bm, bi, q0 = rand_dynamics(rng)
     in_axes = jax.tree_util.tree_map(lambda x: None, model)
     in_axes = in_axes.tree_replace({
         "pair_friction": 0, "dof_frictionloss": 0, "dof_armature": 0,
-        "body_mass": 0, "qpos0": 0,
+        "body_mass": 0, "body_inertia": 0, "qpos0": 0,
     })
     model = model.tree_replace({
         "pair_friction": pf, "dof_frictionloss": fl, "dof_armature": arm,
-        "body_mass": bm, "qpos0": q0,
+        "body_mass": bm, "body_inertia": bi, "qpos0": q0,
     })
     return model, in_axes
 

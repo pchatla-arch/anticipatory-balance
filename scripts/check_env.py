@@ -21,7 +21,7 @@ def main(_):
   print("JAX backend:", jax.default_backend(), jax.devices())
   cfg = default_config()
   cfg.impact.miss_fraction = 0.0     # force hits for the smoke test
-  cfg.impact.launch_time_range = [0.3, 0.5]
+  cfg.impact.hit_time_range = [0.8, 1.0]
   cfg.impact.reset_perturb = 0.0   # zero action = default pose; keep the passive robot up
   cfg.noise_config.level = 0.0
   cfg.impact.hold_base = True      # pin the base: verifies projectile hits without a policy
@@ -49,7 +49,7 @@ def main(_):
   fbl = int(state.info["fell_before_launch"].sum())
   print(f"launched {launched}/{_N.value}, contact {contact}/{_N.value}, "
         f"fell {fell}/{_N.value} (of which before launch: {fbl})")
-  print("impulse classes (N*s):", jp.round(state.info["proj_impulse"], 1))
+  print("incoming momentum m*v (N*s):", jp.round(state.info["proj_momentum"], 1))
   if contact == 0:
     print("WARNING: no torso contact; check capsule injection and launch aim.")
 
