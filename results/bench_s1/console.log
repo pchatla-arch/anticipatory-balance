@@ -1,0 +1,198 @@
+Warp 1.18.0 initialized:
+   CUDA Toolkit 13.4, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA RTX 6000 Ada Generation" (47 GiB, sm_89, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.18.0
+Environment Config:
+action_repeat: 1
+action_scale: 0.5
+ang_vel_yaw:
+- -1.0
+- 1.0
+command_config:
+  a:
+  - 1.0
+  - 0.8
+  - 1.0
+  b:
+  - 0.9
+  - 0.25
+  - 0.5
+ctrl_dt: 0.02
+episode_length: 300
+history_len: 1
+impact:
+  height_range:
+  - 0.6
+  - 1.1
+  hold_base: false
+  launch_time_range:
+  - 0.5
+  - 2.0
+  mass_range:
+  - 1.0
+  - 8.0
+  miss_fraction: 0.3
+  miss_offset_range:
+  - 0.4
+  - 0.8
+  proj_radius: 0.15
+  range_dist:
+  - 2.0
+  - 4.0
+  reset_perturb: 1.0
+  speed_range:
+  - 1.0
+  - 4.0
+impl: warp
+lin_vel_x:
+- -1.0
+- 1.0
+lin_vel_y:
+- -0.5
+- 0.5
+naconmax: 131072
+njmax: 142
+noise_config:
+  level: 1.0
+  scales:
+    gravity: 0.05
+    gyro: 0.2
+    joint_pos: 0.03
+    joint_vel: 1.5
+    linvel: 0.1
+push_config:
+  enable: false
+  interval_range:
+  - 5.0
+  - 10.0
+  magnitude_range:
+  - 0.1
+  - 2.0
+restricted_joint_range: false
+reward_config:
+  base_height_target: 0.5
+  max_contact_force: 500.0
+  max_foot_height: 0.15
+  scales:
+    action_rate: 0.0
+    alive: 0.0
+    ang_vel_xy: -0.15
+    base_height: 0.0
+    collision: -0.1
+    contact_force: -0.01
+    dof_acc: 0.0
+    dof_pos_limits: -1.0
+    energy: 0.0
+    feet_air_time: 2.0
+    feet_clearance: 0.0
+    feet_height: 0.0
+    feet_phase: 1.0
+    feet_slip: -0.25
+    joint_deviation_hip: -0.25
+    joint_deviation_knee: -0.1
+    lin_vel_z: 0.0
+    orientation: -2.0
+    pose: -0.1
+    stand_still: -1.0
+    termination: -100.0
+    torques: 0.0
+    tracking_ang_vel: 0.75
+    tracking_lin_vel: 1.0
+  tracking_sigma: 0.25
+sim_dt: 0.002
+soft_joint_pos_limit_factor: 0.95
+
+Environment Config Overrides:
+{'impl': 'warp'}
+
+PPO Training Parameters:
+action_repeat: 1
+batch_size: 256
+clipping_epsilon: 0.2
+discounting: 0.97
+entropy_cost: 0.005
+episode_length: 300
+learning_rate: 0.0003
+max_grad_norm: 1.0
+network_factory:
+  policy_hidden_layer_sizes: &id001 !!python/tuple
+  - 512
+  - 256
+  - 128
+  policy_obs_key: state
+  value_hidden_layer_sizes: *id001
+  value_obs_key: privileged_state
+normalize_observations: true
+num_envs: 4096
+num_evals: 20
+num_minibatches: 32
+num_resets_per_eval: 1
+num_timesteps: 20000000
+num_updates_per_batch: 4
+reward_scaling: 1.0
+unroll_length: 20
+
+Experiment name: G1Impact-20261112-042331
+Logs are being stored in: /workspace/anticipatory-balance/logs/bench_s1/G1Impact-20261112-042331
+No checkpoint path provided, not restoring from checkpoint
+Checkpoint path: /workspace/anticipatory-balance/logs/bench_s1/G1Impact-20261112-042331/checkpoints
+0: reward=-5.660
+W1112 04:24:14.696632   18011 cuda_timer.cc:88] Delay kernel timed out: measured time has sub-optimal accuracy. There may be a missing warmup execution, please investigate in Nsight Systems.
+1146880: reward=-4.070
+2293760: reward=-3.424
+3440640: reward=-3.204
+4587520: reward=-2.871
+5734400: reward=-2.893
+6881280: reward=-2.789
+8028160: reward=-2.540
+9175040: reward=-2.527
+10321920: reward=-2.662
+11468800: reward=-2.705
+12615680: reward=-2.527
+13762560: reward=-2.461
+14909440: reward=-2.545
+16056320: reward=-2.306
+17203200: reward=-2.362
+18350080: reward=-2.083
+19496960: reward=-2.234
+20643840: reward=-2.363
+21790720: reward=-2.241
+Done training.
+Time to JIT compile: 36.73413333995268
+Time to train: 225.00585338001838
+Starting inference...
+Traceback (most recent call last):
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/warp/_src/jax/ffi.py", line 1083, in ffi_callback
+    self.func(*arg_list)
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/warp/ffi.py", line 173, in func_wrapper
+    return func(*unflat_args, *output_buffers, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/warp/ffi.py", line 250, in wrapper
+    return func(*args)
+           ^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/warp/forward.py", line 1352, in _forward_shim
+    mjwarp.forward(_m, _d)
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/warp_util.py", line 123, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/forward.py", line 2076, in forward
+    solver.solve(m, d)
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/warp_util.py", line 123, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/solver.py", line 3936, in solve
+    _solve(m, d, ctx)
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/solver.py", line 3976, in _solve
+    _update_gradient(m, d, ctx, compact=compact)
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/solver.py", line 3318, in _update_gradient
+    groups_per_world = _jtdaj_groups_per_world(d.nworld, d.njmax)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/solver.py", line 3268, in _jtdaj_groups_per_world
+    return max(1, min(njmax, _JTDAJ_OVERSUBSCRIBE_WAVES * device_warps // nworld))
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^~~~~~~~
+ZeroDivisionError: integer division or modulo by zero
+
+FPS for rendering: 25.0
