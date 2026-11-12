@@ -142,7 +142,7 @@ class ImpactJoystick(JoystickRobotSliced):
         # info pytree is identical across reset/step, as lax.scan requires).
         "obj_pos": self._proj_pos(state.data),
         "obj_vel": self._proj_vel(state.data),
-        "obj_rel_pos": self._proj_pos(state.data) - pelvis,
+        "obj_rel_pos": self._proj_pos(state.data) - self._pelvis_pos(state.data),
     })
     return state
 
