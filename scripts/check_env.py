@@ -24,6 +24,7 @@ def main(_):
   cfg.impact.launch_time_range = [0.3, 0.5]
   cfg.impact.reset_perturb = 0.0   # zero action = default pose; keep the passive robot up
   cfg.noise_config.level = 0.0
+  cfg.impact.hold_base = True      # pin the base: verifies projectile hits without a policy
   env = ImpactJoystick(config=cfg)
   print("obs size:", env.observation_size, "action size:", env.action_size)
 

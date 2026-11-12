@@ -48,6 +48,7 @@ def default_config() -> config_dict.ConfigDict:
       miss_offset_range=[0.4, 0.8],   # lateral miss distance, m
       proj_radius=0.15,
       reset_perturb=1.0,              # 0.0 = deterministic initial pose (eval, smoke test)
+      hold_base=False,                # True: pin the floating base (contact smoke test only)
   )
   return cfg
 
@@ -114,25 +115,20 @@ class ImpactJoystick(JoystickRobotSliced):
     side = jp.where(jax.random.uniform(k_side) < 0.5, -1.0, 1.0)
     lateral = jp.where(is_miss, side * off, 0.0)
 
-    # Launch point on a circle around the pelvis; aim at pelvis (+ lateral offset).
-    pelvis = self._pelvis_pos(state.data)
+    # Launch geometry is resolved at the launch step (aim at the pelvis where it is then).
     dir_xy = jp.array([jp.cos(azimuth), jp.sin(azimuth)])
     perp = jp.array([-dir_xy[1], dir_xy[0]])
-    launch_xy = pelvis[:2] + dist * dir_xy + lateral * perp
-    target_xy = pelvis[:2] + lateral * perp
-    vel_xy = (target_xy - launch_xy) / jp.linalg.norm(target_xy - launch_xy) * speed
-    # Aim at the torso capsule (pelvis + ~0.25 m); fly level (gravcomp=1 on the body).
-    target_z = pelvis[2] + 0.25
-    launch_pos = jp.array([launch_xy[0], launch_xy[1], height])
-    flight_t = dist / speed
-    launch_vel = jp.array([vel_xy[0], vel_xy[1], (target_z - height) / flight_t])
-
     state.info.update({
         "proj_mass": mass,
         "proj_speed": speed,
         "proj_impulse": mass * speed,          # N*s if fully absorbed
-        "proj_launch_pos": launch_pos,
-        "proj_launch_vel": launch_vel,
+        "proj_dir_xy": dir_xy,
+        "proj_perp_xy": perp,
+        "proj_dist": dist,
+        "proj_height": height,
+        "proj_lateral": lateral,
+        "proj_launch_pos": jp.zeros(3),
+        "proj_launch_vel": jp.zeros(3),
         "proj_launch_step": jp.round(t_launch / self.dt).astype(jp.int32),
         "proj_launched": jp.array(False),
         "proj_is_miss": is_miss,
@@ -149,20 +145,36 @@ class ImpactJoystick(JoystickRobotSliced):
     data = state.data
     launch_now = (info["step"] >= info["proj_launch_step"]) & (~info["proj_launched"])
 
+    # Resolve launch pos/vel from the pelvis position *now* (so the aim is current).
+    pelvis = self._pelvis_pos(data)
+    launch_xy = pelvis[:2] + info["proj_dist"] * info["proj_dir_xy"] + info["proj_lateral"] * info["proj_perp_xy"]
+    target_xy = pelvis[:2] + info["proj_lateral"] * info["proj_perp_xy"]
+    d_xy = target_xy - launch_xy
+    vel_xy = d_xy / (jp.linalg.norm(d_xy) + 1e-6) * info["proj_speed"]
+    target_z = pelvis[2] + 0.25
+    flight_t = info["proj_dist"] / info["proj_speed"]
+    launch_pos = jp.array([launch_xy[0], launch_xy[1], info["proj_height"]])
+    launch_vel = jp.array([vel_xy[0], vel_xy[1], (target_z - info["proj_height"]) / flight_t])
+    info["proj_launch_pos"] = jp.where(launch_now, launch_pos, info["proj_launch_pos"])
+    info["proj_launch_vel"] = jp.where(launch_now, launch_vel, info["proj_launch_vel"])
+
     # Place and release the projectile at launch; before that it stays parked.
     qpos = data.qpos
     qvel = data.qvel
     a, b = self._proj_qpos_adr, self._proj_qvel_adr
-    qpos = jp.where(launch_now, qpos.at[a : a + 3].set(info["proj_launch_pos"]), qpos)
-    qvel = jp.where(launch_now, qvel.at[b : b + 3].set(info["proj_launch_vel"]), qvel)
+    qpos = jp.where(launch_now, qpos.at[a : a + 3].set(launch_pos), qpos)
+    qvel = jp.where(launch_now, qvel.at[b : b + 3].set(launch_vel), qvel)
     # Freeze the projectile while parked (zero velocity), so it does not fall.
     parked = ~(info["proj_launched"] | launch_now)
     qvel = jp.where(parked, qvel.at[b : b + 6].set(0.0), qvel)
-    state = state.replace(data=data.replace(qpos=qpos, qvel=qvel))
-
     # Per-episode projectile mass: scale body_mass via the model is not per-env in MJX;
     # we emulate impulse class through speed only in v0 and keep mass in [1,8] via
     # domain randomization in a later commit (see TODO in README).
+    if self._config.impact.hold_base:
+      # Pin the robot's floating base: reset its pose to the keyframe and zero its velocity.
+      qpos = qpos.at[0:7].set(self._init_q[0:7])
+      qvel = qvel.at[0:6].set(0.0)
+    state = state.replace(data=data.replace(qpos=qpos, qvel=qvel))
     state = super().step(state, action)
 
     touch = jp.any(jp.array([state.data.sensordata[a] > 0 for a in self._impact_found_adrs]))
