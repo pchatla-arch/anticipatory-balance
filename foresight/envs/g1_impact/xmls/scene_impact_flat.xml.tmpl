@@ -38,6 +38,13 @@
   </contact>
 
   <include file="{G1_XML_DIR}/sensor.xml"/>
+  <sensor>
+    <!-- Same idiom as Playground's *_found sensors: 1 when the pair is in contact. -->
+    <contact name="proj_torso_found"  geom1="projectile_geom" geom2="torso_impact_geom"  reduce="mindist" num="1" data="found"/>
+    <contact name="proj_pelvis_found" geom1="projectile_geom" geom2="pelvis_impact_geom" reduce="mindist" num="1" data="found"/>
+    <contact name="proj_lthigh_found" geom1="projectile_geom" geom2="left_thigh"  reduce="mindist" num="1" data="found"/>
+    <contact name="proj_rthigh_found" geom1="projectile_geom" geom2="right_thigh" reduce="mindist" num="1" data="found"/>
+  </sensor>
 
   <keyframe>
     <!-- Playground's knees_bent pose, plus the projectile's 7 free-joint coordinates appended. -->

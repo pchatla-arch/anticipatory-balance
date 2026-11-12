@@ -71,7 +71,11 @@ class ImpactJoystick(g1_joystick.Joystick):
     self._proj_qpos_adr = m.joint("projectile_free").qposadr[0]
     self._proj_qvel_adr = m.joint("projectile_free").dofadr[0]
     self._pelvis_body = m.body("pelvis").id
-    self._torso_touch_adr = m.sensor_adr[m.sensor("torso_impact_touch").id]
+    self._impact_found_adrs = [
+        m.sensor_adr[m.sensor(n).id]
+        for n in ("proj_torso_found", "proj_pelvis_found",
+                  "proj_lthigh_found", "proj_rthigh_found")
+    ]
 
   # ---- helpers -----------------------------------------------------------------
   def _proj_pos(self, data: mjx.Data) -> jax.Array:
@@ -149,7 +153,7 @@ class ImpactJoystick(g1_joystick.Joystick):
     # domain randomization in a later commit (see TODO in README).
     state = super().step(state, action)
 
-    touch = state.data.sensordata[self._torso_touch_adr] > 0.0
+    touch = jp.any(jp.array([state.data.sensordata[a] > 0 for a in self._impact_found_adrs]))
     info = state.info
     info["proj_launched"] = info["proj_launched"] | launch_now
     info["impact_contact"] = info["impact_contact"] | touch

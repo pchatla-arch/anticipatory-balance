@@ -26,8 +26,7 @@ TEMPLATE = HERE / "xmls" / "scene_impact_flat.xml.tmpl"
 # Capsules approximating the torso and pelvis; sizes from the G1 torso_link mesh extents.
 TORSO_CAPSULE = (
     '<geom name="torso_impact_geom" class="collision" type="capsule" '
-    'size="0.09" fromto="0 0 0.02 0 0 0.30"/>\n'
-    '<site name="torso_impact_site" pos="0 0 0.16" size="0.1" group="5"/>'
+    'size="0.09" fromto="0 0 0.02 0 0 0.30"/>'
 )
 PELVIS_CAPSULE = (
     '<geom name="pelvis_impact_geom" class="collision" type="capsule" '
