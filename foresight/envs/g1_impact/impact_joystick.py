@@ -25,6 +25,8 @@ from mujoco import mjx
 from mujoco_playground._src import mjx_env
 from mujoco_playground._src.locomotion.g1 import joystick as g1_joystick
 
+from foresight.envs.g1_impact.parent_shim import JoystickRobotSliced
+
 from foresight.envs.g1_impact import scene as impact_scene
 
 
@@ -45,7 +47,7 @@ def default_config() -> config_dict.ConfigDict:
   return cfg
 
 
-class ImpactJoystick(g1_joystick.Joystick):
+class ImpactJoystick(JoystickRobotSliced):
   """Joystick env + launched projectile."""
 
   def __init__(
