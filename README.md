@@ -33,3 +33,8 @@ uv --no-config run python scripts/check_env.py
 - [x] Per-env projectile mass via domain randomization
 - [ ] Nominal skill training script
 - [ ] Reactive fall-rate curve
+
+## Saving results
+Small artifacts (eval curves, plots, configs, console logs) are committed under `results/<run>/`
+via `scripts/save_run.py`; checkpoints stay on the pod volume and final skills are uploaded to a
+GitHub Release (`gh release upload`).

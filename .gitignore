@@ -1,6 +1,9 @@
+# training checkpoints stay on the pod / GitHub Releases, never in git
+*.ckpt
+*.egg-info/
+*.pyc
+.pytest_cache/
 .venv/
 __pycache__/
-*.pyc
 logs/
-*.egg-info/
-.pytest_cache/
+results/**/checkpoints/
