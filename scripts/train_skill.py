@@ -16,8 +16,27 @@ Examples (from the repo root, rss2025 venv active):
 import os
 import sys
 
-import mujoco_playground
+import jax
 from absl import app
+
+# brax 0.14.2 still calls jax.device_put_replicated / device_put_sharded, which JAX 0.12
+# removed. Provide the drop-in replacements from JAX's own migration guide.
+if not hasattr(jax, "device_put_replicated"):
+  from jax.sharding import NamedSharding, PartitionSpec as P
+
+  def _device_put_replicated(x, devices):
+    mesh = jax.make_mesh((len(devices),), ("i",), devices=devices)
+    return jax.device_put(x, NamedSharding(mesh, P()))
+
+  def _device_put_sharded(shards, devices):
+    mesh = jax.make_mesh((len(devices),), ("i",), devices=devices)
+    return jax.device_put(jax.tree_util.tree_map(lambda *xs: jax.numpy.stack(xs), *shards),
+                          NamedSharding(mesh, P("i")))
+
+  jax.device_put_replicated = _device_put_replicated
+  jax.device_put_sharded = _device_put_sharded
+
+import mujoco_playground
 
 from foresight.skills import register as fs_register
 
