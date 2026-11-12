@@ -30,6 +30,6 @@ uv --no-config run python scripts/check_env.py
 ## Status
 - [x] LIP module + tests
 - [x] Impact env v0 (projectile launch, torso capsules, contact/fall flags)
-- [ ] Per-episode projectile mass (v0 uses speed only; mass fixed at scene build)
+- [x] Per-env projectile mass via domain randomization
 - [ ] Nominal skill training script
 - [ ] Reactive fall-rate curve

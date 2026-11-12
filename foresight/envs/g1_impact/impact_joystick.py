@@ -102,7 +102,8 @@ class ImpactJoystick(JoystickRobotSliced):
     )
     state = super().reset(rng)
     c = self._config.impact
-    mass = jax.random.uniform(k_mass, minval=c.mass_range[0], maxval=c.mass_range[1])
+    # Projectile mass comes from the (possibly domain-randomized) model, so info matches physics.
+    mass = self.mjx_model.body_mass[self._proj_body]
     speed = jax.random.uniform(k_speed, minval=c.speed_range[0], maxval=c.speed_range[1])
     dist = jax.random.uniform(k_dist, minval=c.range_dist[0], maxval=c.range_dist[1])
     height = jax.random.uniform(k_h, minval=c.height_range[0], maxval=c.height_range[1])
@@ -167,9 +168,6 @@ class ImpactJoystick(JoystickRobotSliced):
     # Freeze the projectile while parked (zero velocity), so it does not fall.
     parked = ~(info["proj_launched"] | launch_now)
     qvel = jp.where(parked, qvel.at[b : b + 6].set(0.0), qvel)
-    # Per-episode projectile mass: scale body_mass via the model is not per-env in MJX;
-    # we emulate impulse class through speed only in v0 and keep mass in [1,8] via
-    # domain randomization in a later commit (see TODO in README).
     if self._config.impact.hold_base:
       # Pin the robot's floating base: reset its pose to the keyframe and zero its velocity.
       qpos = qpos.at[0:7].set(self._init_q[0:7])
