@@ -43,8 +43,9 @@ def _inject_capsules(robot_xml: str) -> str:
       robot_xml,
       count=1,
   )
+  # The pelvis body has a <camera> before its inertial; anchor on the freejoint instead.
   robot_xml, n2 = re.subn(
-      r'(<body name="pelvis"[^>]*>\s*<inertial[^>]*/>)',
+      r'(<freejoint name="floating_base_joint"/>)',
       r"\1\n      " + PELVIS_CAPSULE,
       robot_xml,
       count=1,
