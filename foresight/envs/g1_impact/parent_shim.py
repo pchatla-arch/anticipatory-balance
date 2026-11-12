@@ -45,7 +45,10 @@ def make_robot_sliced_joystick() -> type:
   src = src.replace("class Joystick(", "class JoystickRobotSliced(", 1)
   ns = dict(vars(g1_joystick))        # same globals the original class body used
   exec(compile(src, "<g1_joystick_shim>", "exec"), ns)
+  global SHIM_SOURCE
+  SHIM_SOURCE = src                   # kept for tests (inspect cannot see exec'd code)
   return ns["JoystickRobotSliced"]
 
 
+SHIM_SOURCE = ""
 JoystickRobotSliced = make_robot_sliced_joystick()
