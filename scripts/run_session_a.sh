@@ -20,14 +20,25 @@ newest_run() { ls -td "$1"/G1Impact*-[0-9]*-[0-9]* 2>/dev/null | head -1; }
 done_stage() { [ -f "results/$1/summary.json" ]; }
 stamp() { echo; echo "=== [$(date +%H:%M:%S)] $*"; }
 
+has_final_ckpt() {  # a run dir whose checkpoints/ holds the final step dir
+  local run; run=$(newest_run "$1") || return 1
+  [ -n "$run" ] && [ -d "$run/checkpoints" ] && \
+    [ "$(ls -d "$run"/checkpoints/[0-9]* 2>/dev/null | wc -l)" -ge 1 ] && \
+    grep -q "Done training\|Training and checkpoints complete" "logs/$(basename "$1")_train.txt" 2>/dev/null
+}
+
 train() {  # train <skill> <seed>  -> logs/<skill>_s<seed>/<run>/checkpoints
   local skill=$1 seed=$2 tag="${1}_s${2}"
   if done_stage "$tag"; then echo "skip $tag (results/$tag/summary.json exists)"; return; fi
-  stamp "train $tag ($STEPS steps)"
-  $PY scripts/train_skill.py --skill "$skill" --impl $IMPL --domain_randomization \
-      --num_timesteps $STEPS --num_envs $NENVS --seed "$seed" --use_tb --num_videos 0 \
-      --logdir "logs/$tag" 2>&1 | tee "logs/${tag}_train.txt"
-  $PY scripts/save_run.py --run_dir "$(newest_run logs/$tag)" --out "results/$tag" \
+  if has_final_ckpt "logs/$tag"; then
+    echo "reuse finished training run in logs/$tag (saving results only)"
+  else
+    stamp "train $tag ($STEPS steps)"
+    $PY scripts/train_skill.py --skill "$skill" --impl $IMPL --domain_randomization \
+        --num_timesteps $STEPS --num_envs $NENVS --seed "$seed" --use_tb --num_videos 0 \
+        --logdir "logs/$tag" 2>&1 | tee "logs/${tag}_train.txt"
+  fi
+  $PY scripts/save_run.py --run_dir "$(newest_run logs/$tag)" --name "$tag" \
       --log "logs/${tag}_train.txt"
 }
 
