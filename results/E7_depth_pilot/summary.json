@@ -1,0 +1,13 @@
+{
+  "num_envs": 64,
+  "steps": 150,
+  "frames": 30,
+  "shape": [
+    30,
+    64,
+    8192
+  ],
+  "render_ms_per_batch_mean": 41.938839287593446,
+  "wall_s": 23.20290184020996,
+  "env_steps_per_s": 413.7413529614419
+}
