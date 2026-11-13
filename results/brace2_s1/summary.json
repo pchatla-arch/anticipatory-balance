@@ -1,0 +1,10 @@
+{
+  "run_dir_on_pod": "/workspace/anticipatory-balance/logs/brace2_s1/G1ImpactBrace-20261113-174758",
+  "final_checkpoint_on_pod": "logs/brace2_s1/G1ImpactBrace-20261113-174758/checkpoints/000202342400",
+  "num_eval_points": 20,
+  "final_env_steps": 202342400,
+  "final_eval_reward": 3.9831137657165527,
+  "best_eval_reward": 3.9831137657165527,
+  "jit_time_s": 38.39476562291384,
+  "train_time_s": 1079.4347704891115
+}
