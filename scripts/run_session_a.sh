@@ -48,15 +48,24 @@ if ! done_stage E4_contact; then
   $PY scripts/validate_contact.py --impl $IMPL --reps 2 --out results/E4_contact
 fi
 
-# --- E1: nominal skill, 3 seeds (seed 1 retrained with per-episode projectile resampling)
+# --- E1: nominal skill, 3 seeds, all trained with per-episode projectile resampling.
+# (results/nominal_s1_naive is the Nov 12 policy that saw a projectile only in each lane's
+#  first episode; kept as the projectile-naive baseline.)
 train nominal 1
 train nominal 2
 train nominal 3
-NOM=$(newest_run logs/nominal_s1)/checkpoints
+ckpt_of() {  # ckpt_of <tag> -> <run>/checkpoints, or exit with a clear message
+  local run; run=$(newest_run "logs/$1" || true)
+  if [ -z "$run" ] || [ ! -d "$run/checkpoints" ]; then
+    echo "ERROR: no training run with checkpoints under logs/$1" >&2; exit 1
+  fi
+  echo "$run/checkpoints"
+}
+NOM=$(ckpt_of nominal_s1)
 
 # --- E5: BRACE skill
 train brace 1
-BR=$(newest_run logs/brace_s1)/checkpoints
+BR=$(ckpt_of brace_s1)
 
 # --- E2: reactive fall-rate surface (nominal seed 1)
 if ! done_stage E2_fall_rate; then
