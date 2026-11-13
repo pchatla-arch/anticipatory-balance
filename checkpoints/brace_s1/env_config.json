@@ -1,0 +1,136 @@
+{
+    "action_repeat": 1,
+    "action_scale": 0.5,
+    "ang_vel_yaw": [
+        -1.0,
+        1.0
+    ],
+    "brace": {
+        "base_height_target": 0.65,
+        "feet_sep_target": 0.35,
+        "handover_checkpoint": "",
+        "handover_time_range": [
+            0.0,
+            2.0
+        ]
+    },
+    "command_config": {
+        "a": [
+            1.0,
+            0.8,
+            1.0
+        ],
+        "b": [
+            0.9,
+            0.25,
+            0.5
+        ]
+    },
+    "ctrl_dt": 0.02,
+    "episode_length": 300,
+    "history_len": 1,
+    "impact": {
+        "aim_height": 0.25,
+        "aim_lead": true,
+        "height_range": [
+            0.6,
+            1.1
+        ],
+        "hit_time_range": [
+            2.5,
+            4.0
+        ],
+        "hold_base": false,
+        "mass_range": [
+            4.0,
+            16.0
+        ],
+        "min_launch_time": 0.3,
+        "miss_fraction": 0.3,
+        "miss_offset_range": [
+            0.4,
+            0.8
+        ],
+        "proj_radius": 0.15,
+        "range_dist": [
+            2.0,
+            4.0
+        ],
+        "resample_on_autoreset": true,
+        "reset_perturb": 1.0,
+        "speed_range": [
+            3.0,
+            8.0
+        ]
+    },
+    "impl": "warp",
+    "lin_vel_x": [
+        -1.0,
+        1.0
+    ],
+    "lin_vel_y": [
+        -0.5,
+        0.5
+    ],
+    "naconmax": 131072,
+    "njmax": 142,
+    "noise_config": {
+        "level": 1.0,
+        "scales": {
+            "gravity": 0.05,
+            "gyro": 0.2,
+            "joint_pos": 0.03,
+            "joint_vel": 1.5,
+            "linvel": 0.1
+        }
+    },
+    "push_config": {
+        "enable": false,
+        "interval_range": [
+            5.0,
+            10.0
+        ],
+        "magnitude_range": [
+            0.1,
+            2.0
+        ]
+    },
+    "restricted_joint_range": false,
+    "reward_config": {
+        "base_height_target": 0.65,
+        "max_contact_force": 500.0,
+        "max_foot_height": 0.15,
+        "scales": {
+            "action_rate": -0.1,
+            "alive": 0.0,
+            "ang_vel_xy": -0.15,
+            "base_height": -10.0,
+            "collision": -0.1,
+            "contact_force": -0.01,
+            "dof_acc": 0.0,
+            "dof_pos_limits": -1.0,
+            "energy": 0.0,
+            "feet_air_time": 0.0,
+            "feet_clearance": 0.0,
+            "feet_contact": 0.5,
+            "feet_height": 0.0,
+            "feet_phase": 0.0,
+            "feet_separation": -5.0,
+            "feet_slip": -0.25,
+            "joint_deviation_hip": 0.0,
+            "joint_deviation_knee": 0.0,
+            "lin_vel_z": 0.0,
+            "orientation": -2.0,
+            "pose": 0.0,
+            "stand_still": 0.0,
+            "termination": -100.0,
+            "torques": -0.0001,
+            "tracking_ang_vel": 0.5,
+            "tracking_lin_vel": 1.0
+        },
+        "tracking_sigma": 0.25
+    },
+    "sim_dt": 0.002,
+    "skill": "brace",
+    "soft_joint_pos_limit_factor": 0.95
+}
