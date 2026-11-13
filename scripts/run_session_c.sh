@@ -11,6 +11,17 @@ export JAX_DEFAULT_MATMUL_PRECISION=highest
 unset LD_LIBRARY_PATH MUJOCO_GL || true
 export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
 PY=${PY:-python}
+# Refuse to run outside the Playground venv (a plain shell has no jax; the session would
+# fail at once and a chained finish_and_stop.sh would then stop the pod).
+if ! $PY -c "import jax, absl" 2>/dev/null; then
+  if [ -x /workspace/mujoco_playground/rss2025/.venv/bin/python ]; then
+    echo "activating /workspace/mujoco_playground/rss2025/.venv"
+    # shellcheck disable=SC1091
+    source /workspace/mujoco_playground/rss2025/.venv/bin/activate
+  else
+    echo "ERROR: jax not importable and no venv found; run scripts/bootstrap_pod.sh first" >&2; exit 1
+  fi
+fi
 IMPL=${IMPL:-warp}
 EPISODES=${EPISODES:-1024}
 BATCHES=${BATCHES:-2}

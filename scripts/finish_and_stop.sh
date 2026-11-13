@@ -9,6 +9,12 @@
 #   while pgrep -f run_session_b.sh >/dev/null; do sleep 60; done; bash scripts/finish_and_stop.sh
 set -uo pipefail
 cd "$(dirname "$0")/.."
+# Never stop the pod right after a session that failed at once: require a results commit
+# from the last 12 hours or an explicit FORCE_STOP=1.
+if [ "${FORCE_STOP:-0}" != "1" ] && ! git log -1 --since="12 hours ago" --format=%s -- results | grep -q .; then
+  echo "No results committed in the last 12 hours: saving/pushing only, pod left running (FORCE_STOP=1 to override)."
+  NO_STOP=1
+fi
 echo "=== [$(date +%H:%M:%S)] finish_and_stop: commit results"
 git add results 2>/dev/null || true
 git commit -qm "Results autosave $(date -u +%Y-%m-%dT%H:%MZ)" 2>/dev/null || echo "(no new results to commit)"
@@ -27,7 +33,9 @@ if [ "$ahead" != "0" ] || [ "$dirty" != "0" ]; then
   exit 1
 fi
 echo "GitHub is up to date with $branch ($(git rev-parse --short HEAD))."
-if [ -n "${RUNPOD_POD_ID:-}" ] && command -v runpodctl >/dev/null; then
+if [ "${NO_STOP:-0}" = "1" ]; then
+  echo "pod left running"
+elif [ -n "${RUNPOD_POD_ID:-}" ] && command -v runpodctl >/dev/null; then
   echo "=== stopping pod $RUNPOD_POD_ID in 60 s (Ctrl-C to keep it running)"
   sleep 60
   runpodctl stop pod "$RUNPOD_POD_ID" && echo "stop requested"
