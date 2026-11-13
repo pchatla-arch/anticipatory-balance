@@ -1,0 +1,10 @@
+{
+  "n": 32,
+  "launched": 32,
+  "contacts": 30,
+  "robot_mass_kg": 33.341142,
+  "pos_err_m_mean": 0.22046022288940187,
+  "t_err_s_mean": -0.1242393719355265,
+  "t_err_s_absmax": 0.2694584369659423,
+  "impulse_over_momentum_mean": 1.084290798416436
+}

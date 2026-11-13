@@ -1,0 +1,249 @@
+Warp 1.18.0 initialized:
+   CUDA Toolkit 13.4, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA RTX 6000 Ada Generation" (47 GiB, sm_89, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.18.0
+Environment Config:
+action_repeat: 1
+action_scale: 0.5
+ang_vel_yaw:
+- -1.0
+- 1.0
+brace:
+  base_height_target: 0.6
+  feet_sep_target: 0.4
+command_config:
+  a:
+  - 1.0
+  - 0.8
+  - 1.0
+  b:
+  - 0.9
+  - 0.25
+  - 0.5
+ctrl_dt: 0.02
+episode_length: 300
+history_len: 1
+impact:
+  height_range:
+  - 0.6
+  - 1.1
+  hit_time_range:
+  - 1.5
+  - 3.5
+  hold_base: false
+  mass_range:
+  - 1.0
+  - 8.0
+  min_launch_time: 0.3
+  miss_fraction: 0.3
+  miss_offset_range:
+  - 0.4
+  - 0.8
+  proj_radius: 0.15
+  range_dist:
+  - 2.0
+  - 4.0
+  resample_on_autoreset: true
+  reset_perturb: 1.0
+  speed_range:
+  - 1.0
+  - 4.0
+impl: warp
+lin_vel_x:
+- -1.0
+- 1.0
+lin_vel_y:
+- -0.5
+- 0.5
+naconmax: 131072
+njmax: 142
+noise_config:
+  level: 1.0
+  scales:
+    gravity: 0.05
+    gyro: 0.2
+    joint_pos: 0.03
+    joint_vel: 1.5
+    linvel: 0.1
+push_config:
+  enable: false
+  interval_range:
+  - 5.0
+  - 10.0
+  magnitude_range:
+  - 0.1
+  - 2.0
+restricted_joint_range: false
+reward_config:
+  base_height_target: 0.6
+  max_contact_force: 500.0
+  max_foot_height: 0.15
+  scales:
+    action_rate: -0.1
+    alive: 0.0
+    ang_vel_xy: -0.15
+    base_height: -10.0
+    collision: -0.1
+    contact_force: -0.01
+    dof_acc: 0.0
+    dof_pos_limits: -1.0
+    energy: 0.0
+    feet_air_time: 0.0
+    feet_clearance: 0.0
+    feet_contact: 0.5
+    feet_height: 0.0
+    feet_phase: 0.0
+    feet_separation: -5.0
+    feet_slip: -0.25
+    joint_deviation_hip: 0.0
+    joint_deviation_knee: 0.0
+    lin_vel_z: 0.0
+    orientation: -2.0
+    pose: 0.0
+    stand_still: 0.0
+    termination: -100.0
+    torques: -0.0001
+    tracking_ang_vel: 0.5
+    tracking_lin_vel: 1.0
+  tracking_sigma: 0.25
+sim_dt: 0.002
+skill: brace
+soft_joint_pos_limit_factor: 0.95
+
+Environment Config Overrides:
+{'impl': 'warp'}
+
+PPO Training Parameters:
+action_repeat: 1
+batch_size: 256
+clipping_epsilon: 0.2
+discounting: 0.97
+entropy_cost: 0.005
+episode_length: 300
+learning_rate: 0.0003
+max_grad_norm: 1.0
+network_factory:
+  policy_hidden_layer_sizes: &id001 !!python/tuple
+  - 512
+  - 256
+  - 128
+  policy_obs_key: state
+  value_hidden_layer_sizes: *id001
+  value_obs_key: privileged_state
+normalize_observations: true
+num_envs: 4096
+num_evals: 20
+num_minibatches: 32
+num_resets_per_eval: 1
+num_timesteps: 200000000
+num_updates_per_batch: 4
+reward_scaling: 1.0
+unroll_length: 20
+
+Experiment name: G1ImpactBrace-20261113-065807
+Logs are being stored in: /workspace/anticipatory-balance/logs/brace_s1/G1ImpactBrace-20261113-065807
+No checkpoint path provided, not restoring from checkpoint
+Checkpoint path: /workspace/anticipatory-balance/logs/brace_s1/G1ImpactBrace-20261113-065807/checkpoints
+Module mujoco.mjx.warp.ffi 4443472 load on device 'cuda:0' took 0.65 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.smooth 43a6a77 load on device 'cuda:0' took 6.73 ms  (cached)
+Module _nxn_broadphase__locals__kernel_95773766 9577376 load on device 'cuda:0' took 0.45 ms  (cached)
+Module ccd_kernel_builder__locals__ccd_kernel_1a0e5f50 1a0e5f5 load on device 'cuda:0' took 0.51 ms  (cached)
+Module _primitive_narrowphase__locals__primitive_narrowphase_45a33c4c 45a33c4 load on device 'cuda:0' took 0.47 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.constraint 8d4d513 load on device 'cuda:0' took 0.40 ms  (cached)
+Module _friction_dof__locals__kernel_c23b2f31 c23b2f3 load on device 'cuda:0' took 0.43 ms  (cached)
+Module _limit_slide_hinge__locals__kernel_9573ef9b 9573ef9 load on device 'cuda:0' took 0.43 ms  (cached)
+Module _efc_contact_init__locals__kernel_9009dd76 9009dd7 load on device 'cuda:0' took 0.43 ms  (cached)
+Module _efc_contact_jac_sparse__locals__kernel_54cecf88 54cecf8 load on device 'cuda:0' took 0.42 ms  (cached)
+Module _efc_contact_update__locals__kernel_efb3ac6e efb3ac6 load on device 'cuda:0' took 0.45 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.sensor 8feaecd load on device 'cuda:0' took 0.60 ms  (cached)
+Module _contact_match_builder__locals___contact_match_4da0430b 4da0430 load on device 'cuda:0' took 0.45 ms  (cached)
+Module _contact_sort__locals__contact_sort_bed1da43 6afef3a load on device 'cuda:0' took 0.47 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.forward 9a96b97 load on device 'cuda:0' took 0.52 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.passive 0de6fd1 load on device 'cuda:0' took 0.57 ms  (cached)
+Module _qfrc_passive_kernel__locals__kernel_976399dd 976399d load on device 'cuda:0' took 0.40 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.forward bdd5619 load on device 'cuda:0' took 0.53 ms  (cached)
+Module _qfrc_smooth__locals__kernel_8b823980 8b82398 load on device 'cuda:0' took 0.43 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.support 770ef7d load on device 'cuda:0' took 0.40 ms  (cached)
+Module _small_cholesky_factorize_solve_block__locals__kernel_9da335f1 a5c2521 load on device 'cuda:0' took 0.42 ms  (cached)
+Module _tile_cholesky_factorize_solve_block__locals__kernel_f18d9752 acc0ae1 load on device 'cuda:0' took 33.87 ms  (cached)
+Module _solve_init_dof__locals__kernel_7cb1664a 7cb1664 load on device 'cuda:0' took 0.44 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.solver 5b3c3b6 load on device 'cuda:0' took 0.62 ms  (cached)
+Module _solve_init_jaref_kernel__locals__kernel_ca465bd8 ca465bd load on device 'cuda:0' took 0.45 ms  (cached)
+Module mul_m_kernel__locals___mul_m_f3de1cc7 f3de1cc load on device 'cuda:0' took 0.42 ms  (cached)
+Module _update_constraint_efc__locals__kernel_0539aa50 0539aa5 load on device 'cuda:0' took 0.45 ms  (cached)
+Module _update_constraint_init_qfrc_constraint_sparse__locals__kernel_801f2ee2 801f2ee load on device 'cuda:0' took 0.45 ms  (cached)
+Module _update_gradient_zero_grad_dot__locals__kernel_b20934d7 b20934d load on device 'cuda:0' took 0.44 ms  (cached)
+Module _update_gradient_grad__locals__kernel_c876081d c876081 load on device 'cuda:0' took 0.46 ms  (cached)
+Module _update_gradient_init_h_sparse__locals__kernel_f82bfdd8 f82bfdd load on device 'cuda:0' took 0.43 ms  (cached)
+Module _JTDACJ_sparse__locals__kernel_765abea5 765abea load on device 'cuda:0' took 0.41 ms  (cached)
+Module _JTDACJ_sparse__locals__kernel_765abea5 bd2cd56 load on device 'cuda:0' took 0.40 ms  (cached)
+Module _update_gradient_cholesky_blocked__locals__kernel_1f053eca 38eeb22 load on device 'cuda:0' took 74.74 ms  (cached)
+Module _linesearch_jv_fused_kernel__locals__kernel_bdad643e bdad643 load on device 'cuda:0' took 0.47 ms  (cached)
+Module _linesearch_iterative_kernel__locals__kernel_f3a187e1 ee17086 load on device 'cuda:0' took 0.52 ms  (cached)
+Module _update_constraint_efc__locals__kernel_e953547e e953547 load on device 'cuda:0' took 0.44 ms  (cached)
+Module _update_gradient_zero_grad_dot__locals__kernel_e9f8c963 e9f8c96 load on device 'cuda:0' took 0.42 ms  (cached)
+Module _update_gradient_grad__locals__kernel_87959044 8795904 load on device 'cuda:0' took 0.40 ms  (cached)
+Module _update_gradient_h_incremental_sparse__locals__kernel_e8129775 e812977 load on device 'cuda:0' took 0.69 ms  (cached)
+Module _update_gradient_cholesky_blocked_skip_unchanged__locals__kernel_dc0908fb 837e4e8 load on device 'cuda:0' took 84.38 ms  (cached)
+Module _solve_done__locals__kernel_54267c25 54267c2 load on device 'cuda:0' took 0.81 ms  (cached)
+Module _next_time_builder__locals___next_time_bc454e15 bc454e1 load on device 'cuda:0' took 0.68 ms  (cached)
+0: reward=-6.569
+W1113 06:59:11.247206    9194 cuda_timer.cc:88] Delay kernel timed out: measured time has sub-optimal accuracy. There may be a missing warmup execution, please investigate in Nsight Systems.
+10649600: reward=-2.712
+21299200: reward=0.568
+31948800: reward=2.550
+42598400: reward=3.040
+53248000: reward=3.779
+63897600: reward=4.765
+74547200: reward=5.548
+85196800: reward=6.469
+95846400: reward=6.894
+106496000: reward=7.311
+117145600: reward=6.908
+127795200: reward=7.060
+138444800: reward=7.320
+149094400: reward=7.986
+159744000: reward=7.581
+170393600: reward=7.785
+181043200: reward=7.729
+191692800: reward=8.007
+202342400: reward=7.996
+Done training.
+Time to JIT compile: 38.226176492869854
+Time to train: 1239.3587473621592
+Starting inference...
+Traceback (most recent call last):
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/warp/_src/jax/ffi.py", line 1083, in ffi_callback
+    self.func(*arg_list)
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/warp/ffi.py", line 173, in func_wrapper
+    return func(*unflat_args, *output_buffers, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/warp/ffi.py", line 250, in wrapper
+    return func(*args)
+           ^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/warp/forward.py", line 1352, in _forward_shim
+    mjwarp.forward(_m, _d)
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/warp_util.py", line 123, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/forward.py", line 2076, in forward
+    solver.solve(m, d)
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/warp_util.py", line 123, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/solver.py", line 3936, in solve
+    _solve(m, d, ctx)
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/solver.py", line 3976, in _solve
+    _update_gradient(m, d, ctx, compact=compact)
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/solver.py", line 3318, in _update_gradient
+    groups_per_world = _jtdaj_groups_per_world(d.nworld, d.njmax)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/mujoco/mjx/third_party/mujoco_warp/_src/solver.py", line 3268, in _jtdaj_groups_per_world
+    return max(1, min(njmax, _JTDAJ_OVERSUBSCRIBE_WAVES * device_warps // nworld))
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^~~~~~~~
+ZeroDivisionError: integer division or modulo by zero
+
+FPS for rendering: 25.0

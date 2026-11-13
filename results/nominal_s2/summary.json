@@ -1,0 +1,10 @@
+{
+  "run_dir_on_pod": "/workspace/anticipatory-balance/logs/nominal_s2/G1Impact-20261113-053342",
+  "final_checkpoint_on_pod": "logs/nominal_s2/G1Impact-20261113-053342/checkpoints/000202342400",
+  "num_eval_points": 20,
+  "final_env_steps": 202342400,
+  "final_eval_reward": 7.623234748840332,
+  "best_eval_reward": 7.623234748840332,
+  "jit_time_s": 40.41797498892993,
+  "train_time_s": 1190.9174364292994
+}

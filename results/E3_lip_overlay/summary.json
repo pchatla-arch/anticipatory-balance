@@ -1,0 +1,14 @@
+{
+  "n": 1285,
+  "pred_fall_and_fell": 17,
+  "pred_fall_not_fell": 1219,
+  "pred_stand_but_fell": 1,
+  "pred_stand_and_stood": 48,
+  "accuracy": 0.05058365758754864,
+  "jmax_median_Ns": -7.7959601006781645,
+  "jmax_iqr_Ns": [
+    -11.666228167425642,
+    -4.001545424183897
+  ],
+  "z_com_pre_median_m": 0.67696
+}

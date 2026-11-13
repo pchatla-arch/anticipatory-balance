@@ -1,0 +1,25 @@
+{
+  "checkpoint": "/workspace/anticipatory-balance/logs/nominal_s1/G1Impact-20261113-063725/checkpoints/000202342400",
+  "masses": [
+    1.0,
+    2.0,
+    4.0,
+    8.0
+  ],
+  "speeds": [
+    1.0,
+    2.0,
+    3.0,
+    4.0
+  ],
+  "episodes_per_cell": 256,
+  "command_vx": 0.5,
+  "near_miss_control": {
+    "n": 256,
+    "fall_rate": 0.0,
+    "contact_rate": 0.17578125,
+    "progress_m": 2.576150417327881
+  },
+  "overall_fall_rate_hits": 0.004638671875,
+  "fell_before_launch_rate": 0.0
+}

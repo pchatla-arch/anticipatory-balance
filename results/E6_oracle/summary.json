@@ -1,0 +1,88 @@
+{
+  "nominal": "/workspace/anticipatory-balance/logs/nominal_s1/G1Impact-20261113-063725/checkpoints/000202342400",
+  "brace": "/workspace/anticipatory-balance/logs/brace_s1/G1ImpactBrace-20261113-065807/checkpoints/000202342400",
+  "hold_s": 0.5,
+  "episodes_per_lead": 512,
+  "curve": [
+    {
+      "lead_s": -1.0,
+      "n": 512,
+      "fall_rate": 0.001953125,
+      "contact_rate": 0.306640625,
+      "progress_m": 2.572662353515625,
+      "progress_loss_m": 0.0,
+      "braced_s": 0.0,
+      "tau_brace_s": null
+    },
+    {
+      "lead_s": 0.1,
+      "n": 512,
+      "fall_rate": 0.37890625,
+      "contact_rate": 0.30078125,
+      "progress_m": 2.3816652297973633,
+      "progress_loss_m": 0.19099712371826172,
+      "braced_s": 0.6,
+      "tau_brace_s": 0.09644531250000002
+    },
+    {
+      "lead_s": 0.2,
+      "n": 512,
+      "fall_rate": 0.44921875,
+      "contact_rate": 0.279296875,
+      "progress_m": 2.3443288803100586,
+      "progress_loss_m": 0.2283334732055664,
+      "braced_s": 0.7000000000000001,
+      "tau_brace_s": 0.09734375
+    },
+    {
+      "lead_s": 0.3,
+      "n": 512,
+      "fall_rate": 0.556640625,
+      "contact_rate": 0.27734375,
+      "progress_m": 2.175835132598877,
+      "progress_loss_m": 0.39682722091674805,
+      "braced_s": 0.8,
+      "tau_brace_s": 0.09703125000000001
+    },
+    {
+      "lead_s": 0.5,
+      "n": 512,
+      "fall_rate": 0.658203125,
+      "contact_rate": 0.26953125,
+      "progress_m": 2.0751800537109375,
+      "progress_loss_m": 0.4974822998046875,
+      "braced_s": 1.0,
+      "tau_brace_s": 0.09832031250000002
+    },
+    {
+      "lead_s": 0.75,
+      "n": 512,
+      "fall_rate": 0.681640625,
+      "contact_rate": 0.333984375,
+      "progress_m": 2.002962589263916,
+      "progress_loss_m": 0.569699764251709,
+      "braced_s": 1.24953125,
+      "tau_brace_s": 0.0983203125
+    },
+    {
+      "lead_s": 1.0,
+      "n": 512,
+      "fall_rate": 0.744140625,
+      "contact_rate": 0.326171875,
+      "progress_m": 1.9210106134414673,
+      "progress_loss_m": 0.6516517400741577,
+      "braced_s": 1.5,
+      "tau_brace_s": 0.09789062500000004
+    },
+    {
+      "lead_s": 9.0,
+      "n": 512,
+      "fall_rate": 0.26953125,
+      "contact_rate": 0.77734375,
+      "progress_m": 1.1280832290649414,
+      "progress_loss_m": 1.4445791244506836,
+      "braced_s": 3.115078125,
+      "tau_brace_s": 0.09914062500000002
+    }
+  ]
+}
