@@ -72,11 +72,17 @@ def default_config() -> config_dict.ConfigDict:
       reset_perturb=1.0,              # 0.0 = deterministic initial pose (eval, smoke test)
       hold_base=False,                # True: pin the floating base (contact smoke test only)
       resample_on_autoreset=True,     # resample the scenario at every episode start
+      aim_lead=True,                  # aim at pelvis + base velocity * flight time
+      aim_height=0.25,                # m above the pelvis at arrival
   )
   cfg.skill = "nominal"               # "nominal" (walk) or "brace"
   cfg.brace = config_dict.create(
-      base_height_target=0.60,        # m; nominal keyframe pelvis height is 0.755
-      feet_sep_target=0.40,           # m between foot sites (nominal stance ~0.2)
+      base_height_target=0.65,        # m; nominal keyframe pelvis height is 0.755
+      feet_sep_target=0.35,           # m between foot sites (nominal stance ~0.2)
+      # BRACE v2: the frozen walker controls the first handover_time seconds of each episode
+      # so BRACE learns to take over from walking states. "" disables the handover.
+      handover_checkpoint="",
+      handover_time_range=[0.0, 2.0],
   )
   # Extra reward terms (zero weight for the nominal skill; metrics need the keys).
   cfg.reward_config.scales.feet_separation = 0.0
@@ -99,6 +105,10 @@ def brace_config() -> config_dict.ConfigDict:
   s.joint_deviation_hip = 0.0
   s.base_height = -10.0
   s.feet_separation = -5.0
+  # Impacts during BRACE training come from the regime where the walker fails 5-95%.
+  cfg.impact.mass_range = [4.0, 16.0]
+  cfg.impact.speed_range = [3.0, 8.0]
+  cfg.impact.hit_time_range = [2.5, 4.0]   # after the handover window
   s.feet_contact = 0.5
   s.orientation = -2.0
   s.action_rate = -0.1
@@ -139,6 +149,11 @@ class ImpactJoystick(JoystickRobotSliced):
                   "proj_lthigh_found", "proj_rthigh_found")
     ]
     self._is_brace = self._config.skill == "brace"
+    self._handover_policy = None
+    hc = self._config.brace.handover_checkpoint if self._is_brace else ""
+    if hc:
+      from foresight.eval.rollout import load_policy   # lazy: avoids a brax import for nominal
+      self._handover_policy = load_policy(hc)
 
   # ---- helpers -----------------------------------------------------------------
   def _proj_pos(self, data: mjx.Data) -> jax.Array:
@@ -158,7 +173,12 @@ class ImpactJoystick(JoystickRobotSliced):
   def _sample_scenario(self, rng: jax.Array) -> dict[str, jax.Array]:
     """One projectile scenario. Mass comes from the model (per-lane randomization)."""
     c = self._config.impact
-    k_speed, k_dist, k_h, k_az, k_t, k_miss, k_off, k_side = jax.random.split(rng, 8)
+    k_speed, k_dist, k_h, k_az, k_t, k_miss, k_off, k_side, k_ho = jax.random.split(rng, 9)
+    ho = self._config.brace.handover_time_range
+    handover_step = jp.where(
+        self._handover_policy is not None,
+        jp.round(jax.random.uniform(k_ho, minval=ho[0], maxval=ho[1]) / self.dt).astype(jp.int32),
+        jp.int32(0))
     mass = self.mjx_model.body_mass[self._proj_body]
     speed = jax.random.uniform(k_speed, minval=c.speed_range[0], maxval=c.speed_range[1])
     dist = jax.random.uniform(k_dist, minval=c.range_dist[0], maxval=c.range_dist[1])
@@ -188,6 +208,8 @@ class ImpactJoystick(JoystickRobotSliced):
         "t_hit_nominal": t_launch + flight,
         "proj_launch_pos": jp.zeros(3),
         "proj_launch_vel": jp.zeros(3),
+        "proj_launch_fixed": jp.array(False),   # True: use the stored pos/vel (replay)
+        "handover_step": handover_step,
         # outcome latches
         "proj_launched": jp.array(False),
         "impact_contact": jp.array(False),
@@ -206,8 +228,12 @@ class ImpactJoystick(JoystickRobotSliced):
     rng, k_scn = jax.random.split(rng)
     state = super().reset(rng)
     state.info.update(self._sample_scenario(k_scn))
+    rng, k_cmd = jax.random.split(rng)
+    # BRACE training with handover: the walker needs a real walking command.
+    cmd_nominal = (JoystickRobotSliced.sample_command(self, k_cmd)
+                   if self._handover_policy is not None else state.info["command"])
     state.info.update({
-        "command_nominal": state.info["command"],
+        "command_nominal": cmd_nominal,
         "brace_active": jp.array(False),
         "brace_steps": jp.int32(0),
         # Privileged object state (present at reset so the info pytree is identical
@@ -233,23 +259,38 @@ class ImpactJoystick(JoystickRobotSliced):
       info["brace_steps"] = jp.where(new_ep, 0, info["brace_steps"])
 
     # --- mode switch: BRACE zeroes the velocity command seen by policy and reward.
-    info["command"] = jp.where(info["brace_active"], jp.zeros(3), info["command_nominal"])
+    # In the BRACE training env the command is zero except during the walker's handover.
+    handover = info["ep_step"] < info["handover_step"]
+    zero_cmd = info["brace_active"] | (self._is_brace & ~handover)
+    info["command"] = jp.where(zero_cmd, jp.zeros(3), info["command_nominal"])
     info["brace_steps"] = jp.where(info["brace_active"], info["brace_steps"] + 1, 0)
 
     launch_now = (info["ep_step"] >= info["proj_launch_step"]) & (~info["proj_launched"])
 
-    # Resolve launch pos/vel from the pelvis position *now* (so the aim is current).
+    # BRACE v2 handover: the frozen walker acts until handover_step.
+    if self._handover_policy is not None:
+      info["rng"], k_ho = jax.random.split(info["rng"])
+      a_walk, _ = self._handover_policy(state.obs, k_ho)
+      action = jp.where(handover, a_walk, action)
+
+    # Resolve launch pos/vel at the launch step: aim at the pelvis, led by the base velocity
+    # over the flight time (aim_lead), unless a replayed trajectory is fixed in info.
     pelvis = self._pelvis_pos(data)
-    launch_xy = pelvis[:2] + info["proj_dist"] * info["proj_dir_xy"] + info["proj_lateral"] * info["proj_perp_xy"]
-    target_xy = pelvis[:2] + info["proj_lateral"] * info["proj_perp_xy"]
+    flight_t = info["proj_dist"] / info["proj_speed"]
+    base_v = jp.where(self._config.impact.aim_lead, data.qvel[0:3], jp.zeros(3))
+    aim = pelvis + base_v * flight_t
+    launch_xy = aim[:2] + info["proj_dist"] * info["proj_dir_xy"] + info["proj_lateral"] * info["proj_perp_xy"]
+    target_xy = aim[:2] + info["proj_lateral"] * info["proj_perp_xy"]
     d_xy = target_xy - launch_xy
     vel_xy = d_xy / (jp.linalg.norm(d_xy) + 1e-6) * info["proj_speed"]
-    target_z = pelvis[2] + 0.25
-    flight_t = info["proj_dist"] / info["proj_speed"]
+    target_z = aim[2] + self._config.impact.aim_height
     launch_pos = jp.array([launch_xy[0], launch_xy[1], info["proj_height"]])
     launch_vel = jp.array([vel_xy[0], vel_xy[1], (target_z - info["proj_height"]) / flight_t])
-    info["proj_launch_pos"] = jp.where(launch_now, launch_pos, info["proj_launch_pos"])
-    info["proj_launch_vel"] = jp.where(launch_now, launch_vel, info["proj_launch_vel"])
+    use_new = launch_now & ~info["proj_launch_fixed"]
+    launch_pos = jp.where(use_new, launch_pos, info["proj_launch_pos"])
+    launch_vel = jp.where(use_new, launch_vel, info["proj_launch_vel"])
+    info["proj_launch_pos"] = launch_pos
+    info["proj_launch_vel"] = launch_vel
 
     # Place and release the projectile at launch; before that it stays parked.
     qpos = data.qpos
@@ -266,11 +307,13 @@ class ImpactJoystick(JoystickRobotSliced):
       qvel = qvel.at[0:6].set(0.0)
     state = state.replace(data=data.replace(qpos=qpos, qvel=qvel), info=info)
     state = super().step(state, action)
+    if self._handover_policy is not None:
+      state = state.replace(reward=jp.where(handover, 0.0, state.reward))
 
     touch = jp.any(jp.array([state.data.sensordata[s] > 0 for s in self._impact_found_adrs]))
     info = state.info
     # Parent may resample the command (step > 500); keep the nominal copy in sync.
-    info["command_nominal"] = jp.where(info["brace_active"], info["command_nominal"], info["command"])
+    info["command_nominal"] = jp.where(zero_cmd, info["command_nominal"], info["command"])
     info["proj_launched"] = info["proj_launched"] | launch_now
     first_contact = touch & ~info["impact_contact"]
     info["contact_step"] = jp.where(first_contact, info["ep_step"], info["contact_step"])

@@ -103,8 +103,10 @@ def main(_):
     sx = np.linspace(min(speeds), max(speeds), 100)
     my = J / (sx * (1.0 + _E.value))
     def to_idx(vals, grid_vals):
-      return np.interp(vals, grid_vals, np.arange(len(grid_vals)))
-    ax.plot(to_idx(sx, speeds), to_idx(my, masses), "c--", lw=2,
+      lg = np.log2(np.asarray(grid_vals, float))
+      return np.interp(np.log2(vals), lg, np.arange(len(grid_vals)))
+    inside = (my >= min(masses) / 1.4) & (my <= max(masses) * 1.4)   # do not clip onto an edge row
+    ax.plot(to_idx(sx[inside], speeds), to_idx(my[inside], masses), "c--", lw=2,
             label=f"LIP: m·v = J_max ≈ {J:.0f} N·s")
     ax.set_ylim(-0.5, len(masses) - 0.5)
     ax.set_xlabel("projectile speed (m/s)"); ax.set_ylabel("projectile mass (kg)")
