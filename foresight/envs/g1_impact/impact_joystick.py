@@ -74,6 +74,8 @@ def default_config() -> config_dict.ConfigDict:
       resample_on_autoreset=True,     # resample the scenario at every episode start
       aim_lead=True,                  # aim at pelvis + base velocity * flight time
       aim_height=0.25,                # m above the pelvis at arrival
+      azimuth_range_deg=180.0,        # launch direction within +-this of the pelvis heading
+                                      # (180 = any direction; 60 = inside a 120-deg camera FOV)
   )
   cfg.skill = "nominal"               # "nominal" (walk) or "brace"
   cfg.brace = config_dict.create(
@@ -183,7 +185,8 @@ class ImpactJoystick(JoystickRobotSliced):
     speed = jax.random.uniform(k_speed, minval=c.speed_range[0], maxval=c.speed_range[1])
     dist = jax.random.uniform(k_dist, minval=c.range_dist[0], maxval=c.range_dist[1])
     height = jax.random.uniform(k_h, minval=c.height_range[0], maxval=c.height_range[1])
-    azimuth = jax.random.uniform(k_az, maxval=2 * jp.pi)
+    az = jp.deg2rad(c.azimuth_range_deg)
+    azimuth = jax.random.uniform(k_az, minval=-az, maxval=az)   # relative to heading at launch
     t_hit = jax.random.uniform(k_t, minval=c.hit_time_range[0], maxval=c.hit_time_range[1])
     flight = dist / speed
     t_launch = jp.maximum(t_hit - flight, c.min_launch_time)
@@ -191,10 +194,11 @@ class ImpactJoystick(JoystickRobotSliced):
     off = jax.random.uniform(k_off, minval=c.miss_offset_range[0], maxval=c.miss_offset_range[1])
     side = jp.where(jax.random.uniform(k_side) < 0.5, -1.0, 1.0)
     lateral = jp.where(is_miss, side * off, 0.0)
-    dir_xy = jp.array([jp.cos(azimuth), jp.sin(azimuth)])
+    dir_xy = jp.array([jp.cos(azimuth), jp.sin(azimuth)])   # rotated by the heading at launch
     perp = jp.array([-dir_xy[1], dir_xy[0]])
     return {
         # scenario
+        "proj_azimuth_rel": azimuth,
         "proj_mass": mass,
         "proj_speed": speed,
         "proj_momentum": mass * speed,
@@ -276,6 +280,13 @@ class ImpactJoystick(JoystickRobotSliced):
     # Resolve launch pos/vel at the launch step: aim at the pelvis, led by the base velocity
     # over the flight time (aim_lead), unless a replayed trajectory is fixed in info.
     pelvis = self._pelvis_pos(data)
+    # Launch direction = heading at launch rotated by the sampled relative azimuth. The
+    # object comes FROM dir_xy, so azimuth 0 means straight ahead of the robot.
+    fwd = data.xmat[self._pelvis_body].reshape(3, 3)[:, 0]
+    yaw = jp.arctan2(fwd[1], fwd[0]) + info["proj_azimuth_rel"]
+    dir_now = jp.array([jp.cos(yaw), jp.sin(yaw)])
+    info["proj_dir_xy"] = jp.where(launch_now, dir_now, info["proj_dir_xy"])
+    info["proj_perp_xy"] = jp.where(launch_now, jp.array([-dir_now[1], dir_now[0]]), info["proj_perp_xy"])
     flight_t = info["proj_dist"] / info["proj_speed"]
     base_v = jp.where(self._config.impact.aim_lead, data.qvel[0:3], jp.zeros(3))
     aim = pelvis + base_v * flight_t

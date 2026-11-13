@@ -27,6 +27,9 @@ TEMPLATE = HERE / "xmls" / "scene_impact_flat.xml.tmpl"
 TORSO_CAPSULE = (
     '<geom name="torso_impact_geom" class="collision" type="capsule" '
     'size="0.09" fromto="0 0 0.02 0 0 0.30"/>'
+    # Head depth camera for the perception pilot: on the torso, 0.42 m up, looking along
+    # +x (MuJoCo cameras look down their -z; xyaxes sets x=-y_world, y=+z_world).
+    '<camera name="head_cam" pos="0.08 0 0.42" xyaxes="0 -1 0 0 0 1" fovy="90"/>'
 )
 PELVIS_CAPSULE = (
     '<geom name="pelvis_impact_geom" class="collision" type="capsule" '

@@ -78,8 +78,12 @@ def load_policy(path: str | Path, deterministic: bool = True):
 
 def make_env(skill: str = "nominal", impl: str = "warp", miss_fraction: float = 0.0,
              reset_perturb: float = 1.0, hold_base: bool = False,
-             overrides: Optional[dict] = None) -> ImpactJoystick:
+             overrides: Optional[dict] = None, azimuth_range_deg: float = 180.0,
+             range_dist: Optional[list] = None) -> ImpactJoystick:
   cfg = brace_config() if skill == "brace" else default_config()
+  cfg.impact.azimuth_range_deg = azimuth_range_deg
+  if range_dist is not None:
+    cfg.impact.range_dist = list(range_dist)
   cfg.impact.miss_fraction = miss_fraction
   cfg.impact.reset_perturb = reset_perturb
   cfg.impact.hold_base = hold_base
@@ -179,11 +183,14 @@ def oracle_brace(lead_s: jax.Array, hold_s: float, dt: float):
 
 def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: int,
             brace_policy=None, decide: Callable = no_brace,
-            scenario_fn: Optional[Callable] = None, reset_keys: Optional[jax.Array] = None):
+            scenario_fn: Optional[Callable] = None, reset_keys: Optional[jax.Array] = None,
+            controller=None):
   """Run `steps` control steps for every env in `wenv` (built by batched_env).
 
   scenario_fn(state) -> state is applied right after reset (use set_scenario).
   reset_keys (n, 2): per-env reset keys; repeat a block to pair scenarios across conditions.
+  controller: an AnticipationController (detector + belief + rule); when given it replaces
+  `decide` and its per-step logs are added to traj under "ctrl_*".
   Returns (final_info: dict of np arrays, traj: dict of np arrays (T, N, ...)).
   """
   n = wenv._mjx_model_v.body_mass.shape[0]
@@ -203,10 +210,21 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
     return jp.where(brace[:, None], a_br, a_nom)
 
   def body(carry, t):
-    state, rng = carry
-    rng, k = jax.random.split(rng)
+    state, rng, cstate = carry
+    rng, k, kc = jax.random.split(rng, 3)
     keys = jax.random.split(k, n)
-    brace = decide(state.info, t)
+    logs = {}
+    if controller is not None:
+      d0 = state.data
+      pel = d0.xpos[:, pelvis]
+      fwd = d0.xmat[:, pelvis].reshape(n, 3, 3)[:, :, 0]
+      # The robot's intended motion: commanded forward speed along its heading (the
+      # instantaneous pelvis velocity sways by +-0.3 m/s during walking).
+      fwd_xy = fwd[:, :2] / (jp.linalg.norm(fwd[:, :2], axis=-1, keepdims=True) + 1e-6)
+      pvel = jp.concatenate([fwd_xy * state.info["command"][:, :1], jp.zeros((n, 1))], axis=-1)
+      cstate, brace, logs = controller.step(cstate, state.info, pel, fwd, pvel, t, kc)
+    else:
+      brace = decide(state.info, t)
     info = dict(state.info)
     info["brace_active"] = brace
     state = state.replace(info=info)
@@ -214,6 +232,7 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
     state = wenv.step(state, act)
     d = state.data
     rec = {k: state.info[k] for k in TRAJ_INFO_KEYS}
+    rec.update({"ctrl_" + k: v for k, v in logs.items()})
     rec.update({
         "pelvis_pos": d.xpos[:, pelvis],
         "pelvis_fwd": d.xmat[:, pelvis].reshape(n, 3, 3)[:, :, 0],
@@ -225,16 +244,17 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
         "feet_contact": jp.stack([d.sensordata[:, a] > 0 for a in feet_adr], axis=-1),
         "done": state.done,
     })
-    return (state, rng), rec
+    return (state, rng, cstate), rec
 
   @jax.jit
   def run(rng, reset_keys):
-    rng, k = jax.random.split(rng)
+    rng, k, kc = jax.random.split(rng, 3)
     keys = jax.random.split(k, n) if reset_keys is None else reset_keys
     state = wenv.reset(keys)
     if scenario_fn is not None:
       state = scenario_fn(state)
-    (state, _), traj = jax.lax.scan(body, (state, rng), jp.arange(steps))
+    cstate = controller.init(n, kc) if controller is not None else None
+    (state, _, _), traj = jax.lax.scan(body, (state, rng, cstate), jp.arange(steps))
     return state.info, traj
 
   final_info, traj = run(rng, reset_keys)
@@ -275,12 +295,18 @@ def episode_table(final_info: dict, traj: dict, dt: float) -> dict:
       "term_reason": final_info["term_reason"], "term_step": final_info["term_step"],
       "progress_m": progress, "censored": censored,
       "brace_steps_total": np.sum(traj["brace_active"], axis=0),
+      "brace_onset_step": np.where(traj["brace_active"].any(axis=0), np.argmax(traj["brace_active"], axis=0), -1),
       "com_x_pre": com_pre[:, 0], "com_y_pre": com_pre[:, 1], "com_z_pre": com_pre[:, 2],
       "com_vx_pre": com_vel[:, 0], "com_vy_pre": com_vel[:, 1],
       "lfoot_x_pre": feet_pre[:, 0, 0], "lfoot_y_pre": feet_pre[:, 0, 1],
       "rfoot_x_pre": feet_pre[:, 1, 0], "rfoot_y_pre": feet_pre[:, 1, 1],
       "proj_vx_pre": pvel[:, 0], "proj_vy_pre": pvel[:, 1], "proj_vz_pre": pvel[:, 2],
   }
+  if "ctrl_p_hit" in traj:
+    pre_p = traj["ctrl_p_hit"][pre, idx]
+    out["p_hit_pre_contact"] = pre_p
+    out["n_detections"] = np.sum(traj["ctrl_det_valid"], axis=0)
+    out["false_prep"] = (final_info["proj_is_miss"] & traj["brace_active"].any(axis=0))
   return {k: np.asarray(v) for k, v in out.items()}
 
 

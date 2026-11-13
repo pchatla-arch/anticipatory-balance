@@ -1,0 +1,10 @@
+{
+  "a_cont": -23.628654904705538,
+  "b_cont": 6.477847143305526,
+  "a_brace": -19.441065624479435,
+  "b_brace": 4.785327865815439,
+  "n_cont": 511,
+  "n_brace": 503,
+  "brace_lead": 0.5,
+  "source": "results/E6b_oracle_v2/episodes.csv"
+}
