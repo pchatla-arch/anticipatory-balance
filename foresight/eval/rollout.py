@@ -114,8 +114,13 @@ def batched_env(env: ImpactJoystick, proj_masses: np.ndarray):
 
 
 def set_scenario(env: ImpactJoystick, state, speed=None, hit_time=None, is_miss=None,
-                 command=None):
-  """Override per-env scenario fields after reset and recompute the derived ones."""
+                 command=None, launch=True, launch_pos=None, launch_vel=None):
+  """Override per-env scenario fields after reset and recompute the derived ones.
+
+  launch=False suppresses the projectile (control episodes with the same schedule).
+  launch_pos/launch_vel (n, 3): replay a fixed world-space trajectory (from a reference
+  rollout's final_info["proj_launch_pos"/"proj_launch_vel"]) instead of re-aiming.
+  """
   info = dict(state.info)
   c = env._config.impact
   if speed is not None:
@@ -137,7 +142,22 @@ def set_scenario(env: ImpactJoystick, state, speed=None, hit_time=None, is_miss=
     cmd = jp.broadcast_to(jp.asarray(command, jp.float32), info["command"].shape)
     info["command"] = cmd
     info["command_nominal"] = cmd
+  if not launch:
+    info["proj_launch_step"] = jp.full_like(info["proj_launch_step"], 10**6)
+  if launch_pos is not None:
+    info["proj_launch_pos"] = jp.asarray(launch_pos, jp.float32)
+    info["proj_launch_vel"] = jp.asarray(launch_vel, jp.float32)
+    info["proj_launch_fixed"] = jp.ones_like(info["proj_launch_fixed"])
   return state.replace(info=info)
+
+
+CMD_SLICE = slice(9, 12)   # info["command"] inside the policy's "state" observation
+
+
+def _with_command(obs, cmd):
+  """Policy observation with the command entries replaced (per env)."""
+  st = obs["state"].at[:, CMD_SLICE].set(cmd)
+  return {**obs, "state": st}
 
 
 def no_brace(info, t):
@@ -171,11 +191,15 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
   feet = env._feet_site_id
   torso = env._mj_model.body("torso_link").id
 
-  def policy_act(obs, keys, brace):
-    a_nom, _ = jax.vmap(nominal_policy)(obs, keys)
+  feet_adr = [env._mj_model.sensor_adr[i] for i in env._feet_floor_found_sensor]
+
+  def policy_act(obs, info, keys, brace):
+    # Each actor sees the command of its own mode, in the step it is chosen (the env only
+    # zeroes the command in the observation one step later).
+    a_nom, _ = jax.vmap(nominal_policy)(_with_command(obs, info["command_nominal"]), keys)
     if brace_policy is None:
       return a_nom
-    a_br, _ = jax.vmap(brace_policy)(obs, keys)
+    a_br, _ = jax.vmap(brace_policy)(_with_command(obs, jp.zeros_like(info["command_nominal"])), keys)
     return jp.where(brace[:, None], a_br, a_nom)
 
   def body(carry, t):
@@ -186,7 +210,7 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
     info = dict(state.info)
     info["brace_active"] = brace
     state = state.replace(info=info)
-    act = policy_act(state.obs, keys, brace)
+    act = policy_act(state.obs, state.info, keys, brace)
     state = wenv.step(state, act)
     d = state.data
     rec = {k: state.info[k] for k in TRAJ_INFO_KEYS}
@@ -198,6 +222,7 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
         "feet_pos": d.site_xpos[:, feet],
         "proj_pos": state.info["obj_pos"],
         "proj_vel": state.info["obj_vel"],
+        "feet_contact": jp.stack([d.sensordata[:, a] > 0 for a in feet_adr], axis=-1),
         "done": state.done,
     })
     return (state, rng), rec
@@ -225,9 +250,14 @@ def episode_table(final_info: dict, traj: dict, dt: float) -> dict:
   dp = np.diff(traj["pelvis_pos"][..., :2], axis=0)                 # (T-1, N, 2)
   fwd = traj["pelvis_fwd"][:-1, :, :2]
   fwd = fwd / (np.linalg.norm(fwd, axis=-1, keepdims=True) + 1e-9)
-  progress = np.sum(np.sum(dp * fwd, axis=-1), axis=0)              # (N,)
-  # Progress until the first failure/contact window end is also useful; keep total.
+  step_prog = np.sum(dp * fwd, axis=-1)                              # (T-1, N)
+  ts = final_info["term_step"]
+  alive = (np.arange(T - 1)[:, None] < np.where(ts < 0, T, ts)[None, :])
+  progress = np.sum(step_prog * alive, axis=0)                        # (N,) until first failure
   cs = final_info["contact_step"]
+  # Censored: contact happened with less than `window` seconds of observation left.
+  window = 2.5
+  censored = (cs >= 0) & ((T - cs) * dt < window) & ~final_info["fell"]
   pre = np.clip(cs - 1, 0, T - 1)
   idx = np.arange(n)
   com_pre = traj["com"][pre, idx]                                   # (N, 3)
@@ -243,7 +273,7 @@ def episode_table(final_info: dict, traj: dict, dt: float) -> dict:
       "contact_step": cs, "fell": final_info["fell"],
       "fell_before_launch": final_info["fell_before_launch"],
       "term_reason": final_info["term_reason"], "term_step": final_info["term_step"],
-      "progress_m": progress,
+      "progress_m": progress, "censored": censored,
       "brace_steps_total": np.sum(traj["brace_active"], axis=0),
       "com_x_pre": com_pre[:, 0], "com_y_pre": com_pre[:, 1], "com_z_pre": com_pre[:, 2],
       "com_vx_pre": com_vel[:, 0], "com_vy_pre": com_vel[:, 1],

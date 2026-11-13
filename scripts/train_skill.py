@@ -10,9 +10,10 @@ Examples (from the repo root, rss2025 venv active):
       --num_timesteps 200000000 --num_envs 4096 --seed 1 --use_tb --logdir logs/nominal_s1 \
       --num_videos 0
 
-  # BRACE skill (zero command, low CoM, wide stance)
+  # BRACE v2 skill (zero command, lower CoM, wider stance), handed over from the walker
   python scripts/train_skill.py --skill brace --impl warp --domain_randomization \
-      --num_timesteps 200000000 --num_envs 4096 --seed 1 --use_tb --logdir logs/brace_s1 \
+      --brace_handover_ckpt logs/nominal_s1/<run>/checkpoints \
+      --num_timesteps 200000000 --num_envs 4096 --seed 1 --use_tb --logdir logs/brace2_s1 \
       --num_videos 0
 """
 import os
@@ -68,11 +69,20 @@ import train_jax_ppo  # noqa: E402  (Playground's script; flags are defined at i
 
 _SKILL = flags.DEFINE_enum("skill", None, list(fs_register.SKILL_ENVS),
                            "Foresight skill to train (sets --env_name).")
+_HANDOVER = flags.DEFINE_string(
+    "brace_handover_ckpt", "",
+    "BRACE v2: checkpoint dir of the frozen walker that controls the first 0-2 s of each "
+    "episode (sets brace.handover_checkpoint in the env config).")
 
 
 def main(argv):
   if _SKILL.value is not None:
     flags.FLAGS.env_name = fs_register.SKILL_ENVS[_SKILL.value]
+  if _HANDOVER.value:
+    import json
+    ov = json.loads(flags.FLAGS.playground_config_overrides or "{}")
+    ov["brace.handover_checkpoint"] = os.path.abspath(_HANDOVER.value)
+    flags.FLAGS.playground_config_overrides = json.dumps(ov)
   try:
     train_jax_ppo.main(argv)
   except ZeroDivisionError:
