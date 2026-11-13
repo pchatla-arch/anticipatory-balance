@@ -1,0 +1,1420 @@
+--- /dev/null
++++ b/docs/STABILIZATION_V1.md
+@@ -0,0 +1,125 @@
++# Foresight: first stabilization and switching diagnostic
++
++Project title: **Foresight: Latency-Aware Anticipatory Bracing from Depth Perception**.
++
++This proposed patch is based on repository commit
++`3409b26fb999acf9b9d79c1f712e8902e382cfee`. It prepares the first diagnostic after
++the Session A review. It is not a completed belief controller or a retrained BRACE
++skill. It requires no new packages and makes no installation, training, commit,
++or push calls. Runtime validation on the existing GPU stack is still required.
++
++## Purpose
++
++Distinguish ordinary stopping under the walking policy, switching into the BRACE
++policy, and the effect of a projectile. Keep paired reset states, sampled inputs,
++and incoming world-space launch trajectories identical across comparison arms.
++
++| Controller | Projectile enabled | Projectile launch suppressed |
++|---|---|---|
++| CONTINUE | Reactive reference | Locomotion control |
++| Nominal actor with scheduled zero command | Stopping under disturbance | Stopping control |
++| Nominal to BRACE to nominal | Skill switch under disturbance | Skill-switch control |
++
++A nominal reference rollout fixes each launch position and velocity before the
++six comparison arms run. These are still the original approach scenarios; this
++patch does not retarget every policy to force a collision. Contact coverage can
++remain low. That is acceptable for the first transition diagnostic and must be
++reported. Shared external trajectories do not imply identical contact outcomes.
++
++The no-projectile control suppresses launch without changing the nominal arrival
++or brace schedule. The parked object remains in the model; the diagnostic fails
++if a launch-disabled arm records a projectile contact.
++
++## Changes
++
++- Refresh the command in both G1 observation arrays before selecting the actor.
++  The adapter uses the inspected rss2025 G1 one-frame observation contract:
++  command occupies indices 9:12 and privileged state begins with actor state.
++  It does not resample sensor noise or change observation dimensions.
++- Add opt-in fixed world-space launch vectors and a launch-enable mask. Defaults
++  preserve the prior training path and scenario random draws.
++- Preserve legacy full-horizon progress in `progress_m`, while new comparisons
++  use `progress_before_failure_m` with an explicit first-failure convention.
++- Classify fixed-window post-contact survival as observed success, observed
++  failure, or unknown/censored. Missing contact and failure before contact do not
++  become impact-recovery successes. Early observed failures are conclusive even
++  if the remaining horizon is shorter than the requested recovery window.
++- Record separate first-failure flags for inversion, self contact, nonfinite
++  physics, and sustained tilt. Multiple flags may be true.
++- Define diagnostic readiness using pelvis height, uprightness, bilateral foot
++  support, lateral stance width, active brace, and sustained sampled dwell. A
++  first readiness event is not proof of impact safety or readiness at contact.
++- Save readable scenario and outcome tables, source/package metadata, and raw
++  compressed traces before invariant checks. Refuse to overwrite a results
++  directory. Numerical or input-pairing failures produce `harness_failure`.
++
++## Local validation
++
++From the repository root, using its existing Python environment:
++
++```bash
++python -m unittest discover -s tests -p 'test_eval_*.py' -v
++python scripts/eval_switch_gate.py --help
++```
++
++These tests are simulator-free: they require NumPy and the standard library.
++They check event boundaries and censoring, stale command replacement, readiness,
++paired scenario accounting, result preservation, and nonfinite-data handling.
++They do not establish JAX tracing, Warp execution, or policy quality.
++
++## First pod run
++
++Use the already active rss2025 environment and repository root. The checkpoint
++paths below come from the committed Session A summaries; the loader rejects
++missing checkpoints rather than silently continuing with a random policy.
++
++```bash
++python scripts/eval_switch_gate.py \
++  --nominal logs/nominal_s1/G1Impact-20261113-063725/checkpoints/000202342400 \
++  --brace logs/brace_s1/G1ImpactBrace-20261113-065807/checkpoints/000202342400 \
++  --impl warp --episodes 32 --batches 1 --lead 0.5 --hold 0.5 --steps 300 \
++  --out results/switch_gate_smoke_v1
++```
++
++This is 32 shared scenarios, six comparison arms (192 comparison rollouts),
++plus 32 reference rollouts. It is a smoke diagnostic, not a statistically
++validated safety or improvement claim. A .5-second lead plus .5-second hold
++uses nominal arrival time and is not the final 300 ms commitment controller.
++
++Return `summary.json`, `manifest.json`, `scenarios.csv`, and `episodes.csv` from
++the output directory. Keep the `batch_*.npz` archives for failure inspection;
++they can be loaded with `numpy.load(path, allow_pickle=False)`. Package versions
++and the local Playground source revision are recorded in the manifest.
++
++If the run fails, preserve the directory and return the traceback together with
++its `summary.json` and `manifest.json`. Choose a new output name for a rerun.
++
++## Decision after the diagnostic
++
++| Observation | Next action |
++|---|---|
++| Harness invariant or numerical failure | Correct the implementation/runtime issue before interpreting policy quality. |
++| CONTINUE fails without a projectile | Inspect the restored walker, reset states, and control interface. |
++| Zero-command nominal fails without a projectile | Investigate stopping behavior and command transitions. |
++| BRACE adds failures over zero-command nominal without a projectile | Inspect switch traces, then train on walking-to-brace transitions if warranted. |
++| Transitions are stable without impact but bracing harms impact outcomes | Improve the brace posture and disturbance training; recalibrate the impact task. |
++| No new failures in the small sample | Increase paired evaluation and inspect readiness; this is not yet evidence that bracing helps. |
++
++The script reports `switch_failure` if any paired no-projectile trial newly
++fails under BRACE compared with the zero-command nominal actor. This is an
++inspection flag, not a significance test. Otherwise it reports `inconclusive`;
++there is deliberately no automatic declaration that the BRACE skill is valid.
++
++## Boundaries of this iteration
++
++The patch does not yet solve target/contact calibration, ensure 2.5 seconds of
++follow-up after every actual contact, implement walking-state BRACE training,
++or build depth perception and the belief layer. Short follow-up is now exposed
++as censored. Those next tasks depend on this diagnostic. Existing published
++results remain historical; they are not regenerated or relabeled by applying
++the patch.
++
++The first accepted research milestone is a usable preparation behavior: stable
++transitions and a paired lead-time region where preparation improves the
++failure-versus-interruption tradeoff. Only then should the belief decision
++comparison be interpreted as a test of anticipation.
+--- a/foresight/envs/g1_impact/impact_joystick.py
++++ b/foresight/envs/g1_impact/impact_joystick.py
+@@ -13,6 +13,11 @@
+     wider stance, both feet down;
+   * an external mode switch info["brace_active"]: when True the velocity command seen by
+     the policy and the reward is zero (the decision layer flips it; the env never does).
++
++Evaluation can override the launch with one fixed world-coordinate position/velocity
++shared across policy conditions. Set proj_fixed_trajectory and both proj_fixed_launch_*
++fields after reset. Set proj_enabled=False before launch for a no-projectile control;
++this preserves the nominal arrival time used by the decision rule.
+ 
+ Scenario parameters vs measured outcomes (keep these apart in the analysis):
+   scenario : proj_mass, proj_speed, proj_momentum (= m*v, the incoming momentum, NOT the
+@@ -186,6 +191,12 @@
+         "proj_is_miss": is_miss,
+         "proj_launch_step": jp.round(t_launch / self.dt).astype(jp.int32),
+         "t_hit_nominal": t_launch + flight,
++        # Optional evaluation overrides; default training keeps pelvis-relative aim.
++        # These keys exist at reset so applying an override preserves the info pytree.
++        "proj_enabled": jp.array(True),
++        "proj_fixed_trajectory": jp.array(False),
++        "proj_fixed_launch_pos": jp.zeros(3),
++        "proj_fixed_launch_vel": jp.zeros(3),
+         "proj_launch_pos": jp.zeros(3),
+         "proj_launch_vel": jp.zeros(3),
+         # outcome latches
+@@ -236,7 +247,11 @@
+     info["command"] = jp.where(info["brace_active"], jp.zeros(3), info["command_nominal"])
+     info["brace_steps"] = jp.where(info["brace_active"], info["brace_steps"] + 1, 0)
+ 
+-    launch_now = (info["ep_step"] >= info["proj_launch_step"]) & (~info["proj_launched"])
++    launch_now = (
++        info["proj_enabled"]
++        & (info["ep_step"] >= info["proj_launch_step"])
++        & (~info["proj_launched"])
++    )
+ 
+     # Resolve launch pos/vel from the pelvis position *now* (so the aim is current).
+     pelvis = self._pelvis_pos(data)
+@@ -248,6 +263,12 @@
+     flight_t = info["proj_dist"] / info["proj_speed"]
+     launch_pos = jp.array([launch_xy[0], launch_xy[1], info["proj_height"]])
+     launch_vel = jp.array([vel_xy[0], vel_xy[1], (target_z - info["proj_height"]) / flight_t])
++    # A paired evaluation supplies the same external trajectory to each policy,
++    # instead of retargeting the projectile after their robot states have diverged.
++    launch_pos = jp.where(
++        info["proj_fixed_trajectory"], info["proj_fixed_launch_pos"], launch_pos)
++    launch_vel = jp.where(
++        info["proj_fixed_trajectory"], info["proj_fixed_launch_vel"], launch_vel)
+     info["proj_launch_pos"] = jp.where(launch_now, launch_pos, info["proj_launch_pos"])
+     info["proj_launch_vel"] = jp.where(launch_now, launch_vel, info["proj_launch_vel"])
+ 
+--- /dev/null
++++ b/foresight/eval/metrics.py
+@@ -0,0 +1,218 @@
++# Copyright 2026 Prasuna Chatla. Apache-2.0.
++"""NumPy-only outcome metrics for one rollout without autoreset.
++
++``traj[t]`` is recorded after control transition ``t`` (zero based), at
++time ``(t + 1) * dt``. Contact and termination indices use that same convention;
++``-1`` means the event was not observed. No reset-state sample is assumed.
++"""
++from __future__ import annotations
++
++import numpy as np
++
++
++def _finite_scalar(value, name, *, positive=False):
++  value = float(value)
++  if not np.isfinite(value) or value < 0 or (positive and value == 0):
++    qualifier = "positive" if positive else "nonnegative"
++    raise ValueError(f"{name} must be finite and {qualifier}")
++  return value
++
++
++def _step_indices(values, name, num_steps, num_envs=None):
++  values = np.asarray(values, dtype=float)
++  if values.ndim != 1 or (num_envs is not None and len(values) != num_envs):
++    raise ValueError(f"{name} must have shape (N,)")
++  if (not np.all(np.isfinite(values)) or
++      np.any(values != np.floor(values)) or
++      np.any((values < -1) | (values >= num_steps))):
++    raise ValueError(f"{name} must contain -1 or indices in [0, T - 1]")
++  return values.astype(np.int64)
++
++
++def _boolean(values, shape, name):
++  values = np.asarray(values)
++  if values.shape != shape:
++    raise ValueError(f"{name} must have shape {shape}")
++  try:
++    valid = np.isfinite(values) & ((values == 0) | (values == 1))
++  except TypeError as exc:
++    raise ValueError(f"{name} must contain booleans or finite 0/1 values") from exc
++  if not np.all(valid):
++    raise ValueError(f"{name} must contain booleans or finite 0/1 values")
++  return values.astype(bool)
++
++
++def _pelvis(values):
++  values = np.asarray(values, dtype=float)
++  if values.ndim != 3 or values.shape[2] != 3 or values.shape[0] < 1:
++    raise ValueError("pelvis_pos must have shape (T, N, 3), with T >= 1")
++  return values
++
++
++def _horizontal_heading(values, shape):
++  values = np.asarray(values, dtype=float)
++  if values.shape != shape:
++    raise ValueError(f"pelvis_fwd must have shape {shape}")
++  xy = values[..., :2]
++  norm = np.linalg.norm(xy, axis=-1, keepdims=True)
++  unit = np.full_like(xy, np.nan)
++  np.divide(xy, norm, out=unit, where=np.isfinite(norm) & (norm > 1e-12))
++  return unit
++
++
++def post_contact_survival(contact_step, term_step, *, num_steps, dt, window_s):
++  """Classify survival through a fixed duration after the detected contact.
++
++  Returns per-episode arrays. ``survived_post_contact_window`` is 0 for a
++  failure at contact or within the inclusive window, 1 for observed survival
++  through its end, and NaN for missing contact, pre-contact failure, or censoring.
++  An observed failure within the window is conclusive even if the rollout is
++  shorter than the requested window. A later failure does not undo survival of
++  an earlier window. Failure-free short follow-up is censored, never a success.
++
++  Available contact-to-horizon time is ``(T - 1 - contact_step) * dt``;
++  ``post_contact_followup_s`` stops earlier at a detected failure. Failure at
++  the same recorded step as contact counts as time-zero failure. Substep event
++  ordering is unavailable. Invalid indices (including term_step >= T) raise.
++  """
++  if isinstance(num_steps, bool) or not isinstance(num_steps, (int, np.integer)) or num_steps < 1:
++    raise ValueError("num_steps must be a positive integer")
++  dt = _finite_scalar(dt, "dt", positive=True)
++  window_s = _finite_scalar(window_s, "window_s")
++  contact = _step_indices(contact_step, "contact_step", num_steps)
++  term = _step_indices(term_step, "term_step", num_steps, len(contact))
++  has_contact = contact >= 0
++  pre_failure = has_contact & (term >= 0) & (term < contact)
++  eligible = has_contact & ~pre_failure
++  has_failure = eligible & (term >= contact) & (term >= 0)
++  failure_time = (term - contact) * dt
++  horizon_time = (num_steps - 1 - contact) * dt
++  # Inclusive boundaries must not depend on roundoff in e.g. 3 * 0.1.
++  tol = 16 * np.finfo(float).eps * max(1.0, window_s)
++  failed_in_window = has_failure & (failure_time <= window_s + tol)
++  full_window = eligible & (horizon_time >= window_s - tol)
++  observed = eligible & (failed_in_window | full_window)
++  survival = np.full(len(contact), np.nan)
++  survival[observed] = (~failed_in_window[observed]).astype(float)
++  followup = np.where(has_failure, failure_time, horizon_time)
++  return {
++      "post_contact_eligible": eligible,
++      "pre_contact_failure": pre_failure,
++      "post_contact_observed": observed,
++      "post_contact_censored": eligible & ~observed,
++      "survived_post_contact_window": survival,
++      "post_contact_followup_s": np.where(eligible, followup, np.nan),
++  }
++
++
++def summarize_trajectory(pelvis_pos, pelvis_fwd, brace_active, term_step, dt):
++  """Report observed forward progress and executed brace exposure before failure.
++
++  Progress projects each horizontal displacement onto the pelvis heading at
++  its starting sample. It excludes intervals ending in or after the first
++  failed sample, and cannot include reset-to-first-sample displacement. Thus it
++  measures forward path progress, not displacement along a fixed world axis.
++  Nonfinite data in retained progress intervals yields NaN; invalid data after
++  censoring does not contaminate earlier observations.
++
++  brace_active[t] selects the action for transition t, before its outcome is
++  observed. Brace duration counts that entire dt interval, including the first
++  failure transition, but none after it. Durations describe sampled control
++  exposure, not substep-accurate failure time. A failure on step 0 therefore
++  permits zero observed progress but one executed control interval.
++  """
++  dt = _finite_scalar(dt, "dt", positive=True)
++  pelvis = _pelvis(pelvis_pos)
++  T, N, _ = pelvis.shape
++  heading = _horizontal_heading(pelvis_fwd, pelvis.shape)
++  active = _boolean(brace_active, (T, N), "brace_active")
++  term = _step_indices(term_step, "term_step", T, N)
++  first_failed = np.where(term >= 0, term, T)
++  interval_ok = np.arange(1, T)[:, None] < first_failed[None, :]
++  projected = np.sum(np.diff(pelvis[..., :2], axis=0) * heading[:-1], axis=-1)
++  progress = np.sum(np.where(interval_ok, projected, 0.0), axis=0)
++  last_executed = np.where(term >= 0, term, T - 1)
++  executed = np.arange(T)[:, None] <= last_executed[None, :]
++  return {
++      "progress_before_failure_m": progress,
++      "progress_observed_s": interval_ok.sum(axis=0) * dt,
++      "brace_duration_through_failure_s": (active & executed).sum(axis=0) * dt,
++      "control_duration_through_failure_s": executed.sum(axis=0) * dt,
++  }
++
++
++def brace_readiness(pelvis_pos, torso_up, feet_pos, feet_contact, brace_active,
++                    term_step, *, dt, target_pelvis_height, height_tolerance,
++                    min_torso_up, min_foot_separation, dwell_s, pelvis_fwd=None):
++  """Find the first sustained brace posture; unobserved readiness times are NaN.
++
++  The height target is pelvis/base z, NOT center-of-mass height. A sample must
++  meet height, uprightness, bilateral floor contact, foot separation, active
++  brace, and no-failure criteria. If pelvis_fwd is supplied, separation is the
++  lateral component in that heading; otherwise it is horizontal foot distance.
++  Supply pelvis_fwd when interpreting separation as lateral stance width.
++
++  Dwell is a sampled criterion: each qualifying post-step sample counts one
++  completed control interval. At least ceil(dwell_s / dt) consecutive samples
++  are required (minimum one). Five good samples at dt=.02 give .10 s of sampled
++  dwell. This is not a claim about unobserved continuous motion between samples.
++  Any bad sample or inactive brace resets dwell. Failure and all later samples
++  are ineligible. Nonfinite posture cannot qualify; nonbinary masks raise.
++
++  Readiness time is (ready_step + 1)*dt. Latency is measured from the start of
++  the active-brace bout achieving readiness: (ready_step - bout_start + 1)*dt.
++  This records the FIRST readiness event, not maintained readiness at impact.
++  """
++  dt = _finite_scalar(dt, "dt", positive=True)
++  target = _finite_scalar(target_pelvis_height, "target_pelvis_height", positive=True)
++  height_tolerance = _finite_scalar(height_tolerance, "height_tolerance")
++  min_foot_separation = _finite_scalar(min_foot_separation, "min_foot_separation")
++  dwell_s = _finite_scalar(dwell_s, "dwell_s")
++  min_torso_up = float(min_torso_up)
++  if not np.isfinite(min_torso_up) or not -1 <= min_torso_up <= 1:
++    raise ValueError("min_torso_up must be finite and in [-1, 1]")
++  pelvis = _pelvis(pelvis_pos)
++  T, N, _ = pelvis.shape
++  up = np.asarray(torso_up, dtype=float)
++  feet = np.asarray(feet_pos, dtype=float)
++  if up.shape != (T, N) or feet.shape != (T, N, 2, 3):
++    raise ValueError("torso_up must have shape (T, N); feet_pos must have shape (T, N, 2, 3)")
++  contact = _boolean(feet_contact, (T, N, 2), "feet_contact")
++  active = _boolean(brace_active, (T, N), "brace_active")
++  term = _step_indices(term_step, "term_step", T, N)
++  foot_delta = feet[:, :, 0, :2] - feet[:, :, 1, :2]
++  if pelvis_fwd is None:
++    separation = np.linalg.norm(foot_delta, axis=-1)
++  else:
++    heading = _horizontal_heading(pelvis_fwd, pelvis.shape)
++    lateral = np.stack((-heading[..., 1], heading[..., 0]), axis=-1)
++    separation = np.abs(np.sum(foot_delta * lateral, axis=-1))
++  sample = np.arange(T)[:, None]
++  before_failure = (term[None, :] < 0) | (sample < term[None, :])
++  tol = 16 * np.finfo(float).eps
++  good = (active & before_failure & contact.all(axis=-1) &
++          np.isfinite(pelvis).all(axis=-1) & np.isfinite(feet).all(axis=(-2, -1)) &
++          np.isfinite(up) & (up >= -1 - 1e-6) & (up <= 1 + 1e-6) &
++          (np.abs(pelvis[..., 2] - target) <= height_tolerance + tol) &
++          (up >= min_torso_up - tol) &
++          np.isfinite(separation) & (separation >= min_foot_separation - tol))
++  ratio = dwell_s / dt
++  required = max(1, int(np.ceil(ratio - tol * max(1.0, ratio))))
++  run = np.zeros(N, dtype=np.int64)
++  bout_start = np.zeros(N, dtype=np.int64)
++  previous_active = np.zeros(N, dtype=bool)
++  ready_step = np.full(N, np.nan)
++  latency = np.full(N, np.nan)
++  for t in range(T):
++    bout_start = np.where(active[t] & ~previous_active, t, bout_start)
++    run = np.where(good[t], run + 1, 0)
++    first_ready = np.isnan(ready_step) & (run >= required)
++    ready_step[first_ready] = t
++    latency[first_ready] = (t - bout_start[first_ready] + 1) * dt
++    previous_active = active[t]
++  return {
++      "brace_ready": np.isfinite(ready_step),
++      "brace_ready_step": ready_step,
++      "brace_ready_time_s": (ready_step + 1) * dt,
++      "brace_ready_latency_s": latency,
++  }
+--- /dev/null
++++ b/foresight/eval/observations.py
+@@ -0,0 +1,36 @@
++# Copyright 2026 Prasuna Chatla. Apache-2.0.
++"""Command updates for the inspected rss2025 G1 observation contract.
++
++The actor's state begins with local velocity (3), gyro (3), gravity (3),
++and command (3). The privileged observation begins with that same state.
++Updating only this slice preserves the sampled sensor noise and its RNG state.
++This helper accepts NumPy or JAX arrays; the caller supplies concatenate.
++"""
++from collections.abc import Mapping
++
++
++def replace_command_observation(obs: Mapping, command, *, concatenate):
++  """Return observations with the effective command, without mutating inputs.
++
++  Supported contract: rss2025 G1 state/privileged_state observations, one
++  history frame. command must already have the same leading dimensions.
++  An upstream observation-layout change requires revisiting this adapter.
++  """
++  if "state" not in obs:
++    raise ValueError("G1 command adapter requires a 'state' observation")
++  state = obs["state"]
++  if state.ndim < 1 or state.shape[-1] < 12:
++    raise ValueError("G1 state is too short for its command field")
++  expected = state.shape[:-1] + (3,)
++  if command.shape != expected:
++    raise ValueError(f"command shape {command.shape} does not match {expected}")
++  result = dict(obs)
++  for key in ("state", "privileged_state"):
++    if key not in obs:
++      continue
++    value = obs[key]
++    if value.shape[:-1] != state.shape[:-1] or value.shape[-1] < state.shape[-1]:
++      raise ValueError(f"{key} does not contain the expected G1 state prefix")
++    cmd = command.astype(value.dtype)
++    result[key] = concatenate((value[..., :9], cmd, value[..., 12:]), axis=-1)
++  return result
+--- a/foresight/eval/rollout.py
++++ b/foresight/eval/rollout.py
+@@ -28,6 +28,8 @@
+ 
+ from foresight.envs.g1_impact import ImpactJoystick, default_config
+ from foresight.envs.g1_impact.impact_joystick import brace_config
++from foresight.eval.observations import replace_command_observation
++from foresight.eval import metrics as eval_metrics
+ 
+ # Records taken every control step. All are (num_envs, ...) per step.
+ TRAJ_INFO_KEYS = (
+@@ -86,6 +88,8 @@
+   cfg.impact.resample_on_autoreset = False   # no autoreset in eval
+   ov = {"impl": impl}
+   ov.update(overrides or {})
++  if ov.get("history_len", cfg.history_len) != 1:
++    raise ValueError("The G1 command-observation adapter requires history_len=1")
+   return ImpactJoystick(config=cfg, config_overrides=ov)
+ 
+ 
+@@ -114,7 +118,8 @@
+ 
+ 
+ def set_scenario(env: ImpactJoystick, state, speed=None, hit_time=None, is_miss=None,
+-                 command=None):
++                 command=None, projectile_enabled=None, fixed_launch_pos=None,
++                 fixed_launch_vel=None):
+   """Override per-env scenario fields after reset and recompute the derived ones."""
+   info = dict(state.info)
+   c = env._config.impact
+@@ -133,11 +138,24 @@
+   info["proj_launch_step"] = jp.round(t_launch / env.dt).astype(jp.int32)
+   info["t_hit_nominal"] = t_launch + flight
+   info["proj_momentum"] = info["proj_mass"] * info["proj_speed"]
++  if projectile_enabled is not None:
++    info["proj_enabled"] = jp.broadcast_to(
++        jp.asarray(projectile_enabled, bool), info["proj_enabled"].shape)
++  if (fixed_launch_pos is None) != (fixed_launch_vel is None):
++    raise ValueError("Provide both fixed launch position and velocity")
++  if fixed_launch_pos is not None:
++    info["proj_fixed_launch_pos"] = jp.broadcast_to(
++        jp.asarray(fixed_launch_pos, jp.float32), info["proj_fixed_launch_pos"].shape)
++    info["proj_fixed_launch_vel"] = jp.broadcast_to(
++        jp.asarray(fixed_launch_vel, jp.float32), info["proj_fixed_launch_vel"].shape)
++    info["proj_fixed_trajectory"] = jp.ones_like(info["proj_fixed_trajectory"])
++  obs = state.obs
+   if command is not None:
+     cmd = jp.broadcast_to(jp.asarray(command, jp.float32), info["command"].shape)
+     info["command"] = cmd
+     info["command_nominal"] = cmd
+-  return state.replace(info=info)
++    obs = replace_command_observation(obs, cmd, concatenate=jp.concatenate)
++  return state.replace(info=info, obs=obs)
+ 
+ 
+ def no_brace(info, t):
+@@ -170,6 +188,13 @@
+   pelvis = env._pelvis_body
+   feet = env._feet_site_id
+   torso = env._mj_model.body("torso_link").id
++  foot_contact_adrs = jp.asarray([
++      int(env._mj_model.sensor_adr[s]) for s in env._feet_floor_found_sensor])
++  self_contact_adrs = jp.asarray([
++      int(env._mj_model.sensor_adr[s]) for s in (
++          env._right_foot_left_foot_found_sensor,
++          env._left_foot_right_shin_found_sensor,
++          env._right_foot_left_shin_found_sensor)])
+ 
+   def policy_act(obs, keys, brace):
+     a_nom, _ = jax.vmap(nominal_policy)(obs, keys)
+@@ -185,8 +210,16 @@
+     brace = decide(state.info, t)
+     info = dict(state.info)
+     info["brace_active"] = brace
+-    state = state.replace(info=info)
++    command = jp.where(brace[..., None], jp.zeros_like(info["command_nominal"]),
++                       info["command_nominal"])
++    info["command"] = command
++    obs = replace_command_observation(state.obs, command, concatenate=jp.concatenate)
++    state = state.replace(info=info, obs=obs)
+     act = policy_act(state.obs, keys, brace)
++    finite_input = jp.ones((n,), dtype=bool)
++    for leaf in jax.tree_util.tree_leaves(state.obs):
++      finite_input = finite_input & jp.all(jp.isfinite(leaf).reshape(n, -1), axis=-1)
++    finite_action = jp.all(jp.isfinite(act), axis=-1)
+     state = wenv.step(state, act)
+     d = state.data
+     rec = {k: state.info[k] for k in TRAJ_INFO_KEYS}
+@@ -196,6 +229,12 @@
+         "com": d.subtree_com[:, pelvis],
+         "torso_up": d.xmat[:, torso].reshape(n, 3, 3)[:, 2, 2],
+         "feet_pos": d.site_xpos[:, feet],
++        "feet_contact": d.sensordata[:, foot_contact_adrs] > 0,
++        "self_contact": jp.any(d.sensordata[:, self_contact_adrs] > 0, axis=-1),
++        "nonfinite_physics": ~(jp.all(jp.isfinite(d.qpos), axis=-1)
++                               & jp.all(jp.isfinite(d.qvel), axis=-1)),
++        "nonfinite_policy_input": ~finite_input,
++        "nonfinite_action": ~finite_action,
+         "proj_pos": state.info["obj_pos"],
+         "proj_vel": state.info["obj_vel"],
+         "done": state.done,
+@@ -217,7 +256,8 @@
+   return to_np(final_info), to_np(traj)
+ 
+ 
+-def episode_table(final_info: dict, traj: dict, dt: float) -> dict:
++def episode_table(final_info: dict, traj: dict, dt: float,
++                  recovery_window_s: float = 2.5) -> dict:
+   """Per-episode scalars from a rollout: scenario, outcome, progress, pre-impact state."""
+   n = final_info["fell"].shape[0]
+   T = traj["pelvis_pos"].shape[0]
+@@ -251,6 +291,31 @@
+       "rfoot_x_pre": feet_pre[:, 1, 0], "rfoot_y_pre": feet_pre[:, 1, 1],
+       "proj_vx_pre": pvel[:, 0], "proj_vy_pre": pvel[:, 1], "proj_vz_pre": pvel[:, 2],
+   }
++  # Retain legacy progress_m for historical readers. New comparisons use the
++  # explicitly censored metric and report incomplete post-contact follow-up.
++  out.update(eval_metrics.post_contact_survival(
++      cs, final_info["term_step"], num_steps=T, dt=dt, window_s=recovery_window_s))
++  out.update(eval_metrics.summarize_trajectory(
++      traj["pelvis_pos"], traj["pelvis_fwd"], traj["brace_active"],
++      final_info["term_step"], dt))
++  failed = final_info["term_step"] >= 0
++  terminal_idx = np.clip(final_info["term_step"], 0, T - 1)
++  out["failure_inverted"] = failed & (traj["torso_up"][terminal_idx, idx] < 0)
++  out["failure_self_contact"] = failed & traj["self_contact"][terminal_idx, idx]
++  out["failure_nonfinite"] = failed & traj["nonfinite_physics"][terminal_idx, idx]
++  out["failure_sustained_tilt"] = failed & (final_info["term_reason"] == 2)
++  out["projectile_enabled"] = final_info["proj_enabled"]
++  out["fixed_trajectory"] = final_info["proj_fixed_trajectory"]
++  out["launch_step"] = final_info["proj_launch_step"]
++  # These are planned inputs even in the launch-disabled control arm.
++  use_fixed = final_info["proj_fixed_trajectory"][..., None]
++  planned_pos = np.where(use_fixed, final_info["proj_fixed_launch_pos"],
++                         final_info["proj_launch_pos"])
++  planned_vel = np.where(use_fixed, final_info["proj_fixed_launch_vel"],
++                         final_info["proj_launch_vel"])
++  for j, axis in enumerate(("x", "y", "z")):
++    out[f"launch_{axis}"] = planned_pos[:, j]
++    out[f"launch_v{axis}"] = planned_vel[:, j]
+   return {k: np.asarray(v) for k, v in out.items()}
+ 
+ 
+--- /dev/null
++++ b/scripts/eval_switch_gate.py
+@@ -0,0 +1,461 @@
++# Copyright 2026 Prasuna Chatla. Apache-2.0.
++"""Small paired diagnostic for command changes and nominal-to-BRACE switching.
++
++For every scenario, a nominal reference supplies a world-frame launch position and
++velocity. The six comparison arms replay those inputs with the same reset keys:
++CONTINUE, nominal actor with a zero-command interval, and BRACE actor with that
++interval, each with the projectile enabled or disabled. Disabling the projectile
++does NOT mark the scenario as a miss or remove the scheduled command change.
++
++This runs fixed checkpoints only. It does not train, install, commit, or push.
++Default sample size is a GPU smoke diagnostic, not a statistical validation gate.
++The output directory must not exist; interrupted runs remain available to inspect.
++The default horizon does not guarantee 2.5 seconds of follow-up after every contact;
++incomplete outcomes are reported as censored. A longer horizon can be requested.
++
++Example (inside the existing Playground venv, from the repository root):
++  python scripts/eval_switch_gate.py --nominal PATH --brace PATH --impl warp \
++      --episodes 32 --batches 1 --lead 0.5 --hold 0.5 \
++      --out results/switch_gate_v1
++"""
++from __future__ import annotations
++
++import argparse
++import csv
++import hashlib
++import importlib.metadata
++import json
++import math
++from pathlib import Path
++import subprocess
++import sys
++import time
++
++
++CONTROLLERS = ("continue", "nominal_zero_command", "brace_switch")
++CONDITIONS = ("projectile", "no_projectile")
++REQUIRED_METRICS = (
++    "fell", "contact", "contact_step", "term_step", "pre_contact_failure",
++    "post_contact_eligible", "post_contact_observed", "post_contact_censored",
++    "survived_post_contact_window", "post_contact_followup_s",
++    "progress_before_failure_m", "brace_duration_through_failure_s",
++    "failure_inverted", "failure_self_contact", "failure_nonfinite", "failure_sustained_tilt",
++)
++
++
++def _arguments(argv=None):
++  p = argparse.ArgumentParser(description=__doc__,
++                              formatter_class=argparse.RawDescriptionHelpFormatter)
++  p.add_argument("--nominal", required=True, help="nominal checkpoint or run directory")
++  p.add_argument("--brace", required=True, help="BRACE checkpoint or run directory")
++  p.add_argument("--impl", choices=("warp", "jax"), default="warp")
++  p.add_argument("--episodes", type=int, default=32, help="paired scenarios per batch")
++  p.add_argument("--batches", type=int, default=1)
++  p.add_argument("--lead", type=float, default=0.5, help="seconds before nominal arrival")
++  p.add_argument("--hold", type=float, default=0.5, help="seconds after nominal arrival")
++  p.add_argument("--steps", type=int, default=300)
++  p.add_argument("--recovery_window", type=float, default=2.5, help="post-contact seconds")
++  p.add_argument("--command_vx", type=float, default=0.5)
++  p.add_argument("--out", default="results/switch_gate_v1")
++  p.add_argument("--seed", type=int, default=100)
++  a = p.parse_args(argv)
++  for name in ("episodes", "batches", "steps"):
++    if getattr(a, name) < 1:
++      p.error(f"--{name} must be positive")
++  for name in ("lead", "hold", "recovery_window", "command_vx"):
++    if not math.isfinite(getattr(a, name)):
++      p.error(f"--{name} must be finite")
++  if a.lead < 0 or a.hold < 0 or a.recovery_window <= 0:
++    p.error("lead/hold must be nonnegative and recovery_window must be positive")
++  if a.seed < 0 or a.seed + a.batches - 1 >= 2**32:
++    p.error("batch seeds must be in [0, 2**32)")
++  if Path(a.out).expanduser().exists():
++    p.error(f"output already exists: {a.out}; choose a new directory")
++  return a
++
++
++def _git(cwd, *args):
++  try:
++    r = subprocess.run(["git", "-C", str(cwd), *args], check=True,
++                       capture_output=True, text=True, timeout=10)
++    return r.stdout.strip()
++  except (OSError, subprocess.SubprocessError):
++    return None
++
++
++def _manifest(args):
++  root = Path(__file__).resolve().parents[1]
++  paths = [Path(__file__).resolve()]
++  paths += sorted((root / "foresight" / "eval").glob("*.py"))
++  paths += sorted((root / "foresight" / "envs" / "g1_impact").glob("*.py"))
++  versions = {}
++  for name in ("jax", "jaxlib", "brax", "mujoco", "mujoco-mjx", "mujoco-warp",
++               "warp-lang", "flax", "optax", "orbax-checkpoint", "numpy"):
++    try:
++      versions[name] = importlib.metadata.version(name)
++    except importlib.metadata.PackageNotFoundError:
++      versions[name] = None
++  return {
++      "protocol": "switch_gate_v1", "arguments": vars(args),
++      "source_commit": _git(root, "rev-parse", "HEAD"),
++      "tracked_source_status": _git(root, "status", "--porcelain", "--untracked-files=no"),
++      "source_sha256": {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
++                        for p in paths},
++      "package_versions": versions, "python": sys.version,
++      "validation": "Generated by this run; no claim of prior GPU validation.",
++  }
++
++
++def _json_value(value):
++  if hasattr(value, "item"):
++    value = value.item()
++  if isinstance(value, dict):
++    return {str(k): _json_value(v) for k, v in value.items()}
++  if isinstance(value, (list, tuple)):
++    return [_json_value(v) for v in value]
++  if isinstance(value, float) and not math.isfinite(value):
++    return None
++  return value
++
++
++def _save_json(path, value):
++  path.write_text(json.dumps(_json_value(value), indent=2, allow_nan=False) + "\n")
++
++
++def _save_rows(path, rows):
++  if not rows:
++    return
++  exists = path.exists()
++  fields = list(rows[0])
++  if any(list(row) != fields for row in rows):
++    raise RuntimeError("inconsistent CSV row schema")
++  if exists:
++    with path.open(newline="") as f:
++      if next(csv.reader(f), None) != fields:
++        raise RuntimeError(f"CSV schema changed during run: {path.name}")
++  with path.open("a", newline="") as f:
++    writer = csv.DictWriter(f, fieldnames=fields)
++    if not exists:
++      writer.writeheader()
++    writer.writerows({k: _json_value(v) for k, v in row.items()} for row in rows)
++
++
++def _summarize_arm(rows):
++  n = len(rows)
++  failures = sum(bool(r["fell"]) for r in rows)
++  observed = [r for r in rows if bool(r["post_contact_observed"])]
++  survivors = sum(r["survived_post_contact_window"] == 1 for r in observed)
++  return {
++      "n": n, "failures": failures, "failure_rate": failures / n,
++      "contacts_recorded_total": sum(bool(r["contact"]) for r in rows),
++      "failures_without_any_recorded_contact": sum(
++          bool(r["fell"]) and not bool(r["contact"]) for r in rows),
++      "contacts_before_or_at_first_failure": sum(
++          bool(r["contact"]) and (r["term_step"] < 0 or r["contact_step"] <= r["term_step"])
++          for r in rows),
++      "pre_contact_failures": sum(bool(r["pre_contact_failure"]) for r in rows),
++      "post_contact_eligible": sum(bool(r["post_contact_eligible"]) for r in rows),
++      "post_contact_observed": len(observed),
++      "post_contact_censored": sum(bool(r["post_contact_censored"]) for r in rows),
++      "post_contact_window_survivals": survivors,
++      "post_contact_window_failures": len(observed) - survivors,
++      "post_contact_survival_rate_observed": survivors / len(observed) if observed else None,
++      "mean_progress_before_failure_m": sum(r["progress_before_failure_m"] for r in rows) / n,
++      "mean_brace_duration_through_failure_s":
++          sum(r["brace_duration_through_failure_s"] for r in rows) / n,
++      "first_failure_flags_may_overlap": {
++          flag: sum(bool(r[flag]) for r in rows)
++          for flag in ("failure_inverted", "failure_self_contact",
++                       "failure_nonfinite", "failure_sustained_tilt")},
++      "diagnostic_first_brace_readiness_count": sum(bool(r["brace_ready"]) for r in rows),
++  }
++
++
++def _paired(reference, treatment):
++  a = {(r["batch"], r["pair_id"]): r for r in reference}
++  b = {(r["batch"], r["pair_id"]): r for r in treatment}
++  if len(a) != len(reference) or len(b) != len(treatment) or a.keys() != b.keys():
++    raise RuntimeError("duplicate or mismatched paired scenario IDs")
++  counts = {"both_fail": 0, "neither_fails": 0,
++            "reference_only_fails": 0, "treatment_only_fails": 0}
++  progress_difference = 0.0
++  for key in a:
++    fa, fb = bool(a[key]["fell"]), bool(b[key]["fell"])
++    name = ("both_fail" if fb else "reference_only_fails") if fa else (
++        "treatment_only_fails" if fb else "neither_fails")
++    counts[name] += 1
++    progress_difference += (b[key]["progress_before_failure_m"] -
++                            a[key]["progress_before_failure_m"])
++  n = len(a)
++  return {"n_pairs": n, **counts,
++          "failure_rate_difference_treatment_minus_reference":
++              (counts["treatment_only_fails"] - counts["reference_only_fails"]) / n,
++          "mean_paired_progress_difference_m": progress_difference / n}
++
++
++def _summary(rows, args, dt, readiness_thresholds):
++  groups = {f"{c}/{p}": [r for r in rows if r["controller"] == c and r["condition"] == p]
++            for c in CONTROLLERS for p in CONDITIONS}
++  expected = args.episodes * args.batches
++  if any(len(r) != expected for r in groups.values()):
++    raise RuntimeError("an arm has the wrong number of paired episodes")
++  comparisons = {}
++  for condition in CONDITIONS:
++    for reference, treatment in (("continue", "nominal_zero_command"),
++                                 ("nominal_zero_command", "brace_switch"),
++                                 ("continue", "brace_switch")):
++      key = f"{treatment}_vs_{reference}/{condition}"
++      comparisons[key] = _paired(groups[f"{reference}/{condition}"],
++                                  groups[f"{treatment}/{condition}"])
++  for controller in CONTROLLERS:
++    comparisons[f"projectile_vs_no_projectile/{controller}"] = _paired(
++        groups[f"{controller}/no_projectile"], groups[f"{controller}/projectile"])
++  switch = comparisons["brace_switch_vs_nominal_zero_command/no_projectile"]
++  command = comparisons["nominal_zero_command_vs_continue/no_projectile"]
++  return {
++      "protocol": "switch_gate_v1",
++      "status": "switch_failure" if switch["treatment_only_fails"] else "inconclusive",
++      "status_rule": "Any new paired no-projectile failure versus the zero-command nominal actor "
++                     "flags the BRACE switch for inspection; this is not a significance test.",
++      "new_no_projectile_command_change_failures": command["treatment_only_fails"],
++      "next_step": "Inspect paired failure traces and readiness before any retraining decision.",
++      "paired_scenarios": expected, "comparison_rollouts": 6 * expected,
++      "reference_rollouts": expected, "episodes_per_arm": expected,
++      "dt_s": dt, "horizon_s": args.steps * dt,
++      "lead_s_before_nominal_arrival": args.lead, "hold_s_after_nominal_arrival": args.hold,
++      "recovery_window_s": args.recovery_window,
++      "readiness": {
++          "thresholds": readiness_thresholds,
++          "interpretation": "Diagnostic sampled posture criterion; first qualifying event, "
++                            "not a verified impact-safe state or maintained readiness at contact."},
++      "population": "Fixed trained policies; scenarios paired across all six arms. "
++                    "Contacts may differ across arms; contact-conditioned subsets are not paired.",
++      "timing": "The switch uses nominal target arrival, not measured physical contact time.",
++      "censoring": "Unknown post-contact outcomes are blank in CSV/null in JSON, not successes. "
++                   "Observed-only rates must be read together with their censored counts.",
++      "arms": {name: _summarize_arm(group) for name, group in groups.items()},
++      "paired_comparisons": comparisons,
++  }
++
++
++def _check_array(name, actual, expected, atol=1e-6):
++  import numpy as np
++  actual, expected = np.asarray(actual), np.asarray(expected)
++  if actual.shape != expected.shape or not np.all(np.isfinite(actual)) or not np.allclose(
++      actual, expected, rtol=0.0, atol=atol):
++    raise RuntimeError(f"paired-input invariant failed: {name}")
++
++
++def _check_finite_trace(traj, term_step, *, name):
++  """Reject numerical corruption in the executed prefix, preserving the raw archive."""
++  import numpy as np
++  T, N = np.asarray(traj["brace_active"]).shape
++  term = np.asarray(term_step)
++  if (term.shape != (N,) or not np.all(np.isfinite(term)) or
++      np.any(term != np.floor(term)) or np.any((term < -1) | (term >= T))):
++    raise RuntimeError(f"{name}: invalid first-failure indices")
++  executed = np.arange(T)[:, None] <= np.where(term >= 0, term, T - 1)[None, :]
++  for key in ("nonfinite_policy_input", "nonfinite_action", "nonfinite_physics"):
++    flag = np.asarray(traj[key])
++    if flag.shape != (T, N) or not np.all(np.isin(flag, [0, 1])):
++      raise RuntimeError(f"{name}: invalid numeric-status flag {key}")
++    bad = executed & flag.astype(bool)
++    if np.any(bad):
++      step, lane = np.argwhere(bad)[0]
++      raise RuntimeError(f"{name}: {key} at executed step {step}, lane {lane}")
++  for key in ("pelvis_pos", "pelvis_fwd", "torso_up", "com", "feet_pos",
++              "proj_pos", "proj_vel"):
++    value = np.asarray(traj[key])
++    if value.shape[:2] != (T, N):
++      raise RuntimeError(f"{name}: invalid trace shape for {key}")
++    bad = executed & ~np.isfinite(value).reshape(T, N, -1).all(axis=-1)
++    if np.any(bad):
++      step, lane = np.argwhere(bad)[0]
++      raise RuntimeError(f"{name}: nonfinite {key} at executed step {step}, lane {lane}")
++
++
++def _run(args, out, manifest):
++  # Keep --help and summary helper tests independent of the GPU Python stack.
++  import inspect
++  import jax
++  import jax.numpy as jp
++  import numpy as np
++  import mujoco_playground
++  from foresight.eval import rollout as R
++  from foresight.eval.metrics import brace_readiness
++
++  for name in ("projectile_enabled", "fixed_launch_pos", "fixed_launch_vel"):
++    if name not in inspect.signature(R.set_scenario).parameters:
++      raise RuntimeError(f"integrated rollout patch is required: set_scenario lacks {name}")
++  if "recovery_window_s" not in inspect.signature(R.episode_table).parameters:
++    raise RuntimeError("integrated episode_table recovery-window patch is required")
++  nominal_path, brace_path = R.latest_checkpoint(args.nominal), R.latest_checkpoint(args.brace)
++  nominal, brace_policy = R.load_policy(nominal_path), R.load_policy(brace_path)
++  env = R.make_env(skill="nominal", impl=args.impl, overrides={"episode_length": args.steps})
++  dt, n = float(env.dt), args.episodes
++  readiness_thresholds = {
++      "target_pelvis_height": float(env._config.brace.base_height_target),
++      "height_tolerance": 0.05, "min_torso_up": 0.9,
++      "min_foot_separation": 0.30, "dwell_s": 0.10,
++  }
++  pg_dir = Path(mujoco_playground.__file__).resolve().parent
++  manifest.update({"resolved_checkpoints": {"nominal": str(nominal_path), "brace": str(brace_path)},
++                   "playground_module": str(pg_dir),
++                   "playground_source_commit": _git(pg_dir, "rev-parse", "HEAD"),
++                   "devices": [str(d) for d in jax.devices()], "dt_s": dt,
++                   "readiness_thresholds": readiness_thresholds,
++                   "trace_archives": "batch_NNN_CONTROLLER.npz; arrays indexed (step, lane, ...). "
++                                     "pair_id and projectile_enabled_input identify lanes."})
++  _save_json(out / "manifest.json", manifest)
++  all_rows = []
++  for batch in range(args.batches):
++    seed = args.seed + batch
++    rng, draws = jax.random.PRNGKey(seed), np.random.RandomState(seed)
++    reset_keys = jax.random.split(jax.random.fold_in(rng, 1), n)
++    masses = draws.uniform(*env._config.impact.mass_range, n).astype(np.float32)
++    speeds = draws.uniform(*env._config.impact.speed_range, n).astype(np.float32)
++    hit_times = draws.uniform(*env._config.impact.hit_time_range, n).astype(np.float32)
++    command = [args.command_vx, 0.0, 0.0]
++
++    def reference_scenario(state):
++      return R.set_scenario(env, state, speed=speeds, hit_time=hit_times,
++                            is_miss=np.zeros(n, bool), command=command, projectile_enabled=True)
++
++    ref_info, ref_traj = R.rollout(env, R.batched_env(env, masses), nominal, rng, args.steps,
++                                   scenario_fn=reference_scenario, reset_keys=reset_keys)
++    np.savez_compressed(out / f"batch_{batch:03d}_reference.npz",
++                        pair_id=np.arange(batch * n, (batch + 1) * n),
++                        projectile_enabled_input=np.ones(n, bool), **ref_traj)
++    _check_finite_trace(ref_traj, ref_info["term_step"], name=f"batch {batch} reference")
++    del ref_traj
++    if not np.all(ref_info["proj_launched"]):
++      raise RuntimeError("reference did not launch every projectile; no scenarios were silently dropped")
++    positions = np.asarray(ref_info["proj_launch_pos"], np.float32)
++    velocities = np.asarray(ref_info["proj_launch_vel"], np.float32)
++    if positions.shape != (n, 3) or velocities.shape != (n, 3):
++      raise RuntimeError("reference launch vectors must have shape (episodes, 3)")
++    _check_array("finite reference launch positions", positions, positions)
++    _check_array("finite reference launch velocities", velocities, velocities)
++    keys_np = np.asarray(reset_keys)
++    scenarios = []
++    for i in range(n):
++      row = {"batch": batch, "pair_id": batch * n + i, "within_batch_id": i, "seed": seed,
++             "resetkey0": int(keys_np[i, 0]), "resetkey1": int(keys_np[i, 1]),
++             "mass": float(masses[i]), "speed": float(speeds[i]),
++             "requested_hit_time_s": float(hit_times[i]),
++             "t_hit_nominal": float(ref_info["t_hit_nominal"][i]),
++             "reference_launch_step": int(ref_info["proj_launch_step"][i]),
++             "reference_fell": bool(ref_info["fell"][i]),
++             "reference_contact": bool(ref_info["impact_contact"][i]),
++             "reference_contact_step": int(ref_info["contact_step"][i]),
++             "reference_term_step": int(ref_info["term_step"][i])}
++      for axis, j in zip("xyz", range(3)):
++        row[f"launch_pos_{axis}"] = float(positions[i, j])
++        row[f"launch_vel_{axis}"] = float(velocities[i, j])
++      scenarios.append(row)
++    _save_rows(out / "scenarios.csv", scenarios)
++
++    paired_keys = jp.concatenate([reset_keys, reset_keys], axis=0)
++    enabled = np.concatenate([np.ones(n, bool), np.zeros(n, bool)])
++    replay_positions, replay_velocities = np.tile(positions, (2, 1)), np.tile(velocities, (2, 1))
++    replay_env = R.batched_env(env, np.tile(masses, 2))
++
++    def replay_scenario(state):
++      return R.set_scenario(
++          env, state, speed=np.tile(speeds, 2), hit_time=np.tile(hit_times, 2),
++          is_miss=np.zeros(2 * n, bool), command=command, projectile_enabled=enabled,
++          fixed_launch_pos=replay_positions, fixed_launch_vel=replay_velocities)
++
++    schedule = R.oracle_brace(jp.full((2 * n,), args.lead), args.hold, dt)
++    for controller in CONTROLLERS:
++      scheduled = controller != "continue"
++      actor = brace_policy if controller == "brace_switch" else nominal
++      info, traj = R.rollout(
++          env, replay_env, nominal, rng, args.steps,
++          brace_policy=actor if scheduled else None,
++          decide=schedule if scheduled else R.no_brace,
++          scenario_fn=replay_scenario, reset_keys=paired_keys)
++      np.savez_compressed(out / f"batch_{batch:03d}_{controller}.npz",
++                          pair_id=np.tile(np.arange(batch * n, (batch + 1) * n), 2),
++                          projectile_enabled_input=enabled, **traj)
++      _check_finite_trace(traj, info["term_step"], name=f"batch {batch} {controller}")
++      _check_array("masses", info["proj_mass"], np.tile(masses, 2))
++      _check_array("speeds", info["proj_speed"], np.tile(speeds, 2))
++      _check_array("nominal arrival", info["t_hit_nominal"], np.tile(ref_info["t_hit_nominal"], 2))
++      _check_array("launch steps", info["proj_launch_step"], np.tile(ref_info["proj_launch_step"], 2), 0)
++      _check_array("projectile enabled flags", info["proj_enabled"], enabled, 0)
++      _check_array("fixed trajectory flags", info["proj_fixed_trajectory"], np.ones(2 * n, bool), 0)
++      _check_array("scenario miss flags", info["proj_is_miss"], np.zeros(2 * n, bool), 0)
++      _check_array("fixed launch positions", info["proj_fixed_launch_pos"], replay_positions)
++      _check_array("fixed launch velocities", info["proj_fixed_launch_vel"], replay_velocities)
++      _check_array("enabled launch positions", info["proj_launch_pos"][:n], positions)
++      _check_array("enabled launch velocities", info["proj_launch_vel"][:n], velocities)
++      if not np.all(info["proj_launched"][:n]) or np.any(info["proj_launched"][n:]):
++        raise RuntimeError("projectile enable/disable did not preserve the assigned arms")
++      if np.any(info["impact_contact"][n:]):
++        raise RuntimeError("disabled-projectile control recorded a projectile contact")
++      expected_brace = np.zeros((args.steps, 2 * n), bool)
++      # Compute schedule using the same float32 arithmetic as the rollout rule.
++      if scheduled:
++        expected_brace = np.asarray((jp.arange(args.steps, dtype=jp.float32)[:, None] * dt >=
++                                    jp.asarray(info["t_hit_nominal"])[None, :] - args.lead) &
++                                   (jp.arange(args.steps, dtype=jp.float32)[:, None] * dt <=
++                                    jp.asarray(info["t_hit_nominal"])[None, :] + args.hold))
++      _check_array("identical nominal brace schedule", traj["brace_active"], expected_brace, 0)
++      table = R.episode_table(info, traj, dt, recovery_window_s=args.recovery_window)
++      table.update(brace_readiness(
++          traj["pelvis_pos"], traj["torso_up"], traj["feet_pos"], traj["feet_contact"],
++          traj["brace_active"], info["term_step"], dt=dt, pelvis_fwd=traj["pelvis_fwd"],
++          **readiness_thresholds))
++      missing = set(REQUIRED_METRICS) - set(table)
++      if missing:
++        raise RuntimeError(f"required gate metrics are absent: {sorted(missing)}")
++      if any(np.asarray(value).shape != (2 * n,) for value in table.values()):
++        raise RuntimeError("episode-table columns must have one scalar per lane")
++      for name in ("progress_before_failure_m", "brace_duration_through_failure_s"):
++        if not np.all(np.isfinite(table[name])):
++          raise RuntimeError(f"nonfinite comparison metric: {name}")
++      observed = np.asarray(table["post_contact_observed"], bool)
++      if not np.all(np.isin(np.asarray(table["survived_post_contact_window"])[observed], [0.0, 1.0])):
++        raise RuntimeError("observed recovery outcomes must be finite binary values")
++      batch_rows = []
++      for lane in range(2 * n):
++        i, condition = lane % n, CONDITIONS[lane // n]
++        row = {"batch": batch, "pair_id": batch * n + i, "within_batch_id": i,
++               "controller": controller, "condition": condition, "projectile_enabled_input": bool(enabled[lane])}
++        row.update({k: v[lane].item() if hasattr(v[lane], "item") else v[lane] for k, v in table.items()})
++        # Scenario inputs remain meaningful even when the projectile was disabled.
++        for axis, j in zip("xyz", range(3)):
++          row[f"fixed_launch_pos_{axis}"] = float(positions[i, j])
++          row[f"fixed_launch_vel_{axis}"] = float(velocities[i, j])
++        batch_rows.append(row)
++      all_rows.extend(batch_rows)
++      _save_rows(out / "episodes.csv", batch_rows)
++      print(f"batch {batch} {controller}: " + "; ".join(
++          f"{condition} failures={sum(bool(r['fell']) for r in batch_rows if r['condition'] == condition)}/{n}"
++          for condition in CONDITIONS), flush=True)
++      del traj
++  return _summary(all_rows, args, dt, readiness_thresholds)
++
++
++def main(argv=None):
++  args = _arguments(argv)
++  out = Path(args.out).expanduser()
++  out.mkdir(parents=True, exist_ok=False)
++  manifest = _manifest(args)
++  _save_json(out / "manifest.json", manifest)
++  start = time.monotonic()
++  try:
++    summary = _run(args, out, manifest)
++    summary["elapsed_s"] = time.monotonic() - start
++    _save_json(out / "summary.json", summary)
++    print(json.dumps(_json_value(summary), indent=2, allow_nan=False), flush=True)
++  except Exception as exc:
++    _save_json(out / "summary.json", {"protocol": "switch_gate_v1", "status": "harness_failure",
++                                     "error_type": type(exc).__name__, "error": str(exc),
++                                     "elapsed_s": time.monotonic() - start})
++    raise
++
++
++if __name__ == "__main__":
++  main()
+--- /dev/null
++++ b/tests/test_eval_metrics.py
+@@ -0,0 +1,206 @@
++# Copyright 2026 Prasuna Chatla. Apache-2.0.
++"""Adversarial, simulator-free checks for sampled evaluation bookkeeping.
++
++Run from the repository root:
++  python -m unittest discover -s tests -p 'test_eval_metrics.py' -v
++"""
++import unittest
++
++import numpy as np
++
++from foresight.eval.metrics import brace_readiness, post_contact_survival, summarize_trajectory
++
++
++class PostContactSurvivalTests(unittest.TestCase):
++
++  def test_missing_contact_precontact_failure_and_short_followup(self):
++    result = post_contact_survival(
++        [-1, 3, 8, 8, 8], [-1, 2, -1, 8, 9],
++        num_steps=10, dt=0.1, window_s=0.3)
++    np.testing.assert_equal(result["survived_post_contact_window"],
++                            [np.nan, np.nan, np.nan, 0, 0])
++    np.testing.assert_array_equal(result["post_contact_eligible"], [0, 0, 1, 1, 1])
++    np.testing.assert_array_equal(result["pre_contact_failure"], [0, 1, 0, 0, 0])
++    np.testing.assert_array_equal(result["post_contact_censored"], [0, 0, 1, 0, 0])
++    np.testing.assert_array_equal(result["post_contact_observed"], [0, 0, 0, 1, 1])
++    np.testing.assert_allclose(result["post_contact_followup_s"][2:], [0.1, 0, 0.1])
++
++  def test_inclusive_endpoint_and_later_failure(self):
++    result = post_contact_survival(
++        [2, 2, 6, 7], [5, 6, -1, -1], num_steps=10, dt=0.1, window_s=0.3)
++    # Three intervals are .3 s, despite floating point roundoff. A failure on
++    # that endpoint fails; the next-step failure does not invalidate the window.
++    np.testing.assert_equal(result["survived_post_contact_window"], [0, 1, 1, np.nan])
++    np.testing.assert_array_equal(result["post_contact_censored"], [0, 0, 0, 1])
++
++  def test_last_sample_contact_is_not_extra_followup(self):
++    result = post_contact_survival(
++        [4, 4], [-1, 4], num_steps=5, dt=0.02, window_s=0.02)
++    np.testing.assert_equal(result["survived_post_contact_window"], [np.nan, 0])
++    np.testing.assert_equal(result["post_contact_followup_s"], [0, 0])
++
++  def test_zero_duration_still_detects_failure_at_contact(self):
++    result = post_contact_survival(
++        [2, 2], [-1, 2], num_steps=3, dt=0.1, window_s=0)
++    np.testing.assert_equal(result["survived_post_contact_window"], [1, 0])
++
++  def test_invalid_event_sentinels_and_durations_raise(self):
++    for invalid in (-2, 5, np.nan, 1.5):
++      with self.subTest(term=invalid), self.assertRaises(ValueError):
++        post_contact_survival([1], [invalid], num_steps=5, dt=0.1, window_s=0.3)
++      with self.subTest(contact=invalid), self.assertRaises(ValueError):
++        post_contact_survival([invalid], [-1], num_steps=5, dt=0.1, window_s=0.3)
++    for dt, window in ((0, 0.3), (0.1, -1), (0.1, np.nan)):
++      with self.subTest(dt=dt, window=window), self.assertRaises(ValueError):
++        post_contact_survival([1], [-1], num_steps=5, dt=dt, window_s=window)
++
++
++class TrajectorySummaryTests(unittest.TestCase):
++
++  def test_post_failure_displacement_and_actions_cannot_improve_metrics(self):
++    pos = np.zeros((5, 2, 3))
++    pos[:, :, 0] = np.array([0, 1, 100, 1000, 10000])[:, None]
++    forward = np.zeros_like(pos)
++    forward[..., 0] = 1
++    result = summarize_trajectory(pos, forward, np.ones((5, 2)), [2, 0], dt=0.1)
++    np.testing.assert_equal(result["progress_before_failure_m"], [1, 0])
++    np.testing.assert_allclose(result["progress_observed_s"], [0.1, 0])
++    np.testing.assert_allclose(result["brace_duration_through_failure_s"], [0.3, 0.1])
++    np.testing.assert_allclose(result["control_duration_through_failure_s"], [0.3, 0.1])
++
++  def test_rotated_heading_and_missing_reset_interval(self):
++    pos = np.zeros((3, 1, 3))
++    pos[:, 0, 1] = [10, 11, 13]
++    forward = np.zeros_like(pos)
++    forward[..., 1] = 2  # Heading magnitude must not scale distance.
++    result = summarize_trajectory(pos, forward, [[0], [1], [1]], [-1], dt=0.2)
++    np.testing.assert_equal(result["progress_before_failure_m"], [3])
++    np.testing.assert_allclose(result["progress_observed_s"], [0.4])
++    np.testing.assert_allclose(result["brace_duration_through_failure_s"], [0.4])
++    np.testing.assert_allclose(result["control_duration_through_failure_s"], [0.6])
++
++  def test_invalid_post_failure_states_do_not_contaminate_valid_prefix(self):
++    pos = np.zeros((4, 2, 3))
++    pos[1, :, 0] = 1
++    pos[2:] = np.nan
++    forward = np.zeros_like(pos)
++    forward[..., 0] = 1
++    result = summarize_trajectory(pos, forward, np.zeros((4, 2)), [2, -1], dt=0.1)
++    self.assertEqual(result["progress_before_failure_m"][0], 1)
++    self.assertTrue(np.isnan(result["progress_before_failure_m"][1]))
++
++  def test_single_poststep_sample_has_exposure_but_no_measured_displacement(self):
++    result = summarize_trajectory(
++        np.array([[[20, 0, 0.6]]]), np.array([[[1, 0, 0]]]), [[1]], [-1], dt=0.02)
++    self.assertEqual(result["progress_before_failure_m"][0], 0)
++    self.assertEqual(result["brace_duration_through_failure_s"][0], 0.02)
++
++  def test_nan_brace_flag_is_not_silently_truthy(self):
++    with self.assertRaises(ValueError):
++      summarize_trajectory(np.zeros((1, 1, 3)), np.ones((1, 1, 3)),
++                           [[np.nan]], [-1], dt=0.1)
++
++
++class BraceReadinessTests(unittest.TestCase):
++
++  def good_trajectory(self, steps=10, episodes=1):
++    pelvis = np.zeros((steps, episodes, 3))
++    pelvis[..., 2] = 0.6
++    feet = np.zeros((steps, episodes, 2, 3))
++    feet[:, :, 0, 1] = 0.15
++    feet[:, :, 1, 1] = -0.15
++    forward = np.zeros_like(pelvis)
++    forward[..., 0] = 1
++    return dict(pelvis_pos=pelvis, torso_up=np.ones((steps, episodes)),
++                feet_pos=feet, feet_contact=np.ones((steps, episodes, 2), bool),
++                brace_active=np.ones((steps, episodes), bool),
++                term_step=np.full(episodes, -1), dt=0.02,
++                target_pelvis_height=0.6, height_tolerance=0.025,
++                min_torso_up=0.95, min_foot_separation=0.25,
++                dwell_s=0.1, pelvis_fwd=forward)
++
++  def test_five_good_samples_are_point_one_seconds_from_action_onset(self):
++    inputs = self.good_trajectory()
++    inputs["brace_active"][:2] = False
++    result = brace_readiness(**inputs)
++    self.assertEqual(result["brace_ready_step"][0], 6)
++    self.assertAlmostEqual(result["brace_ready_time_s"][0], 0.14)
++    self.assertAlmostEqual(result["brace_ready_latency_s"][0], 0.10)
++
++  def test_pose_dropout_resets_dwell_and_inactive_gap_starts_new_bout(self):
++    inputs = self.good_trajectory(steps=12, episodes=2)
++    inputs["torso_up"][3, 0] = 0.8
++    inputs["brace_active"][3, 1] = False
++    result = brace_readiness(**inputs)
++    np.testing.assert_equal(result["brace_ready_step"], [8, 8])
++    np.testing.assert_allclose(result["brace_ready_latency_s"], [0.18, 0.10])
++
++  def test_support_not_just_foot_positions_is_required(self):
++    inputs = self.good_trajectory()
++    inputs["feet_contact"][:, :, 1] = False
++    result = brace_readiness(**inputs)
++    self.assertFalse(result["brace_ready"][0])
++    for key in ("brace_ready_step", "brace_ready_time_s", "brace_ready_latency_s"):
++      self.assertTrue(np.isnan(result[key][0]))
++
++  def test_lateral_width_is_not_fore_aft_distance(self):
++    inputs = self.good_trajectory(episodes=2)
++    # Both feet are .4 m apart longitudinally, but have no lateral stance width.
++    inputs["feet_pos"][:, 0, :, 1] = 0
++    inputs["feet_pos"][:, 0, 0, 0] = 0.2
++    inputs["feet_pos"][:, 0, 1, 0] = -0.2
++    # Rotate robot and stance together by 90 degrees: this should remain ready.
++    inputs["feet_pos"][:, 1, :, 1] = 0
++    inputs["feet_pos"][:, 1, 0, 0] = -0.15
++    inputs["feet_pos"][:, 1, 1, 0] = 0.15
++    inputs["pelvis_fwd"][:, 1] = [0, 1, 0]
++    result = brace_readiness(**inputs)
++    np.testing.assert_equal(result["brace_ready"], [False, True])
++
++  def test_base_height_target_and_nonfinite_posture_cannot_be_bypassed(self):
++    inputs = self.good_trajectory(episodes=4)
++    inputs["pelvis_pos"][:, 0, 2] = 0.45  # COM-like value is not the .6 base target.
++    inputs["pelvis_pos"][:, 1, 2] = np.nan
++    inputs["torso_up"][:, 2] = np.nan
++    inputs["feet_pos"][:, 3, 0, 1] = np.nan
++    result = brace_readiness(**inputs)
++    np.testing.assert_equal(result["brace_ready"], np.zeros(4, bool))
++    self.assertTrue(np.isnan(result["brace_ready_latency_s"]).all())
++
++  def test_failure_sample_cannot_complete_dwell_and_late_readiness_is_excluded(self):
++    inputs = self.good_trajectory(episodes=3)
++    inputs["term_step"] = np.array([4, 0, 5])
++    result = brace_readiness(**inputs)
++    np.testing.assert_equal(result["brace_ready"], [False, False, True])
++    np.testing.assert_equal(result["brace_ready_step"], [np.nan, np.nan, 4])
++
++  def test_short_rollout_does_not_report_zero_latency_when_never_ready(self):
++    inputs = self.good_trajectory(steps=4)
++    result = brace_readiness(**inputs)
++    self.assertFalse(result["brace_ready"][0])
++    self.assertTrue(np.isnan(result["brace_ready_latency_s"][0]))
++
++  def test_nonintegral_dwell_rounds_up_and_zero_dwell_still_requires_a_sample(self):
++    inputs = self.good_trajectory()
++    inputs["dwell_s"] = 0.101
++    self.assertEqual(brace_readiness(**inputs)["brace_ready_step"][0], 5)
++    inputs["dwell_s"] = 0
++    result = brace_readiness(**inputs)
++    self.assertEqual(result["brace_ready_step"][0], 0)
++    self.assertEqual(result["brace_ready_latency_s"][0], 0.02)
++
++  def test_nan_or_nonbinary_support_flags_and_future_termination_raise(self):
++    for invalid in (np.nan, 2, -1):
++      inputs = self.good_trajectory()
++      inputs["feet_contact"] = inputs["feet_contact"].astype(float)
++      inputs["feet_contact"][0, 0, 0] = invalid
++      with self.subTest(flag=invalid), self.assertRaises(ValueError):
++        brace_readiness(**inputs)
++    inputs = self.good_trajectory()
++    inputs["term_step"] = [10]
++    with self.assertRaises(ValueError):
++      brace_readiness(**inputs)
++
++
++if __name__ == "__main__":
++  unittest.main()
+--- /dev/null
++++ b/tests/test_eval_observations.py
+@@ -0,0 +1,48 @@
++"""Regression checks for stale commands at G1 policy switches."""
++import unittest
++
++import numpy as np
++
++from foresight.eval.observations import replace_command_observation
++
++
++class CommandObservationTests(unittest.TestCase):
++  def test_batched_switch_updates_both_network_inputs_only(self):
++    state = np.arange(2 * 103, dtype=np.float32).reshape(2, 103)
++    state[:, 9:12] = [0.5, 0.0, 0.0]
++    privileged = np.concatenate((state, np.ones((2, 20), np.float32)), axis=1)
++    obs = {"state": state, "privileged_state": privileged, "other": object()}
++    before = {k: v.copy() for k, v in obs.items() if isinstance(v, np.ndarray)}
++    command = np.array([[0., 0., 0.], [0.5, 0., 0.]])
++    new = replace_command_observation(obs, command, concatenate=np.concatenate)
++    for key in before:
++      np.testing.assert_array_equal(obs[key], before[key])
++      np.testing.assert_array_equal(new[key][:, 9:12], command)
++      np.testing.assert_array_equal(new[key][:, :9], before[key][:, :9])
++      np.testing.assert_array_equal(new[key][:, 12:], before[key][:, 12:])
++      self.assertEqual(new[key].dtype, before[key].dtype)
++    self.assertIs(new["other"], obs["other"])
++
++  def test_return_to_walking_is_visible_before_next_action(self):
++    obs = {"state": np.zeros(103, dtype=np.float32)}
++    walking = np.array([0.5, 0.1, -0.2], dtype=np.float32)
++    out = replace_command_observation(obs, walking, concatenate=np.concatenate)
++    # A policy reading the command immediately sees the resumed command.
++    action_from_command = lambda observation: observation["state"][9:12].copy()
++    np.testing.assert_array_equal(action_from_command(out), walking)
++    np.testing.assert_array_equal(obs["state"][9:12], np.zeros(3))
++
++  def test_rejects_mismatched_batch_instead_of_broadcasting_silently(self):
++    with self.assertRaises(ValueError):
++      replace_command_observation(
++          {"state": np.zeros((2, 103))}, np.zeros(3), concatenate=np.concatenate)
++
++  def test_rejects_invalid_privileged_prefix(self):
++    with self.assertRaises(ValueError):
++      replace_command_observation(
++          {"state": np.zeros(103), "privileged_state": np.zeros(12)},
++          np.zeros(3), concatenate=np.concatenate)
++
++
++if __name__ == "__main__":
++  unittest.main()
+--- /dev/null
++++ b/tests/test_eval_switch_gate.py
+@@ -0,0 +1,109 @@
++"""Simulator-free checks for paired inference and diagnostic output integrity."""
++import contextlib
++import importlib.util
++import io
++import math
++from pathlib import Path
++import tempfile
++from types import SimpleNamespace
++import unittest
++
++import numpy as np
++
++_path = Path(__file__).resolve().parents[1] / "scripts" / "eval_switch_gate.py"
++_spec = importlib.util.spec_from_file_location("switch_gate", _path)
++gate = importlib.util.module_from_spec(_spec)
++_spec.loader.exec_module(gate)
++
++
++def row(pair_id=0, fell=False, observed=False, censored=False, survived=math.nan):
++  return {
++      "batch": 0, "pair_id": pair_id, "fell": fell, "contact": observed or censored,
++      "term_step": 4 if fell else -1, "contact_step": 2 if observed or censored else -1,
++      "pre_contact_failure": False, "post_contact_eligible": observed or censored,
++      "post_contact_observed": observed, "post_contact_censored": censored,
++      "survived_post_contact_window": survived, "progress_before_failure_m": 1.,
++      "brace_duration_through_failure_s": .2, "failure_inverted": False,
++      "failure_self_contact": fell, "failure_nonfinite": False,
++      "failure_sustained_tilt": False, "brace_ready": False,
++  }
++
++
++class PairedSummaryTests(unittest.TestCase):
++  def test_pairing_uses_ids_and_keeps_rescues_separate_from_new_failures(self):
++    reference = [row(0, True), row(1), row(2, True), row(3)]
++    treatment = [row(3), row(1, True), row(0), row(2, True)]
++    result = gate._paired(reference, treatment)
++    self.assertEqual(result["n_pairs"], 4)
++    for key in ("both_fail", "neither_fails", "reference_only_fails", "treatment_only_fails"):
++      self.assertEqual(result[key], 1)
++    self.assertEqual(result["failure_rate_difference_treatment_minus_reference"], 0.)
++
++  def test_duplicate_or_missing_pairs_cannot_silently_enter_comparison(self):
++    with self.assertRaises(RuntimeError):
++      gate._paired([row(0), row(0)], [row(0), row(1)])
++    with self.assertRaises(RuntimeError):
++      gate._paired([row(0), row(1)], [row(0), row(2)])
++
++  def test_censored_contact_is_not_counted_as_survival(self):
++    result = gate._summarize_arm([
++        row(0, observed=True, survived=1.),
++        row(1, fell=True, observed=True, survived=0.),
++        row(2, censored=True),
++    ])
++    self.assertEqual(result["n"], 3)
++    self.assertEqual(result["post_contact_observed"], 2)
++    self.assertEqual(result["post_contact_censored"], 1)
++    self.assertEqual(result["post_contact_survival_rate_observed"], .5)
++
++  def test_zero_contact_arm_has_unknown_contact_survival_rate(self):
++    self.assertIsNone(gate._summarize_arm([row()])["post_contact_survival_rate_observed"])
++
++  def test_no_projectile_switch_failure_is_flagged_without_claiming_significance(self):
++    rows = []
++    for controller in gate.CONTROLLERS:
++      for condition in gate.CONDITIONS:
++        for i in range(2):
++          r = row(i, controller == "brace_switch" and condition == "no_projectile" and i == 1)
++          r.update(controller=controller, condition=condition)
++          rows.append(r)
++    args = SimpleNamespace(episodes=2, batches=1, steps=300, lead=.5, hold=.5, recovery_window=2.5)
++    result = gate._summary(rows, args, .02, {})
++    self.assertEqual(result["status"], "switch_failure")
++    self.assertEqual(result["comparison_rollouts"], 12)
++    self.assertIn("not a significance test", result["status_rule"])
++
++
++class IntegrityTests(unittest.TestCase):
++  def test_existing_output_is_refused_before_loading_gpu_stack(self):
++    with tempfile.TemporaryDirectory() as directory:
++      with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
++        gate._arguments(["--nominal", "unused", "--brace", "unused", "--out", directory])
++
++  def test_unknown_results_are_null_not_zero_and_csv_schema_cannot_change(self):
++    self.assertEqual(gate._json_value({"unknown": math.nan, "zero": 0.}),
++                     {"unknown": None, "zero": 0.})
++    with tempfile.TemporaryDirectory() as directory:
++      path = Path(directory) / "rows.csv"
++      gate._save_rows(path, [{"id": 1, "outcome": math.nan}])
++      before = path.read_text()
++      self.assertIn("1,\n", before)
++      with self.assertRaises(RuntimeError):
++        gate._save_rows(path, [{"different": 2}])
++      self.assertEqual(path.read_text(), before)
++
++  def test_numerical_corruption_is_checked_through_first_failure_only(self):
++    traj = {"brace_active": np.ones((3, 1), bool)}
++    for key in ("nonfinite_policy_input", "nonfinite_action", "nonfinite_physics"):
++      traj[key] = np.zeros((3, 1), bool)
++    for key in ("pelvis_pos", "pelvis_fwd", "torso_up", "com", "feet_pos", "proj_pos", "proj_vel"):
++      traj[key] = np.ones((3, 1, 3))
++      traj[key][2] = np.nan
++    gate._check_finite_trace(traj, np.array([1]), name="synthetic")
++    traj["nonfinite_action"][1, 0] = True
++    with self.assertRaises(RuntimeError):
++      gate._check_finite_trace(traj, np.array([1]), name="synthetic")
++
++
++if __name__ == "__main__":
++  unittest.main()

@@ -14,6 +14,11 @@ Subclasses Playground's rss2025 G1 Joystick env. Adds:
   * an external mode switch info["brace_active"]: when True the velocity command seen by
     the policy and the reward is zero (the decision layer flips it; the env never does).
 
+Evaluation can override the launch with one fixed world-coordinate position/velocity
+shared across policy conditions. Set proj_fixed_trajectory and both proj_fixed_launch_*
+fields after reset. Set proj_enabled=False before launch for a no-projectile control;
+this preserves the nominal arrival time used by the decision rule.
+
 Scenario parameters vs measured outcomes (keep these apart in the analysis):
   scenario : proj_mass, proj_speed, proj_momentum (= m*v, the incoming momentum, NOT the
              transferred impulse), proj_is_miss (sampled path category), t_hit_nominal
@@ -186,6 +191,12 @@ class ImpactJoystick(JoystickRobotSliced):
         "proj_is_miss": is_miss,
         "proj_launch_step": jp.round(t_launch / self.dt).astype(jp.int32),
         "t_hit_nominal": t_launch + flight,
+        # Optional evaluation overrides; default training keeps pelvis-relative aim.
+        # These keys exist at reset so applying an override preserves the info pytree.
+        "proj_enabled": jp.array(True),
+        "proj_fixed_trajectory": jp.array(False),
+        "proj_fixed_launch_pos": jp.zeros(3),
+        "proj_fixed_launch_vel": jp.zeros(3),
         "proj_launch_pos": jp.zeros(3),
         "proj_launch_vel": jp.zeros(3),
         # outcome latches
@@ -236,7 +247,11 @@ class ImpactJoystick(JoystickRobotSliced):
     info["command"] = jp.where(info["brace_active"], jp.zeros(3), info["command_nominal"])
     info["brace_steps"] = jp.where(info["brace_active"], info["brace_steps"] + 1, 0)
 
-    launch_now = (info["ep_step"] >= info["proj_launch_step"]) & (~info["proj_launched"])
+    launch_now = (
+        info["proj_enabled"]
+        & (info["ep_step"] >= info["proj_launch_step"])
+        & (~info["proj_launched"])
+    )
 
     # Resolve launch pos/vel from the pelvis position *now* (so the aim is current).
     pelvis = self._pelvis_pos(data)
@@ -248,6 +263,12 @@ class ImpactJoystick(JoystickRobotSliced):
     flight_t = info["proj_dist"] / info["proj_speed"]
     launch_pos = jp.array([launch_xy[0], launch_xy[1], info["proj_height"]])
     launch_vel = jp.array([vel_xy[0], vel_xy[1], (target_z - info["proj_height"]) / flight_t])
+    # A paired evaluation supplies the same external trajectory to each policy,
+    # instead of retargeting the projectile after their robot states have diverged.
+    launch_pos = jp.where(
+        info["proj_fixed_trajectory"], info["proj_fixed_launch_pos"], launch_pos)
+    launch_vel = jp.where(
+        info["proj_fixed_trajectory"], info["proj_fixed_launch_vel"], launch_vel)
     info["proj_launch_pos"] = jp.where(launch_now, launch_pos, info["proj_launch_pos"])
     info["proj_launch_vel"] = jp.where(launch_now, launch_vel, info["proj_launch_vel"])
 

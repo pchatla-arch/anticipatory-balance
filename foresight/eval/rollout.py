@@ -28,6 +28,8 @@ from mujoco_playground._src import wrapper as pg_wrapper
 
 from foresight.envs.g1_impact import ImpactJoystick, default_config
 from foresight.envs.g1_impact.impact_joystick import brace_config
+from foresight.eval.observations import replace_command_observation
+from foresight.eval import metrics as eval_metrics
 
 # Records taken every control step. All are (num_envs, ...) per step.
 TRAJ_INFO_KEYS = (
@@ -86,6 +88,8 @@ def make_env(skill: str = "nominal", impl: str = "warp", miss_fraction: float = 
   cfg.impact.resample_on_autoreset = False   # no autoreset in eval
   ov = {"impl": impl}
   ov.update(overrides or {})
+  if ov.get("history_len", cfg.history_len) != 1:
+    raise ValueError("The G1 command-observation adapter requires history_len=1")
   return ImpactJoystick(config=cfg, config_overrides=ov)
 
 
@@ -114,7 +118,8 @@ def batched_env(env: ImpactJoystick, proj_masses: np.ndarray):
 
 
 def set_scenario(env: ImpactJoystick, state, speed=None, hit_time=None, is_miss=None,
-                 command=None):
+                 command=None, projectile_enabled=None, fixed_launch_pos=None,
+                 fixed_launch_vel=None):
   """Override per-env scenario fields after reset and recompute the derived ones."""
   info = dict(state.info)
   c = env._config.impact
@@ -133,11 +138,24 @@ def set_scenario(env: ImpactJoystick, state, speed=None, hit_time=None, is_miss=
   info["proj_launch_step"] = jp.round(t_launch / env.dt).astype(jp.int32)
   info["t_hit_nominal"] = t_launch + flight
   info["proj_momentum"] = info["proj_mass"] * info["proj_speed"]
+  if projectile_enabled is not None:
+    info["proj_enabled"] = jp.broadcast_to(
+        jp.asarray(projectile_enabled, bool), info["proj_enabled"].shape)
+  if (fixed_launch_pos is None) != (fixed_launch_vel is None):
+    raise ValueError("Provide both fixed launch position and velocity")
+  if fixed_launch_pos is not None:
+    info["proj_fixed_launch_pos"] = jp.broadcast_to(
+        jp.asarray(fixed_launch_pos, jp.float32), info["proj_fixed_launch_pos"].shape)
+    info["proj_fixed_launch_vel"] = jp.broadcast_to(
+        jp.asarray(fixed_launch_vel, jp.float32), info["proj_fixed_launch_vel"].shape)
+    info["proj_fixed_trajectory"] = jp.ones_like(info["proj_fixed_trajectory"])
+  obs = state.obs
   if command is not None:
     cmd = jp.broadcast_to(jp.asarray(command, jp.float32), info["command"].shape)
     info["command"] = cmd
     info["command_nominal"] = cmd
-  return state.replace(info=info)
+    obs = replace_command_observation(obs, cmd, concatenate=jp.concatenate)
+  return state.replace(info=info, obs=obs)
 
 
 def no_brace(info, t):
@@ -170,6 +188,13 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
   pelvis = env._pelvis_body
   feet = env._feet_site_id
   torso = env._mj_model.body("torso_link").id
+  foot_contact_adrs = jp.asarray([
+      int(env._mj_model.sensor_adr[s]) for s in env._feet_floor_found_sensor])
+  self_contact_adrs = jp.asarray([
+      int(env._mj_model.sensor_adr[s]) for s in (
+          env._right_foot_left_foot_found_sensor,
+          env._left_foot_right_shin_found_sensor,
+          env._right_foot_left_shin_found_sensor)])
 
   def policy_act(obs, keys, brace):
     a_nom, _ = jax.vmap(nominal_policy)(obs, keys)
@@ -185,8 +210,16 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
     brace = decide(state.info, t)
     info = dict(state.info)
     info["brace_active"] = brace
-    state = state.replace(info=info)
+    command = jp.where(brace[..., None], jp.zeros_like(info["command_nominal"]),
+                       info["command_nominal"])
+    info["command"] = command
+    obs = replace_command_observation(state.obs, command, concatenate=jp.concatenate)
+    state = state.replace(info=info, obs=obs)
     act = policy_act(state.obs, keys, brace)
+    finite_input = jp.ones((n,), dtype=bool)
+    for leaf in jax.tree_util.tree_leaves(state.obs):
+      finite_input = finite_input & jp.all(jp.isfinite(leaf).reshape(n, -1), axis=-1)
+    finite_action = jp.all(jp.isfinite(act), axis=-1)
     state = wenv.step(state, act)
     d = state.data
     rec = {k: state.info[k] for k in TRAJ_INFO_KEYS}
@@ -196,6 +229,12 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
         "com": d.subtree_com[:, pelvis],
         "torso_up": d.xmat[:, torso].reshape(n, 3, 3)[:, 2, 2],
         "feet_pos": d.site_xpos[:, feet],
+        "feet_contact": d.sensordata[:, foot_contact_adrs] > 0,
+        "self_contact": jp.any(d.sensordata[:, self_contact_adrs] > 0, axis=-1),
+        "nonfinite_physics": ~(jp.all(jp.isfinite(d.qpos), axis=-1)
+                               & jp.all(jp.isfinite(d.qvel), axis=-1)),
+        "nonfinite_policy_input": ~finite_input,
+        "nonfinite_action": ~finite_action,
         "proj_pos": state.info["obj_pos"],
         "proj_vel": state.info["obj_vel"],
         "done": state.done,
@@ -217,7 +256,8 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
   return to_np(final_info), to_np(traj)
 
 
-def episode_table(final_info: dict, traj: dict, dt: float) -> dict:
+def episode_table(final_info: dict, traj: dict, dt: float,
+                  recovery_window_s: float = 2.5) -> dict:
   """Per-episode scalars from a rollout: scenario, outcome, progress, pre-impact state."""
   n = final_info["fell"].shape[0]
   T = traj["pelvis_pos"].shape[0]
@@ -251,6 +291,31 @@ def episode_table(final_info: dict, traj: dict, dt: float) -> dict:
       "rfoot_x_pre": feet_pre[:, 1, 0], "rfoot_y_pre": feet_pre[:, 1, 1],
       "proj_vx_pre": pvel[:, 0], "proj_vy_pre": pvel[:, 1], "proj_vz_pre": pvel[:, 2],
   }
+  # Retain legacy progress_m for historical readers. New comparisons use the
+  # explicitly censored metric and report incomplete post-contact follow-up.
+  out.update(eval_metrics.post_contact_survival(
+      cs, final_info["term_step"], num_steps=T, dt=dt, window_s=recovery_window_s))
+  out.update(eval_metrics.summarize_trajectory(
+      traj["pelvis_pos"], traj["pelvis_fwd"], traj["brace_active"],
+      final_info["term_step"], dt))
+  failed = final_info["term_step"] >= 0
+  terminal_idx = np.clip(final_info["term_step"], 0, T - 1)
+  out["failure_inverted"] = failed & (traj["torso_up"][terminal_idx, idx] < 0)
+  out["failure_self_contact"] = failed & traj["self_contact"][terminal_idx, idx]
+  out["failure_nonfinite"] = failed & traj["nonfinite_physics"][terminal_idx, idx]
+  out["failure_sustained_tilt"] = failed & (final_info["term_reason"] == 2)
+  out["projectile_enabled"] = final_info["proj_enabled"]
+  out["fixed_trajectory"] = final_info["proj_fixed_trajectory"]
+  out["launch_step"] = final_info["proj_launch_step"]
+  # These are planned inputs even in the launch-disabled control arm.
+  use_fixed = final_info["proj_fixed_trajectory"][..., None]
+  planned_pos = np.where(use_fixed, final_info["proj_fixed_launch_pos"],
+                         final_info["proj_launch_pos"])
+  planned_vel = np.where(use_fixed, final_info["proj_fixed_launch_vel"],
+                         final_info["proj_launch_vel"])
+  for j, axis in enumerate(("x", "y", "z")):
+    out[f"launch_{axis}"] = planned_pos[:, j]
+    out[f"launch_v{axis}"] = planned_vel[:, j]
   return {k: np.asarray(v) for k, v in out.items()}
 
 
