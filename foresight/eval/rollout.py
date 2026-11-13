@@ -37,7 +37,7 @@ TRAJ_INFO_KEYS = (
 
 def latest_checkpoint(path: str | Path) -> Path:
   """Accepts a Playground run dir, its checkpoints/ dir, or a numeric step dir."""
-  p = Path(path)
+  p = Path(path).resolve()           # orbax requires an absolute path
   if p.name.isdigit() and (p / "ppo_network_config.json").exists():
     return p
   if (p / "checkpoints").is_dir():
