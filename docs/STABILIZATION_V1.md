@@ -1,5 +1,10 @@
 # Foresight: first stabilization and switching diagnostic
 
+For the current GitHub/pod workflow, use [POD_SMOKE_TEST.md](POD_SMOKE_TEST.md).
+The stabilization changes are already integrated on `foresight/stabilization-v1`;
+the archived patch does not need to be applied again. The convenience runner
+automatically publishes compact results to `foresight/pod-results`.
+
 Project title: **Foresight: Latency-Aware Anticipatory Bracing from Depth Perception**.
 
 This proposed patch is based on repository commit
