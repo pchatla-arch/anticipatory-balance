@@ -1,0 +1,13 @@
+{
+  "run_id": "pod_v2_20261114T082621Z_37814b",
+  "source_commit": "d204a8e2c9ee6637602964de2cb04282df101002",
+  "mode": "pilot",
+  "max_minutes": 45.0,
+  "started_utc": "20261114T082621Z",
+  "status": "failed",
+  "stages": [],
+  "interpretation": "Operational smoke and exploratory pilot; synthetic detections; one frozen policy pair.",
+  "error": "Existing Playground Python not found. Set FORESIGHT_VENV to the working rss2025 venv. No packages were installed.",
+  "elapsed_seconds": 0.0,
+  "exit_code": 1
+}

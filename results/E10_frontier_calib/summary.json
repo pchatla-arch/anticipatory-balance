@@ -1,0 +1,74 @@
+{
+  "nominal": "/workspace/anticipatory-balance/checkpoints/nominal_s1/000202342400",
+  "brace": "/workspace/anticipatory-balance/checkpoints/brace2_s1/000202342400",
+  "episodes_per_condition": 1024,
+  "latencies_steps": [
+    0,
+    5,
+    15
+  ],
+  "period": 5,
+  "miss_fraction": 0.3,
+  "rows": [
+    {
+      "method": "reactive",
+      "param": 0.0,
+      "latency_steps": 0,
+      "fall_rate_hits": 0.6836158192090396,
+      "fall_rate_given_contact": 0.6954022988505747,
+      "contact_rate_hits": 0.9830508474576272,
+      "false_prep_rate": 0.0,
+      "braced_on_hits": 0.0,
+      "braced_s": 0.0,
+      "progress_m": 1.4426329135894775,
+      "fall_rate_miss": 0.0,
+      "progress_loss_m": 0.0,
+      "n_total": 1024
+    },
+    {
+      "method": "belief_commit",
+      "param": 0.1,
+      "latency_steps": 0,
+      "fall_rate_hits": 0.6115819209039548,
+      "fall_rate_given_contact": 0.6377025036818851,
+      "contact_rate_hits": 0.9590395480225988,
+      "false_prep_rate": 0.439873417721519,
+      "braced_on_hits": 0.8587570621468926,
+      "braced_s": 0.23412109375,
+      "progress_m": 1.391721487045288,
+      "fall_rate_miss": 0.0,
+      "progress_loss_m": 0.05091142654418945,
+      "n_total": 1024
+    },
+    {
+      "method": "belief_commit",
+      "param": 0.1,
+      "latency_steps": 5,
+      "fall_rate_hits": 0.6412429378531074,
+      "fall_rate_given_contact": 0.664714494875549,
+      "contact_rate_hits": 0.9646892655367232,
+      "false_prep_rate": 0.27848101265822783,
+      "braced_on_hits": 0.442090395480226,
+      "braced_s": 0.12087890625,
+      "progress_m": 1.4394237995147705,
+      "fall_rate_miss": 0.0,
+      "progress_loss_m": 0.0032091140747070312,
+      "n_total": 1024
+    },
+    {
+      "method": "belief_commit",
+      "param": 0.1,
+      "latency_steps": 15,
+      "fall_rate_hits": 0.6765536723163842,
+      "fall_rate_given_contact": 0.6942028985507246,
+      "contact_rate_hits": 0.9745762711864406,
+      "false_prep_rate": 0.08860759493670886,
+      "braced_on_hits": 0.1059322033898305,
+      "braced_s": 0.03060546875,
+      "progress_m": 1.4429638385772705,
+      "fall_rate_miss": 0.0,
+      "progress_loss_m": -0.00033092498779296875,
+      "n_total": 1024
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+method,param,latency_steps,fall_rate_hits,fall_rate_given_contact,contact_rate_hits,false_prep_rate,braced_on_hits,braced_s,progress_m,fall_rate_miss,progress_loss_m,n_total
+reactive,0,0,0.6836,0.6954,0.9831,0,0,0,1.443,0,0,1024
+belief_commit,0.1,0,0.6116,0.6377,0.959,0.4399,0.8588,0.2341,1.392,0,0.05091,1024
+belief_commit,0.1,5,0.6412,0.6647,0.9647,0.2785,0.4421,0.1209,1.439,0,0.003209,1024
+belief_commit,0.1,15,0.6766,0.6942,0.9746,0.08861,0.1059,0.03061,1.443,0,-0.0003309,1024
