@@ -4,7 +4,7 @@
 #
 # Fresh pod, from the pod's shell:
 #   git clone https://github.com/pchatla-arch/anticipatory-balance.git /workspace/anticipatory-balance \
-#     && BRANCH=claude/session-c-prep bash /workspace/anticipatory-balance/scripts/bootstrap_pod.sh
+#     && BRANCH=session-d bash /workspace/anticipatory-balance/scripts/bootstrap_pod.sh
 # Stopped-then-started pod (everything on disk): the same command, finishes in seconds.
 #
 # Afterwards:  source /workspace/mujoco_playground/rss2025/.venv/bin/activate

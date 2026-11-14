@@ -56,6 +56,8 @@ _OLEAD = flags.DEFINE_float("oracle_lead", 0.5, "oracle switch lead, s")
 _METHODS = flags.DEFINE_list("methods", ["reactive", "always", "ttc_threshold", "belief_commit", "oracle"], "subset")
 _OUT = flags.DEFINE_string("out", "results/E10_frontier", "output dir")
 _SEED = flags.DEFINE_integer("seed", 200, "seed")
+_CALIB = flags.DEFINE_list("calib_params", ["0.1"], "belief_commit c_prep values whose per-step belief "
+                           "logs are dumped to <out>/calib/ for E9 calibration (empty: none)")
 
 
 def main(_):
@@ -119,6 +121,17 @@ def main(_):
         info, traj = R.rollout(env, wenv, nominal, key, _STEPS.value, brace_policy=brace,
                                scenario_fn=scn, reset_keys=reset_keys, controller=ctrl)
       tab = R.episode_table(info, traj, env.dt)
+      if method == "belief_commit" and any(abs(param - float(c)) < 1e-9 for c in _CALIB.value):
+        # E9: per-step belief against the eventual outcome (compressed; p_hit is mostly zero).
+        cdir = os.path.join(_OUT.value, "calib"); os.makedirs(cdir, exist_ok=True)
+        np.savez_compressed(os.path.join(cdir, f"belief_c{param:g}_lat{lat}_b{b}.npz"),
+                            p_hit=traj["ctrl_p_hit"].astype(np.float16), t_hit=traj["ctrl_t_hit"].astype(np.float16),
+                            pe_t_hit=traj["ctrl_pe_t_hit"].astype(np.float16), det_valid=traj["ctrl_det_valid"],
+                            n_obs=traj["ctrl_n_obs"].astype(np.int16), brace_active=traj["brace_active"],
+                            contact_step=tab["contact_step"], is_miss=tab["is_miss"], fell=tab["fell"],
+                            contact=tab["contact"], t_hit_nominal=tab["t_hit_nominal"], mass=tab["mass"],
+                            speed=tab["speed"], launch_step=info["proj_launch_step"],
+                            period=_PERIOD.value, latency=lat, dt=env.dt)
       if "false_prep" not in tab:
         tab["false_prep"] = info["proj_is_miss"] & traj["brace_active"].any(axis=0)
       hit_s = ~tab["is_miss"]; c = tab["contact"] & hit_s

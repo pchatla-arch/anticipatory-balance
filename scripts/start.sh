@@ -3,15 +3,15 @@
 # inside tmux (survives SSH drops) followed by finish_and_stop.sh (save, push, verify, stop).
 #
 # From the pod's shell (fresh pod: this clones first; restarted pod: it just updates):
-#   bash <(curl -fsSL https://raw.githubusercontent.com/pchatla-arch/anticipatory-balance/claude/session-c-prep/scripts/start.sh) c
+#   bash <(curl -fsSL https://raw.githubusercontent.com/pchatla-arch/anticipatory-balance/session-d/scripts/start.sh) d
 # or, if the repo is already on disk:
-#   bash /workspace/anticipatory-balance/scripts/start.sh c
+#   bash /workspace/anticipatory-balance/scripts/start.sh d
 #
-# Argument: the session letter (a, b, c). Env: BRANCH (default: the branch this file is from),
+# Argument: the session letter (a, b, c, d). Env: BRANCH (default: the branch this file is from),
 # NO_STOP=1 to leave the pod running at the end.
 set -euo pipefail
 SESSION=${1:?usage: start.sh <a|b|c>}
-BRANCH=${BRANCH:-claude/session-c-prep}
+BRANCH=${BRANCH:-session-d}
 REPO=/workspace/anticipatory-balance
 if [ ! -d "$REPO/.git" ]; then
   git clone -q -b "$BRANCH" https://github.com/pchatla-arch/anticipatory-balance.git "$REPO"
