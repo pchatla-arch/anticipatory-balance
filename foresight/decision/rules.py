@@ -1,10 +1,11 @@
 # Copyright 2026 Prasuna Chatla. Apache-2.0.
 """Decision rules for CONTINUE vs BRACE on top of the particle belief, with commitment.
 
-Every rule maps (belief stats, controller memory) -> brace request. The common wrapper
-applies the commitment: once BRACE starts it is held for at least `commit_steps`, and
-released when the belief says the object has passed (expected impact time negative by
-more than `release_after`) or no detection has arrived for `stale_steps`.
+Every rule generates an entry request. The default single-projectile protocol latches
+a bounded release deadline from the entry forecast, holds for at least `commit_steps`,
+and permits one commitment per episode. Later forecasts do not revise the deadline.
+The `legacy` and `stale_only` modes reproduce the historical release behaviors for
+comparison. See commitment.py for the exact contract and reason codes.
 
 Rules
   reactive        never brace
@@ -26,6 +27,8 @@ import jax
 import jax.numpy as jp
 
 from foresight.belief.particle_filter import BeliefStats
+from foresight.decision import commitment as C
+from foresight.decision.commitment import CtrlMemory
 
 
 class ResponseModel(NamedTuple):
@@ -47,23 +50,18 @@ class RuleConfig(NamedTuple):
   c_fall: float = 1.0
   c_prep: float = 0.2              # per second braced
   c_track: float = 0.1             # per second of lost tracking (approximation)
-  tau_brace: float = 0.22          # s, measured sustained readiness
-  hold: float = 0.5                # s kept braced after the expected impact
+  tau_brace: float = 0.22          # s, assumed heuristic; not validated readiness
+  hold: float = 0.5                # post-forecast margin for cost and default deadline
   commit_steps: int = 15           # 0.3 s at 50 Hz
-  release_after: float = 0.3       # s past expected impact
-  stale_steps: int = 50            # release if no detection for 1 s
+  release_after: float = 0.3       # retained for config compatibility; unused
+  stale_steps: int = 50            # entry freshness / historical release timeout
   dt: float = 0.02
-
-
-class CtrlMemory(NamedTuple):
-  braced: jax.Array        # bool
-  brace_steps: jax.Array   # int32, steps since brace start
-  last_det_step: jax.Array # int32
-  n_switches: jax.Array    # int32
+  release_mode: str = "deadline"  # deadline | legacy | stale_only
+  max_brace_seconds: float = 3.0  # finite duration cap; minimum commitment wins
 
 
 def init_memory() -> CtrlMemory:
-  return CtrlMemory(jp.array(False), jp.int32(0), jp.int32(-1000), jp.int32(0))
+  return C.init_memory(jp)
 
 
 def request(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats) -> jax.Array:
@@ -88,16 +86,6 @@ def request(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats) -> jax.Array:
 def step(cfg: RuleConfig, rm: ResponseModel, mem: CtrlMemory, b: BeliefStats, det_valid,
          step_idx) -> tuple[CtrlMemory, jax.Array]:
   """Apply the rule with commitment; returns (memory, brace_active)."""
-  last_det = jp.where(det_valid, step_idx, mem.last_det_step)
-  want = request(cfg, rm, b)
-  passed = jp.isfinite(b.t_hit) & (b.t_hit < -cfg.release_after)
-  stale = (step_idx - last_det) > cfg.stale_steps
-  committed = mem.braced & (mem.brace_steps < cfg.commit_steps)
-  # Stay braced while committed; afterwards stay while the rule still wants it and the
-  # object has neither passed nor gone stale.
-  stay = committed | (mem.braced & want & ~passed & ~stale)
-  start = ~mem.braced & want
-  braced = stay | start
-  n_sw = mem.n_switches + (braced != mem.braced).astype(jp.int32)
-  brace_steps = jp.where(braced, jp.where(mem.braced, mem.brace_steps + 1, 1), 0)
-  return CtrlMemory(braced, brace_steps, last_det, n_sw), braced
+  mem = C.transition(cfg, mem, request(cfg, rm, b), C.forecast_ttc(cfg.kind, b),
+                     det_valid, step_idx, xp=jp)
+  return mem, mem.braced

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a bounded checkpoint smoke test, then an optional rate/latency pilot.
+"""Run a bounded paired release diagnostic before further rate/latency sweeps.
 
 Uses an existing venv. Writes a new run directory and publishes compact results.
 The wall-time budget stops experiment processes; it does not stop pod billing.
@@ -141,12 +141,16 @@ def interrupt(signum, frame):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--mode', choices=('smoke', 'pilot'), default='pilot')
-    parser.add_argument('--max-minutes', type=float, default=45)
+    parser.add_argument('--mode', choices=('release', 'smoke', 'pilot'), default='release',
+                        help='release: 64 paired scenarios; smoke: 32. pilot is a legacy alias for release.')
+    parser.add_argument('--max-minutes', type=float, default=20)
     parser.add_argument('--no-publish', action='store_true', help='Keep results local for an offline/debug run.')
     args = parser.parse_args(argv)
     if not math.isfinite(args.max_minutes) or args.max_minutes < 1:
         parser.error('--max-minutes must be finite and at least 1')
+    if args.mode == 'pilot':
+        print('The broad pilot is suspended pending release validation. Running the 64-scenario release diagnostic.', flush=True)
+        args.mode = 'release'
     (ROOT / 'logs').mkdir(exist_ok=True)
     lock = (ROOT / 'logs/experiments_v2.lock').open('a')
     try:
@@ -162,7 +166,7 @@ def main(argv=None):
                               capture_output=True, check=True).stdout.strip()
     record = {'run_id': run_id, 'source_commit': revision, 'mode': args.mode,
               'max_minutes': args.max_minutes, 'started_utc': stamp, 'status': 'running',
-              'stages': [], 'interpretation': 'Operational smoke and exploratory pilot; synthetic detections; one frozen policy pair.'}
+              'stages': [], 'interpretation': 'Paired release-contract diagnostic; synthetic detections; one frozen policy pair; no superiority claim.'}
     atomic_json(output / 'run.json', record)
     print(f'Results: {output}\nBudget: {args.max_minutes:g} minutes for experiment processes.', flush=True)
     print('The runner does not stop the pod or its billing.', flush=True)
@@ -186,31 +190,33 @@ def main(argv=None):
             if busy.returncode == 0 and any(line.strip().isdigit() for line in busy.stdout.splitlines()):
                 raise RuntimeError('A GPU process is already active. Let that experiment finish before starting this runner.')
         with (output / 'console.log').open('a') as log:
-            for pattern in ('test_detector_cadence.py', 'test_frontier_output.py'):
+            for pattern in ('test_detector_cadence.py', 'test_detection_capture_validity.py',
+                            'test_brace_commitment.py', 'test_frontier_output.py', 'test_release_audit.py'):
                 run_child([python, '-m', 'unittest', 'discover', '-s', 'tests', '-p', pattern, '-v'],
                           env, log, min(180, deadline - time.monotonic()))
             run_child([python, 'scripts/preflight_experiments_v2.py', '--out', str(output / 'preflight.json')],
                       env, log, min(240, deadline - time.monotonic()))
-            stages = [('smoke', 32, 2.5, '0.3', '0.2', 6)]
-            if args.mode == 'pilot':
-                stages += [(f'pilot_{hz}hz', 128, period, '0.2,0.6', '0.05,0.2', 10)
-                           for hz, period in ((10, 5.0), (20, 2.5), (50, 1.0))]
-            for name, episodes, period, thresholds, costs, condition_count in stages:
+            stages = [('release_diagnostic', 32 if args.mode == 'smoke' else 64, 1.0, 5)]
+            for name, episodes, period, condition_count in stages:
                 stage = {'name': name, 'status': 'running', 'period_steps': period, 'episodes': episodes}
                 record['stages'].append(stage)
                 atomic_json(output / 'run.json', record)
                 command = [python, '-u', 'scripts/eval_decision_frontier.py',
                            '--nominal', 'checkpoints/nominal_s1', '--brace', 'checkpoints/brace2_s1',
                            '--impl', 'warp', '--episodes', str(episodes), '--batches', '1', '--steps', '300',
-                           '--period', str(period), '--latencies', '0,15', '--seed', '400',
-                           '--methods', 'reactive,oracle,ttc_threshold,belief_commit',
-                           '--thetas', thresholds, '--c_preps', costs, '--out', str(output / name)]
-                run_child(command, env, log, min(600 if name == 'smoke' else 1200,
-                                                deadline - time.monotonic()))
+                           '--period', str(period), '--latencies', '0', '--seed', '400',
+                           '--methods', 'reactive,oracle,belief_commit', '--c_preps', '0.1',
+                           '--release_modes', 'legacy,stale_only,deadline', '--save_controller_traces',
+                           '--out', str(output / name)]
+                run_child(command, env, log, min(1000, deadline - time.monotonic()))
                 stage['checks'] = validate_stage(output / name, episodes, condition_count)
+                run_child([python, '-m', 'foresight.eval.release_audit', '--run-dir', str(output / name)],
+                          env, log, min(120, deadline - time.monotonic()))
+                stage['release_checks'] = json.loads((output / name / 'release_audit.json').read_text())
                 stage['status'] = 'passed'
                 atomic_json(output / 'run.json', record)
-                print(f'{name}: operational checks passed.', flush=True)
+                print(f'{name}: execution, scenario pairing, and observed deadline contract checks passed.', flush=True)
+                print('No additional GPU sweep is scheduled. Review these traces before expanding experiments.', flush=True)
         record['status'] = 'completed'
     except (KeyboardInterrupt, Exception) as error:
         status = 130 if isinstance(error, KeyboardInterrupt) else 124 if isinstance(error, TimeoutError) else 1

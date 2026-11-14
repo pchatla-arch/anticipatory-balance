@@ -1,10 +1,14 @@
-# Foresight: next pod experiment
+# Foresight: release diagnostic after the Session D review
 
-This branch starts from the published Session C code and checkpoint bundles. It
-adds an exact 20 Hz observation schedule on the 50 Hz control grid, per-condition
-result persistence, explicit event counts, and a bounded runner. It preserves the
-existing belief/rule formulation. The changes have CPU coverage; the first pod
-smoke run is the GPU integration test.
+The broad rate pilot is suspended. Session D already evaluated 10, 25, and 50 Hz,
+and review found a release error in the old rule and an unreachable passage test
+in its subsequent fix. The next run compares those historical behaviors with an
+explicit bounded commitment on the same scenarios. See `SESSION_D_REVIEW.md`.
+
+This branch retains the published skills, source-pinned bootstrap, exact 20 Hz
+cadence support, per-condition output, pooled counts, and result publisher. It
+adds capture-time launch validity and an auditable release contract. CPU tests
+are available; the pod run is the first GPU integration check for these changes.
 
 ## Empty pod: install and run
 
@@ -46,7 +50,7 @@ tail -f /workspace/anticipatory-balance/logs/fresh_pod.log
 
 The environment-install step is limited to 25 minutes and can resume its owned
 partial installation. Initial OS package-manager steps have separate timeouts.
-The 45-minute experiment budget starts after environment setup. An existing
+The 20-minute experiment budget starts after environment setup. An existing
 unrelated venv is checked and reused without package changes. An existing tmux
 session is preserved. After a finished/failed session, exit its shell before
 rerunning the entry point. These are process limits, not automatic pod shutdown.
@@ -75,42 +79,57 @@ FORESIGHT_MODE=smoke bash scripts/start_experiments_v2.sh
 If tmux is unavailable, run in your connected terminal:
 
 ```bash
-python3 scripts/run_experiments_v2.py --mode pilot --max-minutes 45
+python3 scripts/run_experiments_v2.py --mode release --max-minutes 20
 ```
 
 ## Execution order
 
-1. Check for an existing experiment/GPU process, run the focused CPU/JAX timing
-   checks, verify a JAX GPU device, and restore both policies.
-2. Run 32 scenarios for six seconds each, with six conditions: reactive, oracle,
-   TTC threshold 0.3 s, and belief preparation weight 0.2; sensing methods use
-   delays of 0 and 300 ms. The detector averages 20 Hz.
-3. Only after the smoke checks pass, run the pilot at 10, 20, and 50 Hz. Each rate
-   uses 128 scenarios and ten conditions: reactive, oracle, TTC thresholds 0.2 and
-   0.6 s, and belief preparation weights 0.05 and 0.2, at 0 and 300 ms delay.
-   Scenario seed 400 is shared across rates and conditions.
+1. Check for an existing experiment/GPU process, run focused CPU/JAX timing and
+   commitment checks, verify a JAX GPU device, and restore both published policies.
+2. Run 64 scenarios for six seconds each (32 in smoke mode), seed 400, with five
+   conditions: reactive, oracle at 0.5 s lead, and belief preparation weight 0.1
+   under `legacy`, `stale_only`, and `deadline` release. Detections are 50 Hz with
+   zero latency. Every condition replays the same external projectile trajectories.
+3. Verify complete outputs, identical scenario records, and the observed deadline
+   contract. Save all scalar controller logs through the first terminal transition.
+   Stop after this diagnostic; no broad sweep or skill training follows.
 4. Save a review ZIP and attempt to push compact JSON/CSV/log outputs to the
    dedicated `foresight/experiment-results` branch using the pod's existing Git
    credentials. Publication does not alter the working checkout or code branch.
    A failed push prints a publication-only retry command.
 
-The default limit is 45 minutes for experiment processes, with a maximum of ten
-minutes for the smoke and twenty minutes per pilot stage within that total.
+The default limit is 20 minutes for experiment processes, including tests and
+preflight. The evaluation child has a maximum of 1,000 seconds within that total.
 Timeouts retain completed condition files. Packaging and publication can take
 additional time. **The runner does not stop the pod or its billing.** Save results
 and stop the pod after the run if no further GPU work is needed.
 
-## What counts as a smoke pass
+## Release contracts and pass criteria
 
-Both policies restore; all six conditions complete; the expected episode tables
-exist; headline rates and progress are finite; reactive scheduled hits produce
-contact; and sensing conditions receive valid detections before termination.
-The smoke does not test statistical superiority. The one-pair pilot is exploratory.
+`legacy` reproduces the request-dependent release used for Sessions C–D.
+`stale_only` reproduces the later partial fix, whose negative-TTC passage condition
+could never fire with the current belief statistic. Both retain their historical
+retrigger behavior to make the comparison explicit.
+
+`deadline` is a candidate protocol for these one-projectile episodes: accept the
+first fresh request with a finite positive forecast, latch estimated arrival plus
+0.5 s, respect a 0.3 s minimum commitment, and cap the duration at 3 s. The deadline
+is rounded on the control grid. Later forecasts and missing detections do not move
+it. The episode permits one commitment, preventing repeated starts on the same
+threat. This is a defined protocol change, not an isolated causal ablation of one
+line. It does not claim that estimated arrival equals actual physical contact.
+
+A pass requires both policies to restore; all five conditions to complete;
+finite headline metrics; reactive scheduled hits to produce contact; valid
+detections before termination; matched scenario IDs and external trajectories;
+and actual execution of at least one deadline commitment with no observed early
+release, deadline drift, or rearm. Episodes ending before the deadline are marked
+as observation-censored for this check. Fall-rate superiority is not a pass gate.
 
 ## Data and limitations
 
-Each stage has `config.json`, `batches.json`, `episodes/*.csv`, `summary.json`,
-`frontier.csv`, and an optional plot. Every completed condition is saved before
+Each stage has `config.json`, `batches.json`, `episodes/*.csv`, `traces/*.csv`,
+`summary.json`, `frontier.csv`, and `release_audit.json`. Every condition is saved before
 the next begins. Per-episode records include scenario IDs and the actual shared
 external projectile trajectory. Actual robot contacts can differ by policy.
 
@@ -119,7 +138,7 @@ names and integer denominators. `*_until_termination` preparation metrics exclud
 actions after the first terminal transition; historical metrics include them.
 
 The 20 Hz cadence alternates three and two control ticks (60/40 ms intervals).
-This experiment still uses synthetic detections. Depth detector integration,
+This experiment uses synthetic detections. Depth detector integration,
 belief calibration, validated brace readiness, and additional policy seeds remain
-separate work. The current pilot cannot establish that sensing is the sole cause
+separate work. This diagnostic cannot establish that sensing is the sole cause
 of the oracle gap.

@@ -36,6 +36,7 @@ from absl import app, flags
 
 from foresight.eval import rollout as R
 from foresight.eval import frontier_output as O
+from foresight.eval import release_audit as A
 from foresight.perception import detections as D
 from foresight.belief import particle_filter as PF
 from foresight.decision import rules as RU
@@ -63,6 +64,8 @@ _METHODS = flags.DEFINE_list("methods", ["reactive", "always", "ttc_threshold", 
 _OUT = flags.DEFINE_string("out", "results/E10_frontier", "output dir")
 _SEED = flags.DEFINE_integer("seed", 200, "seed")
 _OVERWRITE = flags.DEFINE_bool("overwrite", False, "Explicitly replace only known result files in --out")
+_RELEASE = flags.DEFINE_list("release_modes", ["deadline"], "Controller release contracts: legacy, stale_only, deadline")
+_TRACES = flags.DEFINE_bool("save_controller_traces", False, "Save per-step controller traces through first termination")
 
 
 def main(_):
@@ -77,6 +80,10 @@ def main(_):
     raise ValueError(f"Unknown/empty method list: {_METHODS.value}")
   if not _LAT.value or any(int(x) < 0 for x in _LAT.value):
     raise ValueError("latencies must be nonnegative control-step counts")
+  if not _RELEASE.value or set(_RELEASE.value) - {"legacy", "stale_only", "deadline"}:
+    raise ValueError("release_modes must select legacy, stale_only, or deadline")
+  if len(set(_RELEASE.value)) != len(_RELEASE.value):
+    raise ValueError("release_modes cannot contain duplicates")
   out_dir = O.prepare_output(_OUT.value, _OVERWRITE.value)
   rmj = json.load(open(_RM.value))
   rm = RU.ResponseModel(rmj["a_cont"], rmj["b_cont"], rmj["a_brace"], rmj["b_brace"])
@@ -87,22 +94,22 @@ def main(_):
   thetas = [float(x) for x in _THETAS.value]; cpreps = [float(x) for x in _CPREPS.value]
   mr = (float(_MASS.value[0]), float(_MASS.value[1]))
 
-  conds = []   # (method, param, latency)
+  conds = []   # (method, param, latency, release contract)
   for m in _METHODS.value:
     if m == "reactive":
-      conds.append(("reactive", 0.0, 0))
+      conds.append(("reactive", 0.0, 0, "none"))
     elif m == "oracle":
-      conds.append(("oracle", _OLEAD.value, 0))
+      conds.append(("oracle", _OLEAD.value, 0, "oracle"))
     elif m == "always":
-      conds += [("always", _PMIN.value, L) for L in lats]
+      conds += [("always", _PMIN.value, L, mode) for L, mode in itertools.product(lats, _RELEASE.value)]
     elif m == "ttc_threshold":
-      conds += [("ttc_threshold", th, L) for th, L in itertools.product(thetas, lats)]
+      conds += [("ttc_threshold", th, L, mode) for th, L, mode in itertools.product(thetas, lats, _RELEASE.value)]
     elif m == "belief_commit":
-      conds += [("belief_commit", c, L) for c, L in itertools.product(cpreps, lats)]
+      conds += [("belief_commit", c, L, mode) for c, L, mode in itertools.product(cpreps, lats, _RELEASE.value)]
   if not conds:
     raise ValueError("No experiment conditions were selected")
   config = {
-      "schema_version": 2, "episodes": n, "batches": _BATCHES.value,
+      "schema_version": 3, "episodes": n, "batches": _BATCHES.value,
       "steps": _STEPS.value, "seed": _SEED.value,
       "batch_seeds": [_SEED.value + b for b in range(_BATCHES.value)],
       "dt": env.dt, "period": _PERIOD.value,
@@ -111,7 +118,10 @@ def main(_):
       "miss_fraction": _MISS.value, "command_vx": _VX.value,
       "mass_range": list(mr), "speed_range": [float(v) for v in _SPEED.value],
       "azimuth_deg": _AZ.value, "range_dist": [3.0, 5.0],
-      "impl": _IMPL.value, "conditions": [dict(method=m, param=p, latency_steps=L) for m,p,L in conds],
+      "impl": _IMPL.value, "conditions": [dict(method=m, param=p, latency_steps=L, release_mode=mode) for m,p,L,mode in conds],
+      "release_modes": _RELEASE.value, "save_controller_traces": _TRACES.value,
+      "release_contract_note": "deadline is a one-commitment protocol for one-projectile episodes; legacy and stale_only reproduce historical logic",
+      "detector_launch_validity": "capture-time launch status, buffered with the observation",
       "nominal": str(R.latest_checkpoint(_NOM.value)),
       "brace": str(R.latest_checkpoint(_BR.value)),
       "response_model_path": str(Path(_RM.value).resolve()), "response_model": rmj,
@@ -160,7 +170,7 @@ def main(_):
           f"contact(miss) {ref_info['impact_contact'][is_miss].mean():.3f}  fell(hits) {ref_info['fell'][~is_miss].mean():.3f}")
     scn = lambda s: R.set_scenario(env, s, launch_pos=lp, launch_vel=lv, **base)
 
-    for condition_index, (method, param, lat) in enumerate(conds):
+    for condition_index, (method, param, lat, mode) in enumerate(conds):
       t0 = time.time()
       if method == "oracle":
         decide = R.oracle_brace(jp.full((n,), param, jp.float32), 0.5, env.dt)
@@ -171,6 +181,8 @@ def main(_):
               "always": RU.RuleConfig(kind="always", p_min=param),
               "ttc_threshold": RU.RuleConfig(kind="ttc_threshold", theta=param),
               "belief_commit": RU.RuleConfig(kind="belief_commit", c_prep=param, c_fall=1.0)}[method]
+        if mode != "none":
+          rc = rc._replace(release_mode=mode)
         ctrl = AnticipationController(D.DetectorConfig(period=_PERIOD.value, latency=lat),
                                       PF.PFConfig(mass_range=mr), rc, rm)
         info, traj = R.rollout(env, wenv, nominal, key, _STEPS.value, brace_policy=brace,
@@ -185,7 +197,7 @@ def main(_):
       tab.update(O.preparation_until_termination(
           traj["brace_active"], info["term_step"], tab["is_miss"], traj.get("ctrl_det_valid")))
       hit_s = ~tab["is_miss"]; c = tab["contact"] & hit_s
-      row = {"method": method, "param": param, "latency_steps": lat, "batch": b, "n": n,
+      row = {"method": method, "param": param, "latency_steps": lat, "release_mode": mode, "batch": b, "n": n,
              "fall_rate_hits": float(tab["fell"][hit_s].mean()),
              "fall_rate_given_contact": float(tab["fell"][c].mean()) if c.any() else float("nan"),
              "contact_rate_hits": float(tab["contact"][hit_s].mean()),
@@ -204,18 +216,24 @@ def main(_):
       row.update(O.outcome_counts(tab))
       row.update(seed=_SEED.value + b, period=_PERIOD.value,
                  condition_index=condition_index, rollout_seconds=time.time()-t0)
-      episode_path = out_dir / "episodes" / f"batch{b:03d}_condition{condition_index:03d}_{method}.csv"
+      episode_path = out_dir / "episodes" / f"batch{b:03d}_condition{condition_index:03d}_{method}_{mode}.csv"
       O.write_episodes(episode_path, tab, batch=b, seed=_SEED.value+b, method=method,
-                       param=param, latency_steps=lat, period=_PERIOD.value)
+                       param=param, latency_steps=lat, period=_PERIOD.value, release_mode=mode)
       row["episode_file"] = str(episode_path.relative_to(out_dir))
+      if _TRACES.value:
+        trace_path = out_dir / "traces" / episode_path.name
+        row["trace_summary"] = A.write_trace(
+            trace_path, traj, tab, seed=_SEED.value+b, batch=b, method=method,
+            param=param, latency_steps=lat, period=_PERIOD.value, release_mode=mode, dt=env.dt)
+        row["trace_file"] = str(trace_path.relative_to(out_dir))
       rows.append(row)
       O.atomic_json(out_dir / "batches.json", {"completed_condition_batches": len(rows), "rows": rows})
-      print(f"  {method:14} p={param:<5g} lat={lat:<3} {time.time()-t0:4.0f}s  fall|hits {row['fall_rate_hits']:.3f}  "
+      print(f"  {method:14} release={mode:10} p={param:<5g} lat={lat:<3} {time.time()-t0:4.0f}s  fall|hits {row['fall_rate_hits']:.3f}  "
             f"fall|contact {row['fall_rate_given_contact']:.3f}  false-prep {row['false_prep_rate']:.3f}  "
             f"braced {row['braced_s']:.2f}s  progress {row['progress_m']:.2f}")
 
   # Aggregate over batches.
-  keys = ["method", "param", "latency_steps"]
+  keys = ["method", "param", "latency_steps", "release_mode"]
   agg = {}
   for r in rows:
     k = tuple(r[x] for x in keys)
@@ -241,6 +259,7 @@ def main(_):
       "episodes_per_condition": n * _BATCHES.value,
       "latencies_steps": lats, "period": _PERIOD.value,
       "detector_hz": config["detector_hz"], "dt": env.dt,
+      "release_modes": _RELEASE.value,
       "miss_fraction": _MISS.value, "rows": out, "config_file": "config.json",
       "rate_aggregation": config["legacy_rate_aggregation"],
       "pooled_rate_aggregation": config["pooled_rate_aggregation"],
@@ -249,6 +268,11 @@ def main(_):
   config["status"] = "complete"
   config["finished_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
   O.atomic_json(out_dir / "config.json", config)
+
+  # A multi-contract comparison is a release diagnostic, not a single policy frontier.
+  if len(_RELEASE.value) > 1:
+    print("Release diagnostic complete; review controller traces and release_audit.json.")
+    return
 
   try:
     import matplotlib

@@ -5,8 +5,8 @@ A detection is a world-frame 3-D position of the object captured `latency` contr
 ago, delivered every `period` steps, with range-dependent Gaussian noise, a field-of-view
 gate around the pelvis heading, and a random miss probability. The robot's own pose is
 assumed known (it is on the robot). This is the observation model the particle filter
-consumes; the rendered-depth pipeline (E7/E8) replaces the noise/dropout numbers, not
-the interface.
+consumes. E8 is a separate rendered-depth benchmark; these defaults have not been
+fitted to its data, and this implementation does not consume rendered frames.
 
 All functions are JAX and operate on one environment; callers vmap over environments.
 """
@@ -18,6 +18,7 @@ import jax
 import jax.numpy as jp
 
 from foresight.perception.cadence import delivery_due, validate_detector_timing
+from foresight.perception.capture import captured_launch_valid
 
 
 class DetectorConfig(NamedTuple):
@@ -35,6 +36,7 @@ class DetectorState(NamedTuple):
   buf_pos: jax.Array         # (buffer_len, 3) true object positions, newest at index step % L
   buf_pelvis: jax.Array      # (buffer_len, 3)
   buf_fwd: jax.Array         # (buffer_len, 3)
+  buf_launched: jax.Array   # (buffer_len,) launch validity at the same capture time
   step: jax.Array            # int32 control step
 
 
@@ -48,7 +50,7 @@ class Detection(NamedTuple):
 def init_state(cfg: DetectorConfig) -> DetectorState:
   validate_detector_timing(cfg.period, cfg.latency, cfg.buffer_len)
   z = jp.zeros((cfg.buffer_len, 3))
-  return DetectorState(z, z, z, jp.int32(0))
+  return DetectorState(z, z, z, jp.zeros((cfg.buffer_len,), dtype=jp.bool_), jp.int32(0))
 
 
 def step(cfg: DetectorConfig, st: DetectorState, obj_pos, pelvis_pos, pelvis_fwd, launched,
@@ -60,6 +62,7 @@ def step(cfg: DetectorConfig, st: DetectorState, obj_pos, pelvis_pos, pelvis_fwd
       buf_pos=st.buf_pos.at[i].set(obj_pos),
       buf_pelvis=st.buf_pelvis.at[i].set(pelvis_pos),
       buf_fwd=st.buf_fwd.at[i].set(pelvis_fwd),
+      buf_launched=st.buf_launched.at[i].set(launched),
   )
   cap = st.step - cfg.latency
   j = cap % L
@@ -71,7 +74,7 @@ def step(cfg: DetectorConfig, st: DetectorState, obj_pos, pelvis_pos, pelvis_fwd
   in_fov = cos_ang > jp.cos(jp.deg2rad(cfg.fov_deg / 2))
   k_miss, k_noise = jax.random.split(rng)
   due = delivery_due(st.step, cfg.period) & (cap >= 0)
-  valid = due & launched & in_fov & (rng_dist < cfg.max_range) & \
+  valid = due & captured_launch_valid(st.buf_launched, cap) & in_fov & (rng_dist < cfg.max_range) & \
       (jax.random.uniform(k_miss) >= cfg.miss_prob)
   sigma = cfg.sigma0 + cfg.sigma1 * rng_dist
   noisy = p + sigma * jax.random.normal(k_noise, (3,))

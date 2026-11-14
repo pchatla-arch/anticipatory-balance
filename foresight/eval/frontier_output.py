@@ -18,16 +18,16 @@ def prepare_output(path, overwrite=False):
   if path.exists() and any(path.iterdir()):
     if not overwrite:
       raise ValueError(f"Output directory is not empty: {path}. Choose a new --out.")
-    known = {"config.json", "batches.json", "summary.json", "frontier.csv", "frontier.png", "episodes"}
+    known = {"config.json", "batches.json", "summary.json", "frontier.csv", "frontier.png", "episodes", "traces", "release_audit.json"}
     unknown = [p.name for p in path.iterdir() if p.name not in known]
     if unknown:
       raise ValueError(f"Refusing overwrite of unrelated output entries: {unknown}")
     # Validate the entire directory before deleting anything.
     for item in path.iterdir():
-      if item.name == "episodes" and item.is_dir() and not item.is_symlink():
+      if item.name in {"episodes", "traces"} and item.is_dir() and not item.is_symlink():
         entries = list(item.iterdir())
         if any(not p.is_file() or p.is_symlink() or not p.name.endswith('.csv') for p in entries):
-          raise ValueError("Unexpected content in episodes/; use a fresh --out")
+          raise ValueError(f"Unexpected content in {item.name}/; use a fresh --out")
       elif not item.is_file() or item.is_symlink():
         raise ValueError(f"Refusing unusual output entry: {item}")
     for item in path.iterdir():
@@ -73,7 +73,7 @@ def atomic_rows(path, rows):
   _atomic_write(path, write)
 
 
-def write_episodes(path, table, *, batch, seed, method, param, latency_steps, period):
+def write_episodes(path, table, *, batch, seed, method, param, latency_steps, period, release_mode=None):
   """Full precision scalar data with stable IDs shared across methods/rates/delays."""
   values = {key: np.asarray(value) for key, value in table.items()}
   n = len(next(iter(values.values())))
@@ -84,6 +84,8 @@ def write_episodes(path, table, *, batch, seed, method, param, latency_steps, pe
     row = dict(scenario_id=f"seed{seed}_episode{i:06d}", batch=batch, seed=seed,
                episode_index=i, method=method, param=param,
                latency_steps=latency_steps, period=period)
+    if release_mode is not None:
+      row["release_mode"] = release_mode
     row.update({key: value[i].item() for key, value in values.items()})
     rows.append(row)
   atomic_rows(path, rows)

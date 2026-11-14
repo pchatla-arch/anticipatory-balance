@@ -16,6 +16,7 @@ import jax.numpy as jp
 from foresight.perception import detections as D
 from foresight.belief import particle_filter as PF
 from foresight.decision import rules as RU
+from foresight.decision import commitment as C
 
 
 class Carry(NamedTuple):
@@ -28,6 +29,7 @@ class AnticipationController:
 
   def __init__(self, det_cfg: D.DetectorConfig, pf_cfg: PF.PFConfig, rule_cfg: RU.RuleConfig,
                response: RU.ResponseModel):
+    C.validate_config(rule_cfg)
     self.det_cfg, self.pf_cfg, self.rule_cfg, self.rm = det_cfg, pf_cfg, rule_cfg, response
 
   def init(self, n: int, rng) -> Carry:
@@ -45,7 +47,12 @@ class AnticipationController:
     logs = {"p_hit": b.p_hit, "t_hit": b.t_hit, "t_hit_std": b.t_hit_std,
             "momentum_mean": b.momentum_mean, "ess": b.ess, "n_obs": b.n_obs,
             "det_valid": det.valid, "pe_t_hit": b.pe_t_hit,
-            "pe_pos": b.pe_pos, "pe_vel": b.pe_vel}
+            "pe_pos": b.pe_pos, "pe_vel": b.pe_vel,
+            "release_deadline_step": mem.release_deadline_step,
+            "brace_start": ~c.mem.braced & mem.braced,
+            "brace_release": c.mem.braced & ~mem.braced,
+            "release_reason": mem.release_reason,
+            "has_committed": mem.has_committed}
     return Carry(det_st, pf, mem), brace, logs
 
   def step(self, carry: Carry, info, pelvis_pos, pelvis_fwd, pelvis_vel, step_idx, rng):

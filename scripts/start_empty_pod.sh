@@ -8,13 +8,13 @@ Usage: bash start_empty_pod.sh
 
 Installs missing Git/curl/CA/Python/tmux/util-linux/GitHub CLI system tools,
 clones the Foresight release, installs its pinned Python 3.12 GPU environment,
-restores published policies, and runs the smoke + pilot in tmux: foresight-run.
+restores published policies, and runs a paired release diagnostic in tmux: foresight-run.
 
 Overrides:
   FORESIGHT_SETUP_ROOT=/workspace
   FORESIGHT_CODE_REF=foresight/experiments-v2   (use a published SHA for a pinned run)
-  FORESIGHT_MODE=pilot                       (or smoke)
-  FORESIGHT_MAX_MINUTES=45                   (experiment budget, after setup)
+  FORESIGHT_MODE=release                     (or smoke for 32 scenarios)
+  FORESIGHT_MAX_MINUTES=20                    (experiment budget, after setup)
   FORESIGHT_SKIP_GITHUB_LOGIN=1               (save locally; upload may fail)
 
 The setup has its own 25-minute limit and can resume a matching interrupted
@@ -27,10 +27,10 @@ if [[ ${1:-} == --help || ${1:-} == -h ]]; then usage; exit 0; fi
 if (( $# > 1 )) || [[ $# == 1 && $1 != --worker ]]; then usage >&2; exit 2; fi
 FORESIGHT_SETUP_ROOT="${FORESIGHT_SETUP_ROOT:-/workspace}"
 FORESIGHT_CODE_REF="${FORESIGHT_CODE_REF:-foresight/experiments-v2}"
-FORESIGHT_MODE="${FORESIGHT_MODE:-pilot}"
-FORESIGHT_MAX_MINUTES="${FORESIGHT_MAX_MINUTES:-45}"
+FORESIGHT_MODE="${FORESIGHT_MODE:-release}"
+FORESIGHT_MAX_MINUTES="${FORESIGHT_MAX_MINUTES:-20}"
 FORESIGHT_SKIP_GITHUB_LOGIN="${FORESIGHT_SKIP_GITHUB_LOGIN:-0}"
-[[ "$FORESIGHT_MODE" == pilot || "$FORESIGHT_MODE" == smoke ]] || { echo 'Invalid FORESIGHT_MODE'; exit 2; }
+[[ "$FORESIGHT_MODE" == release || "$FORESIGHT_MODE" == pilot || "$FORESIGHT_MODE" == smoke ]] || { echo 'Invalid FORESIGHT_MODE'; exit 2; }
 [[ "$FORESIGHT_MAX_MINUTES" =~ ^[0-9]+([.][0-9]+)?$ ]] || { echo 'Invalid FORESIGHT_MAX_MINUTES'; exit 2; }
 [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 || "$FORESIGHT_SKIP_GITHUB_LOGIN" == 1 ]] || { echo 'Invalid FORESIGHT_SKIP_GITHUB_LOGIN'; exit 2; }
 [[ "$FORESIGHT_SETUP_ROOT" == /* ]] || { echo 'FORESIGHT_SETUP_ROOT must be absolute'; exit 2; }
@@ -184,7 +184,7 @@ echo 'Setup and experiments are running in tmux: foresight-run'
 echo "Live log: $FORESIGHT_REPO/logs/fresh_pod.log"
 echo 'View: tmux attach -t foresight-run'
 echo 'Detach without stopping: Ctrl-B, then D.'
-echo 'Limits: 25 minutes for setup, then 45 minutes by default for experiments.'
+echo 'Limits: 25 minutes for setup, then 20 minutes by default for the release diagnostic.'
 echo 'The script does not stop the pod or its billing.'
 
 if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]]; then

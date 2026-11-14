@@ -4,16 +4,16 @@ set -Eeuo pipefail
 FORESIGHT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$FORESIGHT_ROOT"
 if ! command -v tmux >/dev/null 2>&1; then
-  echo 'tmux is unavailable. Run in this terminal: python3 scripts/run_experiments_v2.py --mode pilot'
+  echo 'tmux is unavailable. Run in this terminal: python3 scripts/run_experiments_v2.py --mode release'
   exit 1
 fi
 if [[ $# -gt 0 ]]; then
-  echo 'Use FORESIGHT_MODE=smoke or FORESIGHT_MAX_MINUTES=45 as environment overrides.' >&2
+  echo 'Use FORESIGHT_MODE=smoke or FORESIGHT_MAX_MINUTES=20 as environment overrides.' >&2
   exit 2
 fi
-FORESIGHT_MODE="${FORESIGHT_MODE:-pilot}"
-FORESIGHT_MAX_MINUTES="${FORESIGHT_MAX_MINUTES:-45}"
-[[ "$FORESIGHT_MODE" == smoke || "$FORESIGHT_MODE" == pilot ]] || { echo 'Invalid FORESIGHT_MODE'; exit 2; }
+FORESIGHT_MODE="${FORESIGHT_MODE:-release}"
+FORESIGHT_MAX_MINUTES="${FORESIGHT_MAX_MINUTES:-20}"
+[[ "$FORESIGHT_MODE" == smoke || "$FORESIGHT_MODE" == pilot || "$FORESIGHT_MODE" == release ]] || { echo 'Invalid FORESIGHT_MODE'; exit 2; }
 [[ "$FORESIGHT_MAX_MINUTES" =~ ^[0-9]+([.][0-9]+)?$ ]] || { echo 'Invalid FORESIGHT_MAX_MINUTES'; exit 2; }
 if tmux has-session -t '=foresight-v2' 2>/dev/null; then
   echo 'Session foresight-v2 already exists. Inspect it with: tmux attach -t foresight-v2'
