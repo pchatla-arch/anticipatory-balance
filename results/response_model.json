@@ -6,5 +6,10 @@
   "n_cont": 511,
   "n_brace": 503,
   "brace_lead": 0.5,
+  "a_brace_lead": -18.15209963733896,
+  "b_brace_lead": 4.980737169438276,
+  "c_lead": -4.2816853984732,
+  "lead_max": 0.5,
+  "n_brace_lead": 2023,
   "source": "results/E6b_oracle_v2/episodes.csv"
 }

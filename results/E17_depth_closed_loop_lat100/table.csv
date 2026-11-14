@@ -1,0 +1,10 @@
+source,method,param,n_total,fall_rate_hits,fall_rate_given_contact,contact_rate_hits,false_prep_rate,braced_on_hits,braced_s,progress_m,detections_per_episode,render_ms_per_frame
+parametric,ttc_threshold,0.3,512,0.2839,0.3047,0.9294,0.4543,1,1.358,1.353,8.646,nan
+parametric,belief_commit,0.1,512,0.3789,0.4187,0.9048,0.3238,0.7003,1.012,1.318,9.342,nan
+parametric,belief_lead,0.1,512,0.3574,0.3922,0.9103,0.2057,0.7517,1.034,1.334,9.135,nan
+parametric,belief_voi,0.1,512,0.3711,0.4013,0.9238,0.1705,0.7354,0.9782,1.336,9.244,nan
+depth,ttc_threshold,0.3,512,0.2646,0.2876,0.9186,0.3929,1,1.157,1.412,7.195,50.72
+depth,belief_commit,0.1,512,0.3681,0.4041,0.9103,0.2333,0.7057,0.8579,1.351,7.863,45.36
+depth,belief_lead,0.1,512,0.3246,0.355,0.9131,0.109,0.809,0.9194,1.377,7.664,45.64
+depth,belief_voi,0.1,512,0.3355,0.3651,0.9184,0.09476,0.79,0.8704,1.383,7.781,45.99
+none,reactive,0,512,0.6597,0.6762,0.9755,0,0,0,nan,0,nan
