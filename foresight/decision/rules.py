@@ -32,15 +32,26 @@ from foresight.belief.particle_filter import BeliefStats
 
 
 class ResponseModel(NamedTuple):
-  """P(fall | J) = sigmoid(a + b * log J) for each action."""
+  """P(fall | J) = sigmoid(a + b * log J) for each action; for BRACE, optionally conditioned
+  on the lead with which the brace was started: sigmoid(a_l + b_l log J + c_l min(lead, lead_max))."""
   a_cont: float
   b_cont: float
   a_brace: float
   b_brace: float
+  a_brace_lead: float = 0.0
+  b_brace_lead: float = 0.0
+  c_lead: float = 0.0
+  lead_max: float = 0.5
+  has_lead: bool = False
 
-  def p_fall(self, J, brace: bool):
-    a, b = (self.a_brace, self.b_brace) if brace else (self.a_cont, self.b_cont)
-    return jax.nn.sigmoid(a + b * jp.log(jp.maximum(J, 1e-3)))
+  def p_fall(self, J, brace: bool, lead=None):
+    logJ = jp.log(jp.maximum(J, 1e-3))
+    if not brace:
+      return jax.nn.sigmoid(self.a_cont + self.b_cont * logJ)
+    if lead is None or not self.has_lead:
+      return jax.nn.sigmoid(self.a_brace + self.b_brace * logJ)
+    l = jp.clip(lead, 0.0, self.lead_max)
+    return jax.nn.sigmoid(self.a_brace_lead + self.b_brace_lead * logJ + self.c_lead * l)
 
 
 class RuleConfig(NamedTuple):
@@ -56,6 +67,7 @@ class RuleConfig(NamedTuple):
   release_after: float = 0.3       # s past expected impact
   stale_steps: int = 50            # release if no detection for 1 s
   release_on_unwant: bool = False  # old behaviour: release when the start condition fails
+  wait_steps: int = 5              # belief_voi: the wait is one detection period
   dt: float = 0.02
 
 
@@ -70,8 +82,40 @@ def init_memory() -> CtrlMemory:
   return CtrlMemory(jp.array(False), jp.int32(0), jp.int32(-1000), jp.int32(0))
 
 
-def request(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats) -> jax.Array:
-  """Does the rule want BRACE now (ignoring commitment)?"""
+def _costs(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats, t_shift: float = 0.0):
+  """Expected cost of BRACE-now and of CONTINUE-forever under belief b, with the expected
+  time to contact shifted by t_shift (negative: the belief as it will be t_shift later)."""
+  t = jp.where(jp.isfinite(b.t_hit), b.t_hit, 0.0) + t_shift
+  t = jp.maximum(t, 0.0)
+  wh = b.weights * b.hit_samples
+  pf_c = rm.p_fall(b.momentum_samples, False)
+  pf_b = rm.p_fall(b.momentum_samples, True, lead=t)
+  pf_c = jp.sum(wh * pf_c) / (jp.sum(wh) + 1e-9)
+  pf_b = jp.sum(wh * pf_b) / (jp.sum(wh) + 1e-9)
+  cost_cont = b.p_hit * pf_c * cfg.c_fall
+  cost_brace = b.p_hit * pf_b * cfg.c_fall + cfg.c_prep * (t + cfg.hold) + cfg.c_track * t
+  return cost_brace, cost_cont
+
+
+def request(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats, la=None) -> jax.Array:
+  """Does the rule want BRACE now (ignoring commitment)? `la`: lookahead BeliefStats
+  (leading axis K = hypothetical next detections) for belief_voi."""
+  if cfg.kind == "belief_lead":
+    # Myopic rule with the lead-conditioned response model and no time-to-form gate: a
+    # late brace is worth whatever the oracle data say it is worth.
+    cb, cc = _costs(cfg, rm, b)
+    return (cb < cc) & jp.isfinite(b.t_hit) & (b.p_hit > 0)
+  if cfg.kind == "belief_voi":
+    # One-step lookahead with an explicit observation branch: brace now, or walk for one
+    # more detection period, observe, and then take the better of brace/continue.
+    cb, cc = _costs(cfg, rm, b)
+    dt_wait = cfg.wait_steps * cfg.dt
+    cb_k, cc_k = jax.vmap(lambda bk: _costs(cfg, rm, bk))(la)
+    later = jp.mean(jp.minimum(cb_k, cc_k))
+    # If contact is expected inside the wait, waiting means continuing.
+    hit_during_wait = jp.isfinite(b.t_hit) & (b.t_hit < dt_wait)
+    cost_wait = jp.where(hit_during_wait, cc, cfg.c_track * dt_wait + later)
+    return (cb < jp.minimum(cc, cost_wait)) & jp.isfinite(b.t_hit) & (b.p_hit > 0)
   if cfg.kind == "reactive":
     return jp.array(False)
   if cfg.kind == "always":
@@ -90,10 +134,10 @@ def request(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats) -> jax.Array:
 
 
 def step(cfg: RuleConfig, rm: ResponseModel, mem: CtrlMemory, b: BeliefStats, det_valid,
-         step_idx) -> tuple[CtrlMemory, jax.Array]:
+         step_idx, la=None) -> tuple[CtrlMemory, jax.Array]:
   """Apply the rule with commitment; returns (memory, brace_active)."""
   last_det = jp.where(det_valid, step_idx, mem.last_det_step)
-  want = request(cfg, rm, b)
+  want = request(cfg, rm, b, la)
   passed = jp.isfinite(b.t_hit) & (b.t_hit < -cfg.release_after)
   stale = (step_idx - last_det) > cfg.stale_steps
   committed = mem.braced & (mem.brace_steps < cfg.commit_steps)

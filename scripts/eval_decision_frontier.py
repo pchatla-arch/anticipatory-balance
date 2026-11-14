@@ -79,7 +79,11 @@ _CALIB = flags.DEFINE_list("calib_params", ["0.1"], "belief_commit c_prep values
 def main(_):
   os.makedirs(_OUT.value, exist_ok=True)
   rmj = json.load(open(_RM.value))
-  rm = RU.ResponseModel(rmj["a_cont"], rmj["b_cont"], rmj["a_brace"], rmj["b_brace"])
+  rm = RU.ResponseModel(rmj["a_cont"], rmj["b_cont"], rmj["a_brace"], rmj["b_brace"],
+                        rmj.get("a_brace_lead", 0.0), rmj.get("b_brace_lead", 0.0), rmj.get("c_lead", 0.0),
+                        rmj.get("lead_max", 0.5), "c_lead" in rmj)
+  if "c_lead" not in rmj and any(m in _METHODS.value for m in ("belief_lead", "belief_voi")):
+    raise SystemExit("belief_lead/belief_voi need the lead-conditioned response model: rerun fit_response_model.py")
   nominal = R.load_policy(_NOM.value)
   # The object-aware walker has no BRACE skill: its obs differ, and only "reactive" applies.
   brace = R.load_policy(_BR.value) if _ENVSKILL.value != "aware" else None
@@ -107,8 +111,8 @@ def main(_):
       conds += [("always", _PMIN.value, L) for L in lats]
     elif m == "ttc_threshold":
       conds += [("ttc_threshold", th, L) for th, L in itertools.product(thetas, lats)]
-    elif m == "belief_commit":
-      conds += [("belief_commit", c, L) for c, L in itertools.product(cpreps, lats)]
+    elif m in ("belief_commit", "belief_lead", "belief_voi"):
+      conds += [(m, c, L) for c, L in itertools.product(cpreps, lats)]
   print(f"{len(conds)} conditions x {n} episodes x {_BATCHES.value} batches")
 
   rows = []
@@ -143,7 +147,10 @@ def main(_):
         rc = {"reactive": RU.RuleConfig(kind="reactive", **common),
               "always": RU.RuleConfig(kind="always", p_min=param, **common),
               "ttc_threshold": RU.RuleConfig(kind="ttc_threshold", theta=param, **common),
-              "belief_commit": RU.RuleConfig(kind="belief_commit", c_prep=param, c_fall=1.0, **common)}[method]
+              "belief_commit": RU.RuleConfig(kind="belief_commit", c_prep=param, c_fall=1.0, **common),
+              "belief_lead": RU.RuleConfig(kind="belief_lead", c_prep=param, c_fall=1.0, **common),
+              "belief_voi": RU.RuleConfig(kind="belief_voi", c_prep=param, c_fall=1.0, wait_steps=_PERIOD.value,
+                                          **common)}[method]
         ctrl = AnticipationController(D.DetectorConfig(period=_PERIOD.value, latency=lat, sigma0=_SIG0.value,
                                                        sigma1=_SIG1.value, miss_prob=_MISSP.value, fov_deg=_FOV.value,
                                                        max_range=_MAXRANGE.value),
@@ -151,7 +158,7 @@ def main(_):
         info, traj = R.rollout(env, wenv, nominal, key, _STEPS.value, brace_policy=brace,
                                scenario_fn=scn, reset_keys=reset_keys, controller=ctrl)
       tab = R.episode_table(info, traj, env.dt)
-      if method == "belief_commit" and any(abs(param - float(c)) < 1e-9 for c in _CALIB.value):
+      if method == "belief_commit" and _CALIB.value and any(abs(param - float(c)) < 1e-9 for c in _CALIB.value if c):
         # E9: per-step belief against the eventual outcome (compressed; p_hit is mostly zero).
         cdir = os.path.join(_OUT.value, "calib"); os.makedirs(cdir, exist_ok=True)
         np.savez_compressed(os.path.join(cdir, f"belief_c{param:g}_lat{lat}_b{b}.npz"),
@@ -216,9 +223,10 @@ def main(_):
     import matplotlib.pyplot as plt
     fig, axes = plt.subplots(1, len(lats), figsize=(5.2 * len(lats), 4.4), constrained_layout=True, sharey=True)
     axes = np.atleast_1d(axes)
-    col = {"ttc_threshold": "#2b6f8e", "belief_commit": "#d9772b", "always": "#6a7179", "reactive": "#14213d", "oracle": "#3a9d5d"}
+    col = {"ttc_threshold": "#2b6f8e", "belief_commit": "#d9772b", "belief_lead": "#b5179e", "belief_voi": "#7209b7",
+           "always": "#6a7179", "reactive": "#14213d", "oracle": "#3a9d5d"}
     for ax, L in zip(axes, lats):
-      for m in ("ttc_threshold", "belief_commit"):
+      for m in ("ttc_threshold", "belief_commit", "belief_lead", "belief_voi"):
         pts = sorted([o for o in out if o["method"] == m and o["latency_steps"] == L], key=lambda o: o["false_prep_rate"])
         if pts:
           ax.plot([o["false_prep_rate"] for o in pts], [o["fall_rate_hits"] for o in pts], "o-", color=col[m], label=m)

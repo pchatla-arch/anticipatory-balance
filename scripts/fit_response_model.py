@@ -38,9 +38,24 @@ def main(_):
     return J, y
   Jc, yc = pick(-1.0, True); Jb, yb = pick(_LEAD.value, True)
   wc = fit_logistic(np.log(Jc), yc); wb = fit_logistic(np.log(Jb), yb)
+  # Lead-conditioned BRACE model on every lead up to lead_max (beyond it the braced robot
+  # leaves the replayed path and contact drops): logit = a + b log J + c min(lead, lead_max).
+  lead_max = 0.5
+  rb = [q for q in rows if q["launch"] == "1" and q["contact"] == "1" and q["mode_brace"] == "1"
+        and 0.0 < float(q["lead"]) <= lead_max]
+  Jl = np.array([float(q["momentum"]) for q in rb]); Ll = np.array([float(q["lead"]) for q in rb])
+  yl = np.array([int(q["fell"]) for q in rb], float)
+  X = np.stack([np.ones_like(Jl), np.log(Jl), Ll], 1); w = np.zeros(3)
+  for _ in range(300):
+    pr = 1 / (1 + np.exp(-X @ w)); g = X.T @ (pr - yl) / len(yl)
+    Hm = (X * (pr * (1 - pr))[:, None]).T @ X / len(yl) + 1e-6 * np.eye(3); w -= np.linalg.solve(Hm, g)
   out = {"a_cont": float(wc[0]), "b_cont": float(wc[1]), "a_brace": float(wb[0]), "b_brace": float(wb[1]),
          "n_cont": int(len(yc)), "n_brace": int(len(yb)), "brace_lead": _LEAD.value,
-         "source": _EP.value}
+         "a_brace_lead": float(w[0]), "b_brace_lead": float(w[1]), "c_lead": float(w[2]), "lead_max": lead_max,
+         "n_brace_lead": int(len(yl)), "source": _EP.value}
+  for lead in sorted(set(Ll)):
+    m = Ll == lead
+    print(f"lead {lead:.1f}: empirical P(fall|BRACE,contact) {yl[m].mean():.3f}  model {(1/(1+np.exp(-(X@w))))[m].mean():.3f}  n={m.sum()}")
   sig = lambda z: 1 / (1 + np.exp(-z))
   for J in (16, 24, 32, 48, 64, 96):
     pc = sig(wc[0] + wc[1] * np.log(J)); pb = sig(wb[0] + wb[1] * np.log(J))

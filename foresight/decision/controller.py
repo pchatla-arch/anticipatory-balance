@@ -29,6 +29,7 @@ class AnticipationController:
   def __init__(self, det_cfg: D.DetectorConfig, pf_cfg: PF.PFConfig, rule_cfg: RU.RuleConfig,
                response: RU.ResponseModel):
     self.det_cfg, self.pf_cfg, self.rule_cfg, self.rm = det_cfg, pf_cfg, rule_cfg, response
+    self.lookahead_k = 16
 
   def init(self, n: int, rng) -> Carry:
     one = Carry(D.init_state(self.det_cfg), PF.init_state(self.pf_cfg), RU.init_memory())
@@ -41,12 +42,41 @@ class AnticipationController:
     pf = PF.update(self.pf_cfg, pf, det.valid, det.pos, det.sigma, det.capture_step, step_idx,
                    pelvis_pos, k_pf)
     b = PF.stats(self.pf_cfg, pf, pelvis_pos, pelvis_vel, k_mc)
-    mem, brace = RU.step(self.rule_cfg, self.rm, c.mem, b, det.valid, step_idx)
+    la = None
+    if self.rule_cfg.kind == "belief_voi":
+      k_mc, k_la = jax.random.split(k_mc)
+      sigma_next = self.det_cfg.sigma0 + self.det_cfg.sigma1 * jp.linalg.norm((pf.mu[:3] - pelvis_pos)[:2])
+      la = PF.lookahead(self.pf_cfg, pf, sigma_next, self.rule_cfg.wait_steps, pelvis_pos, pelvis_vel, k_la,
+                        self.lookahead_k)
+    mem, brace = RU.step(self.rule_cfg, self.rm, c.mem, b, det.valid, step_idx, la)
     logs = {"p_hit": b.p_hit, "t_hit": b.t_hit, "t_hit_std": b.t_hit_std,
             "momentum_mean": b.momentum_mean, "ess": b.ess, "n_obs": b.n_obs,
             "det_valid": det.valid, "pe_t_hit": b.pe_t_hit,
             "pe_pos": b.pe_pos, "pe_vel": b.pe_vel}
     return Carry(det_st, pf, mem), brace, logs
+
+  def _step_one_det(self, c: Carry, det_valid, det_pos, det_sigma, capture_step, pelvis_pos, pelvis_vel,
+                    step_idx, rng):
+    """Same as _step_one but with a detection supplied from outside (e.g. a depth detector)."""
+    k_pf, k_mc = jax.random.split(rng)
+    pf = PF.predict(self.pf_cfg, c.pf)
+    pf = PF.update(self.pf_cfg, pf, det_valid, det_pos, det_sigma, capture_step, step_idx, pelvis_pos, k_pf)
+    b = PF.stats(self.pf_cfg, pf, pelvis_pos, pelvis_vel, k_mc)
+    la = None
+    if self.rule_cfg.kind == "belief_voi":
+      k_mc, k_la = jax.random.split(k_mc)
+      la = PF.lookahead(self.pf_cfg, pf, det_sigma, self.rule_cfg.wait_steps, pelvis_pos, pelvis_vel, k_la,
+                        self.lookahead_k)
+    mem, brace = RU.step(self.rule_cfg, self.rm, c.mem, b, det_valid, step_idx, la)
+    logs = {"p_hit": b.p_hit, "t_hit": b.t_hit, "det_valid": det_valid, "n_obs": b.n_obs}
+    return Carry(c.det, pf, mem), brace, logs
+
+  def step_with_detections(self, carry: Carry, det_valid, det_pos, det_sigma, capture_step, pelvis_pos,
+                           pelvis_vel, step_idx, rng):
+    n = pelvis_pos.shape[0]
+    keys = jax.random.split(rng, n)
+    f = jax.vmap(self._step_one_det, in_axes=(0, 0, 0, 0, 0, 0, 0, None, 0))
+    return f(carry, det_valid, det_pos, det_sigma, capture_step, pelvis_pos, pelvis_vel, step_idx, keys)
 
   def step(self, carry: Carry, info, pelvis_pos, pelvis_fwd, pelvis_vel, step_idx, rng):
     n = pelvis_pos.shape[0]
