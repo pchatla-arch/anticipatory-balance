@@ -185,10 +185,12 @@ false-preparation rate on near-misses, one panel per latency; lower-left is bett
 |---|---|
 | Done (Sessions A–C) | env, training pipeline, 3 walker seeds (eval reward 7.32–7.62, 20 min each), BRACE v1 and v2, batched paired evaluation with replayed trajectories and controls, LIP module, parametric detector, Rao-Blackwellized belief, decision rules, response model, depth-render pilot, E1–E7 and E10; status update submitted Nov 13 |
 | Gate | passed: BRACE v2 cuts failure given contact from 0.70 to 0.42 at 0.5 s lead on identical impacts (E6b) |
-| Session D (`scripts/start.sh d`) | E8 measured depth detector; E11 frontier at 25 and 50 Hz; E9 belief calibration; rate × latency summary and crossover rate |
-| Session E (`scripts/start.sh e`) | E12 perfect-sensing frontier and oracle-gap ladder; E13 ablations (commitment, τ_brace, mass prior); E14 object-aware PPO walker and its evaluation |
-| Then | paper draft (4–6 pages), reproducibility check from a clean clone, submission Dec 4 |
-| Compute | ~5 GPU-h used; ~5 GPU-h planned |
+| Session D (done) | E8 measured depth detector (94.5% detection, 3 cm noise, 90° FOV); E11 frontier at 25 and 50 Hz: more sensing did **not** help; E9 calibration: the belief resolves 0.46 s before contact, so the rule, not the belief, was at fault |
+| Diagnosis and fix | the rule re-checked its start condition (incl. t_hit > τ_brace) to decide whether to *stay* braced and released BRACE 0.22 s before contact once the commitment expired; BRACE is now held until the object passes (`foresight/decision/rules.py`) |
+| Session E (done) | E15 corrected-rule frontier: reactive 0.69 → threshold 0.30–0.31, belief 0.30–0.34 at zero latency (below the 0.5 s oracle's 0.36); E12 ladder: sensing rate/noise account for <10% of the remaining gap; E13: old release logic reproduces the defect, point mass prior costs 0.05, commitment window irrelevant; E14 object-aware PPO 0.41–0.44 with 35% more progress |
+| Paper | `paper/foresight.tex` (6 pages, two-column), built from the committed results |
+| Then | lead-conditioned response model (the belief rule abstains under latency because it values late braces at zero), seeds, reproducibility check from a clean clone, submission Dec 4 |
+| Compute | ~8 GPU-h used |
 
 Results are committed as small files under `results/<run>/` (`save_run.py`: eval curves, configs,
 console logs, `summary.json`); the final checkpoints are committed under `checkpoints/<tag>/`.

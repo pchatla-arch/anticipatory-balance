@@ -110,7 +110,7 @@ def main(_):
         if j == 0:
           ax.set_ylabel("failure rate on hits")
     axes[0, 0].legend(fontsize=7, frameon=False)
-    fig.suptitle("E11 decision frontier by detection rate (rows) and latency (columns)", fontsize=11)
+    fig.suptitle("Decision frontier by detection rate (rows) and latency (columns)", fontsize=11)
     fig.savefig(os.path.join(_OUT.value, "frontier_grid.png"), dpi=170)
 
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.2), constrained_layout=True)
@@ -133,7 +133,7 @@ def main(_):
       ax.grid(True, color="#e3e6ea", lw=0.6, which="both")
       ax.set_xticks([1/(p*dt) for p in periods]); ax.set_xticklabels([f"{1/(p*dt):.0f}" for p in periods])
     axes[0].legend(fontsize=7, frameon=False, ncol=2)
-    fig.suptitle("E11: what sensing rate the belief rule needs", fontsize=11)
+    fig.suptitle("Best failure rate against detection rate", fontsize=11)
     fig.savefig(os.path.join(_OUT.value, "rate_curves.png"), dpi=170)
   except Exception as e:  # noqa: BLE001
     print("plot skipped:", e)
