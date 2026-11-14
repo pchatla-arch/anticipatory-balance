@@ -6,7 +6,52 @@ result persistence, explicit event counts, and a bounded runner. It preserves th
 existing belief/rule formulation. The changes have CPU coverage; the first pod
 smoke run is the GPU integration test.
 
-## Start
+## Empty pod: install and run
+
+Use `scripts/start_empty_pod.sh` from the published release. It works from any
+directory and installs missing system tools, the pinned Python 3.12 environment,
+and G1 assets. It fetches the repository's published nominal and BRACE v2 weights.
+The entry point starts setup and experiments in tmux session `foresight-run`.
+
+```bash
+curl -fL https://raw.githubusercontent.com/pchatla-arch/anticipatory-balance/foresight/experiments-v2/scripts/start_empty_pod.sh -o /tmp/foresight-start.sh
+bash /tmp/foresight-start.sh
+```
+
+For an exact release, replace the branch in the URL with its full commit SHA and
+set `FORESIGHT_CODE_REF` to that same SHA when invoking the downloaded script.
+Use an Ubuntu/Debian x86_64 GPU pod with host NVIDIA driver 580 or newer. The
+installer checks the driver before installing packages. It does not install a
+host driver. Container `/workspace` storage is supported; completed results must
+be uploaded or downloaded before the container is replaced.
+
+The pinned runtime is Playground `9de993826d1a486f18aec4e8d3179e93ff64ed41`,
+its frozen `rss2025/uv.lock`, and Menagerie
+`1b86ece576591213e2b666ebf59508454200ca97`. It includes JAX/CUDA12 packages
+0.12.0.1, Brax 0.14.2, MuJoCo/MJX 3.16.0, and Warp 1.18.0. uv 0.13.8 is
+installed locally without changing shell profiles. No separate latest-version
+dependency resolution runs.
+
+Setup runs in the background while GitHub CLI offers browser/device login. This
+login authorizes the new pod to upload results; the ChatGPT GitHub connection does
+not authenticate the pod. Canceling login does not stop setup. If the CLI is not
+available from the OS package manager, evaluation continues and results are kept
+locally. Set `FORESIGHT_SKIP_GITHUB_LOGIN=1` to skip that login deliberately.
+
+```bash
+tmux attach -t foresight-run
+# Or inspect the combined setup/experiment log:
+tail -f /workspace/anticipatory-balance/logs/fresh_pod.log
+```
+
+The environment-install step is limited to 25 minutes and can resume its owned
+partial installation. Initial OS package-manager steps have separate timeouts.
+The 45-minute experiment budget starts after environment setup. An existing
+unrelated venv is checked and reused without package changes. An existing tmux
+session is preserved. After a finished/failed session, exit its shell before
+rerunning the entry point. These are process limits, not automatic pod shutdown.
+
+## Existing environment: start evaluation
 
 Use the existing MuJoCo Playground `rss2025` environment. The default path is
 `/workspace/mujoco_playground/rss2025/.venv`; set `FORESIGHT_VENV` if yours differs.
