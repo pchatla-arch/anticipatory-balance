@@ -17,9 +17,11 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jp
 
+from foresight.perception.cadence import delivery_due, validate_detector_timing
+
 
 class DetectorConfig(NamedTuple):
-  period: int = 5            # control steps between detections (5 -> 10 Hz at 50 Hz)
+  period: float = 5.0        # mean control steps per detection (2.5 -> 20 Hz at 50 Hz)
   latency: int = 5           # control steps between capture and delivery
   sigma0: float = 0.03       # m, position noise at zero range
   sigma1: float = 0.02       # m per m of range
@@ -44,6 +46,7 @@ class Detection(NamedTuple):
 
 
 def init_state(cfg: DetectorConfig) -> DetectorState:
+  validate_detector_timing(cfg.period, cfg.latency, cfg.buffer_len)
   z = jp.zeros((cfg.buffer_len, 3))
   return DetectorState(z, z, z, jp.int32(0))
 
@@ -67,7 +70,7 @@ def step(cfg: DetectorConfig, st: DetectorState, obj_pos, pelvis_pos, pelvis_fwd
   cos_ang = jp.dot(rel[:2] / rng_dist, heading)
   in_fov = cos_ang > jp.cos(jp.deg2rad(cfg.fov_deg / 2))
   k_miss, k_noise = jax.random.split(rng)
-  due = (st.step % cfg.period == 0) & (cap >= 0)
+  due = delivery_due(st.step, cfg.period) & (cap >= 0)
   valid = due & launched & in_fov & (rng_dist < cfg.max_range) & \
       (jax.random.uniform(k_miss) >= cfg.miss_prob)
   sigma = cfg.sigma0 + cfg.sigma1 * rng_dist
