@@ -3,8 +3,11 @@
 
 Every rule maps (belief stats, controller memory) -> brace request. The common wrapper
 applies the commitment: once BRACE starts it is held for at least `commit_steps`, and
-released when the belief says the object has passed (expected impact time negative by
-more than `release_after`) or no detection has arrived for `stale_steps`.
+released only when the belief says the object has passed (expected impact time negative by
+more than `release_after`) or no detection has arrived for `stale_steps`. The request
+decides when to START; it is not re-evaluated to decide whether to stay (an earlier version
+did, and the belief rule's `t_hit > tau_brace` start condition then released the brace
+0.22 s before contact once the commitment had expired: a mode switch at the worst moment).
 
 Rules
   reactive        never brace
@@ -52,6 +55,7 @@ class RuleConfig(NamedTuple):
   commit_steps: int = 15           # 0.3 s at 50 Hz
   release_after: float = 0.3       # s past expected impact
   stale_steps: int = 50            # release if no detection for 1 s
+  release_on_unwant: bool = False  # old behaviour: release when the start condition fails
   dt: float = 0.02
 
 
@@ -93,9 +97,12 @@ def step(cfg: RuleConfig, rm: ResponseModel, mem: CtrlMemory, b: BeliefStats, de
   passed = jp.isfinite(b.t_hit) & (b.t_hit < -cfg.release_after)
   stale = (step_idx - last_det) > cfg.stale_steps
   committed = mem.braced & (mem.brace_steps < cfg.commit_steps)
-  # Stay braced while committed; afterwards stay while the rule still wants it and the
-  # object has neither passed nor gone stale.
-  stay = committed | (mem.braced & want & ~passed & ~stale)
+  # Stay braced while committed; afterwards until the object has passed or gone stale.
+  # (cfg.release_on_unwant restores the old behaviour for the ablation.)
+  keep = ~passed & ~stale
+  if cfg.release_on_unwant:
+    keep = keep & want
+  stay = committed | (mem.braced & keep)
   start = ~mem.braced & want
   braced = stay | start
   n_sw = mem.n_switches + (braced != mem.braced).astype(jp.int32)

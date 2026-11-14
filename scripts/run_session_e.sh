@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Session E (~2.5 GPU-h): the oracle gap, ablations and the end-to-end baseline.
+# Session E (~2.5 GPU-h): the corrected rule, the oracle gap, ablations and the end-to-end baseline.
+#   E15 frontier with the corrected release logic at 10 Hz and 50 Hz, 3 latencies     ~30 min
+#       (Session D showed the belief rule released BRACE 0.22 s before contact once the
+#        commitment expired; the rule now holds until the object has passed)
 #   E12 perfect-sensing frontier (50 Hz, zero latency/noise/misses, full FOV)   ~15 min
 #   E13 ablations at 50 Hz, zero latency: commitment window, tau_brace, mass prior ~45 min
 #   E14 object-aware PPO walker (detections as inputs, heavy impacts in training) ~25 min train
@@ -41,6 +44,15 @@ for f in checkpoints/nominal_s1 checkpoints/brace2_s1 results/response_model.jso
 done
 FRONT="$PY scripts/eval_decision_frontier.py --nominal checkpoints/nominal_s1 --brace checkpoints/brace2_s1 --impl $IMPL --episodes $EPISODES --batches $BATCHES"
 
+# --- E15: the corrected rule on the Session C/D scenarios
+for P in 5 1; do
+  if ! done_stage E15_rule_fixed_p$P; then
+    stamp "E15 corrected-rule frontier at period $P ($((50 / P)) Hz)"
+    $FRONT --latencies 0,5,15 --period $P --methods reactive,always,ttc_threshold,belief_commit,oracle \
+        --calib_params "" --out results/E15_rule_fixed_p$P
+  fi
+done
+
 # --- E12: perfect sensing (the rule + skill alone, no perception limits)
 if ! done_stage E12_perfect; then
   stamp "E12 perfect-sensing frontier"
@@ -62,6 +74,8 @@ abl tau_0.10   --tau_brace 0.10
 abl tau_0.35   --tau_brace 0.35
 abl prior_wide --mass_prior 1,32
 abl prior_point --mass_prior 8,8.01
+abl rcontact_0.35 --r_contact 0.35
+abl release_old --release_on_unwant
 
 # --- E14: object-aware PPO walker
 if has_final_ckpt logs/aware_s1; then echo "reuse finished training run in logs/aware_s1"
@@ -85,11 +99,14 @@ if ! done_stage E14_aware_ppo_50hz; then
       --env_skill aware --period 1 --latencies 0 --methods reactive --calib_params "" --out results/E14_aware_ppo_50hz
 fi
 
+stamp "E15 rate x latency summary (corrected rule)"
+$PY scripts/plot_rate_sweep.py --dirs results/E15_rule_fixed_p5,results/E15_rule_fixed_p1 --out results/E15_rate_sweep
 stamp "E12 oracle-gap ladder"
-$PY scripts/oracle_gap.py --out results/E12_oracle_gap
+$PY scripts/oracle_gap.py --rungs "10 Hz:results/E15_rule_fixed_p5,50 Hz:results/E15_rule_fixed_p1,perfect sensing:results/E12_perfect" \
+    --out results/E12_oracle_gap
 
 stamp "commit results"
 git add results checkpoints || true
-git commit -m "Session E results: E12 perfect sensing and ladder, E13 ablations, E14 object-aware PPO" || true
+git commit -m "Session E results: E15 corrected rule, E12 perfect sensing and ladder, E13 ablations, E14 object-aware PPO" || true
 git push || echo "push failed; run 'git push' manually"
 stamp "Session E done"
