@@ -13,13 +13,16 @@ restores published policies, and runs a paired release diagnostic in tmux: fores
 Overrides:
   FORESIGHT_SETUP_ROOT=/workspace
   FORESIGHT_CODE_REF=foresight/experiments-v2   (use a published SHA for a pinned run)
+  FORESIGHT_REPO=/workspace/foresight-runner  (isolated experiment checkout)
   FORESIGHT_MODE=release                     (or smoke for 32 scenarios)
   FORESIGHT_MAX_MINUTES=20                    (experiment budget, after setup)
-  FORESIGHT_SKIP_GITHUB_LOGIN=1               (save locally; upload may fail)
+  FORESIGHT_SKIP_GITHUB_LOGIN=1               (use existing Git authentication)
+  FORESIGHT_AUTO_STOP=1                       (request stop after verified upload)
 
 The setup has its own 25-minute limit and can resume a matching interrupted
 installation. Existing unrelated environments are reused only after preflight;
-they are never upgraded by this entry point. The pod remains running afterward.
+they are never upgraded by this entry point. Automatic stop requires an explicit
+FORESIGHT_AUTO_STOP=1, verified result upload, and working RunPod controls.
 EOF
 }
 
@@ -34,8 +37,11 @@ FORESIGHT_SKIP_GITHUB_LOGIN="${FORESIGHT_SKIP_GITHUB_LOGIN:-0}"
 [[ "$FORESIGHT_MAX_MINUTES" =~ ^[0-9]+([.][0-9]+)?$ ]] || { echo 'Invalid FORESIGHT_MAX_MINUTES'; exit 2; }
 [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 || "$FORESIGHT_SKIP_GITHUB_LOGIN" == 1 ]] || { echo 'Invalid FORESIGHT_SKIP_GITHUB_LOGIN'; exit 2; }
 [[ "$FORESIGHT_SETUP_ROOT" == /* ]] || { echo 'FORESIGHT_SETUP_ROOT must be absolute'; exit 2; }
-FORESIGHT_REPO="$FORESIGHT_SETUP_ROOT/anticipatory-balance"
-FORESIGHT_VENV="$FORESIGHT_SETUP_ROOT/mujoco_playground/rss2025/.venv"
+FORESIGHT_REPO="${FORESIGHT_REPO:-$FORESIGHT_SETUP_ROOT/foresight-runner}"
+FORESIGHT_VENV="${FORESIGHT_VENV:-$FORESIGHT_SETUP_ROOT/mujoco_playground/rss2025/.venv}"
+FORESIGHT_AUTO_STOP="${FORESIGHT_AUTO_STOP:-0}"
+[[ "$FORESIGHT_REPO" == /* && "$FORESIGHT_VENV" == /* ]] || { echo 'Repository and venv paths must be absolute'; exit 2; }
+[[ "$FORESIGHT_AUTO_STOP" == 0 || "$FORESIGHT_AUTO_STOP" == 1 ]] || { echo 'Invalid FORESIGHT_AUTO_STOP'; exit 2; }
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 
@@ -45,30 +51,26 @@ if [[ ${1:-} == --worker ]]; then
   flock -n 9 || die 'Another Foresight setup is already running.'
   printf '\n=== Foresight setup/run %s ===\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   printf 'Source revision: %s\n' "$(git rev-parse HEAD)"
-  export FORESIGHT_SETUP_ROOT FORESIGHT_VENV
+  export FORESIGHT_SETUP_ROOT FORESIGHT_REPO FORESIGHT_VENV FORESIGHT_AUTO_STOP
   export PYTHONPATH="$FORESIGHT_REPO${PYTHONPATH:+:$PYTHONPATH}"
   unset LD_LIBRARY_PATH MUJOCO_GL PYTHONHOME
-  if [[ -x "$FORESIGHT_VENV/bin/python" && ! -e "$FORESIGHT_SETUP_ROOT/.foresight-bootstrap/state.json" ]]; then
-    echo 'Checking the existing environment before reusing it; no package installation will run.'
-    timeout --kill-after=30s 5m "$FORESIGHT_VENV/bin/python" scripts/preflight_experiments_v2.py \
-      --out logs/reused_environment_preflight.json
-  else
-    echo 'Installing or verifying the pinned environment. Setup limit: 25 minutes.'
-    timeout --kill-after=30s 25m bash scripts/bootstrap_fresh_pod.sh
-  fi
-  echo 'Environment ready. Starting the bounded experiment.'
-  export FORESIGHT_PYTHON="$FORESIGHT_VENV/bin/python"
-  python3 scripts/run_experiments_v2.py --mode "$FORESIGHT_MODE" --max-minutes "$FORESIGHT_MAX_MINUTES"
-  exit 0
+  mkdir -p logs
+  exec > >(tee -a logs/fresh_pod.log) 2>&1
+  exec python3 scripts/pod_session.py --mode "$FORESIGHT_MODE" --max-minutes "$FORESIGHT_MAX_MINUTES"
 fi
 
 command -v nvidia-smi >/dev/null || die 'This pod has no exposed NVIDIA GPU. Select a GPU pod first.'
-FORESIGHT_DRIVERS="$(nvidia-smi --query-gpu=driver_version --format=csv,noheader,nounits)"
-while IFS= read -r FORESIGHT_DRIVER; do
-  FORESIGHT_MAJOR="${FORESIGHT_DRIVER%%.*}"
-  [[ "$FORESIGHT_MAJOR" =~ ^[0-9]+$ && "$FORESIGHT_MAJOR" -ge 580 ]] || \
-    die 'The pinned Warp runtime requires host driver 580 or newer. Select a compatible GPU pod; no installation was attempted.'
-done <<< "$FORESIGHT_DRIVERS"
+# An existing working environment is judged by preflight. Check the pinned
+# fresh runtime before installing system tools when no such environment exists.
+nvidia-smi --query-gpu=name,driver_version --format=csv,noheader,nounits
+if [[ ! -x "$FORESIGHT_VENV/bin/python" ]]; then
+  FORESIGHT_DRIVERS="$(nvidia-smi --query-gpu=driver_version --format=csv,noheader,nounits)"
+  while IFS= read -r FORESIGHT_DRIVER; do
+    FORESIGHT_MAJOR="${FORESIGHT_DRIVER%%.*}"
+    [[ "$FORESIGHT_MAJOR" =~ ^[0-9]+$ && "$FORESIGHT_MAJOR" -ge 580 ]] || \
+      die 'The pinned fresh runtime needs driver 580 or newer. No installation or experiment was started.'
+  done <<< "$FORESIGHT_DRIVERS"
+fi
 
 # Serialize even the initial package-manager work, before flock is available.
 mkdir -p "$FORESIGHT_SETUP_ROOT"
@@ -124,8 +126,7 @@ if (( FORESIGHT_NEED_GH )); then
     apt_step install -y --no-install-recommends gh || true
   fi
   if ! command -v gh >/dev/null; then
-    echo 'GitHub CLI is unavailable. Continuing with local results and existing Git credentials.'
-    FORESIGHT_SKIP_GITHUB_LOGIN=1
+    die 'GitHub CLI could not be installed. With working Git credentials, retry using FORESIGHT_SKIP_GITHUB_LOGIN=1. No experiment has started.'
   fi
 fi
 
@@ -168,40 +169,40 @@ if [[ -n "$FORESIGHT_CLONE_STAGE" ]]; then
   FORESIGHT_CLONE_STAGE=''
 fi
 [[ -f "$FORESIGHT_REPO/scripts/bootstrap_fresh_pod.sh" ]] || die 'Selected revision lacks the fresh-pod installer.'
-[[ -f "$FORESIGHT_REPO/scripts/start_empty_pod.sh" ]] || die 'Selected revision lacks the fresh-pod entry point.'
+[[ -f "$FORESIGHT_REPO/scripts/pod_session.py" ]] || die 'Selected revision lacks the reviewed pod session worker.'
 mkdir -p "$FORESIGHT_REPO/logs"
-
-printf -v FORESIGHT_WORKER 'cd %q && env %q %q %q %q bash scripts/start_empty_pod.sh --worker 8>&- 2>&1 | tee -a logs/fresh_pod.log; exec bash' \
-  "$FORESIGHT_REPO" "FORESIGHT_SETUP_ROOT=$FORESIGHT_SETUP_ROOT" "FORESIGHT_CODE_REF=$FORESIGHT_CODE_REF" \
-  "FORESIGHT_MODE=$FORESIGHT_MODE" "FORESIGHT_MAX_MINUTES=$FORESIGHT_MAX_MINUTES"
-tmux new-session -d -s foresight-run "$FORESIGHT_WORKER"
-exec 8>&-
-rm -- "$FORESIGHT_ENTRY_LOCK/pid"
-rmdir -- "$FORESIGHT_ENTRY_LOCK"
-FORESIGHT_ENTRY_LOCK=''
-echo
-echo 'Setup and experiments are running in tmux: foresight-run'
-echo "Live log: $FORESIGHT_REPO/logs/fresh_pod.log"
-echo 'View: tmux attach -t foresight-run'
-echo 'Detach without stopping: Ctrl-B, then D.'
-echo 'Limits: 25 minutes for setup, then 20 minutes by default for the release diagnostic.'
-echo 'The script does not stop the pod or its billing.'
 
 if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]]; then
   if gh auth status --hostname github.com >/dev/null 2>&1; then
     gh auth setup-git --hostname github.com
   elif [[ -t 0 ]]; then
     echo
-    echo 'Setup continues in the background. Complete this GitHub browser login to enable result uploads.'
-    echo 'No access token needs to be pasted into chat. If login is canceled, a local review ZIP is retained.'
+    echo 'Complete this GitHub browser login before GPU work starts so results can be uploaded.'
+    echo 'No access token needs to be pasted into chat.'
     if gh auth login --hostname github.com --git-protocol https --web; then
       gh auth setup-git --hostname github.com
     else
-      echo 'GitHub login was not completed. Setup continues; results will be saved locally.'
+      die 'GitHub login was not completed. No experiment has started; rerun this command after login.'
     fi
   else
-    echo 'No interactive terminal for GitHub login. Later run: gh auth login --hostname github.com --git-protocol https --web'
-    echo 'Then run: gh auth setup-git --hostname github.com'
+    die 'No terminal for GitHub login. Run gh auth login --hostname github.com --git-protocol https --web, or use existing Git credentials with FORESIGHT_SKIP_GITHUB_LOGIN=1.'
   fi
 fi
+printf -v FORESIGHT_WORKER 'cd %q && env %q %q %q %q %q %q %q %q bash scripts/start_empty_pod.sh --worker 8>&-' \
+  "$FORESIGHT_REPO" "FORESIGHT_SETUP_ROOT=$FORESIGHT_SETUP_ROOT" "FORESIGHT_CODE_REF=$FORESIGHT_CODE_REF" \
+  "FORESIGHT_REPO=$FORESIGHT_REPO" "FORESIGHT_VENV=$FORESIGHT_VENV" \
+  "FORESIGHT_MODE=$FORESIGHT_MODE" "FORESIGHT_MAX_MINUTES=$FORESIGHT_MAX_MINUTES" \
+  "FORESIGHT_AUTO_STOP=$FORESIGHT_AUTO_STOP" "NO_STOP=${NO_STOP:-0}"
+tmux new-session -d -s foresight-run "$FORESIGHT_WORKER"
+exec 8>&-
+rm -- "$FORESIGHT_ENTRY_LOCK/pid"
+rmdir -- "$FORESIGHT_ENTRY_LOCK"
+FORESIGHT_ENTRY_LOCK=''
+echo
+echo 'Setup and F0 diagnostic are running in tmux: foresight-run'
+echo "Isolated checkout: $FORESIGHT_REPO"
+echo "Live log: $FORESIGHT_REPO/logs/fresh_pod.log"
+echo 'Detach without stopping: Ctrl-B, then D.'
+echo 'Limits: 25 minutes for fresh setup, then 20 minutes by default for F0.'
+echo "Automatic stop requested: $FORESIGHT_AUTO_STOP (NO_STOP=${NO_STOP:-0}); requires verified upload and RunPod controls."
 echo 'Next: tmux attach -t foresight-run'

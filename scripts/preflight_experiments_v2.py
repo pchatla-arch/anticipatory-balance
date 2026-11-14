@@ -37,9 +37,20 @@ def main():
         if not (checkpoint / 'manifest.ocdbt').is_file():
             raise RuntimeError(f'Checkpoint data missing: {checkpoint}')
         R.load_policy(checkpoint)
+        files = []
+        tree_hash = hashlib.sha256()
+        for path in sorted(checkpoint.rglob('*')):
+            if not path.is_file():
+                continue
+            relative = path.relative_to(checkpoint).as_posix()
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            tree_hash.update(relative.encode('utf-8') + b'\0' + digest.encode('ascii') + b'\n')
+            files.append({'path': relative, 'bytes': path.stat().st_size, 'sha256': digest})
         record['checkpoints'][label] = {
             'path': str(checkpoint),
             'metadata_sha256': hashlib.sha256((checkpoint / 'ppo_network_config.json').read_bytes()).hexdigest(),
+            'checkpoint_tree_sha256': tree_hash.hexdigest(),
+            'files': files,
         }
         print(f'{label}: restored {checkpoint}', flush=True)
     args.out.write_text(json.dumps(record, indent=2) + '\n')

@@ -14,12 +14,14 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import shutil
 import signal
 import subprocess
 import sys
 import threading
 import time
+import traceback
 import uuid
 
 
@@ -102,11 +104,14 @@ def stop_process(process):
             process.wait()
 
 
-def run_child(command, env, log, timeout_seconds):
+def run_child(command, env, log, timeout_seconds, *, check=True):
     global CURRENT_PROCESS
     if timeout_seconds <= 0:
         raise TimeoutError('Experiment wall-time budget was reached.')
-    print('Running:', ' '.join(str(a) for a in command), flush=True)
+    message = 'Running: ' + ' '.join(str(a) for a in command)
+    print(message, flush=True)
+    log.write(message + '\n')
+    log.flush()
     process = subprocess.Popen(command, cwd=ROOT, env=env, stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT, text=True, bufsize=1,
                                start_new_session=True)
@@ -126,8 +131,9 @@ def run_child(command, env, log, timeout_seconds):
         except subprocess.TimeoutExpired:
             stop_process(process)
             raise TimeoutError('Stage timed out; completed condition files remain available.') from None
-        if result:
+        if result and check:
             raise RuntimeError(f'Child process exited with status {result}. See console.log.')
+        return result
     finally:
         if process.poll() is None:
             stop_process(process)
@@ -137,6 +143,20 @@ def run_child(command, env, log, timeout_seconds):
 
 def interrupt(signum, frame):
     raise KeyboardInterrupt(f'Received signal {signum}')
+
+
+def verified_receipt(path, run_id, source_commit, experiment_exit_code):
+    """Accept only the publisher's verification for this exact run and source."""
+    receipt = json.loads(path.read_text())
+    commit = receipt.get('commit')
+    if (receipt.get('schema_version') != 1 or receipt.get('status') != 'verified'
+            or receipt.get('verified') is not True or receipt.get('run_id') != run_id
+            or receipt.get('run_source') != source_commit or not source_commit
+            or type(receipt.get('run_exit_code')) is not int
+            or receipt['run_exit_code'] != experiment_exit_code
+            or not isinstance(commit, str) or re.fullmatch(r'[0-9a-f]{40}|[0-9a-f]{64}', commit) is None):
+        raise RuntimeError('Publication receipt does not verify this run and source revision.')
+    return receipt
 
 
 def main(argv=None):
@@ -162,17 +182,22 @@ def main(argv=None):
     run_id = f'pod_v2_{stamp}_{uuid.uuid4().hex[:6]}'
     output = ROOT / 'results' / run_id
     output.mkdir(parents=True, exist_ok=False)
-    revision = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True,
-                              capture_output=True, check=True).stdout.strip()
-    record = {'run_id': run_id, 'source_commit': revision, 'mode': args.mode,
+    record = {'run_id': run_id, 'source_commit': None, 'mode': args.mode,
               'max_minutes': args.max_minutes, 'started_utc': stamp, 'status': 'running',
               'stages': [], 'interpretation': 'Paired release-contract diagnostic; synthetic detections; one frozen policy pair; no superiority claim.'}
-    atomic_json(output / 'run.json', record)
-    print(f'Results: {output}\nBudget: {args.max_minutes:g} minutes for experiment processes.', flush=True)
-    print('The runner does not stop the pod or its billing.', flush=True)
     started = time.monotonic()
     deadline = started + args.max_minutes * 60
-    status = 0
+    experiment_code = 0
+    latest_path = ROOT / 'logs' / 'last_run.json'
+    latest = {'schema_version': 1, 'run_id': run_id, 'run_dir': str(output),
+              'invocation_id': os.environ.get('FORESIGHT_INVOCATION_ID'),
+              'console_log': str(output / 'console.log'), 'source_commit': None,
+              'mode': args.mode, 'started_utc': stamp, 'status': 'running',
+              'experiment_status': 'running', 'experiment_exit_code': None,
+              'archive_status': 'pending', 'archive_path': None,
+              'publication_status': 'not_requested' if args.no_publish else 'pending',
+              'publication_exit_code': None, 'publication_receipt': None,
+              'overall_exit_code': None}
     env = os.environ.copy()
     env['PYTHONPATH'] = str(ROOT) + (os.pathsep + env['PYTHONPATH'] if env.get('PYTHONPATH') else '')
     env['JAX_DEFAULT_MATMUL_PRECISION'] = 'highest'
@@ -182,14 +207,40 @@ def main(argv=None):
     signal.signal(signal.SIGTERM, interrupt)
     signal.signal(signal.SIGINT, interrupt)
 
-    try:
-        python = choose_python()
-        if shutil.which('nvidia-smi'):
-            busy = subprocess.run(['nvidia-smi', '--query-compute-apps=pid', '--format=csv,noheader,nounits'],
-                                  capture_output=True, text=True, timeout=15)
-            if busy.returncode == 0 and any(line.strip().isdigit() for line in busy.stdout.splitlines()):
-                raise RuntimeError('A GPU process is already active. Let that experiment finish before starting this runner.')
-        with (output / 'console.log').open('a') as log:
+    with (output / 'console.log').open('a') as log:
+        def emit(message, *, error=False):
+            print(message, file=sys.stderr if error else sys.stdout, flush=True)
+            log.write(message + '\n')
+            log.flush()
+
+        def report_exception(label, error):
+            emit(f'{label}: {error}', error=True)
+            detail = traceback.format_exc()
+            print(detail, file=sys.stderr, end='', flush=True)
+            log.write(detail)
+            log.flush()
+
+        def save_latest():
+            latest['updated_utc'] = datetime.now(timezone.utc).isoformat()
+            atomic_json(latest_path, latest)
+
+        try:
+            atomic_json(output / 'run.json', record)
+            save_latest()
+            emit(f'Results: {output}\nBudget: {args.max_minutes:g} minutes for experiment processes.')
+            emit('The runner does not stop the pod or its billing.')
+            record['source_commit'] = subprocess.run(
+                ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True,
+                capture_output=True, check=True).stdout.strip()
+            latest['source_commit'] = record['source_commit']
+            atomic_json(output / 'run.json', record)
+            save_latest()
+            python = choose_python()
+            if shutil.which('nvidia-smi'):
+                busy = subprocess.run(['nvidia-smi', '--query-compute-apps=pid', '--format=csv,noheader,nounits'],
+                                      capture_output=True, text=True, timeout=15)
+                if busy.returncode == 0 and any(line.strip().isdigit() for line in busy.stdout.splitlines()):
+                    raise RuntimeError('A GPU process is already active. Let that experiment finish before starting this runner.')
             for pattern in ('test_detector_cadence.py', 'test_detection_capture_validity.py',
                             'test_brace_commitment.py', 'test_frontier_output.py', 'test_release_audit.py'):
                 run_child([python, '-m', 'unittest', 'discover', '-s', 'tests', '-p', pattern, '-v'],
@@ -208,41 +259,87 @@ def main(argv=None):
                            '--methods', 'reactive,oracle,belief_commit', '--c_preps', '0.1',
                            '--release_modes', 'legacy,stale_only,deadline', '--save_controller_traces',
                            '--out', str(output / name)]
-                run_child(command, env, log, min(1000, deadline - time.monotonic()))
+                run_child(command, env, log, deadline - time.monotonic())
                 stage['checks'] = validate_stage(output / name, episodes, condition_count)
                 run_child([python, '-m', 'foresight.eval.release_audit', '--run-dir', str(output / name)],
                           env, log, min(120, deadline - time.monotonic()))
                 stage['release_checks'] = json.loads((output / name / 'release_audit.json').read_text())
                 stage['status'] = 'passed'
                 atomic_json(output / 'run.json', record)
-                print(f'{name}: execution, scenario pairing, and observed deadline contract checks passed.', flush=True)
-                print('No additional GPU sweep is scheduled. Review these traces before expanding experiments.', flush=True)
-        record['status'] = 'completed'
-    except (KeyboardInterrupt, Exception) as error:
-        status = 130 if isinstance(error, KeyboardInterrupt) else 124 if isinstance(error, TimeoutError) else 1
-        record['status'] = 'interrupted' if status == 130 else 'timed_out' if status == 124 else 'failed'
-        record['error'] = str(error)
-        if record['stages'] and record['stages'][-1]['status'] == 'running':
-            record['stages'][-1]['status'] = record['status']
-        print(f'Stopped: {error}', file=sys.stderr, flush=True)
-    finally:
+                emit(f'{name}: execution, scenario pairing, and observed deadline contract checks passed.')
+                emit('No additional GPU sweep is scheduled. Review these traces before expanding experiments.')
+            record['status'] = 'completed'
+        except (KeyboardInterrupt, Exception) as error:
+            experiment_code = 130 if isinstance(error, KeyboardInterrupt) else 124 if isinstance(error, TimeoutError) else 1
+            record['status'] = 'interrupted' if experiment_code == 130 else 'timed_out' if experiment_code == 124 else 'failed'
+            record['error'] = str(error)
+            if record['stages'] and record['stages'][-1]['status'] == 'running':
+                record['stages'][-1]['status'] = record['status']
+            report_exception('Experiment stopped', error)
+
+        # Freeze the experiment record before publishing. Final publication state
+        # lives outside that immutable snapshot, in logs/last_run.json and receipt.
         record['elapsed_seconds'] = round(time.monotonic() - started, 3)
-        record['exit_code'] = status
-        atomic_json(output / 'run.json', record)
-        archive = shutil.make_archive(str(ROOT / 'logs' / run_id), 'zip', root_dir=output)
-        print(f'Local review ZIP: {archive}', flush=True)
+        record['exit_code'] = experiment_code
+        latest.update(experiment_status=record['status'], experiment_exit_code=experiment_code,
+                      experiment_elapsed_seconds=record['elapsed_seconds'], status='finalizing')
+        artifact_failed = False
+        try:
+            atomic_json(output / 'run.json', record)
+            save_latest()
+        except (KeyboardInterrupt, Exception) as error:
+            artifact_failed = True
+            latest['record_error'] = str(error)
+            report_exception('Could not save final experiment state', error)
+        try:
+            archive = shutil.make_archive(str(ROOT / 'logs' / run_id), 'zip', root_dir=output)
+            latest.update(archive_status='saved', archive_path=archive)
+            emit(f'Local review ZIP: {archive}')
+        except (KeyboardInterrupt, Exception) as error:
+            artifact_failed = True
+            latest.update(archive_status='failed', archive_error=str(error))
+            report_exception('Review ZIP failed; publication will still be attempted', error)
+
+        publication_failed = False
         if not args.no_publish:
             command = [sys.executable, str(ROOT / 'scripts/publish_experiment_results.py'),
-                       '--run-dir', str(output), '--log', str(output / 'console.log'), '--exit-code', str(status)]
-            publication = subprocess.run(command, cwd=ROOT)
-            if publication.returncode:
-                print('Results remain local. Retry publication without rerunning GPU work:', flush=True)
+                       '--run-dir', str(output), '--log', str(output / 'console.log'), '--exit-code', str(experiment_code)]
+            try:
+                # Publication is a separate bounded cleanup task, including when
+                # the experiment used its entire requested wall-time budget.
+                publication_code = run_child(command, env, log, 300, check=False)
+                latest['publication_exit_code'] = publication_code
+                if publication_code:
+                    raise RuntimeError(f'Publisher exited with status {publication_code}.')
+                receipt = verified_receipt(output / 'publication_receipt.json', run_id,
+                                           record['source_commit'], experiment_code)
+                latest.update(publication_status='verified', publication_receipt=receipt)
+            except (KeyboardInterrupt, Exception) as error:
+                publication_failed = True
+                latest['publication_status'] = 'failed'
+                if latest['publication_exit_code'] is None:
+                    latest['publication_exit_code'] = 130 if isinstance(error, KeyboardInterrupt) else 124 if isinstance(error, TimeoutError) else 1
+                latest['publication_error'] = str(error)
+                report_exception('Publication failed', error)
+                emit('Results remain local. Retry publication without rerunning GPU work:')
                 import shlex
-                print(shlex.join(command), flush=True)
-                if status == 0:
-                    status = 2
-        print(f'Experiment exit status: {record["exit_code"]}. The pod remains running; stop it when finished.', flush=True)
-    return status
+                emit(shlex.join(command))
+
+        overall_code = experiment_code or (2 if publication_failed else 1 if artifact_failed else 0)
+        latest.update(status='completed' if overall_code == 0 else 'failed',
+                      overall_exit_code=overall_code, elapsed_seconds=round(time.monotonic() - started, 3))
+        try:
+            save_latest()
+        except (KeyboardInterrupt, Exception) as error:
+            overall_code = overall_code or 1
+            report_exception('Could not save final launcher status', error)
+        emit(f'Experiment status: {record["status"]} (exit {experiment_code}).')
+        emit(f'Archive status: {latest["archive_status"]}.')
+        emit(f'Publication status: {latest["publication_status"]} (exit {latest["publication_exit_code"]}).')
+        emit(f'Overall runner exit status: {overall_code}. Status file: {latest_path}')
+        emit('The pod remains running; stop it when finished.')
+    lock.close()
+    return overall_code
 
 
 if __name__ == '__main__':

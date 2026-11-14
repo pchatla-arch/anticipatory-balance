@@ -1,0 +1,27 @@
+{
+  "reviewed_source_commit": "58445c74a02172a94d2e2db36e2b1a8449849c9e",
+  "code_parent_commit": "dc32c3da3dfa22a0f3499a1857a5dc6650723aa2",
+  "python_version": "3.12.14",
+  "operational_suite": {
+    "tests_run": 99,
+    "passed": 96,
+    "skipped": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped_reason": "JAX is not installed in the development workspace"
+  },
+  "voi_analytic_tests": {
+    "tests_run": 12,
+    "passed": 12,
+    "production_implementation_tested": false
+  },
+  "syntax_checks": [
+    "bash -n for start.sh, start_empty_pod.sh and bootstrap_fresh_pod.sh",
+    "ast.parse for scripts/*.py"
+  ],
+  "publication_test_environment": "Temporary local bare Git repositories, no external writes",
+  "pod_control_test_environment": "Mock commands only; no real stop requested",
+  "response_fit": "Subset checksum/group validation and CPU refit reproduced the published exploratory metrics",
+  "gpu_experiments_run": false,
+  "scope": "Validation of launch/result-publication/finalization lifecycle and mathematical formulation, not GPU runtime success or improved control performance"
+}

@@ -1,0 +1,50 @@
+{
+  "commit": "58445c74a02172a94d2e2db36e2b1a8449849c9e",
+  "episodes_blob": "820e3dfd0b079c53bd1d8678280bc10bdaab95d5",
+  "summary_blob": "e50c3a0716ad9949c823c5da9351afba56583535",
+  "source_rows": 16384,
+  "source_bytes": 2621657,
+  "source_paths": [
+    "results/E6b_oracle_v2/episodes.csv",
+    "results/E6b_oracle_v2/summary.json"
+  ],
+  "group_key": [
+    "batch",
+    "mass",
+    "speed",
+    "t_hit_nominal"
+  ],
+  "n_scenarios": 512,
+  "repository": "pchatla-arch/anticipatory-balance",
+  "source_blob_validation": {
+    "method": "At audit extraction, recursively retrieved the pinned commit tree and matched each source path to its Git blob SHA. Retrieved both blobs by SHA and independently recomputed SHA-1 of the exact ASCII payload prefixed by 'blob <byte_length>\\0'. Preserved original payload line endings for this calculation.",
+    "episodes": {
+      "path": "results/E6b_oracle_v2/episodes.csv",
+      "tree_blob_sha1": "820e3dfd0b079c53bd1d8678280bc10bdaab95d5",
+      "computed_git_blob_sha1": "820e3dfd0b079c53bd1d8678280bc10bdaab95d5",
+      "bytes": 2621657,
+      "match": true
+    },
+    "summary": {
+      "path": "results/E6b_oracle_v2/summary.json",
+      "tree_blob_sha1": "e50c3a0716ad9949c823c5da9351afba56583535",
+      "computed_git_blob_sha1": "e50c3a0716ad9949c823c5da9351afba56583535",
+      "bytes": 11565,
+      "match": true
+    },
+    "offline_reproduction": "audit_response.py verifies the committed subset SHA-256 before fitting. It does not download or revalidate the upstream blobs at runtime. To revalidate source provenance, retrieve the pinned Git blobs and recompute their Git object hashes."
+  },
+  "subset": {
+    "filename": "e6b_response_subset.csv",
+    "sha256": "08c47e0177077fe24029e5cc9b72fc021f29f31bf61f682026021ab73b3041ef",
+    "bytes": 235470,
+    "rows": 3584,
+    "retained_leads_s": [-1.0, 0.1, 0.2, 0.3, 0.5, 0.75, 1.0],
+    "selection": "Source rows with numeric mode_brace=1 and launch=1, retaining only lead in {-1, 0.1, 0.2, 0.3, 0.5, 0.75, 1}. Preserve source row order. No contact, failure, readiness, or censor-status filtering. Six BRACE leads (0.1 to 1) are fitted together; CONTINUE lead=-1 is fitted separately. Lead=9, zero-command mode, and no-launch controls are excluded.",
+    "columns": ["scenario_id", "batch", "lead", "mass", "speed", "momentum", "t_hit_nominal", "contact_step", "contact", "fell", "censored"],
+    "scenario_id": "Pipe-joined numeric-normalized values of batch, mass, speed, t_hit_nominal in that order. Verified unique among the 512 source scenario tuples; all seven retained rows for each scenario use the same ID.",
+    "serialization": "UTF-8 CSV without BOM, LF line endings including one final newline, comma separator. Source numeric strings were parsed as JavaScript Numbers and serialized with their default decimal string representation. No source numeric precision was added.",
+    "scenario_groups_per_batch": {"0": 256, "1": 256},
+    "endpoint": "Failure during the recorded six-second episode; censored nonfalls retained. This is not complete 2.5-second post-contact survival."
+  }
+}

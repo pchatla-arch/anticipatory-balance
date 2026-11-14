@@ -25,12 +25,23 @@ REMOTE = "origin"
 BRANCH = "foresight/experiment-results"
 REF = "refs/heads/" + BRANCH
 PUBLIC_REPOSITORY = "https://github.com/pchatla-arch/anticipatory-balance"
-RESULT_FILES = ("summary.json", "manifest.json", "scenarios.csv", "episodes.csv")
-RUN_FILES = frozenset((*RESULT_FILES, "console.log", "publication.json"))
+SOURCE_DIRECTORY = Path(__file__).resolve().parents[1]
+STRUCTURED_FILES = frozenset({
+    "run.json", "preflight.json", "summary.json", "manifest.json", "config.json",
+    "batches.json", "release_audit.json", "setup.json", "setup_status.json", "status.json",
+    "error.json", "errors.json", "scenarios.csv", "episodes.csv", "frontier.csv",
+    "error.log", "errors.log", "setup.log", "bootstrap.log",
+})
+GENERATED_FILES = frozenset({"console.log", "publication.json"})
+RECEIPT_FILE = "publication_receipt.json"
 MAX_RESULT_BYTES = 64 * 1024 * 1024
 MAX_LOG_BYTES = 1024 * 1024
 RUN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}\Z")
 OBJECT_ID = re.compile(rb"(?:[0-9a-f]{40}|[0-9a-f]{64})\Z")
+CONDITION_CSV = re.compile(
+    r"batch[0-9]{3,}_condition[0-9]{3,}_"
+    r"(?:reactive|oracle|always|ttc_threshold|belief_commit)"
+    r"(?:_(?:none|oracle|legacy|stale_only|deadline))?\.csv\Z")
 
 
 class PublicationError(Exception):
@@ -48,9 +59,17 @@ def sanitize(text: str) -> str:
   text = re.sub(
       r"(?i)(\bauthorization[\"']?\s*[:=]\s*[\"']?\s*)[^\r\n\"']+",
       r"\1[REDACTED_AUTHORIZATION]", text)
-  return re.sub(
+  text = re.sub(
       r"(?i)\b(Bearer|Basic)\s+[A-Za-z0-9._~+/=-]+",
       r"\1 [REDACTED]", text)
+  text = re.sub(
+      r"(?i)([?&](?:token|access_token|api_key|secret|password)=)[^&\s\"']+",
+      r"\1[REDACTED]", text)
+  return re.sub(
+      r"(?i)([\"']?(?:api[_-]?key|access[_-]?token|token|password|passwd|client[_-]?secret|"
+      r"secret[_-]?key|[A-Z][A-Z0-9_]*_(?:TOKEN|API_KEY|PASSWORD|SECRET|SECRET_ACCESS_KEY))"
+      r"[\"']?\s*[:=]\s*)([\"']?)([^\r\n\s,;}\"']+)(\2)",
+      lambda match: match[1] + match[2] + "[REDACTED]" + match[4], text)
 
 
 class Git:
@@ -157,9 +176,17 @@ def allowed_tree_path(path: str) -> bool:
   if path == "latest.json":
     return True
   parts = path.split("/")
-  return (3 <= len(parts) <= 6 and parts[0] == "results"
-          and all(RUN_ID.fullmatch(part) is not None for part in parts[1:])
-          and Path(parts[-1]).suffix in (".json", ".csv", ".log"))
+  if (not 3 <= len(parts) <= 5 or parts[0] != "results"
+      or not all(RUN_ID.fullmatch(part) is not None for part in parts[1:])):
+    return False
+  relative = parts[2:]
+  if len(relative) == 1:
+    return relative[0] in STRUCTURED_FILES | GENERATED_FILES
+  if len(relative) == 2 and relative[-1] in STRUCTURED_FILES:
+    return relative[0] not in {"episodes", "traces", "per_episode"}
+  return (len(relative) in (2, 3)
+          and relative[-2] in {"episodes", "traces", "per_episode"}
+          and CONDITION_CSV.fullmatch(relative[-1]) is not None)
 
 
 def read_result(path: Path) -> bytes:
@@ -195,87 +222,189 @@ def json_bytes(value: dict) -> bytes:
   return (json.dumps(value, indent=2, sort_keys=True) + "\n").encode("utf-8")
 
 
+def atomic_receipt(run_dir: Path, record: dict) -> None:
+  """Replace the local receipt only after a complete write and fsync."""
+  temporary = None
+  try:
+    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=run_dir,
+                                     prefix=".publication-receipt-", delete=False) as stream:
+      temporary = Path(stream.name)
+      json.dump(record, stream, indent=2, sort_keys=True, allow_nan=False)
+      stream.write("\n")
+      stream.flush()
+      os.fsync(stream.fileno())
+    temporary.replace(run_dir / RECEIPT_FILE)
+  finally:
+    if temporary is not None:
+      temporary.unlink(missing_ok=True)
+
+
+def remote_tip(git: Git) -> str | None:
+  status, output = git.run("ls-remote", "--exit-code", "--heads", REMOTE, REF,
+                           operation="Inspecting results branch", network=True,
+                           allowed=(0, 2))
+  if status == 2:
+    return None
+  lines = output.splitlines()
+  if len(lines) != 1:
+    raise PublicationError("Results branch lookup was ambiguous.")
+  fields = lines[0].split(b"\t")
+  if len(fields) != 2 or fields[1] != REF.encode() or not OBJECT_ID.fullmatch(fields[0]):
+    raise PublicationError("Results branch lookup returned invalid metadata.")
+  return fields[0].decode("ascii")
+
+
+def fetch_object(git: Git, commit: str) -> None:
+  # Do not update FETCH_HEAD, remote-tracking branches, or the active checkout.
+  git.run("fetch", "--no-tags", "--no-write-fetch-head", "--no-recurse-submodules",
+          "--refmap=", REMOTE, commit, operation="Fetching results history", network=True)
+
+
+def verify_published_commit(git: Git, commit: str, tip: str | None) -> bool:
+  """Accept our exact tip or a later tip retaining our publication in its history."""
+  if tip is None:
+    return False
+  if tip == commit:
+    return True
+  fetch_object(git, tip)
+  status, _ = git.run("merge-base", "--is-ancestor", commit, tip,
+                      operation="Verifying published results ancestry", allowed=(0, 1))
+  return status == 0
+
+
 def publish(run_dir: Path, log: Path, exit_code: int) -> str:
   run_dir = run_dir.expanduser().resolve()
   run_id = run_dir.name
-  if RUN_ID.fullmatch(run_id) is None:
-    raise PublicationError("Run directory basename must be 1–128 letters, digits, dots, underscores, or hyphens, starting with a letter or digit.")
+  if RUN_ID.fullmatch(run_id) is None or not run_dir.is_dir():
+    raise PublicationError("Run directory must exist and have a valid publication name.")
   prefix = "results/" + run_id + "/"
-  files = {}
-  for path in sorted(run_dir.rglob("*")):
-    relative = path.relative_to(run_dir).as_posix()
-    if path.is_symlink():
-      raise PublicationError("Symlinks are not published.")
-    if path.is_file() and allowed_tree_path(prefix + relative) and relative != "console.log":
-      files[prefix + relative] = read_result(path)
-  if sum(len(content) for content in files.values()) > 128 * 1024 * 1024:
-    raise PublicationError("Compact results exceed the 128 MiB publication limit.")
-  files[prefix + "console.log"], truncated = read_log(log.expanduser())
-  source_directory = Path(__file__).resolve().parents[1]
+  branch_url = PUBLIC_REPOSITORY + "/tree/" + BRANCH + "/results/" + quote(run_id, safe="")
+  receipt = {
+      "schema_version": 1, "status": "pending", "verified": False,
+      "run_id": run_id, "run_exit_code": exit_code, "run_source": None,
+      "publisher_source": None, "branch": BRANCH, "ref": REF,
+      "results_url": None, "branch_url": branch_url, "commit": None,
+      "remote_tip": None, "attempts": 0, "error": None,
+      "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+  }
+  try:
+    # Invalidate a previous verified receipt before any new attempt or validation.
+    atomic_receipt(run_dir, receipt)
+    run_path = run_dir / "run.json"
+    if run_path.is_symlink() or not run_path.is_file():
+      raise PublicationError("A regular run.json with the original source_commit is required.")
+    try:
+      run_record = json.loads(run_path.read_text(encoding="utf-8"))
+      source = run_record["source_commit"]
+      valid_source = isinstance(source, str) and OBJECT_ID.fullmatch(source.encode("ascii"))
+    except (OSError, ValueError, KeyError, TypeError, UnicodeError):
+      valid_source = False
+    if not valid_source:
+      raise PublicationError("run.json must contain a full source_commit object ID.")
+    if run_record.get("run_id", run_id) != run_id:
+      raise PublicationError("run.json run_id does not match the run directory.")
+    if "exit_code" in run_record and run_record["exit_code"] != exit_code:
+      raise PublicationError("The requested exit code does not match the frozen run.json.")
+    receipt["run_source"] = source
+    atomic_receipt(run_dir, receipt)
 
-  with tempfile.TemporaryDirectory(prefix="foresight-publish-") as temporary:
-    git = Git(source_directory, Path(temporary) / "index")
-    source = git.oid("rev-parse", "HEAD", operation="Reading source revision")
-    git.identity()
-    git.validate_origin()
-    status, output = git.run("ls-remote", "--exit-code", "--heads", REMOTE, REF,
-                             operation="Inspecting results branch", network=True,
-                             allowed=(0, 2))
-    parent = None
-    if status == 0:
-      lines = output.splitlines()
-      if len(lines) != 1:
-        raise PublicationError("Results branch lookup was ambiguous.")
-      fields = lines[0].split(b"\t")
-      if len(fields) != 2 or fields[1] != REF.encode() or not OBJECT_ID.fullmatch(fields[0]):
-        raise PublicationError("Results branch lookup returned invalid metadata.")
-      parent = fields[0].decode("ascii")
-      # Fetch only the advertised object; do not update FETCH_HEAD or tracking refs.
-      git.run("fetch", "--no-tags", "--no-write-fetch-head", "--no-recurse-submodules",
-              "--refmap=", REMOTE, parent, operation="Fetching results history", network=True)
-      _, tree_paths = git.run("ls-tree", "-r", "--name-only", "-z", parent,
-                              operation="Checking results tree")
-      if any(not allowed_tree_path(path.decode("utf-8"))
-             for path in tree_paths.split(b"\0") if path):
-        raise PublicationError("Results branch contains files outside the publication allowlist.")
-      git.run("read-tree", parent, operation="Preparing results index")
-    else:
-      # The first results commit is independent of the code branch's tree/history.
-      git.run("read-tree", "--empty", operation="Preparing empty results index")
+    files = {}
+    for path in sorted(run_dir.rglob("*")):
+      relative = path.relative_to(run_dir).as_posix()
+      if relative in GENERATED_FILES or relative == RECEIPT_FILE:
+        continue
+      if not allowed_tree_path(prefix + relative):
+        continue
+      if path.is_symlink():
+        raise PublicationError("Symlinks are not published.")
+      if path.is_file():
+        files[prefix + relative] = read_result(path)
+    if sum(len(content) for content in files.values()) > 128 * 1024 * 1024:
+      raise PublicationError("Compact results exceed the 128 MiB publication limit.")
+    files[prefix + "console.log"], truncated = read_log(log.expanduser())
 
-    record = {
-        "run_id": run_id,
-        "results_path": prefix.rstrip("/"),
-        "source_commit": source,
-        "run_exit_code": exit_code,
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
-    }
-    files["latest.json"] = json_bytes(record)
-    files[prefix + "publication.json"] = json_bytes({
-        **record, "schema_version": 1, "console_log_truncated": truncated,
-        "result_files_present": sorted(path[len(prefix):] for path in files if path.startswith(prefix)),
-    })
-    # Remove exactly this run prefix from the temporary index before retrying.
-    _, previous = git.run("ls-files", "-z", "--", prefix, operation="Listing previous run artifacts")
-    previous_paths = [p.decode("utf-8") for p in previous.split(b"\0") if p]
-    if previous_paths:
-      git.run("update-index", "--force-remove", "--", *previous_paths,
-              operation="Preparing run snapshot")
-    entries = []
-    for path, content in sorted(files.items()):
-      blob = git.oid("hash-object", "-w", "--stdin", operation="Writing result blob", data=content)
-      entries.append(f"100644 {blob}\t{path}\0".encode("utf-8"))
-    git.run("update-index", "-z", "--index-info", operation="Indexing result blobs",
-            data=b"".join(entries))
-    tree = git.oid("write-tree", operation="Writing results tree")
-    parents = ("-p", parent) if parent is not None else ()
-    commit = git.oid("commit-tree", tree, *parents, "-m", f"Publish pod results {run_id}",
-                     operation="Creating results commit")
-    # A concurrent publisher causes an ordinary non-fast-forward rejection.
-    # Nothing is forced; rerunning will build on the new remote parent.
-    git.run("push", REMOTE, f"{commit}:{REF}",
-            operation="Publishing results branch", network=True)
-  return PUBLIC_REPOSITORY + "/tree/" + BRANCH + "/results/" + quote(run_id, safe="")
+    with tempfile.TemporaryDirectory(prefix="foresight-publish-") as temporary:
+      git = Git(SOURCE_DIRECTORY, Path(temporary) / "index")
+      publisher_source = git.oid("rev-parse", "HEAD", operation="Reading publisher revision")
+      receipt["publisher_source"] = publisher_source
+      git.identity()
+      git.validate_origin()
+
+      # One retry is permitted only when another writer changed the remote parent.
+      for attempt in range(1, 3):
+        receipt["attempts"] = attempt
+        parent = remote_tip(git)
+        if parent is not None:
+          fetch_object(git, parent)
+          _, tree_paths = git.run("ls-tree", "-r", "--name-only", "-z", parent,
+                                  operation="Checking results tree")
+          if any(not allowed_tree_path(path.decode("utf-8"))
+                 for path in tree_paths.split(b"\0") if path):
+            raise PublicationError("Results branch contains files outside the publication allowlist.")
+          git.run("read-tree", parent, operation="Preparing results index")
+        else:
+          git.run("read-tree", "--empty", operation="Preparing empty results index")
+
+        record = {
+            "run_id": run_id, "results_path": prefix.rstrip("/"),
+            "source_commit": source, "publisher_source_commit": publisher_source,
+            "run_exit_code": exit_code, "timestamp_utc": receipt["timestamp_utc"],
+        }
+        snapshot = dict(files)
+        snapshot["latest.json"] = json_bytes(record)
+        snapshot[prefix + "publication.json"] = json_bytes({
+            **record, "schema_version": 2, "console_log_truncated": truncated,
+            "result_files_present": sorted(path[len(prefix):] for path in files),
+        })
+        _, previous = git.run("ls-files", "-z", "--", prefix,
+                              operation="Listing previous run artifacts")
+        previous_paths = [path.decode("utf-8") for path in previous.split(b"\0") if path]
+        if previous_paths:
+          git.run("update-index", "--force-remove", "--", *previous_paths,
+                  operation="Preparing run snapshot")
+        entries = []
+        for path, content in sorted(snapshot.items()):
+          blob = git.oid("hash-object", "-w", "--stdin",
+                         operation="Writing result blob", data=content)
+          entries.append(f"100644 {blob}\t{path}\0".encode("utf-8"))
+        git.run("update-index", "-z", "--index-info",
+                operation="Indexing result blobs", data=b"".join(entries))
+        tree = git.oid("write-tree", operation="Writing results tree")
+        parents = ("-p", parent) if parent is not None else ()
+        commit = git.oid("commit-tree", tree, *parents, "-m", f"Publish pod results {run_id}",
+                         operation="Creating results commit")
+        receipt.update(commit=commit, remote_tip=None,
+                       results_url=PUBLIC_REPOSITORY + "/tree/" + commit + "/results/" + quote(run_id, safe=""))
+        atomic_receipt(run_dir, receipt)
+        push_error = None
+        try:
+          git.run("push", REMOTE, f"{commit}:{REF}",
+                  operation="Publishing results branch", network=True)
+        except PublicationError as exc:
+          push_error = exc
+
+        tip = remote_tip(git)
+        if verify_published_commit(git, commit, tip):
+          receipt.update(status="verified", verified=True, remote_tip=tip, error=None)
+          atomic_receipt(run_dir, receipt)
+          return receipt["results_url"]
+        if push_error is not None and attempt == 1 and tip is not None and tip != parent:
+          continue
+        if push_error is not None:
+          raise push_error
+        raise PublicationError("The pushed results commit could not be verified on the remote branch.")
+    raise PublicationError("The results branch changed during both bounded publication attempts.")
+  except Exception as exc:
+    error = exc if isinstance(exc, PublicationError) else PublicationError(
+        "Publication failed during local preparation.")
+    receipt.update(status="failed", verified=False, error=str(error))
+    try:
+      atomic_receipt(run_dir, receipt)
+    except OSError:
+      pass
+    if error is exc:
+      raise
+    raise error from None
 
 
 def main() -> int:

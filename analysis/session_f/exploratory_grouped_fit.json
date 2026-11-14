@@ -1,0 +1,363 @@
+{
+  "source_commit": "58445c74a02172a94d2e2db36e2b1a8449849c9e",
+  "source_blob": "820e3dfd0b079c53bd1d8678280bc10bdaab95d5",
+  "runtime": {
+    "python": "3.12.14",
+    "python_implementation": "CPython",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0"
+  },
+  "validation": {
+    "subset_sha256": "08c47e0177077fe24029e5cc9b72fc021f29f31bf61f682026021ab73b3041ef",
+    "subset_bytes": 235470,
+    "rows": 3584,
+    "scenario_groups": 512,
+    "scenario_groups_per_batch": {
+      "0": 256,
+      "1": 256
+    },
+    "retained_leads_s": [
+      -1.0,
+      0.1,
+      0.2,
+      0.3,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "positive_finite_momentum_speed": true,
+    "binary_outcomes": true,
+    "one_row_per_scenario_per_lead": true,
+    "batch_isolation": true
+  },
+  "split": "Two directions: fit batch 0 and evaluate batch 1, then reverse. All rows for each scenario stay in one fold: six BRACE leads and a separately analyzed CONTINUE row. Original 512 scenarios, 256 per batch. Exploratory, not confirmatory policy test.",
+  "selection": "Source rows with numeric mode_brace=1 and launch=1, retaining only lead in {-1, 0.1, 0.2, 0.3, 0.5, 0.75, 1}. Preserve source row order. No contact, failure, readiness, or censor-status filtering. Six BRACE leads (0.1 to 1) are fitted together; CONTINUE lead=-1 is fitted separately. Lead=9, zero-command mode, and no-launch controls are excluded.",
+  "endpoint": "Failure during the recorded six-second episode; censored nonfalls retained. This is not complete 2.5-second post-contact survival.",
+  "l2_penalty": "1e-4 on standardized non-intercept coefficients",
+  "models": {
+    "logJ": {
+      "pooled": {
+        "n": 3072,
+        "fall_rate": 0.4039713541666667,
+        "predicted_rate": 0.4044886321461713,
+        "brier": 0.17612596511034265,
+        "log_loss": 0.5233541094093022
+      },
+      "folds": [
+        {
+          "held_batch": 0,
+          "n": 1536,
+          "fall_rate": 0.4049479166666667,
+          "predicted_rate": 0.38366769518954974,
+          "brier": 0.1750066890141099,
+          "log_loss": 0.5169548965200473
+        },
+        {
+          "held_batch": 1,
+          "n": 1536,
+          "fall_rate": 0.4029947916666667,
+          "predicted_rate": 0.4253095691027928,
+          "brier": 0.1772452412065754,
+          "log_loss": 0.529753322298557
+        }
+      ],
+      "by_lead": [
+        {
+          "lead_s": 0.1,
+          "n": 512,
+          "fall_rate": 0.634765625,
+          "predicted_rate": 0.4044886321461712,
+          "brier": 0.18672904513772307,
+          "log_loss": 0.5460935468473338
+        },
+        {
+          "lead_s": 0.2,
+          "n": 512,
+          "fall_rate": 0.59765625,
+          "predicted_rate": 0.4044886321461712,
+          "brier": 0.17455379750389266,
+          "log_loss": 0.52330252392974
+        },
+        {
+          "lead_s": 0.3,
+          "n": 512,
+          "fall_rate": 0.494140625,
+          "predicted_rate": 0.4044886321461712,
+          "brier": 0.158004624197643,
+          "log_loss": 0.48501452913836157
+        },
+        {
+          "lead_s": 0.5,
+          "n": 512,
+          "fall_rate": 0.412109375,
+          "predicted_rate": 0.4044886321461712,
+          "brier": 0.1462520400519019,
+          "log_loss": 0.4521146539336277
+        },
+        {
+          "lead_s": 0.75,
+          "n": 512,
+          "fall_rate": 0.189453125,
+          "predicted_rate": 0.4044886321461712,
+          "brier": 0.1818746014056473,
+          "log_loss": 0.5352262066932312
+        },
+        {
+          "lead_s": 1.0,
+          "n": 512,
+          "fall_rate": 0.095703125,
+          "predicted_rate": 0.4044886321461712,
+          "brier": 0.2093416823652481,
+          "log_loss": 0.5983731959135188
+        }
+      ]
+    },
+    "logJ_logv": {
+      "pooled": {
+        "n": 3072,
+        "fall_rate": 0.4039713541666667,
+        "predicted_rate": 0.4045679045763701,
+        "brier": 0.16963749132759318,
+        "log_loss": 0.5070320183448759
+      },
+      "folds": [
+        {
+          "held_batch": 0,
+          "n": 1536,
+          "fall_rate": 0.4049479166666667,
+          "predicted_rate": 0.37965307825467437,
+          "brier": 0.16766126278917395,
+          "log_loss": 0.49835946491295363
+        },
+        {
+          "held_batch": 1,
+          "n": 1536,
+          "fall_rate": 0.4029947916666667,
+          "predicted_rate": 0.42948273089806577,
+          "brier": 0.17161371986601234,
+          "log_loss": 0.5157045717767982
+        }
+      ],
+      "by_lead": [
+        {
+          "lead_s": 0.1,
+          "n": 512,
+          "fall_rate": 0.634765625,
+          "predicted_rate": 0.40456790457637015,
+          "brier": 0.17931680653423865,
+          "log_loss": 0.5247763350852023
+        },
+        {
+          "lead_s": 0.2,
+          "n": 512,
+          "fall_rate": 0.59765625,
+          "predicted_rate": 0.40456790457637015,
+          "brier": 0.1630013869144778,
+          "log_loss": 0.4914954385191318
+        },
+        {
+          "lead_s": 0.3,
+          "n": 512,
+          "fall_rate": 0.494140625,
+          "predicted_rate": 0.40456790457637015,
+          "brier": 0.14342960642845656,
+          "log_loss": 0.45182668611548676
+        },
+        {
+          "lead_s": 0.5,
+          "n": 512,
+          "fall_rate": 0.412109375,
+          "predicted_rate": 0.40456790457637015,
+          "brier": 0.13424071085193573,
+          "log_loss": 0.41912373212350396
+        },
+        {
+          "lead_s": 0.75,
+          "n": 512,
+          "fall_rate": 0.189453125,
+          "predicted_rate": 0.40456790457637015,
+          "brier": 0.18366330423565558,
+          "log_loss": 0.5408648317244854
+        },
+        {
+          "lead_s": 1.0,
+          "n": 512,
+          "fall_rate": 0.095703125,
+          "predicted_rate": 0.40456790457637015,
+          "brier": 0.21417313300079455,
+          "log_loss": 0.6141050865014452
+        }
+      ]
+    },
+    "logJ_lead_interactions": {
+      "pooled": {
+        "n": 3072,
+        "fall_rate": 0.4039713541666667,
+        "predicted_rate": 0.40419129803514514,
+        "brier": 0.12429888742641783,
+        "log_loss": 0.3891739186951803
+      },
+      "folds": [
+        {
+          "held_batch": 0,
+          "n": 1536,
+          "fall_rate": 0.4049479166666667,
+          "predicted_rate": 0.3873850971512754,
+          "brier": 0.1229158642605394,
+          "log_loss": 0.384071071428592
+        },
+        {
+          "held_batch": 1,
+          "n": 1536,
+          "fall_rate": 0.4029947916666667,
+          "predicted_rate": 0.4209974989190149,
+          "brier": 0.12568191059229628,
+          "log_loss": 0.3942767659617686
+        }
+      ],
+      "by_lead": [
+        {
+          "lead_s": 0.1,
+          "n": 512,
+          "fall_rate": 0.634765625,
+          "predicted_rate": 0.6369804575997289,
+          "brier": 0.11922896383926056,
+          "log_loss": 0.3676430194818663
+        },
+        {
+          "lead_s": 0.2,
+          "n": 512,
+          "fall_rate": 0.59765625,
+          "predicted_rate": 0.5818283843820936,
+          "brier": 0.12666511236209302,
+          "log_loss": 0.3950697778636726
+        },
+        {
+          "lead_s": 0.3,
+          "n": 512,
+          "fall_rate": 0.494140625,
+          "predicted_rate": 0.5204898957715361,
+          "brier": 0.14595339678159241,
+          "log_loss": 0.4542741138152537
+        },
+        {
+          "lead_s": 0.5,
+          "n": 512,
+          "fall_rate": 0.412109375,
+          "predicted_rate": 0.38332803401041227,
+          "brier": 0.142686466854983,
+          "log_loss": 0.44032102441840226
+        },
+        {
+          "lead_s": 0.75,
+          "n": 512,
+          "fall_rate": 0.189453125,
+          "predicted_rate": 0.2114838724460011,
+          "brier": 0.1288705108295036,
+          "log_loss": 0.3948142406868884
+        },
+        {
+          "lead_s": 1.0,
+          "n": 512,
+          "fall_rate": 0.095703125,
+          "predicted_rate": 0.09103714400109908,
+          "brier": 0.0823888738910744,
+          "log_loss": 0.28292133590499885
+        }
+      ]
+    },
+    "logJ_logv_lead_interactions": {
+      "pooled": {
+        "n": 3072,
+        "fall_rate": 0.4039713541666667,
+        "predicted_rate": 0.40419353973506267,
+        "brier": 0.1139992164995313,
+        "log_loss": 0.362950745632991
+      },
+      "folds": [
+        {
+          "held_batch": 0,
+          "n": 1536,
+          "fall_rate": 0.4049479166666667,
+          "predicted_rate": 0.38356422496662784,
+          "brier": 0.1113178549459709,
+          "log_loss": 0.3537030739433393
+        },
+        {
+          "held_batch": 1,
+          "n": 1536,
+          "fall_rate": 0.4029947916666667,
+          "predicted_rate": 0.4248228545034975,
+          "brier": 0.11668057805309169,
+          "log_loss": 0.3721984173226427
+        }
+      ],
+      "by_lead": [
+        {
+          "lead_s": 0.1,
+          "n": 512,
+          "fall_rate": 0.634765625,
+          "predicted_rate": 0.636094519926742,
+          "brier": 0.10658886560875311,
+          "log_loss": 0.3355516726842522
+        },
+        {
+          "lead_s": 0.2,
+          "n": 512,
+          "fall_rate": 0.59765625,
+          "predicted_rate": 0.5814220430980236,
+          "brier": 0.10806044791487854,
+          "log_loss": 0.3478918855141939
+        },
+        {
+          "lead_s": 0.3,
+          "n": 512,
+          "fall_rate": 0.494140625,
+          "predicted_rate": 0.520797295669589,
+          "brier": 0.12717503428522647,
+          "log_loss": 0.41576220812367093
+        },
+        {
+          "lead_s": 0.5,
+          "n": 512,
+          "fall_rate": 0.412109375,
+          "predicted_rate": 0.384315336712005,
+          "brier": 0.13023815499670272,
+          "log_loss": 0.4017751131879208
+        },
+        {
+          "lead_s": 0.75,
+          "n": 512,
+          "fall_rate": 0.189453125,
+          "predicted_rate": 0.21095931754281788,
+          "brier": 0.12951287834754827,
+          "log_loss": 0.3942662383122304
+        },
+        {
+          "lead_s": 1.0,
+          "n": 512,
+          "fall_rate": 0.095703125,
+          "predicted_rate": 0.09157272546119835,
+          "brier": 0.0824199178440787,
+          "log_loss": 0.28245735597567756
+        }
+      ]
+    }
+  },
+  "continue": {
+    "logJ": {
+      "n": 512,
+      "fall_rate": 0.701171875,
+      "predicted_rate": 0.7021552852263064,
+      "brier": 0.09351617576627172,
+      "log_loss": 0.30208924608018733
+    },
+    "logJ_logv": {
+      "n": 512,
+      "fall_rate": 0.701171875,
+      "predicted_rate": 0.7030522102901081,
+      "brier": 0.08901613919862392,
+      "log_loss": 0.2830411967826807
+    }
+  }
+}

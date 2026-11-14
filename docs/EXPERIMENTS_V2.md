@@ -10,7 +10,31 @@ cadence support, per-condition output, pooled counts, and result publisher. It
 adds capture-time launch validity and an auditable release contract. CPU tests
 are available; the pod run is the first GPU integration check for these changes.
 
-## Empty pod: install and run
+## One command: existing or empty pod
+
+The supported entry point is now:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/pchatla-arch/anticipatory-balance/foresight/experiments-v2/scripts/start.sh) f
+```
+
+`f` currently means **F0**, the small release diagnostic described below. It does
+not start new lookahead, rendered-depth, or PPO training experiments. It uses a
+separate checkout at `/workspace/foresight-runner` and the existing Playground
+venv when available. The original Session E checkout is not switched.
+
+The wrapper enables automatic stop by default. A stop request requires this
+invocation's verified GitHub publication, recognized RunPod controls and own pod
+ID, and no active GPU processes. `NO_STOP=1` before the command disables it.
+Stopping is requested through `runpodctl`; `git push` alone does not stop a pod.
+The launcher never requests termination. Check RunPod for actual stopped state;
+storage charges can continue after compute stops.
+
+The complete operating guide, including failure recovery, is
+[POD_RUNBOOK.md](POD_RUNBOOK.md). Code is CPU-tested; F0 remains the first GPU
+integration validation of this release.
+
+## Fresh installation details
 
 Use `scripts/start_empty_pod.sh` from the published release. It works from any
 directory and installs missing system tools, the pinned Python 3.12 environment,
@@ -36,24 +60,26 @@ its frozen `rss2025/uv.lock`, and Menagerie
 installed locally without changing shell profiles. No separate latest-version
 dependency resolution runs.
 
-Setup runs in the background while GitHub CLI offers browser/device login. This
-login authorizes the new pod to upload results; the ChatGPT GitHub connection does
-not authenticate the pod. Canceling login does not stop setup. If the CLI is not
-available from the OS package manager, evaluation continues and results are kept
-locally. Set `FORESIGHT_SKIP_GITHUB_LOGIN=1` to skip that login deliberately.
+GitHub CLI offers browser/device login before GPU setup or evaluation begins.
+This authorizes the new pod to upload results; the ChatGPT GitHub connection does
+not authenticate the pod. Canceling login prevents launch. With existing working
+Git credentials, set `FORESIGHT_SKIP_GITHUB_LOGIN=1` to skip that login.
 
 ```bash
 tmux attach -t foresight-run
 # Or inspect the combined setup/experiment log:
-tail -f /workspace/anticipatory-balance/logs/fresh_pod.log
+tail -f /workspace/foresight-runner/logs/fresh_pod.log
 ```
 
 The environment-install step is limited to 25 minutes and can resume its owned
 partial installation. Initial OS package-manager steps have separate timeouts.
 The 20-minute experiment budget starts after environment setup. An existing
 unrelated venv is checked and reused without package changes. An existing tmux
-session is preserved. After a finished/failed session, exit its shell before
-rerunning the entry point. These are process limits, not automatic pod shutdown.
+session is preserved. The new worker exits its tmux session when finalization
+ends; it does not replace another running session. An old retained shell from an
+earlier launcher must be exited manually. Process limits and pod stop are
+separate checks. Direct `start_empty_pod.sh` use retains opt-in automatic stop;
+the recommended `start.sh f` wrapper enables it.
 
 ## Existing environment: start evaluation
 
@@ -99,10 +125,14 @@ python3 scripts/run_experiments_v2.py --mode release --max-minutes 20
    A failed push prints a publication-only retry command.
 
 The default limit is 20 minutes for experiment processes, including tests and
-preflight. The evaluation child has a maximum of 1,000 seconds within that total.
-Timeouts retain completed condition files. Packaging and publication can take
-additional time. **The runner does not stop the pod or its billing.** Save results
-and stop the pod after the run if no further GPU work is needed.
+preflight. The evaluation uses the remaining budget; the former independent
+1,000-second cap has been removed. Timeouts retain completed condition files.
+Packaging and bounded publication can take additional time. Direct runner use
+does not stop the pod; the recommended wrapper invokes a separate finalizer
+after verified upload. Upload failures retain local data and prevent automatic
+stop. `logs/last_run.json` separates experiment, archive, publication, and overall
+status. The publisher verifies the remote commit and preserves the original
+run's source revision even if publication is retried from a later checkout.
 
 ## Release contracts and pass criteria
 
