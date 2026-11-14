@@ -1,0 +1,47 @@
+{
+  "nominal": "/workspace/anticipatory-balance/logs/aware_s1/G1ImpactAware-20261114-204432/checkpoints/000202342400",
+  "brace": "/workspace/anticipatory-balance/checkpoints/brace2_s1/000202342400",
+  "episodes_per_condition": 2048,
+  "latencies_steps": [
+    0
+  ],
+  "period": 1,
+  "env_skill": "aware",
+  "detector": {
+    "sigma0": 0.03,
+    "sigma1": 0.02,
+    "miss_prob": 0.05,
+    "fov_deg": 120.0,
+    "max_range": 6.0
+  },
+  "rule": {
+    "commit_steps": 15,
+    "tau_brace": 0.22,
+    "c_track": 0.1,
+    "hold": 0.5,
+    "mass_prior": [
+      4.0,
+      16.0
+    ],
+    "r_contact": 0.45,
+    "release_on_unwant": false
+  },
+  "miss_fraction": 0.3,
+  "rows": [
+    {
+      "method": "reactive",
+      "param": 0.0,
+      "latency_steps": 0,
+      "fall_rate_hits": 0.4097457627118644,
+      "fall_rate_given_contact": 0.42965288154542425,
+      "contact_rate_hits": 0.9519335671147477,
+      "false_prep_rate": 0.0,
+      "braced_on_hits": 0.0,
+      "braced_s": 0.0,
+      "progress_m": 1.9557170271873474,
+      "fall_rate_miss": 0.0032545192836882435,
+      "progress_loss_m": 0.0,
+      "n_total": 2048
+    }
+  ]
+}

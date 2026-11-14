@@ -1,0 +1,10 @@
+rung,method,fall_rate_hits,false_prep_rate,param,progress_m
+reactive,reactive,0.6853,0.0000,0,1.428
+10 Hz,ttc_threshold,0.3143,0.3761,0.3,1.456
+10 Hz,belief_commit,0.3387,0.4156,0.1,1.400
+50 Hz,ttc_threshold,0.2969,0.2585,0.3,1.464
+50 Hz,belief_commit,0.3046,0.4992,0.1,1.315
+perfect sensing,ttc_threshold,0.2864,0.0760,0.3,0.968
+perfect sensing,belief_commit,0.3179,0.0791,0.1,0.849
+object-aware PPO,aware_ppo,0.4446,nan,0,1.902
+oracle,oracle,0.3555,0.0000,0.5,1.460

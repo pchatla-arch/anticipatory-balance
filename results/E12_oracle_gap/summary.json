@@ -1,0 +1,593 @@
+{
+  "fp_budget": 0.5,
+  "reactive": {
+    "method": "reactive",
+    "param": 0.0,
+    "latency_steps": 0,
+    "fall_rate_hits": 0.6852561854665887,
+    "fall_rate_given_contact": 0.6998935115186395,
+    "contact_rate_hits": 0.9791116306253653,
+    "false_prep_rate": 0.0,
+    "braced_on_hits": 0.0,
+    "braced_s": 0.0,
+    "progress_m": 1.4282621145248413,
+    "fall_rate_miss": 0.0,
+    "progress_loss_m": 0.0,
+    "n_total": 2048
+  },
+  "oracle": {
+    "method": "oracle",
+    "param": 0.5,
+    "latency_steps": 0,
+    "fall_rate_hits": 0.35552211182544324,
+    "fall_rate_given_contact": 0.37693740685543964,
+    "contact_rate_hits": 0.9428355737385544,
+    "false_prep_rate": 0.0,
+    "braced_on_hits": 1.0,
+    "braced_s": 0.69970703125,
+    "progress_m": 1.4598217010498047,
+    "fall_rate_miss": 0.0,
+    "progress_loss_m": -0.03155958652496338,
+    "n_total": 2048
+  },
+  "ladder": [
+    {
+      "rung": "10 Hz",
+      "method": "ttc_threshold",
+      "fall_rate_hits": 0.31426943308007016,
+      "false_prep_rate": 0.3760848397612294,
+      "param": 0.3,
+      "progress_m": 1.4564164280891418,
+      "latency_steps": 0,
+      "dir": "results/E15_rule_fixed_p5"
+    },
+    {
+      "rung": "10 Hz",
+      "method": "belief_commit",
+      "fall_rate_hits": 0.3386888759010326,
+      "false_prep_rate": 0.415588882773803,
+      "param": 0.1,
+      "progress_m": 1.400350034236908,
+      "latency_steps": 0,
+      "dir": "results/E15_rule_fixed_p5"
+    },
+    {
+      "rung": "50 Hz",
+      "method": "ttc_threshold",
+      "fall_rate_hits": 0.2969121371517631,
+      "false_prep_rate": 0.25850937724905804,
+      "param": 0.3,
+      "progress_m": 1.4635058641433716,
+      "latency_steps": 0,
+      "dir": "results/E15_rule_fixed_p1"
+    },
+    {
+      "rung": "50 Hz",
+      "method": "belief_commit",
+      "fall_rate_hits": 0.3045977011494253,
+      "false_prep_rate": 0.4991638795986622,
+      "param": 0.1,
+      "progress_m": 1.3145321607589722,
+      "latency_steps": 0,
+      "dir": "results/E15_rule_fixed_p1"
+    },
+    {
+      "rung": "perfect sensing",
+      "method": "ttc_threshold",
+      "fall_rate_hits": 0.286385154880187,
+      "false_prep_rate": 0.07598641039752763,
+      "param": 0.3,
+      "progress_m": 0.968083530664444,
+      "latency_steps": 0,
+      "dir": "results/E12_perfect"
+    },
+    {
+      "rung": "perfect sensing",
+      "method": "belief_commit",
+      "fall_rate_hits": 0.3178833041106565,
+      "false_prep_rate": 0.07906100503789001,
+      "param": 0.1,
+      "progress_m": 0.8494471311569214,
+      "latency_steps": 0,
+      "dir": "results/E12_perfect"
+    },
+    {
+      "rung": "object-aware PPO",
+      "method": "aware_ppo",
+      "fall_rate_hits": 0.44462594973699593,
+      "false_prep_rate": NaN,
+      "param": 0,
+      "progress_m": 1.9020580053329468,
+      "latency_steps": 5,
+      "dir": "results/E14_aware_ppo",
+      "contact_rate_hits": 0.9540356516656926
+    }
+  ],
+  "ablations": [
+    {
+      "ablation": "E13_commit_25",
+      "method": "ttc_threshold",
+      "fall_rate_hits": 0.29906390025326324,
+      "false_prep_rate": 0.4135938359933957,
+      "param": 0.4,
+      "rule": {
+        "commit_steps": 25,
+        "tau_brace": 0.22,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          4.0,
+          16.0
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_commit_25",
+      "method": "belief_commit",
+      "fall_rate_hits": 0.30535359438924603,
+      "false_prep_rate": 0.20187015791033402,
+      "param": 0.2,
+      "rule": {
+        "commit_steps": 25,
+        "tau_brace": 0.22,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          4.0,
+          16.0
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_commit_5",
+      "method": "ttc_threshold",
+      "fall_rate_hits": 0.2962224819793493,
+      "false_prep_rate": 0.2601816180517336,
+      "param": 0.3,
+      "rule": {
+        "commit_steps": 5,
+        "tau_brace": 0.22,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          4.0,
+          16.0
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_commit_5",
+      "method": "belief_commit",
+      "fall_rate_hits": 0.30533703487239433,
+      "false_prep_rate": 0.2035423987130096,
+      "param": 0.2,
+      "rule": {
+        "commit_steps": 5,
+        "tau_brace": 0.22,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          4.0,
+          16.0
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_prior_point",
+      "method": "ttc_threshold",
+      "fall_rate_hits": 0.2969121371517631,
+      "false_prep_rate": 0.41684835527708397,
+      "param": 0.4,
+      "rule": {
+        "commit_steps": 15,
+        "tau_brace": 0.22,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          8.0,
+          8.01
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_prior_point",
+      "method": "belief_commit",
+      "fall_rate_hits": 0.35195791934541204,
+      "false_prep_rate": 0.3632837305787223,
+      "param": 0.2,
+      "rule": {
+        "commit_steps": 15,
+        "tau_brace": 0.22,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          8.0,
+          8.01
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_prior_wide",
+      "method": "ttc_threshold",
+      "fall_rate_hits": 0.29832456653029416,
+      "false_prep_rate": 0.2601816180517336,
+      "param": 0.3,
+      "rule": {
+        "commit_steps": 15,
+        "tau_brace": 0.22,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          1.0,
+          32.0
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_prior_wide",
+      "method": "belief_commit",
+      "fall_rate_hits": 0.3024790570816287,
+      "false_prep_rate": 0.3415446001439397,
+      "param": 0.05,
+      "rule": {
+        "commit_steps": 15,
+        "tau_brace": 0.22,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          1.0,
+          32.0
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_rcontact_0.35",
+      "method": "ttc_threshold",
+      "fall_rate_hits": 0.2920183128774596,
+      "false_prep_rate": 0.19536111934295752,
+      "param": 0.4,
+      "rule": {
+        "commit_steps": 15,
+        "tau_brace": 0.22,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          4.0,
+          16.0
+        ],
+        "r_contact": 0.35,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_rcontact_0.35",
+      "method": "belief_commit",
+      "fall_rate_hits": 0.2968790181180596,
+      "false_prep_rate": 0.2617638965327463,
+      "param": 0.1,
+      "rule": {
+        "commit_steps": 15,
+        "tau_brace": 0.22,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          4.0,
+          16.0
+        ],
+        "r_contact": 0.35,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_release_old",
+      "method": "ttc_threshold",
+      "fall_rate_hits": 0.5285437366062732,
+      "false_prep_rate": 0.2618538588544092,
+      "param": 0.3,
+      "rule": {
+        "commit_steps": 15,
+        "tau_brace": 0.22,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          4.0,
+          16.0
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": true
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_release_old",
+      "method": "belief_commit",
+      "fall_rate_hits": 0.6288973309955193,
+      "false_prep_rate": 0.2035423987130096,
+      "param": 0.2,
+      "rule": {
+        "commit_steps": 15,
+        "tau_brace": 0.22,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          4.0,
+          16.0
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": true
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_tau_0.10",
+      "method": "ttc_threshold",
+      "fall_rate_hits": 0.2990473407364115,
+      "false_prep_rate": 0.41852059607975955,
+      "param": 0.4,
+      "rule": {
+        "commit_steps": 15,
+        "tau_brace": 0.1,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          4.0,
+          16.0
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_tau_0.10",
+      "method": "belief_commit",
+      "fall_rate_hits": 0.2961893629456458,
+      "false_prep_rate": 0.24083442699293,
+      "param": 0.2,
+      "rule": {
+        "commit_steps": 15,
+        "tau_brace": 0.1,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          4.0,
+          16.0
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_tau_0.35",
+      "method": "ttc_threshold",
+      "fall_rate_hits": 0.2962556010130528,
+      "false_prep_rate": 0.41684835527708397,
+      "param": 0.4,
+      "rule": {
+        "commit_steps": 15,
+        "tau_brace": 0.35,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          4.0,
+          16.0
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    },
+    {
+      "ablation": "E13_tau_0.35",
+      "method": "belief_commit",
+      "fall_rate_hits": 0.3854091174751607,
+      "false_prep_rate": 0.32992887684687355,
+      "param": 0.1,
+      "rule": {
+        "commit_steps": 15,
+        "tau_brace": 0.35,
+        "c_track": 0.1,
+        "hold": 0.5,
+        "mass_prior": [
+          4.0,
+          16.0
+        ],
+        "r_contact": 0.45,
+        "release_on_unwant": false
+      },
+      "detector": {
+        "sigma0": 0.03,
+        "sigma1": 0.02,
+        "miss_prob": 0.05,
+        "fov_deg": 120.0,
+        "max_range": 6.0
+      },
+      "period": 1
+    }
+  ],
+  "gap_total": 0.3297340736411455,
+  "shares_ttc_threshold": [
+    {
+      "from": "reactive",
+      "to": "10 Hz",
+      "reduction": 0.37098675238651857,
+      "share_of_gap": 1.125108934875408
+    },
+    {
+      "from": "10 Hz",
+      "to": "50 Hz",
+      "reduction": 0.017357295928307037,
+      "share_of_gap": 0.052640285963279736
+    },
+    {
+      "from": "50 Hz",
+      "to": "perfect sensing",
+      "reduction": 0.010526982271576113,
+      "share_of_gap": 0.03192567318060306
+    },
+    {
+      "from": "perfect sensing",
+      "to": "oracle",
+      "reduction": -0.06913695694525623,
+      "share_of_gap": -0.20967489401929088
+    }
+  ],
+  "shares_belief_commit": [
+    {
+      "from": "reactive",
+      "to": "10 Hz",
+      "reduction": 0.34656730956555615,
+      "share_of_gap": 1.0510509445946146
+    },
+    {
+      "from": "10 Hz",
+      "to": "50 Hz",
+      "reduction": 0.03409117475160728,
+      "share_of_gap": 0.1033899056143928
+    },
+    {
+      "from": "50 Hz",
+      "to": "perfect sensing",
+      "reduction": -0.013285602961231213,
+      "share_of_gap": -0.04029187161194064
+    },
+    {
+      "from": "perfect sensing",
+      "to": "oracle",
+      "reduction": -0.037638807714786726,
+      "share_of_gap": -0.11414897859706669
+    }
+  ]
+}
