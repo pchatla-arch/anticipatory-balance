@@ -21,7 +21,7 @@ if tmux has-session -t '=foresight-v2' 2>/dev/null; then
 fi
 mkdir -p logs
 FORESIGHT_LOG="$FORESIGHT_ROOT/logs/experiments_v2_$(date -u +%Y%m%dT%H%M%SZ).log"
-printf -v FORESIGHT_COMMAND 'cd %q && env %q %q python3 scripts/run_experiments_v2.py --mode %q --max-minutes %q > %q 2>&1; exec bash' \
+printf -v FORESIGHT_COMMAND 'cd %q && env %q %q python3 scripts/run_experiments_v2.py --mode %q --max-minutes %q 2>&1 | tee %q; exec bash' \
   "$FORESIGHT_ROOT" "FORESIGHT_VENV=${FORESIGHT_VENV:-/workspace/mujoco_playground/rss2025/.venv}" \
   "FORESIGHT_PYTHON=${FORESIGHT_PYTHON:-}" "$FORESIGHT_MODE" "$FORESIGHT_MAX_MINUTES" "$FORESIGHT_LOG"
 tmux new-session -d -s foresight-v2 "$FORESIGHT_COMMAND"
