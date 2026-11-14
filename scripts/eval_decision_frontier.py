@@ -56,6 +56,20 @@ _OLEAD = flags.DEFINE_float("oracle_lead", 0.5, "oracle switch lead, s")
 _METHODS = flags.DEFINE_list("methods", ["reactive", "always", "ttc_threshold", "belief_commit", "oracle"], "subset")
 _OUT = flags.DEFINE_string("out", "results/E10_frontier", "output dir")
 _SEED = flags.DEFINE_integer("seed", 200, "seed")
+# Detector model (E12 perfect-sensing ladder; E8 measured values)
+_SIG0 = flags.DEFINE_float("sigma0", 0.03, "detector noise at zero range, m")
+_SIG1 = flags.DEFINE_float("sigma1", 0.02, "detector noise per m of range")
+_MISSP = flags.DEFINE_float("miss_prob", 0.05, "random missed-detection probability")
+_FOV = flags.DEFINE_float("fov_deg", 120.0, "detector field of view, deg")
+_MAXRANGE = flags.DEFINE_float("max_range", 6.0, "detector range, m")
+# Rule internals (E13 ablations)
+_COMMIT = flags.DEFINE_integer("commit_steps", 15, "minimum commitment, control steps")
+_TAUB = flags.DEFINE_float("tau_brace", 0.22, "s the posture needs to form")
+_CTRACK = flags.DEFINE_float("c_track", 0.1, "tracking cost per s")
+_HOLD = flags.DEFINE_float("hold", 0.5, "s held after expected impact")
+_PRIOR = flags.DEFINE_list("mass_prior", [], "belief mass prior range, kg (default: the scenario range)")
+# End-to-end baseline (E14): run the object-aware walker itself, no decision layer
+_ENVSKILL = flags.DEFINE_string("env_skill", "nominal", "nominal | aware (the policy in --nominal must match)")
 _CALIB = flags.DEFINE_list("calib_params", ["0.1"], "belief_commit c_prep values whose per-step belief "
                            "logs are dumped to <out>/calib/ for E9 calibration (empty: none)")
 
@@ -64,17 +78,27 @@ def main(_):
   os.makedirs(_OUT.value, exist_ok=True)
   rmj = json.load(open(_RM.value))
   rm = RU.ResponseModel(rmj["a_cont"], rmj["b_cont"], rmj["a_brace"], rmj["b_brace"])
-  nominal = R.load_policy(_NOM.value); brace = R.load_policy(_BR.value)
-  env = R.make_env(impl=_IMPL.value, azimuth_range_deg=_AZ.value, range_dist=[3.0, 5.0])
+  nominal = R.load_policy(_NOM.value)
+  # The object-aware walker has no BRACE skill: its obs differ, and only "reactive" applies.
+  brace = R.load_policy(_BR.value) if _ENVSKILL.value != "aware" else None
+  ov = {}
+  if _ENVSKILL.value == "aware":
+    ov = {"aware.period": _PERIOD.value, "aware.latency": int(_LAT.value[0]), "aware.sigma0": _SIG0.value,
+          "aware.sigma1": _SIG1.value, "aware.miss_prob": _MISSP.value, "aware.fov_deg": _FOV.value,
+          "aware.max_range": _MAXRANGE.value}
+    print("object-aware env:", ov)
+  env = R.make_env(skill=_ENVSKILL.value, impl=_IMPL.value, azimuth_range_deg=_AZ.value, range_dist=[3.0, 5.0],
+                   overrides=ov)
   n = _N.value
   lats = [int(x) for x in _LAT.value]
   thetas = [float(x) for x in _THETAS.value]; cpreps = [float(x) for x in _CPREPS.value]
   mr = (float(_MASS.value[0]), float(_MASS.value[1]))
+  prior = tuple(float(x) for x in _PRIOR.value) if _PRIOR.value else mr
 
   conds = []   # (method, param, latency)
   for m in _METHODS.value:
     if m == "reactive":
-      conds.append(("reactive", 0.0, 0))
+      conds.append(("reactive", 0.0, int(_LAT.value[0]) if _ENVSKILL.value == "aware" else 0))
     elif m == "oracle":
       conds.append(("oracle", _OLEAD.value, 0))
     elif m == "always":
@@ -112,12 +136,15 @@ def main(_):
         info, traj = R.rollout(env, wenv, nominal, key, _STEPS.value, brace_policy=brace,
                                decide=decide, scenario_fn=scn, reset_keys=reset_keys)
       else:
-        rc = {"reactive": RU.RuleConfig(kind="reactive"),
-              "always": RU.RuleConfig(kind="always", p_min=param),
-              "ttc_threshold": RU.RuleConfig(kind="ttc_threshold", theta=param),
-              "belief_commit": RU.RuleConfig(kind="belief_commit", c_prep=param, c_fall=1.0)}[method]
-        ctrl = AnticipationController(D.DetectorConfig(period=_PERIOD.value, latency=lat),
-                                      PF.PFConfig(mass_range=mr), rc, rm)
+        common = dict(commit_steps=_COMMIT.value, tau_brace=_TAUB.value, c_track=_CTRACK.value, hold=_HOLD.value)
+        rc = {"reactive": RU.RuleConfig(kind="reactive", **common),
+              "always": RU.RuleConfig(kind="always", p_min=param, **common),
+              "ttc_threshold": RU.RuleConfig(kind="ttc_threshold", theta=param, **common),
+              "belief_commit": RU.RuleConfig(kind="belief_commit", c_prep=param, c_fall=1.0, **common)}[method]
+        ctrl = AnticipationController(D.DetectorConfig(period=_PERIOD.value, latency=lat, sigma0=_SIG0.value,
+                                                       sigma1=_SIG1.value, miss_prob=_MISSP.value, fov_deg=_FOV.value,
+                                                       max_range=_MAXRANGE.value),
+                                      PF.PFConfig(mass_range=prior), rc, rm)
         info, traj = R.rollout(env, wenv, nominal, key, _STEPS.value, brace_policy=brace,
                                scenario_fn=scn, reset_keys=reset_keys, controller=ctrl)
       tab = R.episode_table(info, traj, env.dt)
@@ -173,6 +200,10 @@ def main(_):
       f.write(",".join(f"{o[c]:.4g}" if isinstance(o[c], float) else str(o[c]) for c in cols) + "\n")
   json.dump({"nominal": str(R.latest_checkpoint(_NOM.value)), "brace": str(R.latest_checkpoint(_BR.value)),
              "episodes_per_condition": n * _BATCHES.value, "latencies_steps": lats, "period": _PERIOD.value,
+             "env_skill": _ENVSKILL.value, "detector": {"sigma0": _SIG0.value, "sigma1": _SIG1.value, "miss_prob": _MISSP.value,
+                                                        "fov_deg": _FOV.value, "max_range": _MAXRANGE.value},
+             "rule": {"commit_steps": _COMMIT.value, "tau_brace": _TAUB.value, "c_track": _CTRACK.value, "hold": _HOLD.value,
+                      "mass_prior": list(prior)},
              "miss_fraction": _MISS.value, "rows": out},
             open(os.path.join(_OUT.value, "summary.json"), "w"), indent=2)
 

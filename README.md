@@ -7,10 +7,14 @@ AA228/CS238 (Decision Making under Uncertainty) final project, Stanford, Autumn 
 Simulation only: Unitree G1 in MuJoCo Playground (rss2025, MJX + MuJoCo-Warp), frozen PPO
 skills, a POMDP decision layer on top. Author: Prasuna Chatla.
 
-Status at a glance (Nov 13): infrastructure complete; four policies trained; the first
-evaluation pass located the disturbance regime, produced a capture-point reference, and showed
-that the first BRACE skill fails when switched into from walking. The corrected preparation gate
-is the next run (`scripts/run_session_b.sh`). Details in [Where we are](#where-we-are).
+Status at a glance (Nov 14): every layer is built and exercised. Sessions A–C (about 5 GPU-h)
+located the disturbance regime, produced a capture-point reference, fixed the evaluation
+protocol, passed the preparation gate with BRACE v2 (failure 0.70 → 0.42 at 0.5 s lead on
+identical impacts), confirmed depth rendering in the batched loop, and produced the first
+decision frontier: the belief rule is the most selective method but braces too late at 10 Hz
+detections. Session D (rate × latency sweep, calibration, measured depth detector) and Session E
+(oracle-gap ladder, ablations, object-aware PPO baseline) run from `scripts/start.sh d` and
+`scripts/start.sh e`. Details in [Where we are](#6-where-we-are).
 
 ---
 
@@ -102,13 +106,20 @@ Three GPU sessions, each preceded by a code drop that is run on CPU against the 
 | E2d/E3d | Walking fall surface in the heavy regime with the led aim, and its LIP overlay | B | corrected Figure 1 |
 | E5b | BRACE v2, trained from walking states (walker hands over after 0–2 s), impacts present | B | checkpoint, τ_brace |
 | E6b | Oracle lead-time curve with BRACE v2 on shared replayed trajectories | B | **the gate** for the belief layer |
-| E7–E9 | Depth-render pilot; observation model fitted from rendered depth; belief calibration | C | observation model, calibration plots |
-| E10 | Decision frontier: reactive, always-brace, TTC threshold, belief rule, QMDP, oracle; 3 latencies | C | headline figure |
-| E11–E14 | Latency and rate sweep; oracle-gap decomposition (mass vs position); ablations and seeds; end-to-end PPO baseline | C/D | latency curve, ablation table |
+| E7 | Depth-render pilot: MJX-Warp batch ray-tracer inside the walking loop | C (done) | GO: 42 ms per batch of 64 at 64×64 |
+| E10 | Decision frontier: reactive, always-brace, TTC threshold sweep, belief rule sweep, oracle; latency 0/100/300 ms at 10 Hz | C (done) | headline figure |
+| E8 | Observation model measured from rendered depth: geometric detector, noise vs range, detection rate, usable FOV | D | replaces the assumed detector numbers |
+| E11 | The frontier at 25 Hz and 50 Hz detections, same paired scenarios | D | rate × latency grid, crossover rate |
+| E9 | Belief calibration: reliability diagram, time-to-hit error, when the belief resolves | D | is the belief wrong, or merely late |
+| E12 | Oracle-gap ladder: reactive → 10 Hz → 50 Hz → perfect sensing → oracle | E | shares of the gap due to rate, noise, rule |
+| E13 | Ablations at 50 Hz: commitment window, τ_brace, mass prior | E | ablation table |
+| E14 | Object-aware PPO walker (detections as inputs, heavy impacts in training), matched observation model | E | end-to-end baseline |
 
-Scripts: `scripts/run_session_a.sh`, `scripts/run_session_b.sh` run a session end to end,
-save results under `results/`, and push. Individual tools: `train_skill.py`,
-`eval_fall_rate.py`, `lip_overlay.py`, `validate_contact.py`, `eval_oracle_brace.py`,
+Scripts: `scripts/run_session_{a,b,c,d,e}.sh` run a session end to end, save results under
+`results/`, and push; `scripts/start.sh <letter>` is the one-command pod entry (bootstrap, tmux,
+finish_and_stop). Individual tools: `train_skill.py`, `eval_fall_rate.py`, `lip_overlay.py`,
+`validate_contact.py`, `eval_oracle_brace.py`, `eval_decision_frontier.py`, `fit_response_model.py`,
+`depth_pilot.py`, `depth_detector.py`, `calibration.py`, `plot_rate_sweep.py`, `oracle_gap.py`,
 `plot_fall_surfaces.py`, `save_run.py`.
 
 ## 5. Outcomes so far
@@ -143,24 +154,44 @@ intervals). Failure is 21% just past the zero-step boundary and 50% near twice t
   failure rate from 0.2% (CONTINUE) to 38–74%, rising with lead; at 0.5 s lead, 270 of 337
   failures occurred with no detected contact. The policy was trained from near-standing resets;
   the switch from walking is the suspected cause, to be isolated by E6a.
-* **Confounds found and fixed in the next drop:** the projectile was aimed at the pelvis at
-  launch and the walker walked out of its path (contact ~30%); comparisons now replay one
-  world-space trajectory across policies; the evaluator chose the BRACE action one step before
-  the command observation changed; readiness was a first height crossing (satisfied by falling).
+* **Confounds found and fixed (Session B):** the projectile was aimed at the pelvis at launch
+  and the walker walked out of its path (contact ~30%); comparisons now replay one world-space
+  trajectory across policies; the evaluator chose the BRACE action one step before the command
+  observation changed; readiness is now a sustained posture-and-support criterion.
+* **The corrected gate passes with BRACE v2** (`results/E6b_oracle_v2`). Without a projectile,
+  switching to either BRACE policy fails 0–3%, so the first-round failures were the evaluator's
+  lag. With the projectile (4–16 kg, 3–8 m/s, 512 paired scenarios per cell, contact 98–100%),
+  failure given contact at 0.1/0.2/0.3/0.5 s lead: CONTINUE 0.70 throughout; zero-command walker
+  0.69–0.70; BRACE v2 0.64/0.60/0.50/0.42. Stopping alone does nothing; the posture protects
+  once it has τ_brace ≈ 0.22 s to form. Preparation costs 0.49 m of 2.55 m progress on a miss.
+
+![frontier](results/E10_frontier/frontier.png)
+
+*Figure 4. Decision frontier at 10 Hz detections (E10): failure rate on scheduled hits vs
+false-preparation rate on near-misses, one panel per latency; lower-left is better.*
+
+* **First frontier (E10):** reactive 0.69, oracle 0.36; the time-to-contact threshold reaches
+  0.55 at 37–51% false preparations; the belief rule is the most selective (0.60 at 18%) but never
+  goes lower, because at 10 Hz the hit probability resolves 0.2–0.3 s before contact, exactly when
+  the brace needs 0.22 s. About half of the attainable benefit is lost to perception timing, not
+  to the rule. Sessions D and E are designed around that finding.
+* **Note on training ranges.** The committed skills were trained with the projectile mass
+  randomized over the nominal 1–8 kg for every skill (one shared randomizer); they are evaluated at
+  4–16 kg. Each skill now has its own randomizer with its config's range (`foresight/skills/register.py`).
 
 ## 6. Where we are
 
 | | |
 |---|---|
-| Done | env, training pipeline, 3 walker seeds (eval reward 7.32–7.62, 20 min each on an RTX 6000 Ada), BRACE v1, batched paired evaluation, LIP module, E1–E6, status update (Nov 13) |
-| Next (PR #1, `scripts/run_session_b.sh`) | E6a transition diagnostics, heavy-regime walking surface with led aim, BRACE v2 from walking states, E6b oracle curve on shared trajectories |
-| Gate | a repeatable lead-time interval in which bracing lowers the failure rate at a quantified progress cost; if none, BRACE is redesigned again before any belief work |
-| Then | observation model from rendered depth (MJX-Warp batch renderer), particle filter, decision frontier, latency sweep, end-to-end PPO baseline |
-| Compute | ~3 GPU-h used; ~13 GPU-h planned |
+| Done (Sessions A–C) | env, training pipeline, 3 walker seeds (eval reward 7.32–7.62, 20 min each), BRACE v1 and v2, batched paired evaluation with replayed trajectories and controls, LIP module, parametric detector, Rao-Blackwellized belief, decision rules, response model, depth-render pilot, E1–E7 and E10; status update submitted Nov 13 |
+| Gate | passed: BRACE v2 cuts failure given contact from 0.70 to 0.42 at 0.5 s lead on identical impacts (E6b) |
+| Session D (`scripts/start.sh d`) | E8 measured depth detector; E11 frontier at 25 and 50 Hz; E9 belief calibration; rate × latency summary and crossover rate |
+| Session E (`scripts/start.sh e`) | E12 perfect-sensing frontier and oracle-gap ladder; E13 ablations (commitment, τ_brace, mass prior); E14 object-aware PPO walker and its evaluation |
+| Then | paper draft (4–6 pages), reproducibility check from a clean clone, submission Dec 4 |
+| Compute | ~5 GPU-h used; ~5 GPU-h planned |
 
 Results are committed as small files under `results/<run>/` (`save_run.py`: eval curves, configs,
-console logs, `summary.json`); checkpoints stay on the pod and the final skills go to a GitHub
-Release.
+console logs, `summary.json`); the final checkpoints are committed under `checkpoints/<tag>/`.
 
 ---
 

@@ -13,12 +13,15 @@ from brax.training.agents.ppo import checkpoint as ppo_checkpoint
 from brax.training.agents.ppo import networks as ppo_networks
 
 from foresight.envs.g1_impact import ImpactJoystick, default_config
+from foresight.envs.g1_impact.impact_joystick import aware_config
 
 _OUT = flags.DEFINE_string("out", None, "checkpoint root (a 000000000000/ dir is created)", required=True)
+_SKILL = flags.DEFINE_string("skill", "nominal", "nominal | aware (sets the observation size)")
 
 
 def main(_):
-  env = ImpactJoystick(config=default_config(), config_overrides={"impl": "jax"})
+  env = ImpactJoystick(config=aware_config() if _SKILL.value == "aware" else default_config(),
+                       config_overrides={"impl": "jax"})
   obs_size = env.observation_size
   factory = functools.partial(
       ppo_networks.make_ppo_networks,

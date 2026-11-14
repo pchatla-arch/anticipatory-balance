@@ -27,7 +27,7 @@ from brax.training.agents.ppo import networks as ppo_networks
 from mujoco_playground._src import wrapper as pg_wrapper
 
 from foresight.envs.g1_impact import ImpactJoystick, default_config
-from foresight.envs.g1_impact.impact_joystick import brace_config
+from foresight.envs.g1_impact.impact_joystick import brace_config, aware_config
 
 # Records taken every control step. All are (num_envs, ...) per step.
 TRAJ_INFO_KEYS = (
@@ -80,7 +80,7 @@ def make_env(skill: str = "nominal", impl: str = "warp", miss_fraction: float = 
              reset_perturb: float = 1.0, hold_base: bool = False,
              overrides: Optional[dict] = None, azimuth_range_deg: float = 180.0,
              range_dist: Optional[list] = None) -> ImpactJoystick:
-  cfg = brace_config() if skill == "brace" else default_config()
+  cfg = {"brace": brace_config, "aware": aware_config}.get(skill, default_config)()
   cfg.impact.azimuth_range_deg = azimuth_range_deg
   if range_dist is not None:
     cfg.impact.range_dist = list(range_dist)

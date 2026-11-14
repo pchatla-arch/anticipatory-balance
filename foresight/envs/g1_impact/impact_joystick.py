@@ -119,8 +119,29 @@ def brace_config() -> config_dict.ConfigDict:
   return cfg
 
 
+def aware_config() -> config_dict.ConfigDict:
+  """E14 baseline: the walker itself sees delayed, noisy detections of the object (the same
+  observation model the decision layer gets) and must learn whatever anticipation it can,
+  end to end, with impacts from the heavy regime during training. Walking reward unchanged;
+  failure is penalised only through termination, as for every other skill."""
+  cfg = default_config()
+  cfg.skill = "aware"
+  cfg.impact.mass_range = [4.0, 16.0]
+  cfg.impact.speed_range = [3.0, 8.0]
+  cfg.impact.range_dist = [3.0, 5.0]
+  cfg.impact.azimuth_range_deg = 60.0
+  cfg.aware = config_dict.create(
+      period=5, latency=5, sigma0=0.03, sigma1=0.02, fov_deg=120.0, miss_prob=0.05,
+      max_range=6.0, stale_s=1.0,
+  )
+  return cfg
+
+
+AWARE_OBS = 5   # [valid, rel x, rel y, rel z (heading frame, m), age (s)]
+
+
 class ImpactJoystick(JoystickRobotSliced):
-  """Joystick env + launched projectile (+ optional BRACE skill reward)."""
+  """Joystick env + launched projectile (+ optional BRACE skill reward, + optional object obs)."""
 
   def __init__(
       self,
@@ -151,6 +172,14 @@ class ImpactJoystick(JoystickRobotSliced):
                   "proj_lthigh_found", "proj_rthigh_found")
     ]
     self._is_brace = self._config.skill == "brace"
+    self._is_aware = self._config.skill == "aware"
+    if self._is_aware:
+      from foresight.perception import detections as _D
+      a = self._config.aware
+      self._det_cfg = _D.DetectorConfig(period=int(a.period), latency=int(a.latency), sigma0=float(a.sigma0),
+                                        sigma1=float(a.sigma1), fov_deg=float(a.fov_deg),
+                                        miss_prob=float(a.miss_prob), max_range=float(a.max_range))
+      self._det_mod = _D
     self._handover_policy = None
     hc = self._config.brace.handover_checkpoint if self._is_brace else ""
     if hc:
@@ -246,7 +275,52 @@ class ImpactJoystick(JoystickRobotSliced):
         "obj_vel": self._proj_vel(state.data),
         "obj_rel_pos": self._proj_pos(state.data) - self._pelvis_pos(state.data),
     })
+    if self._is_aware:
+      state.info.update(self._aware_init())
+      state = state.replace(obs=self._get_obs(state.data, state.info, self._feet_contact(state.data)))
     return state
+
+  # ---- object observation for the end-to-end baseline --------------------------------
+  def _aware_init(self) -> dict:
+    d = self._det_mod.init_state(self._det_cfg)
+    return {"det_buf_pos": d.buf_pos, "det_buf_pelvis": d.buf_pelvis, "det_buf_fwd": d.buf_fwd,
+            "det_step": d.step, "det_last_rel": jp.zeros(3), "det_last_step": jp.int32(-100000),
+            "obj_obs": jp.zeros(AWARE_OBS)}
+
+  def _aware_update(self, info: dict, data: mjx.Data) -> dict:
+    """Run the detector on the true state; keep the latest delivered detection in the
+    robot's heading frame, with its age. Same model as the decision layer's detector."""
+    D = self._det_mod
+    st = D.DetectorState(info["det_buf_pos"], info["det_buf_pelvis"], info["det_buf_fwd"], info["det_step"])
+    pelvis = self._pelvis_pos(data)
+    fwd = data.xmat[self._pelvis_body].reshape(3, 3)[:, 0]
+    info["rng"], k = jax.random.split(info["rng"])
+    st, det = D.step(self._det_cfg, st, self._proj_pos(data), pelvis, fwd, info["proj_launched"], k)
+    yaw = jp.arctan2(fwd[1], fwd[0])
+    c, s_ = jp.cos(yaw), jp.sin(yaw)
+    rel_w = det.pos - pelvis
+    rel = jp.array([c * rel_w[0] + s_ * rel_w[1], -s_ * rel_w[0] + c * rel_w[1], rel_w[2]])
+    last_rel = jp.where(det.valid, rel, info["det_last_rel"])
+    last_step = jp.where(det.valid, det.capture_step, info["det_last_step"])
+    age = (st.step - last_step).astype(jp.float32) * self.dt
+    valid = (age < self._config.aware.stale_s)
+    info.update({"det_buf_pos": st.buf_pos, "det_buf_pelvis": st.buf_pelvis, "det_buf_fwd": st.buf_fwd,
+                 "det_step": st.step, "det_last_rel": last_rel, "det_last_step": last_step,
+                 "obj_obs": jp.where(valid, jp.concatenate([jp.ones(1), last_rel, age[None]]), jp.zeros(AWARE_OBS))})
+    return info
+
+  def _feet_contact(self, data: mjx.Data):
+    return jp.array([data.sensordata[self._mj_model.sensor_adr[i]] > 0 for i in self._feet_floor_found_sensor])
+
+  def _get_obs(self, data: mjx.Data, info: dict, contact: jax.Array):
+    obs = super()._get_obs(data, info, contact)
+    if self._is_aware:
+      obs = dict(obs)
+      oo = info.get("obj_obs", jp.zeros(AWARE_OBS))   # parent reset calls this before the info exists
+      obs["state"] = jp.hstack([obs["state"], oo])
+      obs["privileged_state"] = jp.hstack([obs["privileged_state"], oo,
+                                           self._proj_pos(data) - self._pelvis_pos(data), self._proj_vel(data)])
+    return obs
 
   def step(self, state: mjx_env.State, action: jax.Array) -> mjx_env.State:
     info = dict(state.info)
@@ -261,6 +335,9 @@ class ImpactJoystick(JoystickRobotSliced):
         info[k] = jp.where(new_ep, v, info[k])
       info["brace_active"] = jp.where(new_ep, False, info["brace_active"])
       info["brace_steps"] = jp.where(new_ep, 0, info["brace_steps"])
+      if self._is_aware:
+        for k, v in self._aware_init().items():
+          info[k] = jp.where(new_ep, v, info[k])
 
     # --- mode switch: BRACE zeroes the velocity command seen by policy and reward.
     # In the BRACE training env the command is zero except during the walker's handover.
@@ -270,6 +347,8 @@ class ImpactJoystick(JoystickRobotSliced):
     info["brace_steps"] = jp.where(info["brace_active"], info["brace_steps"] + 1, 0)
 
     launch_now = (info["ep_step"] >= info["proj_launch_step"]) & (~info["proj_launched"])
+    if self._is_aware:
+      info = self._aware_update(info, data)
 
     # BRACE v2 handover: the frozen walker acts until handover_step.
     if self._handover_policy is not None:
