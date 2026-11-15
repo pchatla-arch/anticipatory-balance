@@ -9,6 +9,8 @@ import jax
 import jax.numpy as jp
 import numpy as np
 
+from foresight.eval import session_h_evidence as SE
+
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT/'scripts/eval_depth_closed_loop.py'
 TREE = ast.parse(SOURCE.read_text())
@@ -63,6 +65,32 @@ class EvidenceTests(unittest.TestCase):
             with p.open() as stream: row=list(csv.DictReader(stream))[0]
             self.assertEqual(row['scenario_id'],'seed1_env00000')
             self.assertEqual(float(row['progress_m']),a['progress_m'][0])
+
+    def test_float32_progress_pool_agrees_with_saved_episode_evidence(self):
+        # Reactive progress from the first uploaded GPU gate. Reducing these
+        # float32 values before promotion differs from the saved CSV mean by
+        # 6.89e-8 m, enough to fail the deliberately strict evidence validator.
+        progress=np.asarray([
+            1.5633423328399658, .0919535756111145, 1.6154876947402954,
+            .8632070422172546, .7335505485534668, .8451490998268127,
+            2.16880464553833, 1.9157700538635254, .6903193593025208,
+            1.9477788209915161, .2832622528076172, 2.5334737300872803,
+            2.9313483238220215, .39469870924949646, 1.5092474222183228,
+            2.4433841705322266],dtype=np.float32)
+        a=table(len(progress));a['progress_m']=progress
+        _,pooled=NS['_pool']([a],.02)
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)/'episodes.csv'
+            NS['_episode_csv'](p,a,'none','reactive',0.)
+            with p.open() as stream: rows=list(csv.DictReader(stream))
+        restored={**a,'brace_steps_total':a['brace_steps'],
+                  'progress_m':np.asarray([float(row['progress_m']) for row in rows])}
+        expected=SE.summarize_episodes(restored,.02)['progress_m']
+        self.assertNotEqual(float(progress.mean()),expected)
+        self.assertEqual(pooled['progress_m'],expected)
+        # Batch partitioning cannot change the summary of the same saved values.
+        parts=[{k:v[:7] for k,v in a.items()},{k:v[7:] for k,v in a.items()}]
+        self.assertEqual(NS['_pool'](parts,.02)[1]['progress_m'],expected)
 
     def test_script_refuses_overwrite_and_marks_completion_only_at_end(self):
         s=SOURCE.read_text()

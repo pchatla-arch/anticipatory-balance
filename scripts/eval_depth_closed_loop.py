@@ -76,7 +76,8 @@ def _pool(parts, dt):
              "contact_rate_hits": rate(contact, hit), "false_prep_rate": rate(brace > 0, miss),
              "braced_on_hits": rate(brace > 0, hit), "braced_s": float(brace.mean()*dt),
              "braced_s_raw": float(a["brace_steps_raw"].mean()*dt),
-             "progress_m": float(a["progress_m"].mean()),
+             # Match CSV/common evidence reductions even for float32 rollouts.
+             "progress_m": float(np.mean(a["progress_m"], dtype=np.float64)),
              "detections_per_episode": float(a["n_detections"].mean()),
              "prelaunch_brace_rate": float(a["braced_prelaunch"].mean()),
              "false_alarm_rate": counts["prelaunch_detections"]/counts["prelaunch_frames"] if counts["prelaunch_frames"] else None,

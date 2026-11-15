@@ -1,0 +1,124 @@
+{
+  "scope": "CPU reanalysis of saved GPU gate evidence; no new simulation. Original uploaded failed run preserved.",
+  "experiment_run_id": "session_h_20261115T071536Z_b46b85",
+  "experiment_source_commit": "450c834ffa17c6cffd00b4303eeb194e2a3c6242",
+  "results_commit": "6f60c8ed2ff546f59a35f64f7c5b9c771724b6ec",
+  "original_validator_error": "('none', 'reactive', 0.0):progress_m: disagrees with raw episodes",
+  "cause": "Depth summary reduced reactive float32 progress in float32; CSV/common evidence reduces the same scalars in float64.",
+  "fix": "Pool progress with np.mean(..., dtype=np.float64); validator tolerance unchanged.",
+  "conditions": [
+    {
+      "source": "parametric",
+      "method": "ttc_threshold",
+      "param": 0.3,
+      "raw_progress_dtype": "float64",
+      "stored_progress_m": 1.2160333344199898,
+      "recomputed_progress_m": 1.2160333344199898,
+      "absolute_difference_m": 0.0,
+      "raw_archive_matches_csv": true
+    },
+    {
+      "source": "parametric",
+      "method": "belief_lead",
+      "param": 0.05,
+      "raw_progress_dtype": "float64",
+      "stored_progress_m": 0.9837871354950494,
+      "recomputed_progress_m": 0.9837871354950494,
+      "absolute_difference_m": 0.0,
+      "raw_archive_matches_csv": true
+    },
+    {
+      "source": "parametric",
+      "method": "belief_wait",
+      "param": 0.05,
+      "raw_progress_dtype": "float64",
+      "stored_progress_m": 1.0651820987488918,
+      "recomputed_progress_m": 1.0651820987488918,
+      "absolute_difference_m": 0.0,
+      "raw_archive_matches_csv": true
+    },
+    {
+      "source": "parametric",
+      "method": "belief_voi",
+      "param": 0.05,
+      "raw_progress_dtype": "float64",
+      "stored_progress_m": 1.0366663892041288,
+      "recomputed_progress_m": 1.0366663892041288,
+      "absolute_difference_m": 0.0,
+      "raw_archive_matches_csv": true
+    },
+    {
+      "source": "depth",
+      "method": "ttc_threshold",
+      "param": 0.3,
+      "raw_progress_dtype": "float64",
+      "stored_progress_m": 1.2399906491941692,
+      "recomputed_progress_m": 1.2399906491941692,
+      "absolute_difference_m": 0.0,
+      "raw_archive_matches_csv": true
+    },
+    {
+      "source": "depth",
+      "method": "belief_lead",
+      "param": 0.05,
+      "raw_progress_dtype": "float64",
+      "stored_progress_m": 0.9344170609201115,
+      "recomputed_progress_m": 0.9344170609201115,
+      "absolute_difference_m": 0.0,
+      "raw_archive_matches_csv": true
+    },
+    {
+      "source": "depth",
+      "method": "belief_wait",
+      "param": 0.05,
+      "raw_progress_dtype": "float64",
+      "stored_progress_m": 1.000719309879969,
+      "recomputed_progress_m": 1.000719309879969,
+      "absolute_difference_m": 0.0,
+      "raw_archive_matches_csv": true
+    },
+    {
+      "source": "depth",
+      "method": "belief_voi",
+      "param": 0.05,
+      "raw_progress_dtype": "float64",
+      "stored_progress_m": 0.95920413932663,
+      "recomputed_progress_m": 0.95920413932663,
+      "absolute_difference_m": 0.0,
+      "raw_archive_matches_csv": true
+    },
+    {
+      "source": "none",
+      "method": "reactive",
+      "param": 0.0,
+      "raw_progress_dtype": "float32",
+      "stored_progress_m": 1.408173680305481,
+      "recomputed_progress_m": 1.4081736113876104,
+      "absolute_difference_m": 6.891787052154541e-08,
+      "raw_archive_matches_csv": true
+    }
+  ],
+  "derived_summary_validation": {
+    "schema_version": "foresight.session_h.v1",
+    "status": "passed",
+    "passed": true,
+    "kind": "depth",
+    "source_commit": "450c834ffa17c6cffd00b4303eeb194e2a3c6242",
+    "conditions": 9,
+    "episodes_per_condition": 16,
+    "release_after": 0.3,
+    "episode_files": 9,
+    "interpretation": "Execution/evidence gate only; no performance or zero-false-alarm requirement."
+  },
+  "validation_scope": "Regenerating only pooled progress from immutable episode archives makes all nine conditions pass the unchanged stage validator.",
+  "focused_evidence_tests": {
+    "passed": true,
+    "tests_run": 6,
+    "gpu_required": false
+  },
+  "source_sha256": {
+    "scripts/eval_depth_closed_loop.py": "f2a9b09ddb4b9721a504dc75bb3de690176e343ae60963dc5f896584de1d6ca5",
+    "tests/test_session_h_depth.py": "b2d846abb6bbc0ee55b1a81d035a024790128d2af9c86d3714860071fe242d60",
+    "scripts/validate_session_h.py": "f2c1dbeb5ce0d01cdc337c9780ae7c043a42370e4c72cf146fd87cccd79b8895"
+  }
+}
