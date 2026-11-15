@@ -1,0 +1,1 @@
+Checkpoint commit was successful to /workspace/anticipatory-balance/logs/nominal_s2/G1Impact-20261115-034236/checkpoints/000202342400
