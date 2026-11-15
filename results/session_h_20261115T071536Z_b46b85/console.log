@@ -1,0 +1,215 @@
+Results: /workspace/foresight-session-h/results/session_h_20261115T071536Z_b46b85
+Budget: 75 minutes for experiment processes.
+The runner does not stop the pod or its billing.
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python scripts/run_session_h_tests.py --require-jax --out /workspace/foresight-session-h/results/session_h_20261115T071536Z_b46b85/tests.json
+test_finished_e19_does_not_restore_or_train (test_session_g_checkpoint_reuse.PublishedCheckpointReuseTests.test_finished_e19_does_not_restore_or_train) ... ok
+test_fresh_pod_restores_both_published_bundles_without_training_logs (test_session_g_checkpoint_reuse.PublishedCheckpointReuseTests.test_fresh_pod_restores_both_published_bundles_without_training_logs) ... ok
+test_incomplete_or_unfetched_bundle_fails_before_training (test_session_g_checkpoint_reuse.PublishedCheckpointReuseTests.test_incomplete_or_unfetched_bundle_fails_before_training) ... ok
+test_latest_partial_checkpoint_is_not_replaced_by_older_complete_one (test_session_g_checkpoint_reuse.PublishedCheckpointReuseTests.test_latest_partial_checkpoint_is_not_replaced_by_older_complete_one) ... ok
+test_missing_bundle_retains_training_dispatch_without_executing_training (test_session_g_checkpoint_reuse.PublishedCheckpointReuseTests.test_missing_bundle_retains_training_dispatch_without_executing_training) ... ok
+test_structural_success_does_not_bypass_actual_restore_failure (test_session_g_checkpoint_reuse.PublishedCheckpointReuseTests.test_structural_success_does_not_bypass_actual_restore_failure) ... ok
+test_csv_retains_ids_and_full_float_precision (test_session_h_depth.EvidenceTests.test_csv_retains_ids_and_full_float_precision) ... ok
+test_pairing_keeps_discordance_and_checks_ids (test_session_h_depth.EvidenceTests.test_pairing_keeps_discordance_and_checks_ids) ... ok
+test_pool_counts_instead_of_average_conditional_rates (test_session_h_depth.EvidenceTests.test_pool_counts_instead_of_average_conditional_rates) ... ok
+test_script_refuses_overwrite_and_marks_completion_only_at_end (test_session_h_depth.EvidenceTests.test_script_refuses_overwrite_and_marks_completion_only_at_end) ... ok
+test_unobserved_groups_are_null (test_session_h_depth.EvidenceTests.test_unobserved_groups_are_null) ... ok
+test_actual_controller_jits_for_h_methods_and_two_worlds (test_session_h_depth.SensorTests.test_actual_controller_jits_for_h_methods_and_two_worlds) ... ok
+test_median_detector_rejects_parked_range (test_session_h_depth.SensorTests.test_median_detector_rejects_parked_range) ... ok
+test_parked_projectile_is_out_of_range_in_built_scene (test_session_h_depth.SensorTests.test_parked_projectile_is_out_of_range_in_built_scene) ... ok
+test_actual_transitions_distinguish_stale_and_passed_releases (test_session_h_hold.HoldEvidenceTests.test_actual_transitions_distinguish_stale_and_passed_releases) ... ok
+test_after_failure_braces_do_not_count_as_preparation (test_session_h_hold.HoldEvidenceTests.test_after_failure_braces_do_not_count_as_preparation) ... ok
+test_config_names_distinct_execution_cost_and_oracle_holds (test_session_h_hold.HoldEvidenceTests.test_config_names_distinct_execution_cost_and_oracle_holds) ... ok
+test_contact_records_the_brace_in_that_physical_interval (test_session_h_hold.HoldEvidenceTests.test_contact_records_the_brace_in_that_physical_interval) ... ok
+test_csv_preserves_scenario_ids_and_float_precision (test_session_h_hold.HoldEvidenceTests.test_csv_preserves_scenario_ids_and_float_precision) ... ok
+test_horizon_truncation_is_not_a_controller_release (test_session_h_hold.HoldEvidenceTests.test_horizon_truncation_is_not_a_controller_release) ... ok
+test_pooled_metrics_use_corrected_duration_and_keep_legacy (test_session_h_hold.HoldEvidenceTests.test_pooled_metrics_use_corrected_duration_and_keep_legacy) ... ok
+test_terminating_interval_is_included (test_session_h_hold.HoldEvidenceTests.test_terminating_interval_is_included) ... ok
+test_longer_release_waits_for_later_closest_approach_threshold (test_session_h_hold.OriginalReleaseSemanticsTests.test_longer_release_waits_for_later_closest_approach_threshold) ... ok
+test_minimum_commitment_precedes_passed_release (test_session_h_hold.OriginalReleaseSemanticsTests.test_minimum_commitment_precedes_passed_release) ... ok
+test_session_g_allows_a_new_brace_after_release (test_session_h_hold.OriginalReleaseSemanticsTests.test_session_g_allows_a_new_brace_after_release) ... ok
+test_staleness_can_preempt_requested_long_hold (test_session_h_hold.OriginalReleaseSemanticsTests.test_staleness_can_preempt_requested_long_hold) ... ok
+test_explicit_paths_budget_pinned_revision_and_no_stop_survive_dispatch (test_session_h_launchers.LauncherTests.test_explicit_paths_budget_pinned_revision_and_no_stop_survive_dispatch) ... ok
+test_help_and_shell_syntax_require_no_network_or_gpu (test_session_h_launchers.LauncherTests.test_help_and_shell_syntax_require_no_network_or_gpu) ... ok
+test_invalid_dispatch_is_rejected_before_download (test_session_h_launchers.LauncherTests.test_invalid_dispatch_is_rejected_before_download) ... ok
+test_invalid_download_is_never_executed (test_session_h_launchers.LauncherTests.test_invalid_download_is_never_executed) ... ok
+test_pod_entry_rejects_invalid_mode_or_budget_before_gpu_probe (test_session_h_launchers.LauncherTests.test_pod_entry_rejects_invalid_mode_or_budget_before_gpu_probe) ... ok
+test_public_defaults_aliases_and_small_budget (test_session_h_launchers.LauncherTests.test_public_defaults_aliases_and_small_budget) ... ok
+test_push_permission_is_required_before_worker_start_unless_explicitly_skipped (test_session_h_launchers.LauncherTests.test_push_permission_is_required_before_worker_start_unless_explicitly_skipped) ... ok
+test_retry_publish_only_dispatches_completed_local_run (test_session_h_launchers.LauncherTests.test_retry_publish_only_dispatches_completed_local_run) ... ok
+test_retry_publish_rejects_running_and_traversal (test_session_h_launchers.LauncherTests.test_retry_publish_rejects_running_and_traversal) ... ok
+test_worker_modes_reach_review_session_with_matching_budgets (test_session_h_launchers.LauncherTests.test_worker_modes_reach_review_session_with_matching_budgets) ... ok
+test_worker_rechecks_identity_and_permission_before_python_setup (test_session_h_launchers.LauncherTests.test_worker_rechecks_identity_and_permission_before_python_setup) ... ok
+test_wrong_environment_token_identity_cannot_be_fixed_by_switching_stored_account (test_session_h_launchers.LauncherTests.test_wrong_environment_token_identity_cannot_be_fixed_by_switching_stored_account) ... ok
+test_wrong_stored_account_switch_must_produce_expected_identity (test_session_h_launchers.LauncherTests.test_wrong_stored_account_switch_must_produce_expected_identity) ... ok
+test_all_referenced_repository_scripts_exist (test_session_h_launchers.SessionTests.test_all_referenced_repository_scripts_exist) ... ok
+test_existing_environment_gets_preflight_without_install (test_session_h_launchers.SessionTests.test_existing_environment_gets_preflight_without_install) ... ok
+test_fresh_default_only_gets_bounded_bootstrap (test_session_h_launchers.SessionTests.test_fresh_default_only_gets_bounded_bootstrap) ... ok
+test_mode_dependent_budget_and_invalid_limits (test_session_h_launchers.SessionTests.test_mode_dependent_budget_and_invalid_limits) ... ok
+test_concurrent_parent_change_retries_once_without_force (test_session_h_publication.PublicationReceiptTests.test_concurrent_parent_change_retries_once_without_force) ... ok
+test_exit_code_must_match_frozen_run (test_session_h_publication.PublicationReceiptTests.test_exit_code_must_match_frozen_run) ... ok
+test_invalid_run_source_invalidates_old_verified_receipt_without_push (test_session_h_publication.PublicationReceiptTests.test_invalid_run_source_invalidates_old_verified_receipt_without_push) ... ok
+test_new_numeric_archives_and_depth_episode_paths_survive_push (test_session_h_publication.PublicationReceiptTests.test_new_numeric_archives_and_depth_episode_paths_survive_push) ... ok
+test_push_success_without_remote_verification_is_failure (test_session_h_publication.PublicationReceiptTests.test_push_success_without_remote_verification_is_failure) ... ok
+test_remote_descendant_retaining_publication_is_verified (test_session_h_publication.PublicationReceiptTests.test_remote_descendant_retaining_publication_is_verified) ... ok
+test_verified_receipt_uses_original_run_source_and_preserves_checkout (test_session_h_publication.PublicationReceiptTests.test_verified_receipt_uses_original_run_source_and_preserves_checkout) ... ok
+test_wrong_destination_is_rejected_with_failure_receipt (test_session_h_publication.PublicationReceiptTests.test_wrong_destination_is_rejected_with_failure_receipt) ... ok
+test_named_outputs_and_condition_tables_only (test_session_h_publication.PublicationSchemaTests.test_named_outputs_and_condition_tables_only) ... ok
+test_structured_and_query_credentials_are_redacted (test_session_h_publication.PublicationSchemaTests.test_structured_and_query_credentials_are_redacted) ... ok
+test_all_h_evidence_paths_are_published (test_session_h_runner.HRunnerTests.test_all_h_evidence_paths_are_published) ... ok
+test_hold_baseline_and_longer_arms_share_everything_except_release_and_out (test_session_h_runner.HRunnerTests.test_hold_baseline_and_longer_arms_share_everything_except_release_and_out) ... ok
+test_partial_report_names_unstarted_stages (test_session_h_runner.HRunnerTests.test_partial_report_names_unstarted_stages) ... ok
+test_plan_only_requires_standard_python (test_session_h_runner.HRunnerTests.test_plan_only_requires_standard_python) ... ok
+test_stage_timeout_halts_later_work_and_publishes_partial_record (test_session_h_runner.HRunnerTests.test_stage_timeout_halts_later_work_and_publishes_partial_record) ... ok
+test_cli_writes_failure_audit (test_session_h_validation.ValidationTests.test_cli_writes_failure_audit) ... ok
+test_duplicate_id (test_session_h_validation.ValidationTests.test_duplicate_id) ... ok
+test_invalid_release (test_session_h_validation.ValidationTests.test_invalid_release) ... ok
+test_nonfinite_progress (test_session_h_validation.ValidationTests.test_nonfinite_progress) ... ok
+test_prelaunch_numerator_cannot_exceed_frames (test_session_h_validation.ValidationTests.test_prelaunch_numerator_cannot_exceed_frames) ... ok
+test_stale_hash (test_session_h_validation.ValidationTests.test_stale_hash) ... ok
+test_valid_depth_allows_nonzero_false_alarms (test_session_h_validation.ValidationTests.test_valid_depth_allows_nonzero_false_alarms) ... ok
+test_valid_frontier (test_session_h_validation.ValidationTests.test_valid_frontier) ... ok
+test_wrong_count (test_session_h_validation.ValidationTests.test_wrong_count) ... ok
+test_wrong_pooled_rate (test_session_h_validation.ValidationTests.test_wrong_pooled_rate) ... ok
+test_credential_bearing_logs_are_redacted (test_experiment_publisher.PublicationTests.test_credential_bearing_logs_are_redacted) ... ok
+test_nested_tables_are_allowed_and_code_is_rejected (test_experiment_publisher.PublicationTests.test_nested_tables_are_allowed_and_code_is_rejected) ... ok
+test_active_or_unrecognizable_gpu_process_list_prevents_stop (test_finish_pod_session.FinishPodTests.test_active_or_unrecognizable_gpu_process_list_prevents_stop) ... ok
+test_current_verified_run_requests_modern_stop (test_finish_pod_session.FinishPodTests.test_current_verified_run_requests_modern_stop) ... ok
+test_failed_and_timed_out_runs_can_stop_after_verified_log_upload (test_finish_pod_session.FinishPodTests.test_failed_and_timed_out_runs_can_stop_after_verified_log_upload) ... ok
+test_failed_stop_request_is_not_reported_as_success (test_finish_pod_session.FinishPodTests.test_failed_stop_request_is_not_reported_as_success) ... ok
+test_frozen_run_must_match_last_run_record (test_finish_pod_session.FinishPodTests.test_frozen_run_must_match_last_run_record) ... ok
+test_legacy_cli_is_detected_using_help (test_finish_pod_session.FinishPodTests.test_legacy_cli_is_detected_using_help) ... ok
+test_missing_cli_gpu_checker_or_pod_id_prevents_stop (test_finish_pod_session.FinishPodTests.test_missing_cli_gpu_checker_or_pod_id_prevents_stop) ... ok
+test_no_stop_override_and_no_authorization_do_not_read_records_or_run_commands (test_finish_pod_session.FinishPodTests.test_no_stop_override_and_no_authorization_do_not_read_records_or_run_commands) ... ok
+test_publisher_failure_is_rejected_even_with_valid_old_receipt (test_finish_pod_session.FinishPodTests.test_publisher_failure_is_rejected_even_with_valid_old_receipt) ... ok
+test_receipt_file_must_equal_receipt_from_current_publisher (test_finish_pod_session.FinishPodTests.test_receipt_file_must_equal_receipt_from_current_publisher) ... ok
+test_receipt_identity_source_exit_and_verified_flag_must_match (test_finish_pod_session.FinishPodTests.test_receipt_identity_source_exit_and_verified_flag_must_match) ... ok
+test_running_and_interrupted_states_are_not_stopped (test_finish_pod_session.FinishPodTests.test_running_and_interrupted_states_are_not_stopped) ... ok
+test_stale_or_missing_invocation_is_rejected (test_finish_pod_session.FinishPodTests.test_stale_or_missing_invocation_is_rejected) ... ok
+test_subprocess_timeout_is_bounded_and_sanitized (test_finish_pod_session.FinishPodTests.test_subprocess_timeout_is_bounded_and_sanitized) ... ok
+test_unrecognized_cli_never_tries_a_stop_or_terminate (test_finish_pod_session.FinishPodTests.test_unrecognized_cli_never_tries_a_stop_or_terminate) ... ok
+
+----------------------------------------------------------------------
+Ran 85 tests in 21.919s
+
+OK
+{
+  "passed": true,
+  "tests_run": 85,
+  "elapsed_seconds": 21.975,
+  "skipped": []
+}
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python scripts/preflight_session_h.py --out /workspace/foresight-session-h/results/session_h_20261115T071536Z_b46b85/preflight.json
+Python: /workspace/mujoco_playground/rss2025/.venv/bin/python
+JAX devices: [CudaDevice(id=0)]
+nominal_s1: restored /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400
+brace2_s1: restored /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400
+GPU and both checkpoint restores passed.
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python -u scripts/eval_depth_closed_loop.py --nominal checkpoints/nominal_s1 --brace checkpoints/brace2_s1 --response_model results/response_model.json --impl warp --steps 300 --episodes 16 --batches 1 --period 5 --extra_latency 0 --seed 9300 --release_after 0.3 --sources parametric,depth --methods ttc_threshold:0.3,belief_lead:0.05,belief_wait:0.05,belief_voi:0.05 --out /workspace/foresight-session-h/results/session_h_20261115T071536Z_b46b85/depth_gate_l0
+I1115 07:16:15.477466 126476454029120 xla_bridge.py:861] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+I1115 07:16:15.477722 126476454029120 xla_bridge.py:861] Unable to initialize backend 'proxy': The 'proxy' backend requires the address of an IFRT Proxy server. Set it via the JAX_BACKEND_TARGET environment variable or the jax_backend_target config option, e.g. JAX_BACKEND_TARGET=grpc://localhost:29000.
+I1115 07:16:16.455687 126476454029120 checkpoint.py:189] restoring from checkpoint /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400
+I1115 07:16:16.456363 126476454029120 abstract_checkpointer.py:35] orbax-checkpoint version: 0.12.8
+I1115 07:16:16.456439 126476454029120 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 07:16:16.456640 126476454029120 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x730633cc1b80>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 07:16:16.457186 126476454029120 checkpoint.py:228] Read Metadata={'item_handlers': 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler', 'metrics': {}, 'performance_metrics': {}, 'init_timestamp_nsecs': 1794590795947520546, 'commit_timestamp_nsecs': 1794590796010822336, 'custom_metadata': {}} from /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400/_CHECKPOINT_METADATA
+I1115 07:16:16.477062 126476454029120 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 07:16:16.477235 126476454029120 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x730633cc1b80>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 07:16:16.477474 126476454029120 event_tracking.py:76] [process=0] [sync] Started load checkpoint @ /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400.
+I1115 07:16:16.478425 126476454029120 checkpointer.py:368] Restoring checkpoint from /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400.
+I1115 07:16:16.478767 126476454029120 event_tracking.py:171] [process=0] [sync] Finished blocking load in 0.00 seconds. Continuing load @ /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400.
+I1115 07:16:16.490053 126476454029120 async_io_engine.py:127] [process=0] /jax/checkpoint/read/gbytes_per_sec: 172.492 MiB/s (total size: 1.9 MiB) (time elapsed: 0.011087894439697266 s) (global)
+I1115 07:16:16.490229 126476454029120 event_tracking.py:184] [process=0] [sync] Finished load in 0.01 seconds @ /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400
+I1115 07:16:16.492469 126476454029120 checkpoint.py:189] restoring from checkpoint /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400
+I1115 07:16:16.492542 126476454029120 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 07:16:16.492619 126476454029120 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x730633cc1b80>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 07:16:16.507343 126476454029120 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 07:16:16.507450 126476454029120 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x730633cc1b80>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 07:16:16.507594 126476454029120 event_tracking.py:76] [process=0] [sync] Started load checkpoint @ /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400.
+I1115 07:16:16.508435 126476454029120 checkpointer.py:368] Restoring checkpoint from /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400.
+I1115 07:16:16.508558 126476454029120 event_tracking.py:171] [process=0] [sync] Finished blocking load in 0.00 seconds. Continuing load @ /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400.
+I1115 07:16:16.520059 126476454029120 async_io_engine.py:127] [process=0] /jax/checkpoint/read/gbytes_per_sec: 169.873 MiB/s (total size: 1.9 MiB) (time elapsed: 0.011258840560913086 s) (global)
+I1115 07:16:16.520229 126476454029120 event_tracking.py:184] [process=0] [sync] Finished load in 0.01 seconds @ /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400
+Warp 1.18.0 initialized:
+   CUDA Toolkit 13.4, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA RTX 6000 Ada Generation" (47 GiB, sm_89, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.18.0
+Module mujoco.mjx.third_party.mujoco_warp._src.render_util f1ec7f3 load on device 'cuda:0' took 603.42 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.bvh 8857017 load on device 'cuda:0' took 869.22 ms  (compiled)
+Module mujoco.mjx.warp.ffi 4443472 load on device 'cuda:0' took 74.60 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.smooth 43a6a77 load on device 'cuda:0' took 5179.06 ms  (compiled)
+Module _nxn_broadphase__locals__kernel_95773766 9577376 load on device 'cuda:0' took 352.30 ms  (compiled)
+Module ccd_kernel_builder__locals__ccd_kernel_1a0e5f50 1a0e5f5 load on device 'cuda:0' took 15527.78 ms  (compiled)
+Module _primitive_narrowphase__locals__primitive_narrowphase_45a33c4c 45a33c4 load on device 'cuda:0' took 1240.51 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.constraint 8d4d513 load on device 'cuda:0' took 91.01 ms  (compiled)
+Module _friction_dof__locals__kernel_c23b2f31 c23b2f3 load on device 'cuda:0' took 230.33 ms  (compiled)
+Module _limit_slide_hinge__locals__kernel_9573ef9b 9573ef9 load on device 'cuda:0' took 251.58 ms  (compiled)
+Module _efc_contact_init__locals__kernel_9009dd76 9009dd7 load on device 'cuda:0' took 188.82 ms  (compiled)
+Module _efc_contact_jac_sparse__locals__kernel_54cecf88 54cecf8 load on device 'cuda:0' took 215.61 ms  (compiled)
+Module _efc_contact_update__locals__kernel_efb3ac6e efb3ac6 load on device 'cuda:0' took 256.89 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.sensor 8feaecd load on device 'cuda:0' took 4001.38 ms  (compiled)
+Module _contact_match_builder__locals___contact_match_4da0430b 4da0430 load on device 'cuda:0' took 346.08 ms  (compiled)
+Module _contact_sort__locals__contact_sort_bed1da43 6afef3a load on device 'cuda:0' took 193.84 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.forward 9a96b97 load on device 'cuda:0' took 3985.98 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.passive 0de6fd1 load on device 'cuda:0' took 4172.35 ms  (compiled)
+Module _qfrc_passive_kernel__locals__kernel_976399dd 976399d load on device 'cuda:0' took 112.92 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.forward bdd5619 load on device 'cuda:0' took 3227.42 ms  (compiled)
+Module _qfrc_smooth__locals__kernel_8b823980 8b82398 load on device 'cuda:0' took 105.14 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.support 770ef7d load on device 'cuda:0' took 239.05 ms  (compiled)
+Module _small_cholesky_factorize_solve_block__locals__kernel_9da335f1 a5c2521 load on device 'cuda:0' took 376.96 ms  (compiled)
+Module _tile_cholesky_factorize_solve_block__locals__kernel_f18d9752 acc0ae1 load on device 'cuda:0' took 7067.80 ms  (compiled)
+Module _solve_init_dof__locals__kernel_7cb1664a 7cb1664 load on device 'cuda:0' took 104.10 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.solver 5b3c3b6 load on device 'cuda:0' took 895.38 ms  (compiled)
+Module _solve_init_jaref_kernel__locals__kernel_ca465bd8 ca465bd load on device 'cuda:0' took 158.34 ms  (compiled)
+Module mul_m_kernel__locals___mul_m_f3de1cc7 f3de1cc load on device 'cuda:0' took 162.04 ms  (compiled)
+Module _update_constraint_efc__locals__kernel_0539aa50 0539aa5 load on device 'cuda:0' took 192.17 ms  (compiled)
+Module _update_constraint_init_qfrc_constraint_sparse__locals__kernel_801f2ee2 801f2ee load on device 'cuda:0' took 166.37 ms  (compiled)
+Module _update_gradient_zero_grad_dot__locals__kernel_b20934d7 b20934d load on device 'cuda:0' took 94.26 ms  (compiled)
+Module _update_gradient_grad__locals__kernel_c876081d c876081 load on device 'cuda:0' took 102.22 ms  (compiled)
+Module _update_gradient_init_h_sparse__locals__kernel_f82bfdd8 f82bfdd load on device 'cuda:0' took 127.20 ms  (compiled)
+Module _JTDACJ_sparse__locals__kernel_765abea5 765abea load on device 'cuda:0' took 184.47 ms  (compiled)
+Module _JTDACJ_sparse__locals__kernel_765abea5 bd2cd56 load on device 'cuda:0' took 556.25 ms  (compiled)
+Module _update_gradient_cholesky_blocked__locals__kernel_1f053eca 38eeb22 load on device 'cuda:0' took 9427.56 ms  (compiled)
+Module _linesearch_jv_fused_kernel__locals__kernel_bdad643e bdad643 load on device 'cuda:0' took 124.76 ms  (compiled)
+Module _linesearch_iterative_kernel__locals__kernel_f3a187e1 ee17086 load on device 'cuda:0' took 719.51 ms  (compiled)
+Module _update_constraint_efc__locals__kernel_e953547e e953547 load on device 'cuda:0' took 198.34 ms  (compiled)
+Module _update_gradient_zero_grad_dot__locals__kernel_e9f8c963 e9f8c96 load on device 'cuda:0' took 108.85 ms  (compiled)
+Module _update_gradient_grad__locals__kernel_87959044 8795904 load on device 'cuda:0' took 101.72 ms  (compiled)
+Module _update_gradient_h_incremental_sparse__locals__kernel_e8129775 e812977 load on device 'cuda:0' took 177.18 ms  (compiled)
+Module _update_gradient_cholesky_blocked_skip_unchanged__locals__kernel_dc0908fb 837e4e8 load on device 'cuda:0' took 5901.96 ms  (compiled)
+Module _solve_done__locals__kernel_54267c25 54267c2 load on device 'cuda:0' took 145.20 ms  (compiled)
+Module _next_time_builder__locals___next_time_bc454e15 bc454e1 load on device 'cuda:0' took 129.55 ms  (compiled)
+batch 0: reference contact(hits) 1.000 fell(hits) 0.583
+  parametric ttc_threshold  p=0.3    25s  fall|hits 0.417  fall|contact 0.417  contact 1.00  false-prep 0.750  braced 0.68s  det/ep 6.4  render nan ms
+  parametric belief_lead    p=0.05   10s  fall|hits 0.500  fall|contact 0.545  contact 0.92  false-prep 1.000  braced 0.91s  det/ep 6.2  render nan ms
+  parametric belief_wait    p=0.05   11s  fall|hits 0.417  fall|contact 0.455  contact 0.92  false-prep 1.000  braced 0.91s  det/ep 6.4  render nan ms
+  parametric belief_voi     p=0.05   13s  fall|hits 0.417  fall|contact 0.455  contact 0.92  false-prep 1.000  braced 0.92s  det/ep 6.4  render nan ms
+Module _build_megakernel__locals___render_megakernel_397ef078 98dc7d4 load on device 'cuda:0' took 2637.09 ms  (compiled)
+  depth      ttc_threshold  p=0.3    27s  fall|hits 0.417  fall|contact 0.417  contact 1.00  false-prep 0.500  braced 0.60s  det/ep 5.7  render 55 ms
+  depth      belief_lead    p=0.05   13s  fall|hits 0.583  fall|contact 0.636  contact 0.92  false-prep 0.750  braced 0.87s  det/ep 5.1  render 40 ms
+  depth      belief_wait    p=0.05   15s  fall|hits 0.583  fall|contact 0.636  contact 0.92  false-prep 0.500  braced 0.81s  det/ep 5.0  render 40 ms
+  depth      belief_voi     p=0.05   17s  fall|hits 0.583  fall|contact 0.636  contact 0.92  false-prep 0.750  braced 0.85s  det/ep 4.8  render 40 ms
+I1115 07:19:49.575132 126476454029120 font_manager.py:1848] generated new fontManager
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python scripts/validate_session_h.py --stage-dir /workspace/foresight-session-h/results/session_h_20261115T071536Z_b46b85/depth_gate_l0 --kind depth --episodes-per-condition 16 --conditions 9 --expected-release 0.3 --source-commit 450c834ffa17c6cffd00b4303eeb194e2a3c6242
+{
+  "schema_version": "foresight.session_h.v1",
+  "status": "failed",
+  "passed": false,
+  "kind": "depth",
+  "source_commit": "450c834ffa17c6cffd00b4303eeb194e2a3c6242",
+  "error": "('none', 'reactive', 0.0):progress_m: disagrees with raw episodes",
+  "interpretation": "Operational evidence gate failed; no performance conclusion."
+}
+Experiment stopped: Child process exited with status 1. See console.log.
+Traceback (most recent call last):
+  File "/workspace/foresight-session-h/scripts/run_session_h.py", line 227, in main
+    run_child(command, env, log, min(120, deadline-time.monotonic()))
+  File "/workspace/foresight-session-h/scripts/run_session_h.py", line 92, in run_child
+    raise RuntimeError(f'Child process exited with status {result}. See console.log.')
+RuntimeError: Child process exited with status 1. See console.log.
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python scripts/summarize_session_h.py --run-dir /workspace/foresight-session-h/results/session_h_20261115T071536Z_b46b85
+Session H report: partial (0/8 audited stages).
+Local review ZIP: /workspace/foresight-session-h/logs/session_h_20261115T071536Z_b46b85.zip
+Running: /usr/local/bin/python3 /workspace/foresight-session-h/scripts/publish_experiment_results.py --run-dir /workspace/foresight-session-h/results/session_h_20261115T071536Z_b46b85 --log /workspace/foresight-session-h/results/session_h_20261115T071536Z_b46b85/console.log --exit-code 1

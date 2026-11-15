@@ -1,0 +1,9 @@
+{
+  "schema_version": "foresight.session_h.v1",
+  "status": "failed",
+  "passed": false,
+  "kind": "depth",
+  "source_commit": "450c834ffa17c6cffd00b4303eeb194e2a3c6242",
+  "error": "('none', 'reactive', 0.0):progress_m: disagrees with raw episodes",
+  "interpretation": "Operational evidence gate failed; no performance conclusion."
+}

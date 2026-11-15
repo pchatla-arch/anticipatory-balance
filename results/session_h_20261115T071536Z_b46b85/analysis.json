@@ -1,0 +1,60 @@
+{
+  "schema_version": "foresight.session_h.v1",
+  "status": "partial",
+  "source_commit": "450c834ffa17c6cffd00b4303eeb194e2a3c6242",
+  "run_id": "session_h_20261115T071536Z_b46b85",
+  "stages": [
+    {
+      "name": "depth_gate_l0",
+      "status": "failed",
+      "kind": "depth",
+      "split": "gate"
+    },
+    {
+      "name": "depth_gate_l5",
+      "status": "not_started",
+      "kind": "depth",
+      "split": "gate"
+    },
+    {
+      "name": "hold_gate",
+      "status": "not_started",
+      "kind": "frontier",
+      "split": "gate"
+    },
+    {
+      "name": "E18b_hold_0p3",
+      "status": "not_started",
+      "kind": "frontier",
+      "split": "followup"
+    },
+    {
+      "name": "E18b_hold_0p6",
+      "status": "not_started",
+      "kind": "frontier",
+      "split": "followup"
+    },
+    {
+      "name": "E18b_hold_1p0",
+      "status": "not_started",
+      "kind": "frontier",
+      "split": "followup"
+    },
+    {
+      "name": "E17c_depth_lat0",
+      "status": "not_started",
+      "kind": "depth",
+      "split": "followup"
+    },
+    {
+      "name": "E17c_depth_lat100",
+      "status": "not_started",
+      "kind": "depth",
+      "split": "followup"
+    }
+  ],
+  "paired_hold_comparisons": [],
+  "interpretation": "Session G controller retained; fixed response model transferred across execution holds; repeated G scenarios; one frozen policy pair.",
+  "hold_definition": "Release may occur after estimated closest approach OR staleness, subject to minimum commitment; re-entry remains possible.",
+  "uncertainty": "Scenario-paired normal95 intervals conditional on this skill pair, no multiple-selection adjustment."
+}
