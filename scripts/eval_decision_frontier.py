@@ -111,11 +111,12 @@ def main(_):
       conds += [("always", _PMIN.value, L) for L in lats]
     elif m == "ttc_threshold":
       conds += [("ttc_threshold", th, L) for th, L in itertools.product(thetas, lats)]
-    elif m in ("belief_commit", "belief_lead", "belief_voi"):
+    elif m in ("belief_commit", "belief_lead", "belief_voi", "belief_wait"):
       conds += [(m, c, L) for c, L in itertools.product(cpreps, lats)]
   print(f"{len(conds)} conditions x {n} episodes x {_BATCHES.value} batches")
 
   rows = []
+  per_ep = {}
   for b in range(_BATCHES.value):
     rs = np.random.RandomState(_SEED.value + b)
     masses = rs.uniform(*mr, n)
@@ -150,7 +151,9 @@ def main(_):
               "belief_commit": RU.RuleConfig(kind="belief_commit", c_prep=param, c_fall=1.0, **common),
               "belief_lead": RU.RuleConfig(kind="belief_lead", c_prep=param, c_fall=1.0, **common),
               "belief_voi": RU.RuleConfig(kind="belief_voi", c_prep=param, c_fall=1.0, wait_steps=_PERIOD.value,
-                                          **common)}[method]
+                                          **common),
+              "belief_wait": RU.RuleConfig(kind="belief_wait", c_prep=param, c_fall=1.0, wait_steps=_PERIOD.value,
+                                           **common)}[method]
         ctrl = AnticipationController(D.DetectorConfig(period=_PERIOD.value, latency=lat, sigma0=_SIG0.value,
                                                        sigma1=_SIG1.value, miss_prob=_MISSP.value, fov_deg=_FOV.value,
                                                        max_range=_MAXRANGE.value),
@@ -172,6 +175,12 @@ def main(_):
       if "false_prep" not in tab:
         tab["false_prep"] = info["proj_is_miss"] & traj["brace_active"].any(axis=0)
       hit_s = ~tab["is_miss"]; c = tab["contact"] & hit_s
+      # Per-episode outcomes for paired comparisons between conditions (same scenarios).
+      per_ep.setdefault((method, param, lat), []).append(
+          {"fell": tab["fell"], "contact": tab["contact"], "is_miss": tab["is_miss"],
+           "brace_steps": tab["brace_steps_total"], "brace_onset": tab["brace_onset_step"],
+           "contact_step": tab["contact_step"], "progress_m": tab["progress_m"],
+           "release_reason": traj["ctrl_release_reason"][-1] if "ctrl_release_reason" in traj else np.zeros(n, int)})
       row = {"method": method, "param": param, "latency_steps": lat, "batch": b, "n": n,
              "fall_rate_hits": float(tab["fell"][hit_s].mean()),
              "fall_rate_given_contact": float(tab["fell"][c].mean()) if c.any() else float("nan"),
@@ -186,6 +195,13 @@ def main(_):
             f"fall|contact {row['fall_rate_given_contact']:.3f}  false-prep {row['false_prep_rate']:.3f}  "
             f"braced {row['braced_s']:.2f}s  progress {row['progress_m']:.2f}")
 
+  # Per-episode outcomes, concatenated over batches, one array set per condition.
+  ep_out = {}
+  for (meth, par, lat), parts in per_ep.items():
+    tag = f"{meth}__p{par:g}__lat{lat}"
+    for f in parts[0]:
+      ep_out[f"{tag}__{f}"] = np.concatenate([p_[f] for p_ in parts])
+  np.savez_compressed(os.path.join(_OUT.value, "episodes.npz"), **ep_out)
   # Aggregate over batches.
   keys = ["method", "param", "latency_steps"]
   agg = {}
@@ -225,8 +241,9 @@ def main(_):
     axes = np.atleast_1d(axes)
     col = {"ttc_threshold": "#2b6f8e", "belief_commit": "#d9772b", "belief_lead": "#b5179e", "belief_voi": "#7209b7",
            "always": "#6a7179", "reactive": "#14213d", "oracle": "#3a9d5d"}
+    col["belief_wait"] = "#4cc9f0"
     for ax, L in zip(axes, lats):
-      for m in ("ttc_threshold", "belief_commit", "belief_lead", "belief_voi"):
+      for m in ("ttc_threshold", "belief_commit", "belief_lead", "belief_wait", "belief_voi"):
         pts = sorted([o for o in out if o["method"] == m and o["latency_steps"] == L], key=lambda o: o["false_prep_rate"])
         if pts:
           ax.plot([o["false_prep_rate"] for o in pts], [o["fall_rate_hits"] for o in pts], "o-", color=col[m], label=m)

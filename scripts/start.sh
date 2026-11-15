@@ -10,7 +10,7 @@
 # Argument: the session letter (a, b, c, d). Env: BRANCH (default: the branch this file is from),
 # NO_STOP=1 to leave the pod running at the end.
 set -euo pipefail
-SESSION=${1:?usage: start.sh <a|b|c|d|e|f>}
+SESSION=${1:?usage: start.sh <a|b|c|d|e|f|g>}
 BRANCH=${BRANCH:-session-d}
 REPO=/workspace/anticipatory-balance
 if [ ! -d "$REPO/.git" ]; then

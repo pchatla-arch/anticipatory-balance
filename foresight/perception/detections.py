@@ -34,6 +34,7 @@ class DetectorState(NamedTuple):
   buf_pelvis: jax.Array      # (buffer_len, 3)
   buf_fwd: jax.Array         # (buffer_len, 3)
   step: jax.Array            # int32 control step
+  buf_launched: jax.Array    # (buffer_len,) whether the object was in flight at capture
 
 
 class Detection(NamedTuple):
@@ -45,7 +46,7 @@ class Detection(NamedTuple):
 
 def init_state(cfg: DetectorConfig) -> DetectorState:
   z = jp.zeros((cfg.buffer_len, 3))
-  return DetectorState(z, z, z, jp.int32(0))
+  return DetectorState(z, z, z, jp.int32(0), jp.zeros((cfg.buffer_len,), bool))
 
 
 def step(cfg: DetectorConfig, st: DetectorState, obj_pos, pelvis_pos, pelvis_fwd, launched,
@@ -57,10 +58,14 @@ def step(cfg: DetectorConfig, st: DetectorState, obj_pos, pelvis_pos, pelvis_fwd
       buf_pos=st.buf_pos.at[i].set(obj_pos),
       buf_pelvis=st.buf_pelvis.at[i].set(pelvis_pos),
       buf_fwd=st.buf_fwd.at[i].set(pelvis_fwd),
+      buf_launched=st.buf_launched.at[i].set(launched),
   )
   cap = st.step - cfg.latency
   j = cap % L
   p, pel, fwd = st.buf_pos[j], st.buf_pelvis[j], st.buf_fwd[j]
+  # Validity is judged at capture time: an object not yet in flight when the frame was
+  # taken is not reported, however the delivery-time flag reads.
+  launched = st.buf_launched[j]
   rel = p - pel
   rng_dist = jp.linalg.norm(rel[:2]) + 1e-6
   heading = fwd[:2] / (jp.linalg.norm(fwd[:2]) + 1e-6)

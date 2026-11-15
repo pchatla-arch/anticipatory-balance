@@ -47,24 +47,47 @@ _OUT = flags.DEFINE_string("out", "results/E6_oracle", "output dir")
 _SEED = flags.DEFINE_integer("seed", 100, "seed")
 
 
-def readiness(traj, dt, z_target):
-  """tau from switch onset to a sustained braced posture; NaN if never reached."""
+def readiness(traj, dt, z_target, contact_step=None):
+  """Posture readiness relative to the switch and to contact.
+
+  ok(t): pelvis within 3 cm of the BRACE height target, torso upright, both feet down.
+  Returns a dict of per-episode arrays:
+    tau_ready_s        time from switch onset to the START of the first 0.2 s window of ok
+                       during which BRACE is active, counted only before contact (NaN if none)
+    ready_at_contact   ok held over the 0.2 s ending at contact AND BRACE active at contact
+    brace_at_contact   BRACE active at the contact step
+    tau_window_any_s   the old statistic (first 0.2 s window anywhere after onset, any skill,
+                       before or after contact), kept for comparison with earlier reports
+  """
   T, n = traj["brace_active"].shape
-  onset = np.argmax(traj["brace_active"], axis=0)
-  any_on = traj["brace_active"].any(axis=0)
-  # z_target is the pelvis-height target of the BRACE reward (pelvis z, not the CoM).
+  active = traj["brace_active"]
+  onset = np.argmax(active, axis=0)
+  any_on = active.any(axis=0)
   ok = (traj["pelvis_pos"][..., 2] <= z_target + 0.03) & (traj["torso_up"] > 0.9) & traj["feet_contact"].all(axis=-1)
-  tau = np.full(n, np.nan)
   k = int(round(0.2 / dt))
+  cs = np.full(n, T) if contact_step is None else np.where(contact_step >= 0, contact_step, T)
+  tau = np.full(n, np.nan); tau_any = np.full(n, np.nan)
+  ready_c = np.zeros(n, bool); brace_c = np.zeros(n, bool)
   for i in np.where(any_on)[0]:
-    seq = ok[onset[i]:, i]
+    o = onset[i]
     run = 0
-    for t, v in enumerate(seq):
-      run = run + 1 if v else 0
+    for t in range(o, T):
+      run = run + 1 if ok[t, i] else 0
       if run >= k:
-        tau[i] = (t - k + 1) * dt
+        tau_any[i] = (t - k + 1 - o) * dt
         break
-  return tau
+    run = 0
+    for t in range(o, min(cs[i], T)):
+      run = run + 1 if (ok[t, i] and active[t, i]) else 0
+      if run >= k:
+        tau[i] = (t - k + 1 - o) * dt
+        break
+    c = cs[i]
+    if c < T:
+      brace_c[i] = bool(active[c, i])
+      lo = max(c - k + 1, 0)
+      ready_c[i] = brace_c[i] and bool(np.all(ok[lo:c + 1, i] & active[lo:c + 1, i])) and (c - lo + 1 >= k)
+  return {"tau_ready_s": tau, "ready_at_contact": ready_c, "brace_at_contact": brace_c, "tau_window_any_s": tau_any}
 
 
 def main(_):
@@ -118,7 +141,7 @@ def main(_):
       tab = R.episode_table(info, traj, env.dt)
       tab["lead"] = lead_arr; tab["batch"] = np.full(n, b)
       tab["mode"] = np.array([mode] * n); tab["launch"] = np.full(n, int(launch))
-      tab["tau_ready_s"] = readiness(traj, env.dt, z_target)
+      tab.update(readiness(traj, env.dt, z_target, tab["contact_step"]))
       rows.append(tab)
       print(f"batch {b} mode={mode} launch={int(launch)}: {time.time()-t0:.0f}s")
       for L in leads:
@@ -126,7 +149,8 @@ def main(_):
         tr = tab["tau_ready_s"][sel]
         print(f"  lead {L:5.2f}: fall {tab['fell'][sel].mean():.3f}  contact {tab['contact'][sel].mean():.3f}  "
               f"progress {tab['progress_m'][sel].mean():.2f} m  switched {tab['brace_steps_total'][sel].mean()*env.dt:.2f} s  "
-              f"ready {np.isfinite(tr).mean():.2f} tau {np.nanmean(tr) if np.isfinite(tr).any() else float('nan'):.2f} s")
+              f"ready@contact {tab['ready_at_contact'][sel].mean():.2f} brace@contact {tab['brace_at_contact'][sel].mean():.2f} "
+              f"tau {np.nanmean(tr) if np.isfinite(tr).any() else float('nan'):.2f} s")
 
   tab = {k: np.concatenate([r[k] for r in rows]) for k in rows[0]}
   # write_csv wants numeric/bool columns; encode mode as a flag.
@@ -147,7 +171,11 @@ def main(_):
                     "progress_loss_m": float(tab["progress_m"][base].mean() - tab["progress_m"][sel].mean()),
                     "switched_s": float(tab["brace_steps_total"][sel].mean() * env.dt),
                     "ready_frac": float(np.isfinite(tr).mean()),
-                    "tau_ready_s": float(np.nanmean(tr)) if np.isfinite(tr).any() else None})
+                    "tau_ready_s": float(np.nanmean(tr)) if np.isfinite(tr).any() else None,
+                    "ready_at_contact": float(tab["ready_at_contact"][sel].mean()),
+                    "brace_at_contact": float(tab["brace_at_contact"][sel].mean()),
+                    "tau_window_any_s": float(np.nanmean(tab["tau_window_any_s"][sel])) if np.isfinite(tab["tau_window_any_s"][sel]).any() else None,
+                    "fall_given_contact": float(tab["fell"][sel & tab["contact"]].mean()) if (sel & tab["contact"]).any() else None})
   keys = list(curve[0].keys())
   with open(os.path.join(_OUT.value, "lead_curve.csv"), "w") as f:
     f.write(",".join(keys) + "\n")

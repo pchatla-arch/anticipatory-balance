@@ -60,6 +60,7 @@ class BeliefStats(NamedTuple):
   momentum_samples: jax.Array
   hit_samples: jax.Array
   weights: jax.Array         # (N,) uniform
+  t_pass: jax.Array          # time of closest approach of the KF mean (negative once passed)
 
 
 def init_state(cfg: PFConfig) -> PFState:
@@ -122,6 +123,11 @@ def stats(cfg: PFConfig, st: PFState, pelvis_pos, pelvis_vel, rng) -> BeliefStat
   p, v_world = x[:, :3], x[:, 3:]
   w = jp.full((N,), 1.0 / N)
 
+  def t_closest(p, v):
+    rel = pelvis_pos[:2] - p[:2]
+    vxy = v[:2]
+    return jp.dot(rel, vxy) / (jp.sum(vxy ** 2) + 1e-6)
+
   def geom(p, v):
     rel = pelvis_pos[:2] - p[:2]
     vxy = v[:2]
@@ -148,39 +154,42 @@ def stats(cfg: PFConfig, st: PFState, pelvis_pos, pelvis_vel, rng) -> BeliefStat
   pe_hit, pe_t = geom(st.mu[:3], st.mu[3:] - pelvis_vel)
   pe_hit = pe_hit & st.initialized
   mm = jp.mean(st.m)
+  t_pass = jp.where(st.initialized, t_closest(st.mu[:3], st.mu[3:] - pelvis_vel), jp.inf)
   return BeliefStats(p_hit, t_hit, t_std, mom_mean, jp.trace(st.cov[3:, 3:]), st.n_obs,
                      pe_hit, jp.where(pe_hit, pe_t, jp.inf), mm * jp.linalg.norm(st.mu[3:]),
-                     st.mu[:3], st.mu[3:], st.m, mom, hit, w)
+                     st.mu[:3], st.mu[3:], st.m, mom, hit, w, t_pass)
 
 
-def lookahead(cfg: PFConfig, st: PFState, det_sigma, wait_steps: int, pelvis_pos, pelvis_vel,
-              rng, k: int = 16):
-  """Belief statistics after a hypothetical next detection `wait_steps` from now.
+def lookahead(cfg: PFConfig, st: PFState, det_sigma, wait_steps, latency_steps: int,
+              pelvis_pos, pelvis_vel, rng, k: int = 16, observe: bool = True):
+  """Belief statistics at the next delivery, `wait_steps` from now, for a one-step lookahead.
 
-  Predicts the Gaussian forward, samples k measurements from the predictive distribution
-  of a detection taken then (noise det_sigma, no latency), applies the Kalman update to
-  each, and returns stats for the k posteriors (leading axis k) at the robot's predicted
-  position. This is the observation branch of a one-step lookahead."""
-  F = jp.eye(6).at[0:3, 3:6].set(cfg.dt * wait_steps * jp.eye(3))
+  The next delivered detection of the evaluated sensor was captured `latency_steps` before
+  delivery, so it is a measurement z = p(t+w-l) = H x(t+w) with H = [I, -l dt I] of the state
+  at delivery time; k measurements are sampled from that predictive distribution and each is
+  Kalman-updated (observation branch). With observe=False the belief is only predicted
+  forward (a blind wait), which is also the no-detection branch of the lookahead. Returns
+  stats with leading axis k (k = 1 when observe=False), at the robot's predicted position."""
+  w = jp.asarray(wait_steps, jp.float32)          # may be traced (steps to the next delivery)
+  F = jp.eye(6).at[0:3, 3:6].set(cfg.dt * w * jp.eye(3))
   Q = jp.diag(jp.concatenate([jp.full(3, cfg.process_pos_sigma ** 2),
-                              jp.full(3, wait_steps * cfg.process_vel_sigma ** 2)]))
+                              jp.full(3, w * cfg.process_vel_sigma ** 2)]))
   mu = F @ st.mu
   cov = F @ st.cov @ F.T + Q
-  H = jp.concatenate([jp.eye(3), jp.zeros((3, 3))], axis=1)
+  pel = pelvis_pos + pelvis_vel * cfg.dt * w
+  k_z, k_s = jax.random.split(rng)
+  if not observe:
+    return jax.vmap(lambda key: stats(cfg, st._replace(mu=mu, cov=cov), pel, pelvis_vel, key))(
+        jax.random.split(k_s, 1))
+  lag = latency_steps * cfg.dt
+  H = jp.concatenate([jp.eye(3), -lag * jp.eye(3)], axis=1)
   R = det_sigma ** 2 * jp.eye(3)
   S = H @ cov @ H.T + R
   K = cov @ H.T @ jp.linalg.inv(S)
   cov_post = (jp.eye(6) - K @ H) @ cov
   cov_post = 0.5 * (cov_post + cov_post.T)
-  k_z, k_s = jax.random.split(rng)
   Ls = jp.linalg.cholesky(S + 1e-9 * jp.eye(3))
   z = (H @ mu)[None] + jax.random.normal(k_z, (k, 3)) @ Ls.T          # (k, 3)
   mus = mu[None] + (z - (H @ mu)[None]) @ K.T                          # (k, 6)
-  pel = pelvis_pos + pelvis_vel * cfg.dt * wait_steps
   keys = jax.random.split(k_s, k)
-
-  def one(m, key):
-    st_k = st._replace(mu=m, cov=cov_post)
-    return stats(cfg, st_k, pel, pelvis_vel, key)
-
-  return jax.vmap(one)(mus, keys)
+  return jax.vmap(lambda m, key: stats(cfg, st._replace(mu=m, cov=cov_post), pel, pelvis_vel, key))(mus, keys)

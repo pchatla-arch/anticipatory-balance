@@ -76,10 +76,14 @@ class CtrlMemory(NamedTuple):
   brace_steps: jax.Array   # int32, steps since brace start
   last_det_step: jax.Array # int32
   n_switches: jax.Array    # int32
+  release_reason: jax.Array  # int32: 0 none, 1 passed, 2 stale (last release)
+
+
+RELEASE_NONE, RELEASE_PASSED, RELEASE_STALE = 0, 1, 2
 
 
 def init_memory() -> CtrlMemory:
-  return CtrlMemory(jp.array(False), jp.int32(0), jp.int32(-1000), jp.int32(0))
+  return CtrlMemory(jp.array(False), jp.int32(0), jp.int32(-1000), jp.int32(0), jp.int32(0))
 
 
 def _costs(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats, t_shift: float = 0.0):
@@ -105,13 +109,23 @@ def request(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats, la=None) -> jax.
     # late brace is worth whatever the oracle data say it is worth.
     cb, cc = _costs(cfg, rm, b)
     return (cb < cc) & jp.isfinite(b.t_hit) & (b.p_hit > 0)
-  if cfg.kind == "belief_voi":
-    # One-step lookahead with an explicit observation branch: brace now, or walk for one
-    # more detection period, observe, and then take the better of brace/continue.
+  if cfg.kind in ("belief_voi", "belief_wait"):
+    # One-step lookahead: brace now, or walk until the next delivery, then take the better
+    # of brace/continue. belief_voi values the wait with an observation branch (la_obs: k
+    # hypothetical delivered detections, weighted 1 - p_none) and a no-detection branch
+    # (la_none: the belief merely predicted forward, weight p_none). belief_wait is the blind
+    # wait: no observation branch, so it isolates the value of information from the value
+    # of simply acting later.
+    la_obs, la_none, p_none = la
     cb, cc = _costs(cfg, rm, b)
     dt_wait = cfg.wait_steps * cfg.dt
-    cb_k, cc_k = jax.vmap(lambda bk: _costs(cfg, rm, bk))(la)
-    later = jp.mean(jp.minimum(cb_k, cc_k))
+    cb_n, cc_n = jax.vmap(lambda bk: _costs(cfg, rm, bk))(la_none)
+    later_none = jp.mean(jp.minimum(cb_n, cc_n))
+    if cfg.kind == "belief_voi":
+      cb_k, cc_k = jax.vmap(lambda bk: _costs(cfg, rm, bk))(la_obs)
+      later = (1.0 - p_none) * jp.mean(jp.minimum(cb_k, cc_k)) + p_none * later_none
+    else:
+      later = later_none
     # If contact is expected inside the wait, waiting means continuing.
     hit_during_wait = jp.isfinite(b.t_hit) & (b.t_hit < dt_wait)
     cost_wait = jp.where(hit_during_wait, cc, cfg.c_track * dt_wait + later)
@@ -138,7 +152,10 @@ def step(cfg: RuleConfig, rm: ResponseModel, mem: CtrlMemory, b: BeliefStats, de
   """Apply the rule with commitment; returns (memory, brace_active)."""
   last_det = jp.where(det_valid, step_idx, mem.last_det_step)
   want = request(cfg, rm, b, la)
-  passed = jp.isfinite(b.t_hit) & (b.t_hit < -cfg.release_after)
+  # Passed: the KF mean's closest approach to the robot lies release_after behind us. (An
+  # earlier version tested E_b[t_hit], which averages only future-hit samples and is never
+  # negative, so release then depended on staleness alone.)
+  passed = jp.isfinite(b.t_pass) & (b.t_pass < -cfg.release_after)
   stale = (step_idx - last_det) > cfg.stale_steps
   committed = mem.braced & (mem.brace_steps < cfg.commit_steps)
   # Stay braced while committed; afterwards until the object has passed or gone stale.
@@ -151,4 +168,6 @@ def step(cfg: RuleConfig, rm: ResponseModel, mem: CtrlMemory, b: BeliefStats, de
   braced = stay | start
   n_sw = mem.n_switches + (braced != mem.braced).astype(jp.int32)
   brace_steps = jp.where(braced, jp.where(mem.braced, mem.brace_steps + 1, 1), 0)
-  return CtrlMemory(braced, brace_steps, last_det, n_sw), braced
+  released = mem.braced & ~braced
+  reason = jp.where(released, jp.where(passed, RELEASE_PASSED, RELEASE_STALE), mem.release_reason)
+  return CtrlMemory(braced, brace_steps, last_det, n_sw, reason), braced

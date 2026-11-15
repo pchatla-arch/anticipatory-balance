@@ -42,7 +42,7 @@ _MISS = flags.DEFINE_float("miss_fraction", 0.3, "near-miss fraction")
 _VX = flags.DEFINE_float("command_vx", 0.5, "forward command")
 _SIG = flags.DEFINE_float("det_sigma", 0.03, "noise std assumed for a depth detection (E8: 0.03 m)")
 _RAD = flags.DEFINE_float("object_radius", 0.15, "m")
-_METHODS = flags.DEFINE_list("methods", ["ttc_threshold:0.3", "belief_commit:0.1", "belief_lead:0.1", "belief_voi:0.1"],
+_METHODS = flags.DEFINE_list("methods", ["ttc_threshold:0.3", "belief_lead:0.05", "belief_wait:0.05", "belief_voi:0.05"],
                              "kind:param")
 _OUT = flags.DEFINE_string("out", "results/E17_depth_closed_loop", "output dir")
 _SEED = flags.DEFINE_integer("seed", 300, "seed")
@@ -64,7 +64,10 @@ def make_detector(dirs, radius, max_range=6.0):
     rxy = jp.linalg.norm(P[..., :2] - pelvis[:2], axis=-1)
     cand = valid & (P[..., 2] > 0.3) & (P[..., 2] < 2.0) & (rxy > 0.6) & (rxy < max_range)
     n = jp.sum(cand)
-    surf = jp.sum(P * cand[..., None], axis=(0, 1)) / jp.maximum(n, 1)
+    # Median of the candidate points per axis (as calibrated in E8), ignoring non-candidates.
+    Pm = jp.where(cand[..., None], P, jp.nan).reshape(-1, 3)
+    surf = jp.nanmedian(Pm, axis=0)
+    surf = jp.where(jp.isnan(surf), 0.0, surf)
     view = surf - cam_pos
     centre = surf + radius * view / (jp.linalg.norm(view) + 1e-9)
     return n >= 3, centre
@@ -95,6 +98,9 @@ def main(_):
       adr = cam_id * res * res
   detect = make_detector(pixel_dirs(res, fovy), _RAD.value)
   mr = (4.0, 16.0)
+  # Parametric arm: same cadence, added latency, field of view and noise as the depth arm; its
+  # random miss probability is E8's measured 5.5%. The controller's lookahead uses this config
+  # for both arms (the depth arm's detector has no explicit miss model).
   det_cfg_param = D.DetectorConfig(period=_PERIOD.value, latency=_EXTRA_LAT.value, sigma0=_SIG.value, sigma1=0.0,
                                    fov_deg=fovy, miss_prob=0.055)
 
@@ -105,6 +111,7 @@ def main(_):
     return jp.where(brace_flag[:, None], a_br, a_nom)
 
   rows = []
+  per_ep = {}
   for b in range(_BATCHES.value):
     rs = np.random.RandomState(_SEED.value + b)
     masses = rs.uniform(*mr, n); speeds = rs.uniform(3.0, 8.0, n)
@@ -126,7 +133,8 @@ def main(_):
         rc_rule = {"ttc_threshold": RU.RuleConfig(kind="ttc_threshold", theta=param),
                    "belief_commit": RU.RuleConfig(kind="belief_commit", c_prep=param),
                    "belief_lead": RU.RuleConfig(kind="belief_lead", c_prep=param),
-                   "belief_voi": RU.RuleConfig(kind="belief_voi", c_prep=param, wait_steps=_PERIOD.value)}[kind]
+                   "belief_voi": RU.RuleConfig(kind="belief_voi", c_prep=param, wait_steps=_PERIOD.value),
+                   "belief_wait": RU.RuleConfig(kind="belief_wait", c_prep=param, wait_steps=_PERIOD.value)}[kind]
         ctrl = AnticipationController(det_cfg_param, PF.PFConfig(mass_range=mr), rc_rule, rm)
         t0 = time.time()
         rng = jax.random.fold_in(key, 7)
@@ -139,6 +147,7 @@ def main(_):
         heading0 = fwd0[:, :2] / (np.linalg.norm(fwd0[:, :2], axis=-1, keepdims=True) + 1e-9)
         brace_steps = np.zeros(n, int); prog = np.zeros(n); alive = np.ones(n, bool); last_pel = pel0.copy()
         n_det = np.zeros(n, int); render_ms = []; queue = []   # (deliver_step, ok, centre, capture_step)
+        fa_frames = np.zeros(n, int); launched_frames = np.zeros(n, int)   # false alarms: detections with no object in flight
         for t in range(_STEPS.value):
           rng, k1, k2, k3 = jax.random.split(rng, 4)
           d0 = state.data
@@ -155,7 +164,11 @@ def main(_):
               ok, centre = detect(depth, d0.cam_xpos[:, cam_id], d0.cam_xmat[:, cam_id].reshape(n, 3, 3), pel)
               jax.block_until_ready(ok); render_ms.append(1000 * (time.time() - tr))
               # Captured now; delivered --extra_latency steps later (the filter absorbs the age exactly).
-              queue.append((t + _EXTRA_LAT.value, ok & state.info["proj_launched"], centre, t))
+              # No privileged gating: whatever the detector reports is delivered; detections while
+              # no object is in flight are counted as false alarms.
+              fa_frames += np.asarray(ok & ~state.info["proj_launched"]).astype(int)
+              launched_frames += np.asarray(~state.info["proj_launched"]).astype(int)
+              queue.append((t + _EXTRA_LAT.value, ok, centre, t))
             ready = [q for q in queue if q[0] == t]
             queue = [q for q in queue if q[0] > t]
             if ready:
@@ -185,9 +198,13 @@ def main(_):
                "false_prep_rate": float((brace_steps[is_miss] > 0).mean()) if is_miss.any() else 0.0,
                "braced_on_hits": float((brace_steps[hit_s] > 0).mean()), "braced_s": float(brace_steps.mean() * env.dt),
                "progress_m": float(prog.mean()), "detections_per_episode": float(n_det.mean()),
+               "false_alarm_rate": float(fa_frames.sum() / max(launched_frames.sum(), 1)) if source == "depth" else float("nan"),
                "render_ms_per_frame": float(np.mean(render_ms[1:])) if len(render_ms) > 1 else float("nan"),
                "wall_s": time.time() - t0}
         rows.append(row)
+        per_ep[(source, kind, param)] = per_ep.get((source, kind, param), []) + [
+            {"fell": fi["fell"], "contact": fi["impact_contact"], "is_miss": is_miss, "brace_steps": brace_steps,
+             "progress_m": prog}]
         print(f"  {source:10} {kind:14} p={param:<4g} {row['wall_s']:4.0f}s  fall|hits {row['fall_rate_hits']:.3f}  "
               f"fall|contact {row['fall_rate_given_contact']:.3f}  contact {row['contact_rate_hits']:.2f}  "
               f"false-prep {row['false_prep_rate']:.3f}  braced {row['braced_s']:.2f}s  det/ep {row['detections_per_episode']:.1f}  "
@@ -198,8 +215,13 @@ def main(_):
                  "fall_rate_given_contact": float(ref_info["fell"][ref_info["impact_contact"] & ~is_miss].mean()),
                  "contact_rate_hits": float(ref_info["impact_contact"][~is_miss].mean()), "false_prep_rate": 0.0,
                  "braced_on_hits": 0.0, "braced_s": 0.0, "progress_m": float("nan"), "detections_per_episode": 0.0,
-                 "render_ms_per_frame": float("nan"), "wall_s": 0.0})
+                 "render_ms_per_frame": float("nan"), "false_alarm_rate": float("nan"), "wall_s": 0.0})
 
+  ep_out = {}
+  for (src, meth, par), parts in per_ep.items():
+    for f in parts[0]:
+      ep_out[f"{src}__{meth}__p{par:g}__{f}"] = np.concatenate([p_[f] for p_ in parts])
+  np.savez_compressed(os.path.join(_OUT.value, "episodes.npz"), **ep_out)
   agg = {}
   for r in rows:
     agg.setdefault((r["source"], r["method"], r["param"]), []).append(r)
@@ -207,7 +229,7 @@ def main(_):
   for (src, meth, par), rs_ in agg.items():
     o = {"source": src, "method": meth, "param": par, "n_total": sum(r["n"] for r in rs_)}
     for f in ("fall_rate_hits", "fall_rate_given_contact", "contact_rate_hits", "false_prep_rate", "braced_on_hits",
-              "braced_s", "progress_m", "detections_per_episode", "render_ms_per_frame"):
+              "braced_s", "progress_m", "detections_per_episode", "render_ms_per_frame", "false_alarm_rate"):
       o[f] = float(np.nanmean([r[f] for r in rs_]))
     out.append(o)
   cols = list(out[0].keys())
