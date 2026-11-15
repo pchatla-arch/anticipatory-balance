@@ -64,7 +64,10 @@ def build_scene(
     out_dir: Path,
     proj_radius: float = 0.15,
     proj_mass: float = 4.0,
-    park_x: float = 6.0,
+    # Parked (not yet launched) position. It must be outside every sensor's range: the earlier
+    # default (6 m straight ahead at camera height) was inside the depth camera's view and the
+    # walker closed on it, so the rendered detector reported it (E17b false alarms).
+    park_x: float = -80.0,
     park_z: float = 0.9,
 ) -> tuple[Path, dict[str, str]]:
   """Write a patched robot xml and the impact scene xml into out_dir.

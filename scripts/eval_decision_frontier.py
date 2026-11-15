@@ -66,7 +66,8 @@ _MAXRANGE = flags.DEFINE_float("max_range", 6.0, "detector range, m")
 _COMMIT = flags.DEFINE_integer("commit_steps", 15, "minimum commitment, control steps")
 _TAUB = flags.DEFINE_float("tau_brace", 0.22, "s the posture needs to form")
 _CTRACK = flags.DEFINE_float("c_track", 0.1, "tracking cost per s")
-_HOLD = flags.DEFINE_float("hold", 0.5, "s held after expected impact")
+_HOLD = flags.DEFINE_float("hold", 0.5, "s held after expected impact (cost model)")
+_RELAFTER = flags.DEFINE_float("release_after", 0.3, "s past the belief's closest approach before BRACE is released")
 _PRIOR = flags.DEFINE_list("mass_prior", [], "belief mass prior range, kg (default: the scenario range)")
 _RCONT = flags.DEFINE_float("r_contact", 0.45, "belief decision radius about the pelvis axis, m")
 _RELEASE = flags.DEFINE_bool("release_on_unwant", False, "old rule: release BRACE when the start condition fails")
@@ -144,7 +145,7 @@ def main(_):
                                decide=decide, scenario_fn=scn, reset_keys=reset_keys)
       else:
         common = dict(commit_steps=_COMMIT.value, tau_brace=_TAUB.value, c_track=_CTRACK.value, hold=_HOLD.value,
-                      release_on_unwant=_RELEASE.value)
+                      release_on_unwant=_RELEASE.value, release_after=_RELAFTER.value)
         rc = {"reactive": RU.RuleConfig(kind="reactive", **common),
               "always": RU.RuleConfig(kind="always", p_min=param, **common),
               "ttc_threshold": RU.RuleConfig(kind="ttc_threshold", theta=param, **common),
@@ -229,7 +230,8 @@ def main(_):
              "env_skill": _ENVSKILL.value, "detector": {"sigma0": _SIG0.value, "sigma1": _SIG1.value, "miss_prob": _MISSP.value,
                                                         "fov_deg": _FOV.value, "max_range": _MAXRANGE.value},
              "rule": {"commit_steps": _COMMIT.value, "tau_brace": _TAUB.value, "c_track": _CTRACK.value, "hold": _HOLD.value,
-                      "mass_prior": list(prior), "r_contact": _RCONT.value, "release_on_unwant": _RELEASE.value},
+                      "mass_prior": list(prior), "r_contact": _RCONT.value, "release_on_unwant": _RELEASE.value,
+                      "release_after": _RELAFTER.value},
              "miss_fraction": _MISS.value, "rows": out},
             open(os.path.join(_OUT.value, "summary.json"), "w"), indent=2)
 
