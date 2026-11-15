@@ -1,0 +1,424 @@
+Results: /workspace/foresight-session-h/results/session_h_20261115T211850Z_1f77c1
+Budget: 75 minutes for experiment processes.
+The runner does not stop the pod or its billing.
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python scripts/run_session_h_tests.py --require-jax --out /workspace/foresight-session-h/results/session_h_20261115T211850Z_1f77c1/tests.json
+test_finished_e19_does_not_restore_or_train (test_session_g_checkpoint_reuse.PublishedCheckpointReuseTests.test_finished_e19_does_not_restore_or_train) ... ok
+test_fresh_pod_restores_both_published_bundles_without_training_logs (test_session_g_checkpoint_reuse.PublishedCheckpointReuseTests.test_fresh_pod_restores_both_published_bundles_without_training_logs) ... ok
+test_incomplete_or_unfetched_bundle_fails_before_training (test_session_g_checkpoint_reuse.PublishedCheckpointReuseTests.test_incomplete_or_unfetched_bundle_fails_before_training) ... ok
+test_latest_partial_checkpoint_is_not_replaced_by_older_complete_one (test_session_g_checkpoint_reuse.PublishedCheckpointReuseTests.test_latest_partial_checkpoint_is_not_replaced_by_older_complete_one) ... ok
+test_missing_bundle_retains_training_dispatch_without_executing_training (test_session_g_checkpoint_reuse.PublishedCheckpointReuseTests.test_missing_bundle_retains_training_dispatch_without_executing_training) ... ok
+test_structural_success_does_not_bypass_actual_restore_failure (test_session_g_checkpoint_reuse.PublishedCheckpointReuseTests.test_structural_success_does_not_bypass_actual_restore_failure) ... ok
+test_csv_retains_ids_and_full_float_precision (test_session_h_depth.EvidenceTests.test_csv_retains_ids_and_full_float_precision) ... ok
+test_float32_progress_pool_agrees_with_saved_episode_evidence (test_session_h_depth.EvidenceTests.test_float32_progress_pool_agrees_with_saved_episode_evidence) ... ok
+test_pairing_keeps_discordance_and_checks_ids (test_session_h_depth.EvidenceTests.test_pairing_keeps_discordance_and_checks_ids) ... ok
+test_pool_counts_instead_of_average_conditional_rates (test_session_h_depth.EvidenceTests.test_pool_counts_instead_of_average_conditional_rates) ... ok
+test_script_refuses_overwrite_and_marks_completion_only_at_end (test_session_h_depth.EvidenceTests.test_script_refuses_overwrite_and_marks_completion_only_at_end) ... ok
+test_unobserved_groups_are_null (test_session_h_depth.EvidenceTests.test_unobserved_groups_are_null) ... ok
+test_actual_controller_jits_for_h_methods_and_two_worlds (test_session_h_depth.SensorTests.test_actual_controller_jits_for_h_methods_and_two_worlds) ... ok
+test_median_detector_rejects_parked_range (test_session_h_depth.SensorTests.test_median_detector_rejects_parked_range) ... ok
+test_parked_projectile_is_out_of_range_in_built_scene (test_session_h_depth.SensorTests.test_parked_projectile_is_out_of_range_in_built_scene) ... ok
+test_actual_transitions_distinguish_stale_and_passed_releases (test_session_h_hold.HoldEvidenceTests.test_actual_transitions_distinguish_stale_and_passed_releases) ... ok
+test_after_failure_braces_do_not_count_as_preparation (test_session_h_hold.HoldEvidenceTests.test_after_failure_braces_do_not_count_as_preparation) ... ok
+test_config_names_distinct_execution_cost_and_oracle_holds (test_session_h_hold.HoldEvidenceTests.test_config_names_distinct_execution_cost_and_oracle_holds) ... ok
+test_contact_records_the_brace_in_that_physical_interval (test_session_h_hold.HoldEvidenceTests.test_contact_records_the_brace_in_that_physical_interval) ... ok
+test_csv_preserves_scenario_ids_and_float_precision (test_session_h_hold.HoldEvidenceTests.test_csv_preserves_scenario_ids_and_float_precision) ... ok
+test_horizon_truncation_is_not_a_controller_release (test_session_h_hold.HoldEvidenceTests.test_horizon_truncation_is_not_a_controller_release) ... ok
+test_pooled_metrics_use_corrected_duration_and_keep_legacy (test_session_h_hold.HoldEvidenceTests.test_pooled_metrics_use_corrected_duration_and_keep_legacy) ... ok
+test_terminating_interval_is_included (test_session_h_hold.HoldEvidenceTests.test_terminating_interval_is_included) ... ok
+test_longer_release_waits_for_later_closest_approach_threshold (test_session_h_hold.OriginalReleaseSemanticsTests.test_longer_release_waits_for_later_closest_approach_threshold) ... ok
+test_minimum_commitment_precedes_passed_release (test_session_h_hold.OriginalReleaseSemanticsTests.test_minimum_commitment_precedes_passed_release) ... ok
+test_session_g_allows_a_new_brace_after_release (test_session_h_hold.OriginalReleaseSemanticsTests.test_session_g_allows_a_new_brace_after_release) ... ok
+test_staleness_can_preempt_requested_long_hold (test_session_h_hold.OriginalReleaseSemanticsTests.test_staleness_can_preempt_requested_long_hold) ... ok
+test_explicit_paths_budget_pinned_revision_and_no_stop_survive_dispatch (test_session_h_launchers.LauncherTests.test_explicit_paths_budget_pinned_revision_and_no_stop_survive_dispatch) ... ok
+test_help_and_shell_syntax_require_no_network_or_gpu (test_session_h_launchers.LauncherTests.test_help_and_shell_syntax_require_no_network_or_gpu) ... ok
+test_invalid_dispatch_is_rejected_before_download (test_session_h_launchers.LauncherTests.test_invalid_dispatch_is_rejected_before_download) ... ok
+test_invalid_download_is_never_executed (test_session_h_launchers.LauncherTests.test_invalid_download_is_never_executed) ... ok
+test_pod_entry_rejects_invalid_mode_or_budget_before_gpu_probe (test_session_h_launchers.LauncherTests.test_pod_entry_rejects_invalid_mode_or_budget_before_gpu_probe) ... ok
+test_public_defaults_aliases_and_small_budget (test_session_h_launchers.LauncherTests.test_public_defaults_aliases_and_small_budget) ... ok
+test_push_permission_is_required_before_worker_start_unless_explicitly_skipped (test_session_h_launchers.LauncherTests.test_push_permission_is_required_before_worker_start_unless_explicitly_skipped) ... ok
+test_retry_publish_only_dispatches_completed_local_run (test_session_h_launchers.LauncherTests.test_retry_publish_only_dispatches_completed_local_run) ... ok
+test_retry_publish_rejects_running_and_traversal (test_session_h_launchers.LauncherTests.test_retry_publish_rejects_running_and_traversal) ... ok
+test_worker_modes_reach_review_session_with_matching_budgets (test_session_h_launchers.LauncherTests.test_worker_modes_reach_review_session_with_matching_budgets) ... ok
+test_worker_rechecks_identity_and_permission_before_python_setup (test_session_h_launchers.LauncherTests.test_worker_rechecks_identity_and_permission_before_python_setup) ... ok
+test_wrong_environment_token_identity_cannot_be_fixed_by_switching_stored_account (test_session_h_launchers.LauncherTests.test_wrong_environment_token_identity_cannot_be_fixed_by_switching_stored_account) ... ok
+test_wrong_stored_account_switch_must_produce_expected_identity (test_session_h_launchers.LauncherTests.test_wrong_stored_account_switch_must_produce_expected_identity) ... ok
+test_all_referenced_repository_scripts_exist (test_session_h_launchers.SessionTests.test_all_referenced_repository_scripts_exist) ... ok
+test_existing_environment_gets_preflight_without_install (test_session_h_launchers.SessionTests.test_existing_environment_gets_preflight_without_install) ... ok
+test_fresh_default_only_gets_bounded_bootstrap (test_session_h_launchers.SessionTests.test_fresh_default_only_gets_bounded_bootstrap) ... ok
+test_mode_dependent_budget_and_invalid_limits (test_session_h_launchers.SessionTests.test_mode_dependent_budget_and_invalid_limits) ... ok
+test_concurrent_parent_change_retries_once_without_force (test_session_h_publication.PublicationReceiptTests.test_concurrent_parent_change_retries_once_without_force) ... ok
+test_exit_code_must_match_frozen_run (test_session_h_publication.PublicationReceiptTests.test_exit_code_must_match_frozen_run) ... ok
+test_invalid_run_source_invalidates_old_verified_receipt_without_push (test_session_h_publication.PublicationReceiptTests.test_invalid_run_source_invalidates_old_verified_receipt_without_push) ... ok
+test_new_numeric_archives_and_depth_episode_paths_survive_push (test_session_h_publication.PublicationReceiptTests.test_new_numeric_archives_and_depth_episode_paths_survive_push) ... ok
+test_push_success_without_remote_verification_is_failure (test_session_h_publication.PublicationReceiptTests.test_push_success_without_remote_verification_is_failure) ... ok
+test_remote_descendant_retaining_publication_is_verified (test_session_h_publication.PublicationReceiptTests.test_remote_descendant_retaining_publication_is_verified) ... ok
+test_verified_receipt_uses_original_run_source_and_preserves_checkout (test_session_h_publication.PublicationReceiptTests.test_verified_receipt_uses_original_run_source_and_preserves_checkout) ... ok
+test_wrong_destination_is_rejected_with_failure_receipt (test_session_h_publication.PublicationReceiptTests.test_wrong_destination_is_rejected_with_failure_receipt) ... ok
+test_named_outputs_and_condition_tables_only (test_session_h_publication.PublicationSchemaTests.test_named_outputs_and_condition_tables_only) ... ok
+test_structured_and_query_credentials_are_redacted (test_session_h_publication.PublicationSchemaTests.test_structured_and_query_credentials_are_redacted) ... ok
+test_all_h_evidence_paths_are_published (test_session_h_runner.HRunnerTests.test_all_h_evidence_paths_are_published) ... ok
+test_hold_baseline_and_longer_arms_share_everything_except_release_and_out (test_session_h_runner.HRunnerTests.test_hold_baseline_and_longer_arms_share_everything_except_release_and_out) ... ok
+test_partial_report_names_unstarted_stages (test_session_h_runner.HRunnerTests.test_partial_report_names_unstarted_stages) ... ok
+test_plan_only_requires_standard_python (test_session_h_runner.HRunnerTests.test_plan_only_requires_standard_python) ... ok
+test_stage_timeout_halts_later_work_and_publishes_partial_record (test_session_h_runner.HRunnerTests.test_stage_timeout_halts_later_work_and_publishes_partial_record) ... ok
+test_cli_writes_failure_audit (test_session_h_validation.ValidationTests.test_cli_writes_failure_audit) ... ok
+test_duplicate_id (test_session_h_validation.ValidationTests.test_duplicate_id) ... ok
+test_invalid_release (test_session_h_validation.ValidationTests.test_invalid_release) ... ok
+test_nonfinite_progress (test_session_h_validation.ValidationTests.test_nonfinite_progress) ... ok
+test_prelaunch_numerator_cannot_exceed_frames (test_session_h_validation.ValidationTests.test_prelaunch_numerator_cannot_exceed_frames) ... ok
+test_stale_hash (test_session_h_validation.ValidationTests.test_stale_hash) ... ok
+test_valid_depth_allows_nonzero_false_alarms (test_session_h_validation.ValidationTests.test_valid_depth_allows_nonzero_false_alarms) ... ok
+test_valid_frontier (test_session_h_validation.ValidationTests.test_valid_frontier) ... ok
+test_wrong_count (test_session_h_validation.ValidationTests.test_wrong_count) ... ok
+test_wrong_pooled_rate (test_session_h_validation.ValidationTests.test_wrong_pooled_rate) ... ok
+test_credential_bearing_logs_are_redacted (test_experiment_publisher.PublicationTests.test_credential_bearing_logs_are_redacted) ... ok
+test_nested_tables_are_allowed_and_code_is_rejected (test_experiment_publisher.PublicationTests.test_nested_tables_are_allowed_and_code_is_rejected) ... ok
+test_active_or_unrecognizable_gpu_process_list_prevents_stop (test_finish_pod_session.FinishPodTests.test_active_or_unrecognizable_gpu_process_list_prevents_stop) ... ok
+test_current_verified_run_requests_modern_stop (test_finish_pod_session.FinishPodTests.test_current_verified_run_requests_modern_stop) ... ok
+test_failed_and_timed_out_runs_can_stop_after_verified_log_upload (test_finish_pod_session.FinishPodTests.test_failed_and_timed_out_runs_can_stop_after_verified_log_upload) ... ok
+test_failed_stop_request_is_not_reported_as_success (test_finish_pod_session.FinishPodTests.test_failed_stop_request_is_not_reported_as_success) ... ok
+test_frozen_run_must_match_last_run_record (test_finish_pod_session.FinishPodTests.test_frozen_run_must_match_last_run_record) ... ok
+test_legacy_cli_is_detected_using_help (test_finish_pod_session.FinishPodTests.test_legacy_cli_is_detected_using_help) ... ok
+test_missing_cli_gpu_checker_or_pod_id_prevents_stop (test_finish_pod_session.FinishPodTests.test_missing_cli_gpu_checker_or_pod_id_prevents_stop) ... ok
+test_no_stop_override_and_no_authorization_do_not_read_records_or_run_commands (test_finish_pod_session.FinishPodTests.test_no_stop_override_and_no_authorization_do_not_read_records_or_run_commands) ... ok
+test_publisher_failure_is_rejected_even_with_valid_old_receipt (test_finish_pod_session.FinishPodTests.test_publisher_failure_is_rejected_even_with_valid_old_receipt) ... ok
+test_receipt_file_must_equal_receipt_from_current_publisher (test_finish_pod_session.FinishPodTests.test_receipt_file_must_equal_receipt_from_current_publisher) ... ok
+test_receipt_identity_source_exit_and_verified_flag_must_match (test_finish_pod_session.FinishPodTests.test_receipt_identity_source_exit_and_verified_flag_must_match) ... ok
+test_running_and_interrupted_states_are_not_stopped (test_finish_pod_session.FinishPodTests.test_running_and_interrupted_states_are_not_stopped) ... ok
+test_stale_or_missing_invocation_is_rejected (test_finish_pod_session.FinishPodTests.test_stale_or_missing_invocation_is_rejected) ... ok
+test_subprocess_timeout_is_bounded_and_sanitized (test_finish_pod_session.FinishPodTests.test_subprocess_timeout_is_bounded_and_sanitized) ... ok
+test_unrecognized_cli_never_tries_a_stop_or_terminate (test_finish_pod_session.FinishPodTests.test_unrecognized_cli_never_tries_a_stop_or_terminate) ... ok
+
+----------------------------------------------------------------------
+Ran 86 tests in 31.849s
+
+OK
+{
+  "passed": true,
+  "tests_run": 86,
+  "elapsed_seconds": 31.94,
+  "skipped": []
+}
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python scripts/preflight_session_h.py --out /workspace/foresight-session-h/results/session_h_20261115T211850Z_1f77c1/preflight.json
+Python: /workspace/mujoco_playground/rss2025/.venv/bin/python
+JAX devices: [CudaDevice(id=0)]
+nominal_s1: restored /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400
+brace2_s1: restored /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400
+GPU and both checkpoint restores passed.
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python -u scripts/eval_depth_closed_loop.py --nominal checkpoints/nominal_s1 --brace checkpoints/brace2_s1 --response_model results/response_model.json --impl warp --steps 300 --episodes 16 --batches 1 --period 5 --extra_latency 0 --seed 9300 --release_after 0.3 --sources parametric,depth --methods ttc_threshold:0.3,belief_lead:0.05,belief_wait:0.05,belief_voi:0.05 --out /workspace/foresight-session-h/results/session_h_20261115T211850Z_1f77c1/depth_gate_l0
+I1115 21:19:49.781795 138513595311936 xla_bridge.py:861] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+I1115 21:19:49.782290 138513595311936 xla_bridge.py:861] Unable to initialize backend 'proxy': The 'proxy' backend requires the address of an IFRT Proxy server. Set it via the JAX_BACKEND_TARGET environment variable or the jax_backend_target config option, e.g. JAX_BACKEND_TARGET=grpc://localhost:29000.
+I1115 21:19:51.027182 138513595311936 checkpoint.py:189] restoring from checkpoint /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400
+I1115 21:19:51.029179 138513595311936 abstract_checkpointer.py:35] orbax-checkpoint version: 0.12.8
+I1115 21:19:51.029434 138513595311936 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 21:19:51.030138 138513595311936 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7df8d1452810>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 21:19:51.031841 138513595311936 checkpoint.py:228] Read Metadata={'item_handlers': 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler', 'metrics': {}, 'performance_metrics': {}, 'init_timestamp_nsecs': 1794590795947520546, 'commit_timestamp_nsecs': 1794590796010822336, 'custom_metadata': {}} from /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400/_CHECKPOINT_METADATA
+I1115 21:19:51.075429 138513595311936 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 21:19:51.075723 138513595311936 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7df8d1452810>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 21:19:51.076185 138513595311936 event_tracking.py:76] [process=0] [sync] Started load checkpoint @ /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400.
+I1115 21:19:51.078076 138513595311936 checkpointer.py:368] Restoring checkpoint from /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400.
+I1115 21:19:51.078542 138513595311936 event_tracking.py:171] [process=0] [sync] Finished blocking load in 0.00 seconds. Continuing load @ /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400.
+I1115 21:19:51.102425 138513595311936 async_io_engine.py:127] [process=0] /jax/checkpoint/read/gbytes_per_sec: 81.671 MiB/s (total size: 1.9 MiB) (time elapsed: 0.023418188095092773 s) (global)
+I1115 21:19:51.102739 138513595311936 event_tracking.py:184] [process=0] [sync] Finished load in 0.03 seconds @ /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400
+I1115 21:19:51.107365 138513595311936 checkpoint.py:189] restoring from checkpoint /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400
+I1115 21:19:51.107530 138513595311936 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 21:19:51.107664 138513595311936 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7df8d1452810>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 21:19:51.140197 138513595311936 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 21:19:51.140465 138513595311936 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7df8d1452810>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 21:19:51.140812 138513595311936 event_tracking.py:76] [process=0] [sync] Started load checkpoint @ /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400.
+I1115 21:19:51.142685 138513595311936 checkpointer.py:368] Restoring checkpoint from /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400.
+I1115 21:19:51.142866 138513595311936 event_tracking.py:171] [process=0] [sync] Finished blocking load in 0.00 seconds. Continuing load @ /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400.
+I1115 21:19:51.168211 138513595311936 async_io_engine.py:127] [process=0] /jax/checkpoint/read/gbytes_per_sec: 76.934 MiB/s (total size: 1.9 MiB) (time elapsed: 0.024860143661499023 s) (global)
+I1115 21:19:51.168542 138513595311936 event_tracking.py:184] [process=0] [sync] Finished load in 0.03 seconds @ /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400
+Warp 1.18.0 initialized:
+   CUDA Toolkit 13.4, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA RTX 6000 Ada Generation" (47 GiB, sm_89, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.18.0
+Module mujoco.mjx.third_party.mujoco_warp._src.render_util f1ec7f3 load on device 'cuda:0' took 801.55 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.bvh 8857017 load on device 'cuda:0' took 1358.82 ms  (compiled)
+Module mujoco.mjx.warp.ffi 4443472 load on device 'cuda:0' took 106.77 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.smooth 43a6a77 load on device 'cuda:0' took 9088.06 ms  (compiled)
+Module _nxn_broadphase__locals__kernel_95773766 9577376 load on device 'cuda:0' took 605.54 ms  (compiled)
+Module ccd_kernel_builder__locals__ccd_kernel_1a0e5f50 1a0e5f5 load on device 'cuda:0' took 24979.47 ms  (compiled)
+Module _primitive_narrowphase__locals__primitive_narrowphase_45a33c4c 45a33c4 load on device 'cuda:0' took 1525.91 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.constraint 8d4d513 load on device 'cuda:0' took 93.29 ms  (compiled)
+Module _friction_dof__locals__kernel_c23b2f31 c23b2f3 load on device 'cuda:0' took 244.29 ms  (compiled)
+Module _limit_slide_hinge__locals__kernel_9573ef9b 9573ef9 load on device 'cuda:0' took 276.04 ms  (compiled)
+Module _efc_contact_init__locals__kernel_9009dd76 9009dd7 load on device 'cuda:0' took 195.32 ms  (compiled)
+Module _efc_contact_jac_sparse__locals__kernel_54cecf88 54cecf8 load on device 'cuda:0' took 235.21 ms  (compiled)
+Module _efc_contact_update__locals__kernel_efb3ac6e efb3ac6 load on device 'cuda:0' took 265.26 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.sensor 8feaecd load on device 'cuda:0' took 4710.47 ms  (compiled)
+Module _contact_match_builder__locals___contact_match_4da0430b 4da0430 load on device 'cuda:0' took 375.94 ms  (compiled)
+Module _contact_sort__locals__contact_sort_bed1da43 6afef3a load on device 'cuda:0' took 204.05 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.forward 9a96b97 load on device 'cuda:0' took 4611.30 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.passive 0de6fd1 load on device 'cuda:0' took 5060.58 ms  (compiled)
+Module _qfrc_passive_kernel__locals__kernel_976399dd 976399d load on device 'cuda:0' took 150.42 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.forward bdd5619 load on device 'cuda:0' took 5718.89 ms  (compiled)
+Module _qfrc_smooth__locals__kernel_8b823980 8b82398 load on device 'cuda:0' took 113.26 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.support 770ef7d load on device 'cuda:0' took 272.58 ms  (compiled)
+Module _small_cholesky_factorize_solve_block__locals__kernel_9da335f1 a5c2521 load on device 'cuda:0' took 417.66 ms  (compiled)
+Module _tile_cholesky_factorize_solve_block__locals__kernel_f18d9752 acc0ae1 load on device 'cuda:0' took 8273.02 ms  (compiled)
+Module _solve_init_dof__locals__kernel_7cb1664a 7cb1664 load on device 'cuda:0' took 111.31 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.solver 5b3c3b6 load on device 'cuda:0' took 1032.90 ms  (compiled)
+Module _solve_init_jaref_kernel__locals__kernel_ca465bd8 ca465bd load on device 'cuda:0' took 167.12 ms  (compiled)
+Module mul_m_kernel__locals___mul_m_f3de1cc7 f3de1cc load on device 'cuda:0' took 187.39 ms  (compiled)
+Module _update_constraint_efc__locals__kernel_0539aa50 0539aa5 load on device 'cuda:0' took 192.75 ms  (compiled)
+Module _update_constraint_init_qfrc_constraint_sparse__locals__kernel_801f2ee2 801f2ee load on device 'cuda:0' took 168.39 ms  (compiled)
+Module _update_gradient_zero_grad_dot__locals__kernel_b20934d7 b20934d load on device 'cuda:0' took 97.42 ms  (compiled)
+Module _update_gradient_grad__locals__kernel_c876081d c876081 load on device 'cuda:0' took 100.22 ms  (compiled)
+Module _update_gradient_init_h_sparse__locals__kernel_f82bfdd8 f82bfdd load on device 'cuda:0' took 133.28 ms  (compiled)
+Module _JTDACJ_sparse__locals__kernel_765abea5 765abea load on device 'cuda:0' took 192.03 ms  (compiled)
+Module _JTDACJ_sparse__locals__kernel_765abea5 bd2cd56 load on device 'cuda:0' took 622.25 ms  (compiled)
+Module _update_gradient_cholesky_blocked__locals__kernel_1f053eca 38eeb22 load on device 'cuda:0' took 11281.38 ms  (compiled)
+Module _linesearch_jv_fused_kernel__locals__kernel_bdad643e bdad643 load on device 'cuda:0' took 145.68 ms  (compiled)
+Module _linesearch_iterative_kernel__locals__kernel_f3a187e1 ee17086 load on device 'cuda:0' took 823.12 ms  (compiled)
+Module _update_constraint_efc__locals__kernel_e953547e e953547 load on device 'cuda:0' took 221.36 ms  (compiled)
+Module _update_gradient_zero_grad_dot__locals__kernel_e9f8c963 e9f8c96 load on device 'cuda:0' took 115.27 ms  (compiled)
+Module _update_gradient_grad__locals__kernel_87959044 8795904 load on device 'cuda:0' took 112.64 ms  (compiled)
+Module _update_gradient_h_incremental_sparse__locals__kernel_e8129775 e812977 load on device 'cuda:0' took 184.61 ms  (compiled)
+Module _update_gradient_cholesky_blocked_skip_unchanged__locals__kernel_dc0908fb 837e4e8 load on device 'cuda:0' took 8069.43 ms  (compiled)
+Module _solve_done__locals__kernel_54267c25 54267c2 load on device 'cuda:0' took 144.71 ms  (compiled)
+Module _next_time_builder__locals___next_time_bc454e15 bc454e1 load on device 'cuda:0' took 128.16 ms  (compiled)
+batch 0: reference contact(hits) 1.000 fell(hits) 0.583
+  parametric ttc_threshold  p=0.3    64s  fall|hits 0.417  fall|contact 0.417  contact 1.00  false-prep 0.750  braced 0.68s  det/ep 6.4  render nan ms
+  parametric belief_lead    p=0.05   20s  fall|hits 0.500  fall|contact 0.545  contact 0.92  false-prep 1.000  braced 0.93s  det/ep 6.2  render nan ms
+  parametric belief_wait    p=0.05   23s  fall|hits 0.417  fall|contact 0.455  contact 0.92  false-prep 1.000  braced 0.91s  det/ep 6.4  render nan ms
+  parametric belief_voi     p=0.05   29s  fall|hits 0.417  fall|contact 0.455  contact 0.92  false-prep 1.000  braced 0.92s  det/ep 6.3  render nan ms
+Module _build_megakernel__locals___render_megakernel_397ef078 98dc7d4 load on device 'cuda:0' took 4603.74 ms  (compiled)
+  depth      ttc_threshold  p=0.3    64s  fall|hits 0.417  fall|contact 0.417  contact 1.00  false-prep 0.500  braced 0.60s  det/ep 5.7  render 111 ms
+  depth      belief_lead    p=0.05   30s  fall|hits 0.583  fall|contact 0.636  contact 0.92  false-prep 0.750  braced 0.86s  det/ep 4.9  render 81 ms
+  depth      belief_wait    p=0.05   32s  fall|hits 0.583  fall|contact 0.636  contact 0.92  false-prep 0.750  braced 0.84s  det/ep 5.0  render 80 ms
+  depth      belief_voi     p=0.05   39s  fall|hits 0.583  fall|contact 0.636  contact 0.92  false-prep 0.750  braced 0.84s  det/ep 5.0  render 79 ms
+I1115 21:27:03.614547 138513595311936 font_manager.py:1848] generated new fontManager
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python scripts/validate_session_h.py --stage-dir /workspace/foresight-session-h/results/session_h_20261115T211850Z_1f77c1/depth_gate_l0 --kind depth --episodes-per-condition 16 --conditions 9 --expected-release 0.3 --source-commit eb493be055603652ce01a73c66e96dd564a28d34
+{
+  "schema_version": "foresight.session_h.v1",
+  "status": "passed",
+  "passed": true,
+  "kind": "depth",
+  "source_commit": "eb493be055603652ce01a73c66e96dd564a28d34",
+  "conditions": 9,
+  "episodes_per_condition": 16,
+  "release_after": 0.3,
+  "episode_files": 9,
+  "interpretation": "Execution/evidence gate only; no performance or zero-false-alarm requirement."
+}
+depth_gate_l0: completed and evidence checks passed.
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python -u scripts/eval_depth_closed_loop.py --nominal checkpoints/nominal_s1 --brace checkpoints/brace2_s1 --response_model results/response_model.json --impl warp --steps 300 --episodes 16 --batches 1 --period 5 --extra_latency 5 --seed 9300 --release_after 0.3 --sources parametric,depth --methods ttc_threshold:0.3,belief_lead:0.05,belief_wait:0.05,belief_voi:0.05 --out /workspace/foresight-session-h/results/session_h_20261115T211850Z_1f77c1/depth_gate_l5
+I1115 21:27:17.105635 134297167759168 xla_bridge.py:861] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+I1115 21:27:17.105819 134297167759168 xla_bridge.py:861] Unable to initialize backend 'proxy': The 'proxy' backend requires the address of an IFRT Proxy server. Set it via the JAX_BACKEND_TARGET environment variable or the jax_backend_target config option, e.g. JAX_BACKEND_TARGET=grpc://localhost:29000.
+I1115 21:27:18.152554 134297167759168 checkpoint.py:189] restoring from checkpoint /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400
+I1115 21:27:18.153774 134297167759168 abstract_checkpointer.py:35] orbax-checkpoint version: 0.12.8
+I1115 21:27:18.153975 134297167759168 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 21:27:18.154409 134297167759168 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7a231a9aa5a0>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 21:27:18.155235 134297167759168 checkpoint.py:228] Read Metadata={'item_handlers': 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler', 'metrics': {}, 'performance_metrics': {}, 'init_timestamp_nsecs': 1794590795947520546, 'commit_timestamp_nsecs': 1794590796010822336, 'custom_metadata': {}} from /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400/_CHECKPOINT_METADATA
+I1115 21:27:18.185867 134297167759168 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 21:27:18.186094 134297167759168 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7a231a9aa5a0>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 21:27:18.186492 134297167759168 event_tracking.py:76] [process=0] [sync] Started load checkpoint @ /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400.
+I1115 21:27:18.187972 134297167759168 checkpointer.py:368] Restoring checkpoint from /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400.
+I1115 21:27:18.188338 134297167759168 event_tracking.py:171] [process=0] [sync] Finished blocking load in 0.00 seconds. Continuing load @ /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400.
+I1115 21:27:18.209486 134297167759168 async_io_engine.py:127] [process=0] /jax/checkpoint/read/gbytes_per_sec: 92.308 MiB/s (total size: 1.9 MiB) (time elapsed: 0.020719528198242188 s) (global)
+I1115 21:27:18.209736 134297167759168 event_tracking.py:184] [process=0] [sync] Finished load in 0.02 seconds @ /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400
+I1115 21:27:18.213488 134297167759168 checkpoint.py:189] restoring from checkpoint /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400
+I1115 21:27:18.213623 134297167759168 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 21:27:18.213739 134297167759168 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7a231a9aa5a0>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 21:27:18.241414 134297167759168 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 21:27:18.241578 134297167759168 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7a231a9aa5a0>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 21:27:18.241826 134297167759168 event_tracking.py:76] [process=0] [sync] Started load checkpoint @ /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400.
+I1115 21:27:18.243217 134297167759168 checkpointer.py:368] Restoring checkpoint from /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400.
+I1115 21:27:18.243347 134297167759168 event_tracking.py:171] [process=0] [sync] Finished blocking load in 0.00 seconds. Continuing load @ /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400.
+I1115 21:27:18.265441 134297167759168 async_io_engine.py:127] [process=0] /jax/checkpoint/read/gbytes_per_sec: 88.056 MiB/s (total size: 1.9 MiB) (time elapsed: 0.021719932556152344 s) (global)
+I1115 21:27:18.265676 134297167759168 event_tracking.py:184] [process=0] [sync] Finished load in 0.02 seconds @ /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400
+Warp 1.18.0 initialized:
+   CUDA Toolkit 13.4, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA RTX 6000 Ada Generation" (47 GiB, sm_89, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.18.0
+Module mujoco.mjx.third_party.mujoco_warp._src.render_util f1ec7f3 load on device 'cuda:0' took 0.71 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.bvh 8857017 load on device 'cuda:0' took 0.58 ms  (cached)
+Module mujoco.mjx.warp.ffi 4443472 load on device 'cuda:0' took 0.54 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.smooth 43a6a77 load on device 'cuda:0' took 9.46 ms  (cached)
+Module _nxn_broadphase__locals__kernel_95773766 9577376 load on device 'cuda:0' took 0.81 ms  (cached)
+Module ccd_kernel_builder__locals__ccd_kernel_1a0e5f50 1a0e5f5 load on device 'cuda:0' took 1.22 ms  (cached)
+Module _primitive_narrowphase__locals__primitive_narrowphase_45a33c4c 45a33c4 load on device 'cuda:0' took 0.99 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.constraint 8d4d513 load on device 'cuda:0' took 0.72 ms  (cached)
+Module _friction_dof__locals__kernel_c23b2f31 c23b2f3 load on device 'cuda:0' took 0.91 ms  (cached)
+Module _limit_slide_hinge__locals__kernel_9573ef9b 9573ef9 load on device 'cuda:0' took 0.91 ms  (cached)
+Module _efc_contact_init__locals__kernel_9009dd76 9009dd7 load on device 'cuda:0' took 0.86 ms  (cached)
+Module _efc_contact_jac_sparse__locals__kernel_54cecf88 54cecf8 load on device 'cuda:0' took 0.77 ms  (cached)
+Module _efc_contact_update__locals__kernel_efb3ac6e efb3ac6 load on device 'cuda:0' took 0.71 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.sensor 8feaecd load on device 'cuda:0' took 1.24 ms  (cached)
+Module _contact_match_builder__locals___contact_match_4da0430b 4da0430 load on device 'cuda:0' took 0.74 ms  (cached)
+Module _contact_sort__locals__contact_sort_bed1da43 6afef3a load on device 'cuda:0' took 0.85 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.forward 9a96b97 load on device 'cuda:0' took 1.07 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.passive 0de6fd1 load on device 'cuda:0' took 1.23 ms  (cached)
+Module _qfrc_passive_kernel__locals__kernel_976399dd 976399d load on device 'cuda:0' took 0.70 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.forward bdd5619 load on device 'cuda:0' took 1.16 ms  (cached)
+Module _qfrc_smooth__locals__kernel_8b823980 8b82398 load on device 'cuda:0' took 0.68 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.support 770ef7d load on device 'cuda:0' took 0.66 ms  (cached)
+Module _small_cholesky_factorize_solve_block__locals__kernel_9da335f1 a5c2521 load on device 'cuda:0' took 0.70 ms  (cached)
+Module _tile_cholesky_factorize_solve_block__locals__kernel_f18d9752 acc0ae1 load on device 'cuda:0' took 51.24 ms  (cached)
+Module _solve_init_dof__locals__kernel_7cb1664a 7cb1664 load on device 'cuda:0' took 0.75 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.solver 5b3c3b6 load on device 'cuda:0' took 1.06 ms  (cached)
+Module _solve_init_jaref_kernel__locals__kernel_ca465bd8 ca465bd load on device 'cuda:0' took 0.70 ms  (cached)
+Module mul_m_kernel__locals___mul_m_f3de1cc7 f3de1cc load on device 'cuda:0' took 0.70 ms  (cached)
+Module _update_constraint_efc__locals__kernel_0539aa50 0539aa5 load on device 'cuda:0' took 0.72 ms  (cached)
+Module _update_constraint_init_qfrc_constraint_sparse__locals__kernel_801f2ee2 801f2ee load on device 'cuda:0' took 0.69 ms  (cached)
+Module _update_gradient_zero_grad_dot__locals__kernel_b20934d7 b20934d load on device 'cuda:0' took 0.63 ms  (cached)
+Module _update_gradient_grad__locals__kernel_c876081d c876081 load on device 'cuda:0' took 0.63 ms  (cached)
+Module _update_gradient_init_h_sparse__locals__kernel_f82bfdd8 f82bfdd load on device 'cuda:0' took 0.66 ms  (cached)
+Module _JTDACJ_sparse__locals__kernel_765abea5 765abea load on device 'cuda:0' took 0.84 ms  (cached)
+Module _JTDACJ_sparse__locals__kernel_765abea5 bd2cd56 load on device 'cuda:0' took 0.89 ms  (cached)
+Module _update_gradient_cholesky_blocked__locals__kernel_1f053eca 38eeb22 load on device 'cuda:0' took 117.76 ms  (cached)
+Module _linesearch_jv_fused_kernel__locals__kernel_bdad643e bdad643 load on device 'cuda:0' took 1.01 ms  (cached)
+Module _linesearch_iterative_kernel__locals__kernel_f3a187e1 ee17086 load on device 'cuda:0' took 1.38 ms  (cached)
+Module _update_constraint_efc__locals__kernel_e953547e e953547 load on device 'cuda:0' took 0.77 ms  (cached)
+Module _update_gradient_zero_grad_dot__locals__kernel_e9f8c963 e9f8c96 load on device 'cuda:0' took 0.63 ms  (cached)
+Module _update_gradient_grad__locals__kernel_87959044 8795904 load on device 'cuda:0' took 0.60 ms  (cached)
+Module _update_gradient_h_incremental_sparse__locals__kernel_e8129775 e812977 load on device 'cuda:0' took 0.65 ms  (cached)
+Module _update_gradient_cholesky_blocked_skip_unchanged__locals__kernel_dc0908fb 837e4e8 load on device 'cuda:0' took 127.26 ms  (cached)
+Module _solve_done__locals__kernel_54267c25 54267c2 load on device 'cuda:0' took 0.81 ms  (cached)
+Module _next_time_builder__locals___next_time_bc454e15 bc454e1 load on device 'cuda:0' took 0.76 ms  (cached)
+batch 0: reference contact(hits) 1.000 fell(hits) 0.583
+  parametric ttc_threshold  p=0.3    65s  fall|hits 0.333  fall|contact 0.364  contact 0.92  false-prep 0.750  braced 0.64s  det/ep 6.3  render nan ms
+  parametric belief_lead    p=0.05   20s  fall|hits 0.333  fall|contact 0.364  contact 0.92  false-prep 0.750  braced 0.57s  det/ep 6.4  render nan ms
+  parametric belief_wait    p=0.05   21s  fall|hits 0.333  fall|contact 0.364  contact 0.92  false-prep 0.750  braced 0.57s  det/ep 6.4  render nan ms
+  parametric belief_voi     p=0.05   24s  fall|hits 0.333  fall|contact 0.364  contact 0.92  false-prep 0.750  braced 0.58s  det/ep 6.4  render nan ms
+Module _build_megakernel__locals___render_megakernel_397ef078 98dc7d4 load on device 'cuda:0' took 1.33 ms  (cached)
+  depth      ttc_threshold  p=0.3    56s  fall|hits 0.250  fall|contact 0.273  contact 0.92  false-prep 0.250  braced 0.54s  det/ep 5.8  render 107 ms
+  depth      belief_lead    p=0.05   32s  fall|hits 0.250  fall|contact 0.300  contact 0.83  false-prep 0.500  braced 0.56s  det/ep 5.4  render 77 ms
+  depth      belief_wait    p=0.05   37s  fall|hits 0.250  fall|contact 0.300  contact 0.83  false-prep 0.500  braced 0.56s  det/ep 5.4  render 71 ms
+  depth      belief_voi     p=0.05   41s  fall|hits 0.250  fall|contact 0.300  contact 0.83  false-prep 0.500  braced 0.56s  det/ep 5.5  render 68 ms
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python scripts/validate_session_h.py --stage-dir /workspace/foresight-session-h/results/session_h_20261115T211850Z_1f77c1/depth_gate_l5 --kind depth --episodes-per-condition 16 --conditions 9 --expected-release 0.3 --source-commit eb493be055603652ce01a73c66e96dd564a28d34
+{
+  "schema_version": "foresight.session_h.v1",
+  "status": "passed",
+  "passed": true,
+  "kind": "depth",
+  "source_commit": "eb493be055603652ce01a73c66e96dd564a28d34",
+  "conditions": 9,
+  "episodes_per_condition": 16,
+  "release_after": 0.3,
+  "episode_files": 9,
+  "interpretation": "Execution/evidence gate only; no performance or zero-false-alarm requirement."
+}
+depth_gate_l5: completed and evidence checks passed.
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python -u scripts/eval_decision_frontier.py --nominal checkpoints/nominal_s1 --brace checkpoints/brace2_s1 --response_model results/response_model.json --impl warp --steps 300 --episodes 32 --batches 1 --period 5 --latencies 0,5 --seed 9400 --release_after 0.3 --hold 0.5 --methods reactive,ttc_threshold,belief_lead --thetas 0.3,0.4 --c_preps 0.05,0.1 --calib_params  --out /workspace/foresight-session-h/results/session_h_20261115T211850Z_1f77c1/hold_gate
+I1115 21:32:59.914638 139574161524544 xla_bridge.py:861] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+I1115 21:32:59.914995 139574161524544 xla_bridge.py:861] Unable to initialize backend 'proxy': The 'proxy' backend requires the address of an IFRT Proxy server. Set it via the JAX_BACKEND_TARGET environment variable or the jax_backend_target config option, e.g. JAX_BACKEND_TARGET=grpc://localhost:29000.
+I1115 21:33:01.754599 139574161524544 checkpoint.py:189] restoring from checkpoint /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400
+I1115 21:33:01.755433 139574161524544 abstract_checkpointer.py:35] orbax-checkpoint version: 0.12.8
+I1115 21:33:01.755625 139574161524544 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 21:33:01.756035 139574161524544 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7eefbff016a0>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 21:33:01.756975 139574161524544 checkpoint.py:228] Read Metadata={'item_handlers': 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler', 'metrics': {}, 'performance_metrics': {}, 'init_timestamp_nsecs': 1794590795947520546, 'commit_timestamp_nsecs': 1794590796010822336, 'custom_metadata': {}} from /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400/_CHECKPOINT_METADATA
+I1115 21:33:01.790141 139574161524544 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 21:33:01.790401 139574161524544 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7eefbff016a0>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 21:33:01.790852 139574161524544 event_tracking.py:76] [process=0] [sync] Started load checkpoint @ /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400.
+I1115 21:33:01.792521 139574161524544 checkpointer.py:368] Restoring checkpoint from /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400.
+I1115 21:33:01.792938 139574161524544 event_tracking.py:171] [process=0] [sync] Finished blocking load in 0.00 seconds. Continuing load @ /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400.
+I1115 21:33:01.816320 139574161524544 async_io_engine.py:127] [process=0] /jax/checkpoint/read/gbytes_per_sec: 83.399 MiB/s (total size: 1.9 MiB) (time elapsed: 0.022933006286621094 s) (global)
+I1115 21:33:01.816586 139574161524544 event_tracking.py:184] [process=0] [sync] Finished load in 0.03 seconds @ /workspace/foresight-session-h/checkpoints/nominal_s1/000202342400
+I1115 21:33:01.820578 139574161524544 checkpoint.py:189] restoring from checkpoint /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400
+I1115 21:33:01.820717 139574161524544 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 21:33:01.820820 139574161524544 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7eefbff016a0>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 21:33:01.849506 139574161524544 pytree_checkpoint_handler.py:596] save_device_host_concurrent_bytes=None
+I1115 21:33:01.849724 139574161524544 base_pytree_checkpoint_handler.py:501] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7eefbff016a0>, enable_pinned_host_transfer=True, save_concurrent_bytes: 96000000000 (89.4 GiB), restore_concurrent_bytes: 96000000000 (89.4 GiB)
+I1115 21:33:01.850025 139574161524544 event_tracking.py:76] [process=0] [sync] Started load checkpoint @ /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400.
+I1115 21:33:01.851648 139574161524544 checkpointer.py:368] Restoring checkpoint from /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400.
+I1115 21:33:01.851818 139574161524544 event_tracking.py:171] [process=0] [sync] Finished blocking load in 0.00 seconds. Continuing load @ /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400.
+I1115 21:33:01.873350 139574161524544 async_io_engine.py:127] [process=0] /jax/checkpoint/read/gbytes_per_sec: 90.557 MiB/s (total size: 1.9 MiB) (time elapsed: 0.021120071411132812 s) (global)
+I1115 21:33:01.873610 139574161524544 event_tracking.py:184] [process=0] [sync] Finished load in 0.02 seconds @ /workspace/foresight-session-h/checkpoints/brace2_s1/000202342400
+Warp 1.18.0 initialized:
+   CUDA Toolkit 13.4, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA RTX 6000 Ada Generation" (47 GiB, sm_89, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.18.0
+9 conditions x 32 episodes x 1 batches
+Module mujoco.mjx.warp.ffi 4443472 load on device 'cuda:0' took 0.52 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.smooth 43a6a77 load on device 'cuda:0' took 8.13 ms  (cached)
+Module _nxn_broadphase__locals__kernel_95773766 9577376 load on device 'cuda:0' took 0.76 ms  (cached)
+Module ccd_kernel_builder__locals__ccd_kernel_1a0e5f50 1a0e5f5 load on device 'cuda:0' took 1.22 ms  (cached)
+Module _primitive_narrowphase__locals__primitive_narrowphase_45a33c4c 45a33c4 load on device 'cuda:0' took 0.99 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.constraint 8d4d513 load on device 'cuda:0' took 0.76 ms  (cached)
+Module _friction_dof__locals__kernel_c23b2f31 c23b2f3 load on device 'cuda:0' took 0.79 ms  (cached)
+Module _limit_slide_hinge__locals__kernel_9573ef9b 9573ef9 load on device 'cuda:0' took 0.71 ms  (cached)
+Module _efc_contact_init__locals__kernel_9009dd76 9009dd7 load on device 'cuda:0' took 0.71 ms  (cached)
+Module _efc_contact_jac_sparse__locals__kernel_54cecf88 54cecf8 load on device 'cuda:0' took 0.67 ms  (cached)
+Module _efc_contact_update__locals__kernel_efb3ac6e efb3ac6 load on device 'cuda:0' took 0.66 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.sensor 8feaecd load on device 'cuda:0' took 1.29 ms  (cached)
+Module _contact_match_builder__locals___contact_match_4da0430b 4da0430 load on device 'cuda:0' took 0.72 ms  (cached)
+Module _contact_sort__locals__contact_sort_bed1da43 6afef3a load on device 'cuda:0' took 0.80 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.forward 9a96b97 load on device 'cuda:0' took 1.06 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.passive 0de6fd1 load on device 'cuda:0' took 1.13 ms  (cached)
+Module _qfrc_passive_kernel__locals__kernel_976399dd 976399d load on device 'cuda:0' took 0.70 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.forward bdd5619 load on device 'cuda:0' took 1.09 ms  (cached)
+Module _qfrc_smooth__locals__kernel_8b823980 8b82398 load on device 'cuda:0' took 0.69 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.support 770ef7d load on device 'cuda:0' took 0.70 ms  (cached)
+Module _small_cholesky_factorize_solve_block__locals__kernel_9da335f1 a5c2521 load on device 'cuda:0' took 0.70 ms  (cached)
+Module _tile_cholesky_factorize_solve_block__locals__kernel_f18d9752 acc0ae1 load on device 'cuda:0' took 51.67 ms  (cached)
+Module _solve_init_dof__locals__kernel_7cb1664a 7cb1664 load on device 'cuda:0' took 0.72 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.solver 5b3c3b6 load on device 'cuda:0' took 0.96 ms  (cached)
+Module _solve_init_jaref_kernel__locals__kernel_ca465bd8 ca465bd load on device 'cuda:0' took 0.64 ms  (cached)
+Module mul_m_kernel__locals___mul_m_f3de1cc7 f3de1cc load on device 'cuda:0' took 0.60 ms  (cached)
+Module _update_constraint_efc__locals__kernel_0539aa50 0539aa5 load on device 'cuda:0' took 0.64 ms  (cached)
+Module _update_constraint_init_qfrc_constraint_sparse__locals__kernel_801f2ee2 801f2ee load on device 'cuda:0' took 0.61 ms  (cached)
+Module _update_gradient_zero_grad_dot__locals__kernel_b20934d7 b20934d load on device 'cuda:0' took 0.60 ms  (cached)
+Module _update_gradient_grad__locals__kernel_c876081d c876081 load on device 'cuda:0' took 0.58 ms  (cached)
+Module _update_gradient_init_h_sparse__locals__kernel_f82bfdd8 f82bfdd load on device 'cuda:0' took 0.60 ms  (cached)
+Module _JTDACJ_sparse__locals__kernel_765abea5 765abea load on device 'cuda:0' took 0.65 ms  (cached)
+Module _JTDACJ_sparse__locals__kernel_765abea5 bd2cd56 load on device 'cuda:0' took 0.64 ms  (cached)
+Module _update_gradient_cholesky_blocked__locals__kernel_1f053eca 38eeb22 load on device 'cuda:0' took 119.52 ms  (cached)
+Module _linesearch_jv_fused_kernel__locals__kernel_bdad643e bdad643 load on device 'cuda:0' took 0.77 ms  (cached)
+Module _linesearch_iterative_kernel__locals__kernel_f3a187e1 ee17086 load on device 'cuda:0' took 0.87 ms  (cached)
+Module _update_constraint_efc__locals__kernel_e953547e e953547 load on device 'cuda:0' took 0.68 ms  (cached)
+Module _update_gradient_zero_grad_dot__locals__kernel_e9f8c963 e9f8c96 load on device 'cuda:0' took 0.77 ms  (cached)
+Module _update_gradient_grad__locals__kernel_87959044 8795904 load on device 'cuda:0' took 0.74 ms  (cached)
+Module _update_gradient_h_incremental_sparse__locals__kernel_e8129775 e812977 load on device 'cuda:0' took 0.75 ms  (cached)
+Module _update_gradient_cholesky_blocked_skip_unchanged__locals__kernel_dc0908fb 837e4e8 load on device 'cuda:0' took 137.10 ms  (cached)
+Module _solve_done__locals__kernel_54267c25 54267c2 load on device 'cuda:0' took 0.98 ms  (cached)
+Module _next_time_builder__locals___next_time_bc454e15 bc454e1 load on device 'cuda:0' took 0.89 ms  (cached)
+batch 0: reference 39s  contact(hits) 0.957  contact(miss) 0.000  fell(hits) 0.652
+  reactive       p=0     lat=0     38s  fall|hits 0.652  fall|contact 0.636  false-prep 0.000  braced 0.00s  progress nan
+  ttc_threshold  p=0.3   lat=0     38s  fall|hits 0.304  fall|contact 0.273  false-prep 0.444  braced 0.66s  progress nan
+  ttc_threshold  p=0.3   lat=5     37s  fall|hits 0.391  fall|contact 0.364  false-prep 0.556  braced 0.68s  progress nan
+  ttc_threshold  p=0.4   lat=0     38s  fall|hits 0.348  fall|contact 0.318  false-prep 0.556  braced 0.76s  progress nan
+  ttc_threshold  p=0.4   lat=5     40s  fall|hits 0.348  fall|contact 0.318  false-prep 0.667  braced 0.81s  progress nan
+  belief_lead    p=0.05  lat=0     38s  fall|hits 0.391  fall|contact 0.364  false-prep 0.556  braced 0.77s  progress nan
+  belief_lead    p=0.05  lat=5     39s  fall|hits 0.391  fall|contact 0.364  false-prep 0.222  braced 0.53s  progress nan
+  belief_lead    p=0.1   lat=0     34s  fall|hits 0.348  fall|contact 0.318  false-prep 0.222  braced 0.61s  progress nan
+  belief_lead    p=0.1   lat=5     34s  fall|hits 0.478  fall|contact 0.455  false-prep 0.111  braced 0.30s  progress nan
+Traceback (most recent call last):
+  File "/workspace/foresight-session-h/scripts/eval_decision_frontier.py", line 376, in <module>
+    app.run(main)
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/absl/app.py", line 410, in run
+    _run_main(main, args)
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/absl/app.py", line 355, in _run_main
+    sys.exit(main(argv))
+             ^^^^^^^^^^
+  File "/workspace/foresight-session-h/scripts/eval_decision_frontier.py", line 331, in main
+    comparison = ST.paired_comparison(tab, pooled[reference], env.dt)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/foresight-session-h/foresight/eval/session_h_evidence.py", line 172, in paired_comparison
+    "progress_m": paired_difference(a["progress_m"], b["progress_m"]),
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/foresight-session-h/foresight/eval/session_h_evidence.py", line 129, in paired_difference
+    raise ValueError("Need aligned finite one-dimensional arrays")
+ValueError: Need aligned finite one-dimensional arrays
+Experiment stopped: Child process exited with status 1. See console.log.
+Traceback (most recent call last):
+  File "/workspace/foresight-session-h/scripts/run_session_h.py", line 220, in main
+    run_child([python, '-u', *spec['args']], env, log, deadline - time.monotonic())
+  File "/workspace/foresight-session-h/scripts/run_session_h.py", line 92, in run_child
+    raise RuntimeError(f'Child process exited with status {result}. See console.log.')
+RuntimeError: Child process exited with status 1. See console.log.
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python scripts/summarize_session_h.py --run-dir /workspace/foresight-session-h/results/session_h_20261115T211850Z_1f77c1
+Session H report: partial (2/8 audited stages).
+Local review ZIP: /workspace/foresight-session-h/logs/session_h_20261115T211850Z_1f77c1.zip
+Running: /usr/local/bin/python3 /workspace/foresight-session-h/scripts/publish_experiment_results.py --run-dir /workspace/foresight-session-h/results/session_h_20261115T211850Z_1f77c1 --log /workspace/foresight-session-h/results/session_h_20261115T211850Z_1f77c1/console.log --exit-code 1

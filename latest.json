@@ -1,8 +1,8 @@
 {
-  "publisher_source_commit": "450c834ffa17c6cffd00b4303eeb194e2a3c6242",
-  "results_path": "results/session_h_20261115T071536Z_b46b85",
+  "publisher_source_commit": "eb493be055603652ce01a73c66e96dd564a28d34",
+  "results_path": "results/session_h_20261115T211850Z_1f77c1",
   "run_exit_code": 1,
-  "run_id": "session_h_20261115T071536Z_b46b85",
-  "source_commit": "450c834ffa17c6cffd00b4303eeb194e2a3c6242",
-  "timestamp_utc": "2026-11-15T07:19:54Z"
+  "run_id": "session_h_20261115T211850Z_1f77c1",
+  "source_commit": "eb493be055603652ce01a73c66e96dd564a28d34",
+  "timestamp_utc": "2026-11-15T21:39:23Z"
 }

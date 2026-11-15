@@ -1,0 +1,12 @@
+{
+  "schema_version": "foresight.session_h.v1",
+  "status": "passed",
+  "passed": true,
+  "kind": "depth",
+  "source_commit": "eb493be055603652ce01a73c66e96dd564a28d34",
+  "conditions": 9,
+  "episodes_per_condition": 16,
+  "release_after": 0.3,
+  "episode_files": 9,
+  "interpretation": "Execution/evidence gate only; no performance or zero-false-alarm requirement."
+}

@@ -1,0 +1,254 @@
+[
+  {
+    "condition_a": [
+      "parametric",
+      "ttc_threshold",
+      0.3
+    ],
+    "condition_b": [
+      "none",
+      "reactive",
+      0.0
+    ],
+    "n_hits": 12,
+    "difference_a_minus_b": -0.25,
+    "normal95": [
+      -0.5058941542548758,
+      0.005894154254875883
+    ],
+    "a_only": 0,
+    "b_only": 3,
+    "uncertainty": "approximate paired normal interval, conditional on this frozen skill pair"
+  },
+  {
+    "condition_a": [
+      "parametric",
+      "belief_lead",
+      0.05
+    ],
+    "condition_b": [
+      "none",
+      "reactive",
+      0.0
+    ],
+    "n_hits": 12,
+    "difference_a_minus_b": -0.25,
+    "normal95": [
+      -0.5058941542548758,
+      0.005894154254875883
+    ],
+    "a_only": 0,
+    "b_only": 3,
+    "uncertainty": "approximate paired normal interval, conditional on this frozen skill pair"
+  },
+  {
+    "condition_a": [
+      "parametric",
+      "belief_wait",
+      0.05
+    ],
+    "condition_b": [
+      "none",
+      "reactive",
+      0.0
+    ],
+    "n_hits": 12,
+    "difference_a_minus_b": -0.25,
+    "normal95": [
+      -0.5058941542548758,
+      0.005894154254875883
+    ],
+    "a_only": 0,
+    "b_only": 3,
+    "uncertainty": "approximate paired normal interval, conditional on this frozen skill pair"
+  },
+  {
+    "condition_a": [
+      "parametric",
+      "belief_voi",
+      0.05
+    ],
+    "condition_b": [
+      "none",
+      "reactive",
+      0.0
+    ],
+    "n_hits": 12,
+    "difference_a_minus_b": -0.25,
+    "normal95": [
+      -0.5058941542548758,
+      0.005894154254875883
+    ],
+    "a_only": 0,
+    "b_only": 3,
+    "uncertainty": "approximate paired normal interval, conditional on this frozen skill pair"
+  },
+  {
+    "condition_a": [
+      "depth",
+      "ttc_threshold",
+      0.3
+    ],
+    "condition_b": [
+      "none",
+      "reactive",
+      0.0
+    ],
+    "n_hits": 12,
+    "difference_a_minus_b": -0.3333333333333333,
+    "normal95": [
+      -0.6119156027046644,
+      -0.0547510639620023
+    ],
+    "a_only": 0,
+    "b_only": 4,
+    "uncertainty": "approximate paired normal interval, conditional on this frozen skill pair"
+  },
+  {
+    "condition_a": [
+      "depth",
+      "ttc_threshold",
+      0.3
+    ],
+    "condition_b": [
+      "parametric",
+      "ttc_threshold",
+      0.3
+    ],
+    "n_hits": 12,
+    "difference_a_minus_b": -0.08333333333333333,
+    "normal95": [
+      -0.24666666666666665,
+      0.08
+    ],
+    "a_only": 0,
+    "b_only": 1,
+    "uncertainty": "approximate paired normal interval, conditional on this frozen skill pair"
+  },
+  {
+    "condition_a": [
+      "depth",
+      "belief_lead",
+      0.05
+    ],
+    "condition_b": [
+      "none",
+      "reactive",
+      0.0
+    ],
+    "n_hits": 12,
+    "difference_a_minus_b": -0.3333333333333333,
+    "normal95": [
+      -0.6119156027046644,
+      -0.0547510639620023
+    ],
+    "a_only": 0,
+    "b_only": 4,
+    "uncertainty": "approximate paired normal interval, conditional on this frozen skill pair"
+  },
+  {
+    "condition_a": [
+      "depth",
+      "belief_lead",
+      0.05
+    ],
+    "condition_b": [
+      "parametric",
+      "belief_lead",
+      0.05
+    ],
+    "n_hits": 12,
+    "difference_a_minus_b": -0.08333333333333333,
+    "normal95": [
+      -0.24666666666666665,
+      0.08
+    ],
+    "a_only": 0,
+    "b_only": 1,
+    "uncertainty": "approximate paired normal interval, conditional on this frozen skill pair"
+  },
+  {
+    "condition_a": [
+      "depth",
+      "belief_wait",
+      0.05
+    ],
+    "condition_b": [
+      "none",
+      "reactive",
+      0.0
+    ],
+    "n_hits": 12,
+    "difference_a_minus_b": -0.3333333333333333,
+    "normal95": [
+      -0.6119156027046644,
+      -0.0547510639620023
+    ],
+    "a_only": 0,
+    "b_only": 4,
+    "uncertainty": "approximate paired normal interval, conditional on this frozen skill pair"
+  },
+  {
+    "condition_a": [
+      "depth",
+      "belief_wait",
+      0.05
+    ],
+    "condition_b": [
+      "parametric",
+      "belief_wait",
+      0.05
+    ],
+    "n_hits": 12,
+    "difference_a_minus_b": -0.08333333333333333,
+    "normal95": [
+      -0.24666666666666665,
+      0.08
+    ],
+    "a_only": 0,
+    "b_only": 1,
+    "uncertainty": "approximate paired normal interval, conditional on this frozen skill pair"
+  },
+  {
+    "condition_a": [
+      "depth",
+      "belief_voi",
+      0.05
+    ],
+    "condition_b": [
+      "none",
+      "reactive",
+      0.0
+    ],
+    "n_hits": 12,
+    "difference_a_minus_b": -0.3333333333333333,
+    "normal95": [
+      -0.6119156027046644,
+      -0.0547510639620023
+    ],
+    "a_only": 0,
+    "b_only": 4,
+    "uncertainty": "approximate paired normal interval, conditional on this frozen skill pair"
+  },
+  {
+    "condition_a": [
+      "depth",
+      "belief_voi",
+      0.05
+    ],
+    "condition_b": [
+      "parametric",
+      "belief_voi",
+      0.05
+    ],
+    "n_hits": 12,
+    "difference_a_minus_b": -0.08333333333333333,
+    "normal95": [
+      -0.24666666666666665,
+      0.08
+    ],
+    "a_only": 0,
+    "b_only": 1,
+    "uncertainty": "approximate paired normal interval, conditional on this frozen skill pair"
+  }
+]
