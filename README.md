@@ -7,6 +7,12 @@ AA228/CS238 (Decision Making under Uncertainty) final project, Stanford, Autumn 
 Simulation only: Unitree G1 in MuJoCo Playground (rss2025, MJX + MuJoCo-Warp), frozen PPO
 skills, a POMDP decision layer on top. Author: Prasuna Chatla.
 
+**Technical notes:** [Controllers, frozen skills, and bracing decisions](docs/technical_notes/controllers_and_freezing.md)
+explains the implemented policies, zero-command walking versus BRACE, and what Session H varies.
+[Numerical precision](docs/technical_notes/numerical_precision.md) covers the FP32/FP64 reporting
+incident and FP16/BF16/INT8/FP8 tradeoffs. The [technical notes index](docs/technical_notes/README.md)
+links both references and their separate discussion threads.
+
 Status at a glance (Nov 14): every layer is built and exercised. Sessions A–C (about 5 GPU-h)
 located the disturbance regime, produced a capture-point reference, fixed the evaluation
 protocol, passed the preparation gate with BRACE v2 (failure 0.70 → 0.42 at 0.5 s lead on

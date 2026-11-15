@@ -39,6 +39,13 @@ weaker BRACE policy as the cause. Two pairs also provide a limited view of
 training-seed variability. E19 uses the pair-1 response surrogate, so response
 model transfer is an additional possible contributor to belief-rule performance.
 
+The subsequent [controller audit](technical_notes/controllers_and_freezing.md) also identifies
+a training-distribution caveat: the skill registry records that the seed-1 checkpoints
+predate the per-skill mass-randomizer fix. BRACE seed 1 was trained with 1–8 kg
+randomization despite a configuration declaring 4–16 kg; the later training code uses
+the per-skill range. These two pairs therefore do not isolate random-seed variance
+under a matched training distribution.
+
 Do not claim an unchanged strict method ranking. At zero delay, belief lead
 minus TTC 0.4 is −0.07 points for pair 1 (95% interval −1.32 to +1.18) and +1.61
 points for pair 2 (−0.03 to +3.24). The point ordering changes, while both intervals
