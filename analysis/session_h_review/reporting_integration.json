@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "scope": "Reporting integration using synthetic copies of a real tiny CPU run; not GPU evidence",
+  "real_stage": "/workspace/scratch/ff48d6d3d990/h_hold_cpu_runtime",
+  "groups": 2,
+  "conditions_per_hold": 2,
+  "synthetic_hold_arms": 3,
+  "paired_comparisons": 4,
+  "identical_copy_effects_are_zero": true,
+  "missing_planned_stage_is_partial": true,
+  "validator_reaches_expected_no_contact_failure_after_fixture_only_provenance_override": "Reactive reference has no intended-hit contacts"
+}

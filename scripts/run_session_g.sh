@@ -38,8 +38,67 @@ has_final_ckpt() {
   [ -n "$run" ] && [ "$(ls -d "$run"/checkpoints/[0-9]* 2>/dev/null | wc -l)" -ge 1 ] && \
     grep -q "Done training\|Training and checkpoints complete" "logs/$(basename "$1")_train.txt" 2>/dev/null
 }
+reuse_published_checkpoint() {
+  # A fresh pod has the published bundles but none of the old training logs.
+  # Validate and restore the newest numeric checkpoint on CPU before trusting it.
+  # A partial published bundle is an error, not permission to spend an hour
+  # silently replacing the trained policies used by the existing results.
+  local tag=$1 bundle="checkpoints/$1"
+  [ -e "$bundle" ] || return 2
+  if JAX_PLATFORMS=cpu "$PY" - "$bundle" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+bundle = Path(sys.argv[1]).resolve()
+if not bundle.is_dir():
+    raise SystemExit(f"Published checkpoint is not a directory: {bundle}")
+steps = [p for p in bundle.iterdir() if p.is_dir() and p.name.isdigit()]
+if not steps:
+    raise SystemExit(f"Published bundle has no numeric checkpoint: {bundle}")
+checkpoint = max(steps, key=lambda p: int(p.name))
+required = ('manifest.ocdbt', 'ppo_network_config.json', '_METADATA',
+            '_CHECKPOINT_METADATA', 'commit_success.txt')
+for name in required:
+    path = checkpoint / name
+    if not path.is_file() or path.stat().st_size == 0:
+        raise SystemExit(f"Incomplete published checkpoint: missing or empty {path}")
+for name in ('ppo_network_config.json', '_METADATA', '_CHECKPOINT_METADATA'):
+    with (checkpoint / name).open() as stream:
+        value = json.load(stream)
+    if not isinstance(value, dict) or not value:
+        raise SystemExit(f"Invalid checkpoint metadata: {checkpoint / name}")
+    if name == '_CHECKPOINT_METADATA' and not value.get('commit_timestamp_nsecs'):
+        raise SystemExit(f"Checkpoint has no completed commit: {checkpoint}")
+manifests = list(checkpoint.rglob('manifest.ocdbt'))
+for manifest in manifests:
+    data_dir = manifest.parent / 'd'
+    payloads = [p for p in data_dir.iterdir() if p.is_file()] if data_dir.is_dir() else []
+    if not payloads or any(p.stat().st_size == 0 for p in payloads):
+        raise SystemExit(f"Incomplete OCDBT payload directory: {data_dir}")
+    for payload in payloads:
+        with payload.open('rb') as stream:
+            if stream.read(80).startswith(b'version https://git-lfs.github.com/spec/v1'):
+                raise SystemExit(f"OCDBT payload is an unfetched LFS pointer: {payload}")
+# A structural inventory cannot prove that every OCDBT reference resolves.
+# The same loader used by evaluation checks the actual data before training is skipped.
+from foresight.eval import rollout as R
+R.load_policy(checkpoint)
+print(f"Verified published checkpoint on CPU: {checkpoint}", flush=True)
+PY
+  then
+    echo "reuse published checkpoint checkpoints/$tag; no retraining or log recovery needed"
+    return 0
+  fi
+  echo "ERROR: published checkpoints/$tag failed validation/restore. Repair the bundle before rerunning; no replacement training was started." >&2
+  return 1
+}
 train() {  # train <skill> <seed> <tag> [extra flags...]
   local skill=$1 seed=$2 tag=$3; shift 3
+  local reuse_status=0
+  reuse_published_checkpoint "$tag" || reuse_status=$?
+  if [ "$reuse_status" -eq 0 ]; then return 0; fi
+  if [ "$reuse_status" -ne 2 ]; then return "$reuse_status"; fi
   if has_final_ckpt "logs/$tag"; then echo "reuse finished training run in logs/$tag"
   else
     stamp "train $tag ($STEPS steps)"
@@ -90,10 +149,10 @@ for L in 0 5; do
 done
 
 # --- E19: a second seed pair (walker s2, BRACE v2 from it), frontier at 10 Hz
-train nominal 2 nominal_s2
-NOM2=checkpoints/nominal_s2
-train brace 2 brace2_s2 --brace_handover_ckpt "$NOM2"
 if ! done_stage E19_seed2_p5; then
+  train nominal 2 nominal_s2
+  NOM2=checkpoints/nominal_s2
+  train brace 2 brace2_s2 --brace_handover_ckpt "$NOM2"
   stamp "E19 frontier at 10 Hz with seed pair 2"
   $PY scripts/eval_decision_frontier.py --nominal checkpoints/nominal_s2 --brace checkpoints/brace2_s2 --impl $IMPL \
       --episodes $EPISODES --batches $BATCHES --latencies 0,5 --period 5 \

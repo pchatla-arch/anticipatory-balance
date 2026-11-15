@@ -1,0 +1,38 @@
+{
+  "base_source_commit": "84c161a6d3782a93385d4a258ecc48487e5bfe57",
+  "scope": "Session G preserved; Session H same-code hold/depth follow-up. CPU validation only; GPU experiments pending.",
+  "cpu_suite": {
+    "tests_run": 82,
+    "passed": true,
+    "skipped": 0
+  },
+  "source_sha256": {
+    "foresight/eval/session_h_evidence.py": "1358e6d20f60ac1abe205a2e64f3feee4776aa575a3b4591e6cd56bde2883601",
+    "scripts/bootstrap_fresh_pod.sh": "80c7f476159c8598a198389879b2136eeeeb150abea058ebe312d992bb5aeecf",
+    "scripts/eval_decision_frontier.py": "a60b3980671b026f70a20ad464ce5503e63e59edf6170971bbdb0d9c290d5322",
+    "scripts/eval_depth_closed_loop.py": "fafb817d79d0656d67bccc40ea4dac6bfbe1f84356e6b5487a809ebba200898b",
+    "scripts/finish_pod_session.py": "390b2602065892f9d4f8c5ef0730f24fb6a3c183ebfe6da91e8f9215ec8f56cc",
+    "scripts/preflight_session_h.py": "3f8d55643ad911fe448fd2447e5b584a68cde41139df6dc65a5f587d171b8ba1",
+    "scripts/publish_experiment_results.py": "9adb6cbfa9545e04b34568b7e0d245baf206bf5e92f69f840fc8a9941f2a766e",
+    "scripts/run_session_g.sh": "2394b789adea8a1b27a6fdc67654c7b7614b76c5e95792a1bc9356ada06772ce",
+    "scripts/run_session_h.py": "a75f652a92282cb160a0808a4a79df1165f3f8158b8461d40a8a8e06ad1e6e07",
+    "scripts/run_session_h.sh": "eb5c436203fb581e5fa9701853fa44374baa0624503fc65f65d2fb3b12a6dc93",
+    "scripts/run_session_h_tests.py": "7b2bd3ff1e0ef9c7fe7aeb62d49e2c10543909b249377196959e9cd027737c52",
+    "scripts/session_h_plan.py": "c76c02cfb2f10125eeda2b465103e76a6ea78e60d9d9572f474f2ecf00f0cd02",
+    "scripts/session_h_pod.py": "aeb91e528ceba1b7ceeaf463f9959cbc878105fe33e47b0c3e07643e48cc96c8",
+    "scripts/start.sh": "ab708de259b7f7f3a62eb3b022c2b03bdf4d173f12887c06a0998e899ce0b8ef",
+    "scripts/start_session_h.sh": "e52951f42d7404a25430a625339c8d7f706828c13a8a06d052e6236945e8703f",
+    "scripts/start_session_h_pod.sh": "8c9aabd6821323382cef9d3c5e156a62e20fbde755e52ad2e387fd2f84c1a1ac",
+    "scripts/summarize_session_h.py": "20a52fc99b2f3ef6b95f4b1509d75871db7fa2f6991d1cf85e6e5b588ba5e753",
+    "scripts/validate_session_h.py": "f2c1dbeb5ce0d01cdc337c9780ae7c043a42370e4c72cf146fd87cccd79b8895",
+    "tests/test_experiment_publisher.py": "8aa7d39b8b9c9b7666ca2dffbdef670a859f95b4a8c2841b8f8eb7bd6094a204",
+    "tests/test_finish_pod_session.py": "879f4cd7ce9ce0764c5e6031405a9f798cd482252abc0bfc5b35a840366a8ff0",
+    "tests/test_session_g_checkpoint_reuse.py": "0f2014a9d6ae37887c1fa291c024643424f2f05971b90927a64f1c83c47f0838",
+    "tests/test_session_h_depth.py": "09f20cdf62b860e8ef65e492432117f9a0ab3f354a73ae6f92b9b180150217fd",
+    "tests/test_session_h_hold.py": "d509909074ccd8c20a1f81b55eec37a1e747f0e5739a77413bb4f8658dfb0c69",
+    "tests/test_session_h_launchers.py": "fa538c734eb5cf5a1f58f438f71c3c7d5a9eba7e2b6eea1b02e6709a1a7040c4",
+    "tests/test_session_h_publication.py": "bd19d7be16c853ee1513247cbf405708acf9a0616fa64dbe82208646ac31dbf9",
+    "tests/test_session_h_runner.py": "2f6020562ee17ab3e441b1a43bc38c1060ecb6d19954bbdfc1e199d421bdb59e",
+    "tests/test_session_h_validation.py": "7f2dc4609529a711ebc01b6d86e059066e6fb0cde47ce3543793421884cc0868"
+  }
+}

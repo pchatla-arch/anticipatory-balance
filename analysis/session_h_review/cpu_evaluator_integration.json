@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "kind": "actual CPU evaluator CLI integration; no GPU/scientific performance claim",
+  "environment_backend": "jax CPU",
+  "jax": "0.12.0.1",
+  "episodes": 2,
+  "steps": 3,
+  "conditions": [
+    "reactive",
+    "ttc_threshold"
+  ],
+  "checks": [
+    "both published checkpoints restored",
+    "new parked-object scene constructed",
+    "three physical steps per rollout",
+    "complete strict-JSON output",
+    "paired CSV scenario IDs",
+    "numeric-only NPZ",
+    "paired summary generation",
+    "plot created"
+  ],
+  "npz_arrays": 100,
+  "note": "Tiny fixture has no contact; not a scientific gate and not submitted as experiment results."
+}

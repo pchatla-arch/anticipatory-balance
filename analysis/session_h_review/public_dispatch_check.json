@@ -1,0 +1,4 @@
+{
+  "passed": true,
+  "scope": "Mocked public start.sh h smoke dispatch; no network, GPU, setup or pod actions."
+}
