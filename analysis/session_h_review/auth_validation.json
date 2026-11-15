@@ -1,0 +1,16 @@
+{
+  "base_source_commit": "bbd341d247b0b9856790c4e1365d44a240c5cc59",
+  "scope": "Authentication correction only; mocked services, no GPU or package installation.",
+  "checked_at_utc": "2026-11-15T06:55:01.662595+00:00",
+  "tests_run": 17,
+  "passed": true,
+  "skipped": 0,
+  "elapsed_seconds": 1.284,
+  "failures": [],
+  "errors": [],
+  "source_sha256": {
+    "scripts/start_session_h_pod.sh": "f63df8d92896b90e677b090e2158a1a4a448c2d953da1e0958b292f3cc1a12a6",
+    "tests/test_session_h_launchers.py": "21056ee6aa233e66295eed618121c2dd4925744a5b8bfa51dd21e42b5ad98173",
+    "docs/SESSION_H_RUNBOOK.md": "fbd770ce1c26bcacff63ef159ee48edefbc4460d63a878b7ac8405d8940bd2c8"
+  }
+}

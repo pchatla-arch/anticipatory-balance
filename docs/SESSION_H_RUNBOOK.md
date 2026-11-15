@@ -12,10 +12,27 @@ observation model, response fit, and trained policies.
 bash <(curl -fsSL https://raw.githubusercontent.com/pchatla-arch/anticipatory-balance/session-d/scripts/start.sh) h
 ```
 
-If prompted, complete GitHub browser/device authentication. The default path
-checks repository push permission before starting the experiment worker. No
-token belongs in chat or in the remote URL. Existing working credentials can be
-used with `FORESIGHT_SKIP_GITHUB_LOGIN=1`, which explicitly bypasses that check.
+If prompted, log in to GitHub as **`pchatla-arch`**. Choose **Paste an
+authentication token** to enter your existing key directly on the pod, or choose
+browser/device authentication. The launcher verifies the authenticated account
+and repository push permission, then checks both again inside tmux before Python
+setup. It selects an existing stored `pchatla-arch` login when available. No token
+belongs in chat or in the remote URL.
+
+To correct a login manually on the pod:
+
+```bash
+gh auth login --hostname github.com --git-protocol https
+gh api --hostname github.com user --jq '.login'
+```
+
+The second command must print `pchatla-arch`. Prefer this stored login for the
+detached worker: `GH_TOKEN` / `GITHUB_TOKEN` override stored credentials and may
+differ in an existing tmux server. The launcher does not change these overrides
+or copy token values into worker commands. If an override selects a different
+account, correct or unset it on the pod and retry. Existing working Git
+credentials can instead be used with `FORESIGHT_SKIP_GITHUB_LOGIN=1`, which
+explicitly bypasses both identity and push-permission checks.
 
 The launcher creates an isolated checkout at `/workspace/foresight-session-h`
 and tmux session `foresight-h`. It reuses a compatible existing Playground venv;

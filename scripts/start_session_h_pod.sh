@@ -29,7 +29,9 @@ FORESIGHT_AUTO_STOP=1, verified result upload, and working RunPod controls.
 NO_STOP=1 overrides automatic stop. Missing GitHub credentials abort before the
 experiment; missing stop controls leave the pod running after publication.
 In either case, correct the issue or stop the pod in the RunPod dashboard.
-The default GitHub flow requires repository push permission before GPU work.
+The default GitHub flow verifies account pchatla-arch and repository push
+permission before GPU work. Enter an existing token only at the pod's GitHub
+login prompt, or choose browser login.
 FORESIGHT_SKIP_GITHUB_LOGIN=1 explicitly bypasses that check and trusts your
 existing Git credentials; publication may fail if they cannot push this repo.
 EOF
@@ -59,6 +61,23 @@ FORESIGHT_AUTO_STOP="${FORESIGHT_AUTO_STOP:-0}"
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 
+github_login() {
+  gh api --hostname github.com user --jq '.login' 2>/dev/null
+}
+
+require_github_access() {
+  local github_user can_push
+  if ! github_user=$(github_login) || [[ "$github_user" != pchatla-arch ]]; then
+    die 'GitHub must authenticate as pchatla-arch in this shell. Run gh auth login --hostname github.com --git-protocol https on the pod; check GH_TOKEN/GITHUB_TOKEN overrides if set. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
+  fi
+  if ! can_push=$(gh api --hostname github.com repos/pchatla-arch/anticipatory-balance \
+      --jq '.permissions.push' 2>/dev/null); then
+    die 'Could not verify GitHub push permission for pchatla-arch/anticipatory-balance. No experiment has started. Correct repository access and retry, or stop the still-running pod in the RunPod dashboard.'
+  fi
+  [[ "$can_push" == true ]] || \
+    die 'The pchatla-arch account/token does not have verified push permission for pchatla-arch/anticipatory-balance. No experiment has started. Correct repository access and retry, or stop the still-running pod in the RunPod dashboard.'
+}
+
 if [[ ${1:-} == --worker ]]; then
   cd "$FORESIGHT_REPO"
   exec 9> "$FORESIGHT_SETUP_ROOT/.foresight-setup.lock"
@@ -70,6 +89,9 @@ if [[ ${1:-} == --worker ]]; then
   unset LD_LIBRARY_PATH MUJOCO_GL PYTHONHOME
   mkdir -p logs
   exec > >(tee -a logs/fresh_pod.log) 2>&1
+  # An existing tmux server can have different credential environment variables
+  # from the launching shell. Recheck before setup or any paid experiment work.
+  if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]]; then require_github_access; fi
   exec python3 scripts/session_h_pod.py --mode "$FORESIGHT_MODE" --max-minutes "$FORESIGHT_MAX_MINUTES"
 fi
 
@@ -187,32 +209,39 @@ fi
 mkdir -p "$FORESIGHT_REPO/logs"
 
 if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]]; then
-  if gh auth status --hostname github.com >/dev/null 2>&1; then
-    gh auth setup-git --hostname github.com
-  elif [[ -t 0 ]]; then
-    echo
-    echo 'Complete this GitHub browser login before GPU work starts so results can be uploaded.'
-    echo 'No access token needs to be pasted into chat.'
-    if gh auth login --hostname github.com --git-protocol https --web; then
-      gh auth setup-git --hostname github.com
-    else
-      die 'GitHub login was not completed. No experiment has started; rerun after login. The pod is still running; stop it in the RunPod dashboard if leaving.'
+  FORESIGHT_GITHUB_USER=$(github_login) || FORESIGHT_GITHUB_USER=''
+  if [[ "$FORESIGHT_GITHUB_USER" != pchatla-arch ]]; then
+    if [[ -n ${GH_TOKEN:-} || -n ${GITHUB_TOKEN:-} ]]; then
+      die 'GH_TOKEN/GITHUB_TOKEN does not authenticate as pchatla-arch. Correct or unset that override, then log in as pchatla-arch on the pod. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
     fi
-  else
-    die 'No terminal for GitHub login. Run gh auth login --hostname github.com --git-protocol https --web, or use existing Git credentials with FORESIGHT_SKIP_GITHUB_LOGIN=1. The pod is still running; stop it in the RunPod dashboard if leaving.'
+    # Reuse the requested account when it is already stored by GitHub CLI.
+    if gh auth switch --hostname github.com --user pchatla-arch >/dev/null 2>&1; then
+      FORESIGHT_GITHUB_USER=$(github_login) || FORESIGHT_GITHUB_USER=''
+    fi
+    if [[ "$FORESIGHT_GITHUB_USER" != pchatla-arch ]]; then
+      if [[ -t 0 ]]; then
+        echo
+        echo 'Log in to GitHub as pchatla-arch before GPU work starts.'
+        echo 'Choose Paste an authentication token to enter your key directly on this pod, or choose browser login.'
+        echo 'Do not paste the token into chat or put it in the repository URL.'
+        gh auth login --hostname github.com --git-protocol https || \
+          die 'GitHub login was not completed. No experiment has started; rerun after login. The pod is still running; stop it in the RunPod dashboard if leaving.'
+      else
+        die 'No terminal for GitHub login as pchatla-arch. Run gh auth login --hostname github.com --git-protocol https on the pod, or use existing Git credentials with FORESIGHT_SKIP_GITHUB_LOGIN=1. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
+      fi
+    fi
   fi
-  if ! FORESIGHT_CAN_PUSH=$(gh api repos/pchatla-arch/anticipatory-balance \
-      --jq '.permissions.push' 2>/dev/null); then
-    die 'Could not verify GitHub push permission for pchatla-arch/anticipatory-balance. No experiment has started. Correct repository access and retry, or stop the still-running pod in the RunPod dashboard.'
-  fi
-  [[ "$FORESIGHT_CAN_PUSH" == true ]] || \
-    die 'This GitHub account/token does not have verified push permission for pchatla-arch/anticipatory-balance. No experiment has started. Correct repository access and retry, or stop the still-running pod in the RunPod dashboard.'
+  require_github_access
+  gh auth setup-git --hostname github.com
+  git -C "$FORESIGHT_REPO" config --local credential.https://github.com.username pchatla-arch
+  echo 'GitHub verified: pchatla-arch has repository push permission.'
 fi
-printf -v FORESIGHT_WORKER 'cd %q && env %q %q %q %q %q %q %q %q bash scripts/start_session_h_pod.sh --worker 8>&-' \
+printf -v FORESIGHT_WORKER 'cd %q && env %q %q %q %q %q %q %q %q %q bash scripts/start_session_h_pod.sh --worker 8>&-' \
   "$FORESIGHT_REPO" "FORESIGHT_SETUP_ROOT=$FORESIGHT_SETUP_ROOT" "FORESIGHT_CODE_REF=$FORESIGHT_CODE_REF" \
   "FORESIGHT_REPO=$FORESIGHT_REPO" "FORESIGHT_VENV=$FORESIGHT_VENV" \
   "FORESIGHT_MODE=$FORESIGHT_MODE" "FORESIGHT_MAX_MINUTES=$FORESIGHT_MAX_MINUTES" \
-  "FORESIGHT_AUTO_STOP=$FORESIGHT_AUTO_STOP" "NO_STOP=${NO_STOP:-0}"
+  "FORESIGHT_AUTO_STOP=$FORESIGHT_AUTO_STOP" "NO_STOP=${NO_STOP:-0}" \
+  "FORESIGHT_SKIP_GITHUB_LOGIN=$FORESIGHT_SKIP_GITHUB_LOGIN"
 tmux new-session -d -s foresight-h "$FORESIGHT_WORKER"
 exec 8>&-
 rm -- "$FORESIGHT_ENTRY_LOCK/pid"

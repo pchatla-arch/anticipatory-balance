@@ -51,7 +51,8 @@ cp -- "$MOCK_ENTRY" "$output"
 ''')
         curl.chmod(0o755)
         self.env = {k:v for k,v in os.environ.items()
-                    if not k.startswith('FORESIGHT_') and k != 'NO_STOP'}
+                    if not k.startswith('FORESIGHT_')
+                    and k not in ('NO_STOP', 'GH_TOKEN', 'GITHUB_TOKEN', 'GH_HOST')}
         self.env.update(PATH=str(self.bin) + os.pathsep + os.environ['PATH'],
                         MOCK_ENTRY=str(self.download), MOCK_CURL_ARGS=str(self.calls))
 
@@ -166,6 +167,7 @@ print(json.dumps({'args':sys.argv[1:], 'no_stop':os.environ.get('NO_STOP'),
                                      {'FORESIGHT_SETUP_ROOT': str(self.root),
                                       'FORESIGHT_REPO': str(repo),
                                       'FORESIGHT_MODE': mode, 'NO_STOP': '1',
+                                      'FORESIGHT_SKIP_GITHUB_LOGIN': '1',
                                       'FORESIGHT_AUTO_STOP': '1'}, script='start_session_h_pod.sh')
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 data = json.loads(result.stdout.splitlines()[-1])
@@ -181,7 +183,7 @@ print(json.dumps({'args':sys.argv[1:], 'no_stop':os.environ.get('NO_STOP'),
             self.assertNotIn('NVIDIA', result.stderr)
             self.assertFalse(self.calls.exists())
 
-    def test_push_permission_is_required_before_worker_start_unless_explicitly_skipped(self):
+    def make_auth_fixture(self):
         repo = self.root / 'permission repo'
         (repo / '.git').mkdir(parents=True)
         (repo / 'scripts').mkdir()
@@ -203,8 +205,26 @@ esac
 printf '%s\\n' "$*" >> "$MOCK_GH_CALLS"
 if [[ "$1" == api ]]; then
   printf 'mock API stderr must stay private\\n' >&2
-  printf '%s\\n' "$MOCK_CAN_PUSH"
-  exit "$MOCK_API_EXIT"
+  [[ "$2" == --hostname && "$3" == github.com ]] || exit 90
+  case "$4" in
+    user)
+      if [[ -f "$MOCK_SWITCHED" ]]; then
+        printf '%s\\n' "$MOCK_LOGIN_AFTER_SWITCH"
+      else
+        printf '%s\\n' "$MOCK_LOGIN"
+      fi
+      exit "$MOCK_USER_API_EXIT"
+      ;;
+    repos/pchatla-arch/anticipatory-balance)
+      printf '%s\\n' "$MOCK_CAN_PUSH"
+      exit "$MOCK_API_EXIT"
+      ;;
+    *) exit 91 ;;
+  esac
+fi
+if [[ "$1 $2" == 'auth switch' ]]; then
+  if [[ "$MOCK_SWITCH_EXIT" == 0 ]]; then touch "$MOCK_SWITCHED"; fi
+  exit "$MOCK_SWITCH_EXIT"
 fi
 exit 0
 ''',
@@ -218,31 +238,109 @@ exit 2
             target = self.bin / name
             target.write_text(content)
             target.chmod(0o755)
-        started = self.root / 'worker_started.txt'
-        gh_calls = self.root / 'gh_calls.txt'
+        self.started = self.root / 'worker_started.txt'
+        self.gh_calls = self.root / 'gh_calls.txt'
+        self.switched = self.root / 'account_switched.txt'
+        self.env.update({
+            'FORESIGHT_SETUP_ROOT': str(self.root), 'FORESIGHT_REPO': str(repo),
+            'FORESIGHT_SKIP_GITHUB_LOGIN': '0', 'NO_STOP': '1',
+            'MOCK_CAN_PUSH': 'true', 'MOCK_API_EXIT': '0', 'MOCK_USER_API_EXIT': '0',
+            'MOCK_LOGIN': 'pchatla-arch', 'MOCK_LOGIN_AFTER_SWITCH': 'pchatla-arch',
+            'MOCK_SWITCH_EXIT': '0', 'MOCK_SWITCHED': str(self.switched),
+            'MOCK_GH_CALLS': str(self.gh_calls), 'MOCK_WORKER_STARTED': str(self.started),
+        })
+        return repo
+
+    def reset_auth_calls(self):
+        for path in (self.started, self.gh_calls, self.switched):
+            path.unlink(missing_ok=True)
+
+    def test_push_permission_is_required_before_worker_start_unless_explicitly_skipped(self):
+        self.make_auth_fixture()
         cases = (('true', '0', '0', True), ('false', '0', '0', False),
                  ('true', '7', '0', False), ('false', '7', '1', True))
         for permission, api_exit, skip, expected_start in cases:
             with self.subTest(permission=permission, api_exit=api_exit, skip=skip):
-                started.unlink(missing_ok=True)
-                gh_calls.unlink(missing_ok=True)
+                self.reset_auth_calls()
                 result = self.invoke(env={
-                    'FORESIGHT_SETUP_ROOT': str(self.root), 'FORESIGHT_REPO': str(repo),
-                    'FORESIGHT_SKIP_GITHUB_LOGIN': skip, 'NO_STOP': '1',
+                    'FORESIGHT_SKIP_GITHUB_LOGIN': skip,
                     'MOCK_CAN_PUSH': permission, 'MOCK_API_EXIT': api_exit,
-                    'MOCK_GH_CALLS': str(gh_calls), 'MOCK_WORKER_STARTED': str(started),
                 }, script='start_session_h_pod.sh')
-                self.assertEqual(started.exists(), expected_start, result.stdout + result.stderr)
+                self.assertEqual(self.started.exists(), expected_start, result.stdout + result.stderr)
                 self.assertEqual(result.returncode == 0, expected_start)
                 self.assertNotIn('mock API stderr', result.stdout + result.stderr)
                 if skip == '0':
-                    self.assertIn('api repos/pchatla-arch/anticipatory-balance --jq .permissions.push',
-                                  gh_calls.read_text())
+                    calls = self.gh_calls.read_text()
+                    self.assertIn('api --hostname github.com user --jq .login', calls)
+                    self.assertIn('api --hostname github.com repos/pchatla-arch/anticipatory-balance --jq .permissions.push',
+                                  calls)
                 else:
-                    self.assertFalse(gh_calls.exists())
+                    self.assertFalse(self.gh_calls.exists())
+                    self.assertIn('FORESIGHT_SKIP_GITHUB_LOGIN=1', self.started.read_text())
                 if not expected_start:
                     self.assertIn('No experiment has started', result.stderr)
                     self.assertIn('RunPod dashboard', result.stderr)
+
+    def test_wrong_stored_account_switch_must_produce_expected_identity(self):
+        self.make_auth_fixture()
+        cases = (('0', 'pchatla-arch', True), ('1', 'pchatla-arch', False),
+                 ('0', 'other-account', False))
+        for switch_exit, switched_login, expected_start in cases:
+            with self.subTest(switch_exit=switch_exit, switched_login=switched_login):
+                self.reset_auth_calls()
+                result = self.invoke(env={
+                    'MOCK_LOGIN': 'other-account', 'MOCK_SWITCH_EXIT': switch_exit,
+                    'MOCK_LOGIN_AFTER_SWITCH': switched_login,
+                }, script='start_session_h_pod.sh')
+                self.assertEqual(self.started.exists(), expected_start, result.stdout + result.stderr)
+                self.assertEqual(result.returncode == 0, expected_start)
+                calls = self.gh_calls.read_text()
+                self.assertIn('auth switch --hostname github.com --user pchatla-arch', calls)
+                if expected_start:
+                    self.assertGreaterEqual(calls.count('api --hostname github.com user --jq .login'), 2)
+                else:
+                    self.assertNotIn('auth setup-git', calls)
+                    self.assertNotIn('repos/pchatla-arch/anticipatory-balance', calls)
+
+    def test_wrong_environment_token_identity_cannot_be_fixed_by_switching_stored_account(self):
+        self.make_auth_fixture()
+        for name in ('GH_TOKEN', 'GITHUB_TOKEN'):
+            with self.subTest(name=name):
+                self.reset_auth_calls()
+                result = self.invoke(env={
+                    'MOCK_LOGIN': 'other-account',
+                    name: 'dummy-test-value',
+                }, script='start_session_h_pod.sh')
+                self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertFalse(self.started.exists())
+                self.assertNotIn('auth switch', self.gh_calls.read_text())
+                self.assertNotIn('auth login', self.gh_calls.read_text())
+                self.assertNotIn('dummy-test-value', result.stdout + result.stderr)
+
+    def test_worker_rechecks_identity_and_permission_before_python_setup(self):
+        repo = self.make_auth_fixture()
+        python_started = self.root / 'python_started.txt'
+        (repo / 'scripts/session_h_pod.py').write_text(
+            'import os\nfrom pathlib import Path\n'
+            'Path(os.environ["MOCK_PYTHON_STARTED"]).touch()\n'
+        )
+        cases = (('pchatla-arch', 'true', True), ('other-account', 'true', False),
+                 ('pchatla-arch', 'false', False))
+        for login, permission, expected_start in cases:
+            with self.subTest(login=login, permission=permission):
+                self.reset_auth_calls()
+                python_started.unlink(missing_ok=True)
+                result = self.invoke(['--worker'], env={
+                    'MOCK_LOGIN': login, 'MOCK_CAN_PUSH': permission,
+                    'MOCK_PYTHON_STARTED': str(python_started),
+                }, script='start_session_h_pod.sh')
+                self.assertEqual(python_started.exists(), expected_start, result.stdout + result.stderr)
+                self.assertEqual(result.returncode == 0, expected_start)
+                calls = self.gh_calls.read_text()
+                self.assertIn('api --hostname github.com user --jq .login', calls)
+                self.assertNotIn('auth switch', calls)
+                self.assertNotIn('auth login', calls)
+                self.assertNotIn('mock API stderr', result.stdout + result.stderr)
 
 
 class SessionTests(unittest.TestCase):
