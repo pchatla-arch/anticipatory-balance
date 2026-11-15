@@ -188,9 +188,10 @@ false-preparation rate on near-misses, one panel per latency; lower-left is bett
 | Session D (done) | E8 measured depth detector (94.5% detection, 3 cm noise, 90° FOV); E11 frontier at 25 and 50 Hz: more sensing did **not** help; E9 calibration: the belief resolves 0.46 s before contact, so the rule, not the belief, was at fault |
 | Diagnosis and fix | the rule re-checked its start condition (incl. t_hit > τ_brace) to decide whether to *stay* braced and released BRACE 0.22 s before contact once the commitment expired; BRACE is now held until the object passes (`foresight/decision/rules.py`) |
 | Session E (done) | E15 corrected-rule frontier: reactive 0.69 → threshold 0.30–0.31, belief 0.30–0.34 at zero latency (below the 0.5 s oracle's 0.36); E12 ladder: sensing rate/noise account for <10% of the remaining gap; E13: old release logic reproduces the defect, point mass prior costs 0.05, commitment window irrelevant; E14 object-aware PPO 0.41–0.44 with 35% more progress |
-| Paper | `paper/foresight.tex` (6 pages, two-column), built from the committed results |
-| Then | lead-conditioned response model (the belief rule abstains under latency because it values late braces at zero), seeds, reproducibility check from a clean clone, submission Dec 4 |
-| Compute | ~8 GPU-h used |
+| Session F (done) | lead-conditioned response model; E16 `belief_lead` and `belief_voi` (one-step lookahead with an observation branch): recover a third of the latency gap, match the threshold at 10 Hz/100 ms; E17 closed loop from rendered depth: equal failure, half the false preparations, 46 ms per frame of 256 robots |
+| Paper | `paper/foresight.tex` (7 pages, two-column), built from the committed results |
+| Then | seeds for both skills (Session G), belief-PPO gate (optional), reproducibility check from a clean clone, submission Dec 4 |
+| Compute | ~9.5 GPU-h used |
 
 Results are committed as small files under `results/<run>/` (`save_run.py`: eval curves, configs,
 console logs, `summary.json`); the final checkpoints are committed under `checkpoints/<tag>/`.
