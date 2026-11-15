@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "tests_run": 14,
+  "skipped": 0,
+  "elapsed_seconds": 0.81,
+  "scope": "Focused recheck after correcting finalizer reference and adding pre-experiment GitHub push permission check; network/GPU calls mocked."
+}

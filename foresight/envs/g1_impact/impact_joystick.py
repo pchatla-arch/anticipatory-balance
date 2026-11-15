@@ -284,16 +284,16 @@ class ImpactJoystick(JoystickRobotSliced):
   def _aware_init(self) -> dict:
     d = self._det_mod.init_state(self._det_cfg)
     return {"det_buf_pos": d.buf_pos, "det_buf_pelvis": d.buf_pelvis, "det_buf_fwd": d.buf_fwd,
-            "det_step": d.step, "det_buf_launched": d.buf_launched,
-            "det_last_rel": jp.zeros(3), "det_last_step": jp.int32(-100000),
+            "det_buf_launched": d.buf_launched,
+            "det_step": d.step, "det_last_rel": jp.zeros(3), "det_last_step": jp.int32(-100000),
             "obj_obs": jp.zeros(AWARE_OBS)}
 
   def _aware_update(self, info: dict, data: mjx.Data) -> dict:
     """Run the detector on the true state; keep the latest delivered detection in the
     robot's heading frame, with its age. Same model as the decision layer's detector."""
     D = self._det_mod
-    st = D.DetectorState(info["det_buf_pos"], info["det_buf_pelvis"], info["det_buf_fwd"], info["det_step"],
-                         info["det_buf_launched"])
+    st = D.DetectorState(info["det_buf_pos"], info["det_buf_pelvis"], info["det_buf_fwd"],
+                         info["det_step"], info["det_buf_launched"])
     pelvis = self._pelvis_pos(data)
     fwd = data.xmat[self._pelvis_body].reshape(3, 3)[:, 0]
     info["rng"], k = jax.random.split(info["rng"])
@@ -307,8 +307,8 @@ class ImpactJoystick(JoystickRobotSliced):
     age = (st.step - last_step).astype(jp.float32) * self.dt
     valid = (age < self._config.aware.stale_s)
     info.update({"det_buf_pos": st.buf_pos, "det_buf_pelvis": st.buf_pelvis, "det_buf_fwd": st.buf_fwd,
-                 "det_step": st.step, "det_buf_launched": st.buf_launched,
-                 "det_last_rel": last_rel, "det_last_step": last_step,
+                 "det_buf_launched": st.buf_launched,
+                 "det_step": st.step, "det_last_rel": last_rel, "det_last_step": last_step,
                  "obj_obs": jp.where(valid, jp.concatenate([jp.ones(1), last_rel, age[None]]), jp.zeros(AWARE_OBS))})
     return info
 

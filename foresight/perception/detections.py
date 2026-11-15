@@ -1,8 +1,8 @@
 # Copyright 2026 Prasuna Chatla. Apache-2.0.
 """Parametric object detections from the simulator's privileged object state.
 
-A detection is a world-frame 3-D position of the object captured `latency` control steps
-ago, delivered every `period` steps, with range-dependent Gaussian noise, a field-of-view
+A detection is a world-frame 3-D position of the object captured on the grid
+`capture_step % period == 0`, delivered `latency` steps later, with range-dependent Gaussian noise, a field-of-view
 gate around the pelvis heading, and a random miss probability. The robot's own pose is
 assumed known (it is on the robot). This is the observation model the particle filter
 consumes; the rendered-depth pipeline (E7/E8) replaces the noise/dropout numbers, not
@@ -34,7 +34,7 @@ class DetectorState(NamedTuple):
   buf_pelvis: jax.Array      # (buffer_len, 3)
   buf_fwd: jax.Array         # (buffer_len, 3)
   step: jax.Array            # int32 control step
-  buf_launched: jax.Array    # (buffer_len,) whether the object was in flight at capture
+  buf_launched: jax.Array    # (buffer_len,) validity at capture, never delivery time
 
 
 class Detection(NamedTuple):
@@ -45,6 +45,12 @@ class Detection(NamedTuple):
 
 
 def init_state(cfg: DetectorConfig) -> DetectorState:
+  if cfg.period <= 0 or cfg.latency < 0 or cfg.buffer_len <= cfg.latency:
+    raise ValueError("detector requires period>0, latency>=0 and buffer_len>latency")
+  if not 0.0 <= cfg.miss_prob <= 1.0:
+    raise ValueError("miss_prob must lie in [0, 1]")
+  if cfg.sigma0 < 0 or cfg.sigma1 < 0 or cfg.max_range <= 0:
+    raise ValueError("noise coefficients must be nonnegative and max_range positive")
   z = jp.zeros((cfg.buffer_len, 3))
   return DetectorState(z, z, z, jp.int32(0), jp.zeros((cfg.buffer_len,), bool))
 
@@ -63,17 +69,14 @@ def step(cfg: DetectorConfig, st: DetectorState, obj_pos, pelvis_pos, pelvis_fwd
   cap = st.step - cfg.latency
   j = cap % L
   p, pel, fwd = st.buf_pos[j], st.buf_pelvis[j], st.buf_fwd[j]
-  # Validity is judged at capture time: an object not yet in flight when the frame was
-  # taken is not reported, however the delivery-time flag reads.
-  launched = st.buf_launched[j]
   rel = p - pel
   rng_dist = jp.linalg.norm(rel[:2]) + 1e-6
   heading = fwd[:2] / (jp.linalg.norm(fwd[:2]) + 1e-6)
   cos_ang = jp.dot(rel[:2] / rng_dist, heading)
   in_fov = cos_ang > jp.cos(jp.deg2rad(cfg.fov_deg / 2))
   k_miss, k_noise = jax.random.split(rng)
-  due = (st.step % cfg.period == 0) & (cap >= 0)
-  valid = due & launched & in_fov & (rng_dist < cfg.max_range) & \
+  due = (cap % cfg.period == 0) & (cap >= 0)
+  valid = due & st.buf_launched[j] & in_fov & (rng_dist < cfg.max_range) & \
       (jax.random.uniform(k_miss) >= cfg.miss_prob)
   sigma = cfg.sigma0 + cfg.sigma1 * rng_dist
   noisy = p + sigma * jax.random.normal(k_noise, (3,))

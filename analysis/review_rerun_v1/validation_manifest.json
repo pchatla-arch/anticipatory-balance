@@ -1,0 +1,51 @@
+{
+  "base_source_commit": "cc17b7b1066a5694a4c9e8c5e4dddf0a8f5ecdcf",
+  "scope": "CPU protocol, runtime and operational validation; GPU experiment outcomes pending pod execution.",
+  "combined_cpu_suite": {
+    "tests": 136,
+    "passed": true,
+    "skipped": 0
+  },
+  "final_launcher_recheck": {
+    "tests": 14,
+    "passed": true,
+    "skipped": 0
+  },
+  "source_sha256": {
+    "foresight/belief/particle_filter.py": "fff81392a0d1cef86fe198b4dcaaa513fe3f0d6c60e83e2f2cedd046f53bc98e",
+    "foresight/decision/controller.py": "e11d280749828aa32930429c25ac9eef8c014bc49a995a69ced8f87586050bb2",
+    "foresight/decision/rules.py": "0176dcfefa58100fc577b755d35483e25e8dc5e63e353efd860a2d07fc301519",
+    "foresight/decision/contracts.py": "04fd49ab0754f335a9020f5830d7233cafc89f9eb4b024db8c0d08db5e675226",
+    "foresight/envs/g1_impact/impact_joystick.py": "aae1da0c402aca99817df11d5a777d54e59c016ab7789c05f153f94ad515210b",
+    "foresight/eval/rollout.py": "70a248d00f8f7cf084ceb47b7a828b8f4a7e929d53e82846290f1cee85b4dd68",
+    "foresight/eval/statistics.py": "776f0706ed6fa977cf7937babd83a5a0b40bf5ab17fe6a87fd0ced1c7234fdd6",
+    "foresight/perception/detections.py": "0fa6f2f359e1137a29b45e8db20489c7dc20a15ba16a55c3ecad851e19d96b1f",
+    "foresight/perception/depth_geometry.py": "6a230898f71e25eb13ee77462003174a90fbf2b7ed6b33d54a762fbd4b5f511f",
+    "scripts/eval_oracle_brace.py": "aeb058115351f4ea725cd1398087cc727a2b00ec5e5afb00ba47d3c2b5a2bc8b",
+    "scripts/eval_decision_frontier.py": "81b7342fc9ea04931547acf4294a22115bbbe1eceff3a69aceff7b405db061dd",
+    "scripts/eval_depth_closed_loop.py": "045d0ac4d10cdd4aec8c1a2ed9b0525267e71f50ebb3cd57160e816fe7b0a835",
+    "scripts/fit_review_response.py": "fe175843abe3cd4a49eb9e586d6e4567a095636dfd06394f718e1b0ef8aeb1a1",
+    "scripts/review_plan.py": "d67e6e5ebd59305d6660c2e509ff46fe4e334a492df6811c065c73a5b779b7b6",
+    "scripts/run_review_experiments.py": "f9b15ad2aad91fc4e637796b630dbc4641c363af8fd76b7f76c5eaa377134147",
+    "scripts/run_review_tests.py": "c7a0ac13eec2060d37c95e41763bd3c53b203648111458a7e6b273266ba35bb5",
+    "scripts/preflight_review.py": "3f8d55643ad911fe448fd2447e5b584a68cde41139df6dc65a5f587d171b8ba1",
+    "scripts/review_pod_session.py": "7a4404379511ec694ab153409b1d0854fdbe2bbecca7aabe85a3431cb49e9462",
+    "scripts/start_review_pod.sh": "76984058317269b87df288c7ff2578425159da27580928ad230f2c44db4c5e86",
+    "scripts/start_review.sh": "810090f0c6703d34f6d74a1592f524c349d60d15831b5521ac00f0df480c534a",
+    "scripts/bootstrap_fresh_pod.sh": "80c7f476159c8598a198389879b2136eeeeb150abea058ebe312d992bb5aeecf",
+    "scripts/publish_experiment_results.py": "767ffd7367fbe72e7ac00671c94381c57040edf88c729a32c04696c21ebe1e96",
+    "scripts/finish_pod_session.py": "390b2602065892f9d4f8c5ef0730f24fb6a3c183ebfe6da91e8f9215ec8f56cc",
+    "scripts/validate_review_stage.py": "baf4e19cf6ab4cd7a2a0817505dd7b5d659b0d1aedd78e9667c6a049b3a1db94",
+    "scripts/summarize_review_run.py": "b086d923ae480fc2700d4a2d70dace4785472f10e83e076a12223bba153bee79",
+    "tests/test_review_belief_rules.py": "2aff692d1b7084415b8c04969f58954450a278521d5bd2c7482c8e15ef15a54c",
+    "tests/test_review_depth_sensor.py": "586db24ce2d2cf3865b55e08d053883466cbe8960d1d2631fed41d5170e0ab3c",
+    "tests/test_review_evaluation.py": "153d677c2b7d50df296a4b22fe767d22bfb9838c06a14aca6744f72315a58112",
+    "tests/test_review_launchers.py": "694f20b0cc7c66c4546b32d1c196e03a74ea31cf6fb0b676eda95860309491cd",
+    "tests/test_review_publication.py": "bd19d7be16c853ee1513247cbf405708acf9a0616fa64dbe82208646ac31dbf9",
+    "tests/test_review_reporting.py": "955b33e7e33f4ce4fe3a32a355775a9ec27b39bff9676baa05901767ed150ba6",
+    "tests/test_review_response.py": "9a5582cc39a19742024382e1b829cb02f6ff8c9b6e673bf3d2b641313db149b1",
+    "tests/test_review_runner.py": "6970df36cae6ab284040c0c571c08eea928bffa2c65e90628645120eb36d3853",
+    "tests/test_experiment_publisher.py": "8aa7d39b8b9c9b7666ca2dffbdef670a859f95b4a8c2841b8f8eb7bd6094a204",
+    "tests/test_finish_pod_session.py": "879f4cd7ce9ce0764c5e6031405a9f798cd482252abc0bfc5b35a840366a8ff0"
+  }
+}

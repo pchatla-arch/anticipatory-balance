@@ -1,0 +1,73 @@
+{
+  "status": "passed",
+  "kind": "real CPU integration only, not GPU experiment evidence",
+  "elapsed_seconds": 39.5369843840017,
+  "devices": [
+    "cpu:0"
+  ],
+  "trajectory_shapes": {
+    "pre_pelvis_pos": [
+      3,
+      2,
+      3
+    ],
+    "pre_feet_contact": [
+      3,
+      2,
+      2
+    ],
+    "pre_pelvis_vel": [
+      3,
+      2,
+      3
+    ],
+    "brace_active": [
+      3,
+      2
+    ]
+  },
+  "brace_steps": [
+    2,
+    0
+  ],
+  "brace_onsets": [
+    1,
+    -1
+  ],
+  "summary": {
+    "n_total": 2,
+    "n_hits": 1,
+    "n_misses": 1,
+    "n_contact_hits": 0,
+    "n_falls_hits": 0,
+    "n_falls_contact_hits": 0,
+    "n_false_prep_miss": 0,
+    "n_braced_hits": 1,
+    "n_falls_miss": 0,
+    "n_censored_hits": 0,
+    "n_censored": 0,
+    "fall_rate_hits": 0.0,
+    "fall_rate_given_contact": null,
+    "contact_rate_hits": 0.0,
+    "false_prep_rate": 0.0,
+    "braced_on_hits": 1.0,
+    "fall_rate_miss": 0.0,
+    "censored_rate": 0.0,
+    "braced_s": 0.02,
+    "progress_m": 0.0021026512840762734
+  },
+  "base_source_commit": "cc17b7b1066a5694a4c9e8c5e4dddf0a8f5ecdcf",
+  "jax": "0.12.0.1",
+  "jaxlib": "0.12.0.1",
+  "brax": "0.14.2",
+  "mujoco": "3.16.0",
+  "mujoco_mjx": "3.16.0",
+  "playground_commit": "9de993826d1a486f18aec4e8d3179e93ff64ed41",
+  "menagerie_commit": "1b86ece576591213e2b666ebf59508454200ca97",
+  "checkpoint_labels": [
+    "nominal_s1",
+    "brace2_s1"
+  ],
+  "implementation": "jax",
+  "interpretation": "Short CPU shape/runtime integration only; no contact, GPU/Warp, or scientific performance validation."
+}

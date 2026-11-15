@@ -1,18 +1,18 @@
 # Copyright 2026 Prasuna Chatla. Apache-2.0.
-"""E17: the decision layer closed over rendered depth.
+"""Reviewed online depth experiment with explicit timing and paired evidence.
 
-Every detection period the head camera is rendered for all environments (MJX-Warp batch
-ray-tracer), the geometric depth detector of E8 (in JAX) turns each frame into a world-frame
-detection or nothing, the belief absorbs it, and the rule decides. The parametric detector
-with the same field of view runs on the same paired scenarios for comparison, so the only
-difference between the two columns is where the detections come from.
-
-A Python loop (not lax.scan) so the renderer can be called between steps, as in E7/E8.
-
-  python scripts/eval_depth_closed_loop.py --impl warp --episodes 256 --batches 2 --out results/E17_depth_closed_loop
+Sources are deliberately distinguished:
+  depth: image-derived centre/validity, with no launch metadata in its observations;
+  parametric: delayed privileged centre, pelvis-cone visibility and IID dropout;
+  parametric_matched: privileged noisy centre using the actual image-validity mask.
+The last is a diagnostic comparator, not a deployable sensor. The renderer's wall
+clock cost is reported separately and does not advance simulated observation age.
 """
+from __future__ import annotations
+
+import csv
 import json
-import os
+from pathlib import Path
 import time
 
 import jax
@@ -25,84 +25,181 @@ from foresight.belief import particle_filter as PF
 from foresight.decision import rules as RU
 from foresight.decision.controller import AnticipationController
 from foresight.eval import rollout as R
+from foresight.eval import statistics as ST
 from foresight.perception import detections as D
+from foresight.perception import depth_geometry as DG
 
-_NOM = flags.DEFINE_string("nominal", "checkpoints/nominal_s1", "walker")
-_BR = flags.DEFINE_string("brace", "checkpoints/brace2_s1", "BRACE skill")
-_RM = flags.DEFINE_string("response_model", "results/response_model.json", "response model")
-_IMPL = flags.DEFINE_string("impl", "warp", "warp")
+_NOM = flags.DEFINE_string("nominal", "checkpoints/nominal_s1", "walker checkpoint")
+_BR = flags.DEFINE_string("brace", "checkpoints/brace2_s1", "BRACE checkpoint")
+_RM = flags.DEFINE_string("response_model", "results/response_model.json", "frozen response model")
+_IMPL = flags.DEFINE_string("impl", "warp", "MuJoCo backend")
 _N = flags.DEFINE_integer("episodes", 256, "environments per batch")
-_BATCHES = flags.DEFINE_integer("batches", 2, "batches")
-_STEPS = flags.DEFINE_integer("steps", 300, "control steps")
-_PERIOD = flags.DEFINE_integer("period", 5, "detection period, control steps")
-_EXTRA_LAT = flags.DEFINE_integer("extra_latency", 0, "control steps added to the rendered detection's age")
-_RES = flags.DEFINE_integer("res", 96, "image size")
-_AZ = flags.DEFINE_float("azimuth_deg", 40.0, "launch azimuth half-range (inside the 90-deg camera)")
-_MISS = flags.DEFINE_float("miss_fraction", 0.3, "near-miss fraction")
-_VX = flags.DEFINE_float("command_vx", 0.5, "forward command")
-_SIG = flags.DEFINE_float("det_sigma", 0.03, "noise std assumed for a depth detection (E8: 0.03 m)")
-_RAD = flags.DEFINE_float("object_radius", 0.15, "m")
-_METHODS = flags.DEFINE_list("methods", ["ttc_threshold:0.3", "belief_lead:0.05", "belief_wait:0.05", "belief_voi:0.05"],
-                             "kind:param")
-_OUT = flags.DEFINE_string("out", "results/E17_depth_closed_loop", "output dir")
-_SEED = flags.DEFINE_integer("seed", 300, "seed")
-_SOURCES = flags.DEFINE_list("sources", ["parametric", "depth"], "detection sources to run")
+_BATCHES = flags.DEFINE_integer("batches", 2, "independent scenario batches")
+_STEPS = flags.DEFINE_integer("steps", 360, "20 ms control steps; full test includes recovery")
+_PERIOD = flags.DEFINE_integer("period", 5, "capture period in control steps")
+_EXTRA_LAT = flags.DEFINE_integer("extra_latency", 0, "capture-to-delivery delay in control steps")
+_RES = flags.DEFINE_integer("res", 96, "square image resolution")
+_AZ = flags.DEFINE_float("azimuth_deg", 40.0, "launch half-angle; does not guarantee perpetual visibility")
+_MISS = flags.DEFINE_float("miss_fraction", 0.3, "scheduled near-miss probability")
+_VX = flags.DEFINE_float("command_vx", 0.5, "nominal forward command")
+_SIG = flags.DEFINE_float("det_sigma", 0.03, "fixed assumed likelihood SD; measured errors saved separately")
+_RAD = flags.DEFINE_float("object_radius", 0.15, "known sphere radius, metres")
+_PARAM_MISS = flags.DEFINE_float("parametric_miss_prob", 0.055, "IID dropout only for parametric source")
+_IMAGE_MISS = flags.DEFINE_float("image_miss_prob", 0.0, "optional shared IID dropout for depth/matched sources")
+_METHODS = flags.DEFINE_list("methods", ["ttc_threshold:0.3", "belief_lead:0.1", "belief_wait:0.1", "belief_voi:0.1"], "kind:param")
+_SOURCES = flags.DEFINE_list("sources", ["depth", "parametric", "parametric_matched"], "named observation sources")
+_OUT = flags.DEFINE_string("out", "results/review_depth", "new output directory")
+_SEED = flags.DEFINE_integer("seed", 10001, "fresh scenario seed; +batch")
+_PHASE = flags.DEFINE_enum("phase", "test", ["smoke", "development", "test"], "evidence phase")
+_RELEASE = flags.DEFINE_enum("release_mode", "deadline", ["deadline", "legacy"], "retention contract")
+_HOLD = flags.DEFINE_float("hold", 0.5, "hold after locked predicted arrival")
+_COMMIT = flags.DEFINE_integer("commit_steps", 15, "minimum BRACE duration")
+_MAX_HOLD = flags.DEFINE_float("max_hold_s", 4.0, "absolute maximum brace duration")
+_SINGLE = flags.DEFINE_bool("single_commit", True, "at most one preparation per single-object episode")
+_TRACE = flags.DEFINE_integer("trace_episodes", 8, "first N scenarios per batch with full timing traces")
+_ALLOW_LEGACY = flags.DEFINE_bool("allow_legacy_response", False, "explicitly allow a historical, unmatched response file for diagnostics")
+
+PARK_POSITION = (1000.0, 1000.0, 100.0)
+SENSOR_DESCRIPTIONS = {
+    "depth": "actual image geometric validity and surface-median centre; known radius; no launch gate",
+    "parametric": "capture-time launch validity, pelvis horizontal cone, true centre plus Gaussian noise and IID dropout",
+    "parametric_matched": "privileged diagnostic: actual image validity, true centre plus Gaussian noise; shared image dropout",
+}
 
 
-def pixel_dirs(res, fovy_deg):
-  t = np.tan(np.deg2rad(fovy_deg) / 2)
-  u = (np.arange(res) + 0.5) / res * 2 - 1
-  v = 1 - (np.arange(res) + 0.5) / res * 2
-  X, Y = np.meshgrid(u * t, v * t)
-  return jp.asarray(np.stack([X, Y, -np.ones_like(X)], axis=-1), dtype=jp.float32)   # z-depth convention (E8)
+def make_detector(res, fovy, radius):
+  dirs = jp.asarray(DG.pixel_directions(res, fovy))
+  fn = lambda depth, pos, mat, pelvis: DG.detect_centre(depth, pos, mat, pelvis, dirs, radius, xp=jp)
+  return jax.jit(jax.vmap(fn))
 
 
-def make_detector(dirs, radius, max_range=6.0):
-  def one(depth, cam_pos, cam_mat, pelvis):
-    valid = jp.isfinite(depth) & (depth > 0.05) & (depth < 50.0)
-    P = cam_pos + (dirs * jp.where(valid, depth, 1.0)[..., None]) @ cam_mat.T
-    rxy = jp.linalg.norm(P[..., :2] - pelvis[:2], axis=-1)
-    cand = valid & (P[..., 2] > 0.3) & (P[..., 2] < 2.0) & (rxy > 0.6) & (rxy < max_range)
-    n = jp.sum(cand)
-    # Median of the candidate points per axis (as calibrated in E8), ignoring non-candidates.
-    Pm = jp.where(cand[..., None], P, jp.nan).reshape(-1, 3)
-    surf = jp.nanmedian(Pm, axis=0)
-    surf = jp.where(jp.isnan(surf), 0.0, surf)
-    view = surf - cam_pos
-    centre = surf + radius * view / (jp.linalg.norm(view) + 1e-9)
-    return n >= 3, centre
-  return jax.jit(jax.vmap(one))
+def method_config(kind, param):
+  common = dict(kind=kind, release_mode=_RELEASE.value, hold=_HOLD.value,
+                commit_steps=_COMMIT.value, max_hold_s=_MAX_HOLD.value,
+                single_commit=_SINGLE.value, horizon_steps=_STEPS.value,
+                wait_steps=_PERIOD.value)
+  if kind == "ttc_threshold":
+    common["theta"] = param
+  elif kind in ("belief_commit", "belief_lead", "belief_wait", "belief_voi"):
+    common["c_prep"] = param
+  else:
+    raise ValueError("Unsupported depth controller: " + kind)
+  return RU.RuleConfig(**common)
+
+
+def parse_methods():
+  parsed = []
+  for spec in _METHODS.value:
+    kind, value = spec.split(":", 1)
+    value = float(value)
+    if not np.isfinite(value) or value < 0:
+      raise ValueError("Method parameter must be finite and nonnegative")
+    method_config(kind, value)
+    parsed.append((kind, value))
+  if not parsed or len(set(parsed)) != len(parsed):
+    raise ValueError("Need nonempty unique methods")
+  return parsed
+
+
+def _slug(source, method, param, batch):
+  p = format(param, ".9g").replace(".", "p").replace("-", "m")
+  return f"{source}_{method}_p{p}_batch{batch:03d}"
+
+
+def _extra_columns(tab, source, kind, param, batch, seed, n):
+  return {**tab, "scenario_id": np.array([f"seed{seed}_env{i:05d}" for i in range(n)]),
+          "source": np.full(n, source), "method": np.full(n, kind),
+          "param": np.full(n, param), "batch": np.full(n, batch), "scenario_seed": np.full(n, seed),
+          "scenario_index": np.arange(n, dtype=int)}
+
+
+def _log_value(logs, name, idx):
+  if name not in logs:
+    return ""
+  a = np.asarray(logs[name])
+  return ST.json_safe(a[idx] if a.ndim else a)
+
+
+def _write_csv_rows(path, rows):
+  if not rows:
+    return
+  names = list(dict.fromkeys(k for row in rows for k in row))
+  with Path(path).open("w", newline="") as stream:
+    writer = csv.DictWriter(stream, fieldnames=names)
+    writer.writeheader()
+    writer.writerows(rows)
 
 
 def main(_):
-  os.makedirs(_OUT.value, exist_ok=True)
-  rmj = json.load(open(_RM.value))
+  if min(_N.value, _BATCHES.value, _STEPS.value, _PERIOD.value) <= 0 or _EXTRA_LAT.value < 0:
+    raise ValueError("Positive episode/batch/step/period sizes and nonnegative latency required")
+  if not 0 <= _MISS.value <= 1 or not 0 <= _PARAM_MISS.value <= 1 or not 0 <= _IMAGE_MISS.value <= 1:
+    raise ValueError("Miss probabilities must lie in [0,1]")
+  if _SIG.value <= 0 or _RAD.value <= 0 or _TRACE.value < 0:
+    raise ValueError("Positive noise/radius and nonnegative trace size required")
+  sources = list(_SOURCES.value)
+  if not sources or len(set(sources)) != len(sources) or any(s not in SENSOR_DESCRIPTIONS for s in sources):
+    raise ValueError("Sources must be unique members of depth,parametric,parametric_matched")
+  methods = parse_methods()
+  outdir = Path(_OUT.value)
+  if (outdir / "config.json").exists() or (outdir / "summary.json").exists():
+    raise FileExistsError("Choose a fresh output directory; existing runs are never reused implicitly")
+  outdir.mkdir(parents=True, exist_ok=True)
+  (outdir / "episodes").mkdir(); (outdir / "traces").mkdir()
+  rmj = json.loads(Path(_RM.value).read_text())
+  response_validation = ST.validate_response_protocol(rmj, {
+      "timing_reference": "reference_entry", "reference_radius": 0.45,
+      "hold_s": _HOLD.value, "commit_steps": _COMMIT.value,
+      "max_hold_s": _MAX_HOLD.value, "release_mode": _RELEASE.value,
+      "single_commit": _SINGLE.value, "dt": 0.02}, allow_legacy=_ALLOW_LEGACY.value)
   rm = RU.ResponseModel(rmj["a_cont"], rmj["b_cont"], rmj["a_brace"], rmj["b_brace"],
                         rmj.get("a_brace_lead", 0.0), rmj.get("b_brace_lead", 0.0), rmj.get("c_lead", 0.0),
                         rmj.get("lead_max", 0.5), "c_lead" in rmj)
   nominal = R.load_policy(_NOM.value); brace = R.load_policy(_BR.value)
   env = R.make_env(impl=_IMPL.value, azimuth_range_deg=_AZ.value, range_dist=[3.0, 5.0])
+  # The original environment already keeps the free projectile at _init_q until
+  # launch. Move that reset position geometrically out of the sensor range for
+  # every arm, including the replay reference. No per-frame depth launch gate.
+  qa = int(env._proj_qpos_adr)
+  env._init_q = env._init_q.at[qa:qa + 3].set(jp.asarray(PARK_POSITION))
   m = env.mj_model
   cam_id = m.camera("head_cam").id
-  fovy = float(m.cam_fovy[cam_id])
-  n, res = _N.value, _RES.value
+  fovy = float(m.cam_fovy[cam_id]); n, res = _N.value, _RES.value
   pelvis_b = env._pelvis_body
-  if "depth" in _SOURCES.value:
+  needs_render = any(s in ("depth", "parametric_matched") for s in sources)
+  if needs_render:
     rc = mjx.create_render_context(mjm=m, nworld=n, cam_res=(res, res), render_rgb=False, render_depth=True,
                                    enabled_geom_groups=[0, 1, 2])
     refit = jax.jit(mjx.refit_bvh); render = jax.jit(mjx.render)
     try:
       from mujoco.mjx.warp import render_context as _rcm
       adr = int(_rcm.get(rc.pytree()).depth_adr.numpy()[cam_id])
-    except Exception:  # noqa: BLE001
+    except (ImportError, AttributeError, TypeError):
       adr = cam_id * res * res
-  detect = make_detector(pixel_dirs(res, fovy), _RAD.value)
+    detect = make_detector(res, fovy, _RAD.value)
   mr = (4.0, 16.0)
-  # Parametric arm: same cadence, added latency, field of view and noise as the depth arm; its
-  # random miss probability is E8's measured 5.5%. The controller's lookahead uses this config
-  # for both arms (the depth arm's detector has no explicit miss model).
-  det_cfg_param = D.DetectorConfig(period=_PERIOD.value, latency=_EXTRA_LAT.value, sigma0=_SIG.value, sigma1=0.0,
-                                   fov_deg=fovy, miss_prob=0.055)
+  config = {"schema": ST.SCHEMA_VERSION, "phase": _PHASE.value, "episodes_per_batch": n,
+            "batches": _BATCHES.value, "steps": _STEPS.value, "dt": float(env.dt),
+            "seed": _SEED.value, "period": _PERIOD.value, "extra_latency": _EXTRA_LAT.value,
+            "capture_schedule": "step % period == 0", "delivery_schedule": "capture + extra_latency",
+            "simulated_delay_ms": 1000 * _EXTRA_LAT.value * float(env.dt),
+            "renderer_wall_time_added_to_simulated_delay": False,
+            "res": res, "fovy_deg": fovy, "azimuth_deg": _AZ.value, "miss_fraction": _MISS.value,
+            "near_miss_lateral_offset_m": 0.6, "mass_range": mr, "speed_range": [3, 8], "range_dist": [3, 5],
+            "command_vx": _VX.value, "park_position": PARK_POSITION,
+            "det_sigma_assumed_m": _SIG.value, "known_radius_m": _RAD.value,
+            "estimator": "per-axis surface median plus known-radius correction (latest upstream/E8 estimator)",
+            "parametric_miss_prob": _PARAM_MISS.value, "image_miss_prob": _IMAGE_MISS.value,
+            "sources": {s: SENSOR_DESCRIPTIONS[s] for s in sources}, "methods": [list(x) for x in methods],
+            "rules": [method_config(*x)._asdict() for x in methods], "trace_episodes_per_batch": min(n, _TRACE.value),
+            "robot_state_assumption": "exact simulated camera/robot pose and freejoint linear velocity",
+            "lookahead_sensor_assumption": "simplified pelvis-cone forecast; empirical depth visibility is not forecast exactly",
+            "depth_calibration": "diagnostic only; fixed assumed likelihood is not fitted on test frames",
+            "response_validation": response_validation,
+            "env_config": env._config.to_dict()}
+  metadata = ST.protocol_metadata({"nominal": R.latest_checkpoint(_NOM.value), "brace": R.latest_checkpoint(_BR.value),
+                                   "response_model": _RM.value}, config)
+  ST.write_json(outdir / "config.json", {**config, "provenance": metadata})
 
   @jax.jit
   def act_fn(obs, cmd_nom, keys, brace_flag):
@@ -110,157 +207,219 @@ def main(_):
     a_br, _ = jax.vmap(brace)(R._with_command(obs, jp.zeros_like(cmd_nom)), keys)
     return jp.where(brace_flag[:, None], a_br, a_nom)
 
-  rows = []
-  per_ep = {}
+  # Reuse compiled controllers across scenario batches; checkpoint and rule
+  # parameters are fixed for this invocation, only episode state/keys change.
+  detectors = {}; detector_steps = {}; controllers = {}; controller_steps = {}
+  for source in sources:
+    cfg = D.DetectorConfig(period=_PERIOD.value, latency=_EXTRA_LAT.value,
+                           sigma0=_SIG.value, sigma1=0., fov_deg=fovy,
+                           miss_prob=_PARAM_MISS.value if source == "parametric" else _IMAGE_MISS.value,
+                           buffer_len=max(16, _EXTRA_LAT.value + 1))
+    detectors[source] = cfg
+    def one_detector(st, o, p, f, launched, key, cfg=cfg):
+      return D.step(cfg, st, o, p, f, launched, key)
+    detector_steps[source] = jax.jit(jax.vmap(one_detector))
+    for kind, param in methods:
+      ctrl = AnticipationController(cfg, PF.PFConfig(mass_range=mr), method_config(kind, param), rm)
+      controllers[(source, kind, param)] = ctrl
+      controller_steps[(source, kind, param)] = jax.jit(ctrl.step_with_detections)
+
+  groups = {}; batch_rows = []; calibration = []; timing = {}
   for b in range(_BATCHES.value):
-    rs = np.random.RandomState(_SEED.value + b)
+    seed = _SEED.value + b
+    rs = np.random.RandomState(seed)
     masses = rs.uniform(*mr, n); speeds = rs.uniform(3.0, 8.0, n)
     hits = rs.uniform(*env._config.impact.hit_time_range, n); is_miss = rs.uniform(size=n) < _MISS.value
-    key = jax.random.PRNGKey(_SEED.value + b)
+    key = jax.random.PRNGKey(seed)
     reset_keys = jax.random.split(jax.random.fold_in(key, 1), n)
     wenv = R.batched_env(env, masses)
     step_fn = jax.jit(wenv.step); reset_fn = jax.jit(wenv.reset)
     base = dict(speed=speeds, hit_time=hits, is_miss=is_miss, command=[_VX.value, 0, 0])
-    ref_info, _ = R.rollout(env, wenv, nominal, key, _STEPS.value,
-                            scenario_fn=lambda s: R.set_scenario(env, s, **base), reset_keys=reset_keys)
+    ref_info, ref_traj = R.rollout(env, wenv, nominal, key, _STEPS.value,
+                                  scenario_fn=lambda s: R.set_scenario(env, s, **base), reset_keys=reset_keys)
     lp, lv = ref_info["proj_launch_pos"], ref_info["proj_launch_vel"]
-    print(f"batch {b}: reference contact(hits) {ref_info['impact_contact'][~is_miss].mean():.3f} fell(hits) {ref_info['fell'][~is_miss].mean():.3f}")
-    det_step = jax.jit(jax.vmap(lambda st, o, p, f, l, k: D.step(det_cfg_param, st, o, p, f, l, k)))
+    ref_tab = _extra_columns(R.episode_table(ref_info, ref_traj, env.dt), "none", "reactive", 0., b, seed, n)
+    groups.setdefault(("none", "reactive", 0.), []).append(ref_tab)
+    R.write_csv(outdir / "episodes" / (_slug("none", "reactive", 0., b) + ".csv"), ref_tab)
+    batch_rows.append({"source": "none", "method": "reactive", "param": 0., "batch": b,
+                       **ST.summarize_episodes(ref_tab, env.dt)})
+    print(f"batch {b}: {int((~is_miss).sum())} hits, {int(is_miss.sum())} misses; reference fall "
+          f"{ref_info['fell'][~is_miss].mean() if (~is_miss).any() else float('nan'):.3f}", flush=True)
 
-    for source in _SOURCES.value:
-      for spec in _METHODS.value:
-        kind, param = spec.split(":"); param = float(param)
-        rc_rule = {"ttc_threshold": RU.RuleConfig(kind="ttc_threshold", theta=param),
-                   "belief_commit": RU.RuleConfig(kind="belief_commit", c_prep=param),
-                   "belief_lead": RU.RuleConfig(kind="belief_lead", c_prep=param),
-                   "belief_voi": RU.RuleConfig(kind="belief_voi", c_prep=param, wait_steps=_PERIOD.value),
-                   "belief_wait": RU.RuleConfig(kind="belief_wait", c_prep=param, wait_steps=_PERIOD.value)}[kind]
-        ctrl = AnticipationController(det_cfg_param, PF.PFConfig(mass_range=mr), rc_rule, rm)
-        t0 = time.time()
-        rng = jax.random.fold_in(key, 7)
-        state = reset_fn(reset_keys)
-        state = R.set_scenario(env, state, launch_pos=lp, launch_vel=lv, **base)
+    for source in sources:
+      det_cfg = detectors[source]
+      det_step = detector_steps[source]
+      for kind, param in methods:
+        ctrl = controllers[(source, kind, param)]
+        control_step = controller_steps[(source, kind, param)]
+        t0 = time.perf_counter(); rng = jax.random.fold_in(key, 7)
+        state = R.set_scenario(env, reset_fn(reset_keys), launch_pos=lp, launch_vel=lv, **base)
         carry = ctrl.init(n, jax.random.fold_in(rng, 1))
-        dst = jax.tree_util.tree_map(lambda x: jp.broadcast_to(x, (n,) + jp.shape(x)), D.init_state(det_cfg_param))
-        brace_flag = jp.zeros((n,), bool)
-        pel0 = np.asarray(state.data.xpos[:, pelvis_b]); fwd0 = np.asarray(state.data.xmat[:, pelvis_b].reshape(n, 3, 3)[:, :, 0])
-        heading0 = fwd0[:, :2] / (np.linalg.norm(fwd0[:, :2], axis=-1, keepdims=True) + 1e-9)
-        brace_steps = np.zeros(n, int); prog = np.zeros(n); alive = np.ones(n, bool); last_pel = pel0.copy()
-        n_det = np.zeros(n, int); render_ms = []; queue = []   # (deliver_step, ok, centre, capture_step)
-        fa_frames = np.zeros(n, int); launched_frames = np.zeros(n, int)   # false alarms: detections with no object in flight
-        for t in range(_STEPS.value):
-          rng, k1, k2, k3 = jax.random.split(rng, 4)
-          d0 = state.data
-          pel = d0.xpos[:, pelvis_b]; fwd = d0.xmat[:, pelvis_b].reshape(n, 3, 3)[:, :, 0]
-          fxy = fwd[:, :2] / (jp.linalg.norm(fwd[:, :2], axis=-1, keepdims=True) + 1e-6)
-          pvel = jp.concatenate([fxy * state.info["command"][:, :1], jp.zeros((n, 1))], axis=-1)
-          due = (t % _PERIOD.value == 0)
-          if source == "depth":
-            if due:
-              tr = time.time()
-              data = refit(env.mjx_model, d0, rc.pytree())
-              out = render(env.mjx_model, data, rc.pytree())
-              depth = out[1][:, adr:adr + res * res].reshape(n, res, res)
-              ok, centre = detect(depth, d0.cam_xpos[:, cam_id], d0.cam_xmat[:, cam_id].reshape(n, 3, 3), pel)
-              jax.block_until_ready(ok); render_ms.append(1000 * (time.time() - tr))
-              # Captured now; delivered --extra_latency steps later (the filter absorbs the age exactly).
-              # No privileged gating: whatever the detector reports is delivered; detections while
-              # no object is in flight are counted as false alarms.
-              fa_frames += np.asarray(ok & ~state.info["proj_launched"]).astype(int)
-              launched_frames += np.asarray(~state.info["proj_launched"]).astype(int)
-              queue.append((t + _EXTRA_LAT.value, ok, centre, t))
-            ready = [q for q in queue if q[0] == t]
-            queue = [q for q in queue if q[0] > t]
-            if ready:
-              _, det_valid, det_pos, cs = ready[-1]; cap = jp.full((n,), cs, jp.int32)
+        dst = jax.tree_util.tree_map(lambda x: jp.broadcast_to(x, (n,) + jp.shape(x)), D.init_state(det_cfg))
+        queue = DG.DetectionQueue(_EXTRA_LAT.value)
+        n_det = np.zeros(n, int); det_before_fall = np.zeros(n, int)
+        prelaunch_frames = np.zeros(n, int); prelaunch_detections = np.zeros(n, int)
+        brace_steps = np.zeros(n, int); switches = np.zeros(n, int); prog = np.zeros(n)
+        first_capture = np.full(n, -1, int); first_delivery = np.full(n, -1, int)
+        first_brace = np.full(n, -1, int); first_release = np.full(n, -1, int)
+        brace_at_contact = np.zeros(n, bool); previous_brace = np.zeros(n, bool); previous_contact = np.zeros(n, bool)
+        alive = np.ones(n, bool)
+        render_ms = []; err = DG.ErrorAccumulator()
+        slug = _slug(source, kind, param, b)
+        trace_fields = ["scenario_id", "step", "capture_step", "delivery_valid", "det_x", "det_y", "det_z",
+                        "applied_brace", "requested_brace", "terminated_before", "contact_after",
+                        "p_hit", "t_hit", "cost_brace", "cost_continue", "cost_wait", "next_delivery_step",
+                        "next_capture_step", "release_step", "release_reason"]
+        with (outdir / "traces" / (slug + ".csv")).open("w", newline="") as trace_stream:
+          trace_writer = csv.DictWriter(trace_stream, fieldnames=trace_fields)
+          trace_writer.writeheader()
+          for t in range(_STEPS.value):
+            rng, k1, k2, k3 = jax.random.split(rng, 4)
+            d0 = state.data; pel = d0.xpos[:, pelvis_b]
+            fwd = d0.xmat[:, pelvis_b].reshape(n, 3, 3)[:, :, 0]
+            pvel = d0.qvel[:, :3]
+            terminated_before = np.asarray(state.info["terminated"], bool)
+            if source in ("depth", "parametric_matched"):
+              if t % _PERIOD.value == 0:
+                tr = time.perf_counter()
+                data = refit(env.mjx_model, d0, rc.pytree())
+                rendered = render(env.mjx_model, data, rc.pytree())
+                depth = rendered[1][:, adr:adr + res * res].reshape(n, res, res)
+                ok, image_centre, pixels = detect(depth, d0.cam_xpos[:, cam_id],
+                                                  d0.cam_xmat[:, cam_id].reshape(n, 3, 3), pel)
+                jax.block_until_ready(image_centre)
+                render_ms.append(1000 * (time.perf_counter() - tr))
+                kd, kn = jax.random.split(k1)
+                valid = ok & (jax.random.uniform(kd, (n,)) >= _IMAGE_MISS.value)
+                # Truth below is for an explicitly privileged diagnostic comparator
+                # and error logging. The depth observation path uses image_centre.
+                truth = d0.qpos[:, qa:qa + 3]
+                pos = image_centre if source == "depth" else truth + _SIG.value * jax.random.normal(kn, (n, 3))
+                sigma = jp.full((n,), _SIG.value)
+                queue.capture(t, valid, pos, sigma)
+                active = ~terminated_before
+                prelaunch = active & ~np.asarray(state.info["proj_launched"], bool)
+                prelaunch_frames += prelaunch
+                prelaunch_detections += prelaunch & np.asarray(ok, bool)
+                err.add(np.asarray(ok)[active], np.asarray(image_centre)[active], np.asarray(truth)[active],
+                        np.asarray(pel)[active], np.asarray(state.info["proj_launched"])[active])
+              delivered = queue.deliver(t)
+              if delivered is None:
+                det_valid, det_pos = jp.zeros(n, bool), jp.zeros((n, 3))
+                cap, det_sigma = jp.full(n, -1, jp.int32), jp.full(n, _SIG.value)
+              else:
+                captured, det_valid, det_pos, det_sigma = delivered
+                cap = jp.full(n, captured, jp.int32)
             else:
-              det_valid = jp.zeros((n,), bool); det_pos = jp.zeros((n, 3)); cap = jp.full((n,), t, jp.int32)
-            det_sigma = jp.full((n,), _SIG.value)
-          else:
-            dst, det = det_step(dst, state.info["obj_pos"], pel, fwd, state.info["proj_launched"], jax.random.split(k1, n))
-            det_valid, det_pos, det_sigma, cap = det.valid, det.pos, det.sigma, det.capture_step
-          carry, brace_flag, logs = ctrl.step_with_detections(carry, det_valid, det_pos, det_sigma, cap, pel, pvel, t, k2)
-          n_det += np.asarray(det_valid)
-          info = dict(state.info); info["brace_active"] = brace_flag; state = state.replace(info=info)
-          act = act_fn(state.obs, state.info["command_nominal"], jax.random.split(k3, n), brace_flag)
-          state = step_fn(state, act)
-          pel_np = np.asarray(state.data.xpos[:, pelvis_b])
-          prog += np.where(alive, np.sum((pel_np[:, :2] - last_pel[:, :2]) * heading0, axis=-1), 0.0)
-          last_pel = pel_np
-          alive &= ~np.asarray(state.info["fell"])
-          brace_steps += np.asarray(brace_flag)
+              dst, det = det_step(dst, state.info["obj_pos"], pel, fwd, state.info["proj_launched"], jax.random.split(k1, n))
+              det_valid, det_pos, det_sigma, cap = det.valid, det.pos, det.sigma, det.capture_step
+            carry, request_brace, logs = control_step(carry, det_valid, det_pos, det_sigma, cap,
+                                                      pel, pvel, t, k2, pelvis_fwd=fwd)
+            applied = request_brace & ~state.info["terminated"]
+            valid_np = np.asarray(det_valid, bool); cap_np = np.asarray(cap)
+            first_capture = np.where((first_delivery < 0) & valid_np, cap_np, first_capture)
+            first_delivery = np.where((first_delivery < 0) & valid_np, t, first_delivery)
+            n_det += valid_np; det_before_fall += valid_np & ~terminated_before
+            brace_np = np.asarray(applied, bool)
+            first_brace = np.where((first_brace < 0) & brace_np, t, first_brace)
+            first_release = np.where((first_release < 0) & previous_brace & ~brace_np, t, first_release)
+            switches += brace_np != previous_brace; previous_brace = brace_np
+            info = dict(state.info); info["brace_active"] = applied; state = state.replace(info=info)
+            state = step_fn(state, act_fn(state.obs, state.info["command_nominal"], jax.random.split(k3, n), applied))
+            pel_np = np.asarray(state.data.xpos[:, pelvis_b])
+            fwd_np = np.asarray(fwd)[:, :2]
+            heading = fwd_np / (np.linalg.norm(fwd_np, axis=-1, keepdims=True) + 1e-9)
+            prog += np.where(~terminated_before,
+                             np.sum((pel_np[:, :2] - np.asarray(pel)[:, :2]) * heading, axis=-1), 0.)
+            contact_np = np.asarray(state.info["impact_contact"], bool)
+            brace_at_contact |= contact_np & ~previous_contact & brace_np
+            previous_contact = contact_np
+            alive &= ~np.asarray(state.info["fell"], bool)
+            brace_steps += brace_np
+            if alive.any() and not np.isfinite(pel_np[alive]).all():
+              raise FloatingPointError("Nonfinite pelvis state in an unterminated episode")
+            observed = np.asarray(det_pos)
+            for i in range(min(n, _TRACE.value)):
+              row = {"scenario_id": f"seed{seed}_env{i:05d}", "step": t, "capture_step": int(cap_np[i]),
+                     "delivery_valid": int(valid_np[i]), "det_x": observed[i, 0], "det_y": observed[i, 1], "det_z": observed[i, 2],
+                     "applied_brace": int(brace_np[i]), "requested_brace": int(np.asarray(request_brace)[i]),
+                     "terminated_before": int(terminated_before[i]), "contact_after": int(contact_np[i])}
+              row.update({k: _log_value(logs, k, i) for k in trace_fields[11:]})
+              trace_writer.writerow(row)
+            if t % 50 == 0:
+              trace_stream.flush()
         fi = jax.tree_util.tree_map(np.asarray, state.info)
-        hit_s = ~is_miss; c = fi["impact_contact"] & hit_s
-        row = {"source": source, "method": kind, "param": param, "batch": b, "n": n,
-               "fall_rate_hits": float(fi["fell"][hit_s].mean()),
-               "fall_rate_given_contact": float(fi["fell"][c].mean()) if c.any() else float("nan"),
-               "contact_rate_hits": float(fi["impact_contact"][hit_s].mean()),
-               "false_prep_rate": float((brace_steps[is_miss] > 0).mean()) if is_miss.any() else 0.0,
-               "braced_on_hits": float((brace_steps[hit_s] > 0).mean()), "braced_s": float(brace_steps.mean() * env.dt),
-               "progress_m": float(prog.mean()), "detections_per_episode": float(n_det.mean()),
-               "false_alarm_rate": float(fa_frames.sum() / max(launched_frames.sum(), 1)) if source == "depth" else float("nan"),
-               "render_ms_per_frame": float(np.mean(render_ms[1:])) if len(render_ms) > 1 else float("nan"),
-               "wall_s": time.time() - t0}
-        rows.append(row)
-        per_ep[(source, kind, param)] = per_ep.get((source, kind, param), []) + [
-            {"fell": fi["fell"], "contact": fi["impact_contact"], "is_miss": is_miss, "brace_steps": brace_steps,
-             "progress_m": prog}]
-        print(f"  {source:10} {kind:14} p={param:<4g} {row['wall_s']:4.0f}s  fall|hits {row['fall_rate_hits']:.3f}  "
-              f"fall|contact {row['fall_rate_given_contact']:.3f}  contact {row['contact_rate_hits']:.2f}  "
-              f"false-prep {row['false_prep_rate']:.3f}  braced {row['braced_s']:.2f}s  det/ep {row['detections_per_episode']:.1f}  "
-              f"render {row['render_ms_per_frame']:.0f} ms")
-    # reactive reference for this batch
-    rows.append({"source": "none", "method": "reactive", "param": 0.0, "batch": b, "n": n,
-                 "fall_rate_hits": float(ref_info["fell"][~is_miss].mean()),
-                 "fall_rate_given_contact": float(ref_info["fell"][ref_info["impact_contact"] & ~is_miss].mean()),
-                 "contact_rate_hits": float(ref_info["impact_contact"][~is_miss].mean()), "false_prep_rate": 0.0,
-                 "braced_on_hits": 0.0, "braced_s": 0.0, "progress_m": float("nan"), "detections_per_episode": 0.0,
-                 "render_ms_per_frame": float("nan"), "false_alarm_rate": float("nan"), "wall_s": 0.0})
+        cs = fi["contact_step"]
+        tab = {"mass": masses, "speed": speeds, "momentum": masses * speeds, "is_miss": is_miss,
+               "t_hit_nominal": fi["t_hit_nominal"], "launched": fi["proj_launched"], "contact": fi["impact_contact"],
+               "contact_step": cs, "fell": fi["fell"], "fell_before_launch": fi["fell_before_launch"],
+               "term_reason": fi["term_reason"], "term_step": fi["term_step"], "progress_m": prog,
+               "censored": (cs >= 0) & ((_STEPS.value - cs - 1) * env.dt < 2.5) & ~fi["fell"],
+               "brace_steps_total": brace_steps, "brace_onset_step": first_brace,
+               "first_release_step": first_release, "switches": switches, "brace_at_contact": brace_at_contact,
+               "n_detections": n_det, "n_detections_before_failure": det_before_fall,
+               "prelaunch_image_frames": prelaunch_frames, "prelaunch_image_detections": prelaunch_detections,
+               "first_detection_capture_step": first_capture, "first_detection_delivery_step": first_delivery}
+        tab = _extra_columns(tab, source, kind, param, b, seed, n)
+        R.write_csv(outdir / "episodes" / (slug + ".csv"), tab)
+        groups.setdefault((source, kind, param), []).append(tab)
+        wall = time.perf_counter() - t0
+        timing.setdefault((source, kind, param), []).extend(render_ms[1:])
+        row = {"source": source, "method": kind, "param": param, "batch": b,
+               **ST.summarize_episodes(tab, env.dt), "wall_s": wall,
+               "render_detect_batch_ms": float(np.mean(render_ms[1:])) if len(render_ms) > 1 else None}
+        batch_rows.append(row)
+        calibration.append({"source": source, "method": kind, "param": param, "batch": b, **err.summary()})
+        ST.write_json(outdir / "batches.json", batch_rows)
+        ST.write_json(outdir / "calibration.json", calibration)
+        print(f"  {source} {kind}:{param:g}: {wall:.1f}s, hits={row['n_hits']} "
+              f"fall={row['fall_rate_hits']} false_prep={row['false_prep_rate']}", flush=True)
 
-  ep_out = {}
-  for (src, meth, par), parts in per_ep.items():
-    for f in parts[0]:
-      ep_out[f"{src}__{meth}__p{par:g}__{f}"] = np.concatenate([p_[f] for p_ in parts])
-  np.savez_compressed(os.path.join(_OUT.value, "episodes.npz"), **ep_out)
-  agg = {}
-  for r in rows:
-    agg.setdefault((r["source"], r["method"], r["param"]), []).append(r)
-  out = []
-  for (src, meth, par), rs_ in agg.items():
-    o = {"source": src, "method": meth, "param": par, "n_total": sum(r["n"] for r in rs_)}
-    for f in ("fall_rate_hits", "fall_rate_given_contact", "contact_rate_hits", "false_prep_rate", "braced_on_hits",
-              "braced_s", "progress_m", "detections_per_episode", "render_ms_per_frame", "false_alarm_rate"):
-      o[f] = float(np.nanmean([r[f] for r in rs_]))
-    out.append(o)
-  cols = list(out[0].keys())
-  with open(os.path.join(_OUT.value, "table.csv"), "w") as f:
-    f.write(",".join(cols) + "\n")
-    for o in out:
-      f.write(",".join(f"{o[c]:.4g}" if isinstance(o[c], float) else str(o[c]) for c in cols) + "\n")
-  json.dump({"period": _PERIOD.value, "extra_latency": _EXTRA_LAT.value, "res": res, "fovy_deg": fovy,
-             "azimuth_deg": _AZ.value, "det_sigma": _SIG.value, "episodes_per_condition": n * _BATCHES.value, "rows": out},
-            open(os.path.join(_OUT.value, "summary.json"), "w"), indent=2)
-  try:
-    import matplotlib
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    meths = [s.split(":")[0] for s in _METHODS.value]
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4), constrained_layout=True)
-    x = np.arange(len(meths)); w = 0.38
-    for i, (src, col) in enumerate((("parametric", "#2b6f8e"), ("depth", "#d9772b"))):
-      vals = [next((o for o in out if o["source"] == src and o["method"] == mm), None) for mm in meths]
-      axes[0].bar(x + (i - 0.5) * w, [v["fall_rate_hits"] if v else np.nan for v in vals], w, color=col, label=src)
-      axes[1].bar(x + (i - 0.5) * w, [v["false_prep_rate"] if v else np.nan for v in vals], w, color=col, label=src)
-    react = next((o for o in out if o["method"] == "reactive"), None)
-    if react:
-      axes[0].axhline(react["fall_rate_hits"], color="#14213d", lw=1, ls="--", label="reactive")
-    for ax, yl in zip(axes, ("failure rate on hits", "false-preparation rate")):
-      ax.set_xticks(x); ax.set_xticklabels(meths, fontsize=8); ax.set_ylabel(yl); ax.set_ylim(0, 1); ax.grid(True, axis="y", color="#e3e6ea", lw=0.6)
-    axes[0].legend(fontsize=8, frameon=False)
-    fig.suptitle(f"Closed loop from rendered depth vs the parametric detector ({res}x{res}, {50/_PERIOD.value:.0f} Hz)", fontsize=11)
-    fig.savefig(os.path.join(_OUT.value, "closed_loop.png"), dpi=170)
-  except Exception as e:  # noqa: BLE001
-    print("plot skipped:", e)
+  combined = {k: ST.concatenate_tables(v) for k, v in groups.items()}
+  # Preserve Session G's compact archive in addition to the explicit-ID CSVs.
+  # The old brace_steps key remains an alias for brace_steps_total.
+  archive = {}
+  for (src, meth, par), tab in combined.items():
+    for name, values in tab.items():
+      # The result publisher permits numeric/bool archives only. Text IDs and
+      # condition labels stay in CSV; seed+index identify each archived scenario.
+      if np.asarray(values).dtype.kind in "biufc":
+        archive[f"{src}__{meth}__p{par:g}__{name}"] = values
+    archive[f"{src}__{meth}__p{par:g}__brace_steps"] = tab["brace_steps_total"]
+  np.savez_compressed(outdir / "episodes.npz", **archive)
+  rows = []
+  for key, tab in combined.items():
+    src, meth, par = key
+    times = timing.get(key, [])
+    pre_n = int(np.asarray(tab.get("prelaunch_image_frames", [])).sum())
+    pre_det = int(np.asarray(tab.get("prelaunch_image_detections", [])).sum())
+    rows.append({"source": src, "method": meth, "param": par, **ST.summarize_episodes(tab, env.dt),
+                 "n_prelaunch_image_frames": pre_n, "n_prelaunch_image_detections": pre_det,
+                 "false_alarm_rate": pre_det / pre_n if pre_n else None,
+                 "render_detect_batch_ms": float(np.mean(times)) if times else None})
+  comparisons = []
+  for key, tab in combined.items():
+    if key[0] == "none":
+      continue
+    comparisons.append({"condition_a": list(key), "condition_b": ["none", "reactive", 0.],
+                        **ST.paired_comparison(tab, combined[("none", "reactive", 0.)], env.dt)})
+    if key[0] == "depth":
+      for other in ("parametric", "parametric_matched"):
+        other_key = (other, key[1], key[2])
+        if other_key in combined:
+          comparisons.append({"condition_a": list(key), "condition_b": list(other_key),
+                              **ST.paired_comparison(tab, combined[other_key], env.dt)})
+  ST.write_json(outdir / "paired.json", comparisons)
+  _write_csv_rows(outdir / "table.csv", rows)
+  ST.write_json(outdir / "batches.json", batch_rows)
+  ST.write_json(outdir / "calibration.json", calibration)
+  ST.write_json(outdir / "summary.json", {"schema": ST.SCHEMA_VERSION, "status": "complete", "phase": _PHASE.value,
+                "period": _PERIOD.value, "extra_latency": _EXTRA_LAT.value, "res": res, "fovy_deg": fovy,
+                "azimuth_deg": _AZ.value, "episodes_per_condition": n * _BATCHES.value,
+                "aggregation": "pooled episode numerators/denominators", "rows": rows,
+                "calibration_use": "post-hoc diagnostic; no test-set likelihood fitting",
+                "provenance": metadata})
+  print("Complete; per-episode evidence, paired comparisons and provenance saved.", flush=True)
 
 
 if __name__ == "__main__":

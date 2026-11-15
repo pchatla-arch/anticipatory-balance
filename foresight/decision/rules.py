@@ -1,25 +1,14 @@
 # Copyright 2026 Prasuna Chatla. Apache-2.0.
-"""Decision rules for CONTINUE vs BRACE on top of the particle belief, with commitment.
+"""Decision rules with an explicit single-threat commitment contract.
 
-Every rule maps (belief stats, controller memory) -> brace request. The common wrapper
-applies the commitment: once BRACE starts it is held for at least `commit_steps`, and
-released only when the belief says the object has passed (expected impact time negative by
-more than `release_after`) or no detection has arrived for `stale_steps`. The request
-decides when to START; it is not re-evaluated to decide whether to stay (an earlier version
-did, and the belief rule's `t_hit > tau_brace` start condition then released the brace
-0.22 s before contact once the commitment had expired: a mode switch at the worst moment).
+Corrected default: at first BRACE, lock a release deadline from the current predicted
+arrival plus hold, round to the control grid, and enforce minimum/maximum duration.
+New observations cannot slide this deadline. One preparation is allowed per projectile
+episode by default. Stale captures cannot initiate a new preparation. Historical
+stale-driven retention is available only as release_mode='legacy'.
 
-Rules
-  reactive        never brace
-  always          brace as soon as any particle predicts a hit (p_hit > p_min)
-  ttc_threshold   brace when the point-estimate (mean particle) says hit and TTC < theta
-  belief_commit   the myopic commit rule:
-                    p_hit * E_b[dP(J)] * c_fall  >  c_prep * (E_b[t_hit] + hold) + c_track * E_b[t_hit]
-                    and E_b[t_hit] > tau_brace
-                  dP(J) = P(fall | CONTINUE, J) - P(fall | BRACE, J) from the fitted
-                  response model (logistic in log J), averaged over hit particles so the
-                  mass mixture enters through J = m|v|.
-All JAX, per environment.
+The response model remains an empirical surrogate, not an exact dynamics model.
+Corrected lead/wait/VOI rules share its per-sample lead and independent mass integration.
 """
 from __future__ import annotations
 
@@ -29,11 +18,10 @@ import jax
 import jax.numpy as jp
 
 from foresight.belief.particle_filter import BeliefStats
+from foresight.decision import contracts as C
 
 
 class ResponseModel(NamedTuple):
-  """P(fall | J) = sigmoid(a + b * log J) for each action; for BRACE, optionally conditioned
-  on the lead with which the brace was started: sigmoid(a_l + b_l log J + c_l min(lead, lead_max))."""
   a_cont: float
   b_cont: float
   a_brace: float
@@ -50,124 +38,177 @@ class ResponseModel(NamedTuple):
       return jax.nn.sigmoid(self.a_cont + self.b_cont * logJ)
     if lead is None or not self.has_lead:
       return jax.nn.sigmoid(self.a_brace + self.b_brace * logJ)
-    l = jp.clip(lead, 0.0, self.lead_max)
-    return jax.nn.sigmoid(self.a_brace_lead + self.b_brace_lead * logJ + self.c_lead * l)
+    lead = jp.clip(lead, 0.0, self.lead_max)
+    return jax.nn.sigmoid(self.a_brace_lead + self.b_brace_lead * logJ + self.c_lead * lead)
 
 
 class RuleConfig(NamedTuple):
-  kind: str = "belief_commit"      # reactive | always | ttc_threshold | belief_commit | oracle
-  theta: float = 0.5               # ttc_threshold: brace when TTC < theta (s)
-  p_min: float = 0.5               # always / ttc_threshold: minimum hit probability
+  kind: str = "belief_commit"
+  theta: float = 0.5
+  p_min: float = 0.5
   c_fall: float = 1.0
-  c_prep: float = 0.2              # per second braced
-  c_track: float = 0.1             # per second of lost tracking (approximation)
-  tau_brace: float = 0.22          # s, measured sustained readiness
-  hold: float = 0.5                # s kept braced after the expected impact
-  commit_steps: int = 15           # 0.3 s at 50 Hz
-  release_after: float = 0.3       # s past expected impact
-  stale_steps: int = 50            # release if no detection for 1 s
-  release_on_unwant: bool = False  # old behaviour: release when the start condition fails
-  wait_steps: int = 5              # belief_voi: the wait is one detection period
+  c_prep: float = 0.2
+  c_track: float = 0.1  # per second of BRACE, which interrupts walking
+  tau_brace: float = 0.22  # historical heuristic; not validated readiness-at-impact
+  hold: float = 0.5
+  commit_steps: int = 15
+  release_after: float = 0.3  # legacy only
+  stale_steps: int = 50
+  release_on_unwant: bool = False  # legacy ablation only
+  wait_steps: int = 5  # legacy metadata; corrected waiting uses detector timestamps
   dt: float = 0.02
+  release_mode: str = "deadline"  # deadline | legacy
+  max_hold_s: float = 4.0
+  single_commit: bool = True
+  horizon_steps: int = 0  # 0 means unspecified; evaluators supply their actual horizon
 
 
 class CtrlMemory(NamedTuple):
-  braced: jax.Array        # bool
-  brace_steps: jax.Array   # int32, steps since brace start
-  last_det_step: jax.Array # int32
-  n_switches: jax.Array    # int32
-  release_reason: jax.Array  # int32: 0 none, 1 passed, 2 stale (last release)
+  braced: jax.Array
+  brace_steps: jax.Array
+  last_det_step: jax.Array
+  n_switches: jax.Array
+  last_capture_step: jax.Array = -1000
+  release_step: jax.Array = -1
+  onset_step: jax.Array = -1
+  completed: jax.Array = False
+  release_reason: jax.Array = 0  # event: 1 deadline,2 maxhold,3 legacy stale,4 legacy request,5 legacy passed
+  deadline_capped: jax.Array = False
 
 
-RELEASE_NONE, RELEASE_PASSED, RELEASE_STALE = 0, 1, 2
+def validate_config(cfg: RuleConfig):
+  if cfg.release_mode not in ("deadline", "legacy"):
+    raise ValueError("release_mode must be deadline or legacy")
+  if cfg.kind not in ("reactive", "always", "ttc_threshold", "belief_commit", "belief_lead", "belief_wait", "belief_voi"):
+    raise ValueError("unknown decision rule: " + cfg.kind)
+  if min(cfg.c_fall, cfg.c_prep, cfg.c_track) < 0 or cfg.stale_steps < 0 or cfg.horizon_steps < 0:
+    raise ValueError("negative cost, staleness, or horizon")
+  C.locked_duration(0.0, cfg.hold, cfg.commit_steps, cfg.dt, cfg.max_hold_s)
 
 
 def init_memory() -> CtrlMemory:
-  return CtrlMemory(jp.array(False), jp.int32(0), jp.int32(-1000), jp.int32(0), jp.int32(0))
+  return CtrlMemory(jp.array(False), jp.int32(0), jp.int32(-1000), jp.int32(0),
+                    jp.int32(-1000), jp.int32(-1), jp.int32(-1), jp.array(False),
+                    jp.int32(0), jp.array(False))
 
 
-def _costs(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats, t_shift: float = 0.0):
-  """Expected cost of BRACE-now and of CONTINUE-forever under belief b, with the expected
-  time to contact shifted by t_shift (negative: the belief as it will be t_shift later)."""
-  t = jp.where(jp.isfinite(b.t_hit), b.t_hit, 0.0) + t_shift
-  t = jp.maximum(t, 0.0)
+def _risks(rm: ResponseModel, b: BeliefStats, use_lead=True):
+  """Average over the independent mass prior BEFORE choosing an action.
+
+  All posterior observation branches retain the same mass prior. Only geometry
+  particle weights are updated by position observations.
+  """
+  lead = b.t_hit_samples if b.t_hit_samples is not None else jp.full_like(b.weights, b.t_hit)
+  lead = jp.maximum(jp.where(jp.isfinite(lead), lead, 0.0), 0.0)
+  if b.state_samples is None:
+    return rm.p_fall(b.momentum_samples, False), rm.p_fall(b.momentum_samples, True, lead if use_lead else None)
+  speed = jp.linalg.norm(b.state_samples[:, 3:], axis=-1)
+  momentum = speed[:, None] * b.mass_samples[None, :]
+  pc = jp.mean(rm.p_fall(momentum, False), axis=1)
+  pb = jp.mean(rm.p_fall(momentum, True, lead[:, None] if use_lead else None), axis=1)
+  return pc, pb
+
+
+def _duration(cfg, t):
+  return C.locked_duration(jp.where(jp.isfinite(t), t, 0.0), cfg.hold,
+                           cfg.commit_steps, cfg.dt, cfg.max_hold_s, jp)
+
+
+def _costs(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats, use_lead=True):
+  pc, pb = _risks(rm, b, use_lead)
   wh = b.weights * b.hit_samples
-  pf_c = rm.p_fall(b.momentum_samples, False)
-  pf_b = rm.p_fall(b.momentum_samples, True, lead=t)
-  pf_c = jp.sum(wh * pf_c) / (jp.sum(wh) + 1e-9)
-  pf_b = jp.sum(wh * pf_b) / (jp.sum(wh) + 1e-9)
-  cost_cont = b.p_hit * pf_c * cfg.c_fall
-  cost_brace = b.p_hit * pf_b * cfg.c_fall + cfg.c_prep * (t + cfg.hold) + cfg.c_track * t
+  cost_cont = jp.sum(wh * pc) * cfg.c_fall
+  cost_brace = jp.sum(wh * pb) * cfg.c_fall + (cfg.c_prep + cfg.c_track) * _duration(cfg, b.t_hit)
   return cost_brace, cost_cont
 
 
-def request(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats, la=None) -> jax.Array:
-  """Does the rule want BRACE now (ignoring commitment)? `la`: lookahead BeliefStats
-  (leading axis K = hypothetical next detections) for belief_voi."""
-  if cfg.kind == "belief_lead":
-    # Myopic rule with the lead-conditioned response model and no time-to-form gate: a
-    # late brace is worth whatever the oracle data say it is worth.
-    cb, cc = _costs(cfg, rm, b)
-    return (cb < cc) & jp.isfinite(b.t_hit) & (b.p_hit > 0)
-  if cfg.kind in ("belief_voi", "belief_wait"):
-    # One-step lookahead: brace now, or walk until the next delivery, then take the better
-    # of brace/continue. belief_voi values the wait with an observation branch (la_obs: k
-    # hypothetical delivered detections, weighted 1 - p_none) and a no-detection branch
-    # (la_none: the belief merely predicted forward, weight p_none). belief_wait is the blind
-    # wait: no observation branch, so it isolates the value of information from the value
-    # of simply acting later.
-    la_obs, la_none, p_none = la
-    cb, cc = _costs(cfg, rm, b)
-    dt_wait = cfg.wait_steps * cfg.dt
-    cb_n, cc_n = jax.vmap(lambda bk: _costs(cfg, rm, bk))(la_none)
-    later_none = jp.mean(jp.minimum(cb_n, cc_n))
-    if cfg.kind == "belief_voi":
-      cb_k, cc_k = jax.vmap(lambda bk: _costs(cfg, rm, bk))(la_obs)
-      later = (1.0 - p_none) * jp.mean(jp.minimum(cb_k, cc_k)) + p_none * later_none
-    else:
-      later = later_none
-    # If contact is expected inside the wait, waiting means continuing.
-    hit_during_wait = jp.isfinite(b.t_hit) & (b.t_hit < dt_wait)
-    cost_wait = jp.where(hit_during_wait, cc, cfg.c_track * dt_wait + later)
-    return (cb < jp.minimum(cc, cost_wait)) & jp.isfinite(b.t_hit) & (b.p_hit > 0)
+def decision_values(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats, la=None):
+  cb, cc = _costs(cfg, rm, b, cfg.kind != "belief_commit")
+  cw = jp.asarray(jp.inf)
+  if la is not None:
+    # Each observation has an analytic point posterior (or moment-matched empty
+    # posterior), with fresh geometry samples. Average mass/geometry costs first,
+    # then choose one future action for that observable branch.
+    later_brace, later_cont = jax.vmap(lambda bk: _costs(cfg, rm, bk))(la.future)
+    pc_now, _ = _risks(rm, b)
+    prefix = jp.sum(la.prefix_hit_weights * pc_now) * cfg.c_fall
+    # Continuing to walk during the wait has no lost-tracking/preparation charge.
+    cw = prefix + jp.sum(la.branch_probability * jp.minimum(later_cont, later_brace))
+    if cfg.horizon_steps > 0:
+      cw = jp.where(la.delivery_step >= cfg.horizon_steps, cc, cw)
+  return cb, cc, cw
+
+
+def evaluate(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats, la=None):
+  cb, cc, cw = decision_values(cfg, rm, b, la)
+  finite_hit = jp.isfinite(b.t_hit) & (b.p_hit > 0)
   if cfg.kind == "reactive":
-    return jp.array(False)
-  if cfg.kind == "always":
-    return b.p_hit > cfg.p_min
-  if cfg.kind == "ttc_threshold":
-    return b.pe_hit & (b.pe_t_hit < cfg.theta)
-  if cfg.kind == "belief_commit":
-    dP = rm.p_fall(b.momentum_samples, False) - rm.p_fall(b.momentum_samples, True)
-    wh = b.weights * b.hit_samples
-    dP_mean = jp.sum(wh * dP) / (jp.sum(wh) + 1e-9)
-    t = jp.where(jp.isfinite(b.t_hit), b.t_hit, 0.0)
-    benefit = b.p_hit * dP_mean * cfg.c_fall
-    cost = cfg.c_prep * (t + cfg.hold) + cfg.c_track * t
-    return (benefit > cost) & (b.t_hit > cfg.tau_brace) & jp.isfinite(b.t_hit)
-  raise ValueError(cfg.kind)
+    want = jp.array(False)
+  elif cfg.kind == "always":
+    want = b.p_hit > cfg.p_min
+  elif cfg.kind == "ttc_threshold":
+    want = b.pe_hit & (b.pe_t_hit < cfg.theta)
+  elif cfg.kind == "belief_commit":
+    if cfg.release_mode == "legacy":
+      # Preserve the original hard-gate request for release-only ablations.
+      dP = rm.p_fall(b.momentum_samples, False) - rm.p_fall(b.momentum_samples, True)
+      wh = b.weights * b.hit_samples
+      benefit = jp.sum(wh * dP) * cfg.c_fall
+      t = jp.where(jp.isfinite(b.t_hit), b.t_hit, 0.0)
+      want = (benefit > cfg.c_prep * (t + cfg.hold) + cfg.c_track * t) & finite_hit & (t > cfg.tau_brace)
+    else:
+      want = (cb < cc) & finite_hit & (b.t_hit > cfg.tau_brace)
+  elif cfg.kind == "belief_lead":
+    want = (cb < cc) & finite_hit
+  elif cfg.kind in ("belief_wait", "belief_voi"):
+    if la is None:
+      raise ValueError("waiting rules require a forecast")
+    want = (cb < jp.minimum(cc, cw)) & finite_hit
+  else:
+    raise ValueError(cfg.kind)
+  return want, (cb, cc, cw)
+
+
+def request(cfg: RuleConfig, rm: ResponseModel, b: BeliefStats, la=None):
+  return evaluate(cfg, rm, b, la)[0]
 
 
 def step(cfg: RuleConfig, rm: ResponseModel, mem: CtrlMemory, b: BeliefStats, det_valid,
-         step_idx, la=None) -> tuple[CtrlMemory, jax.Array]:
-  """Apply the rule with commitment; returns (memory, brace_active)."""
-  last_det = jp.where(det_valid, step_idx, mem.last_det_step)
-  want = request(cfg, rm, b, la)
-  # Passed: the KF mean's closest approach to the robot lies release_after behind us. (An
-  # earlier version tested E_b[t_hit], which averages only future-hit samples and is never
-  # negative, so release then depended on staleness alone.)
-  passed = jp.isfinite(b.t_pass) & (b.t_pass < -cfg.release_after)
-  stale = (step_idx - last_det) > cfg.stale_steps
+         step_idx, la=None, capture_step=None, want_override=None) -> tuple[CtrlMemory, jax.Array]:
+  step_idx = jp.asarray(step_idx, jp.int32)
+  capture_step = step_idx if capture_step is None else capture_step
+  usable = det_valid & (capture_step >= 0) & (capture_step <= step_idx)
+  last_det = jp.where(usable, step_idx, mem.last_det_step)
+  last_capture = jp.where(usable, jp.maximum(capture_step, mem.last_capture_step), mem.last_capture_step)
+  want = request(cfg, rm, b, la) if want_override is None else want_override
   committed = mem.braced & (mem.brace_steps < cfg.commit_steps)
-  # Stay braced while committed; afterwards until the object has passed or gone stale.
-  # (cfg.release_on_unwant restores the old behaviour for the ablation.)
-  keep = ~passed & ~stale
-  if cfg.release_on_unwant:
-    keep = keep & want
-  stay = committed | (mem.braced & keep)
-  start = ~mem.braced & want
-  braced = stay | start
-  n_sw = mem.n_switches + (braced != mem.braced).astype(jp.int32)
-  brace_steps = jp.where(braced, jp.where(mem.braced, mem.brace_steps + 1, 1), 0)
+  if cfg.release_mode == "legacy":
+    passed = jp.isfinite(b.t_hit) & (b.t_hit < -cfg.release_after)
+    stale = (step_idx - last_det) > cfg.stale_steps
+    keep = ~passed & ~stale
+    if cfg.release_on_unwant:
+      keep &= want
+    stay = committed | (mem.braced & keep)
+    start = ~mem.braced & want
+    braced = stay | start
+    reason = jp.where(stale, 3, jp.where(passed, 5, 4))
+    deadline, capped = mem.release_step, mem.deadline_capped
+  else:
+    stale = (step_idx - last_capture) > cfg.stale_steps
+    eligible = ~mem.completed if cfg.single_commit else jp.array(True)
+    start = ~mem.braced & eligible & ~stale & want & jp.isfinite(b.t_hit)
+    duration = _duration(cfg, b.t_hit)
+    n_hold = jp.rint(duration / cfg.dt).astype(jp.int32)
+    deadline = jp.where(start, step_idx + n_hold, mem.release_step)
+    capped = jp.where(start, b.t_hit + cfg.hold > cfg.max_hold_s, mem.deadline_capped)
+    stay = mem.braced & (committed | (step_idx < mem.release_step))
+    braced = stay | start
+    reason = jp.where(mem.deadline_capped, 2, 1)
   released = mem.braced & ~braced
-  reason = jp.where(released, jp.where(passed, RELEASE_PASSED, RELEASE_STALE), mem.release_reason)
-  return CtrlMemory(braced, brace_steps, last_det, n_sw, reason), braced
+  completed = mem.completed | released
+  brace_steps = jp.where(braced, jp.where(mem.braced, mem.brace_steps + 1, 1), 0)
+  n_switches = mem.n_switches + (braced != mem.braced).astype(jp.int32)
+  onset = jp.where(start, step_idx, mem.onset_step)
+  updated = CtrlMemory(braced, brace_steps, last_det, n_switches, last_capture, deadline,
+                       onset, completed, jp.where(released, reason, 0).astype(jp.int32), capped)
+  return updated, braced

@@ -118,7 +118,8 @@ def batched_env(env: ImpactJoystick, proj_masses: np.ndarray):
 
 
 def set_scenario(env: ImpactJoystick, state, speed=None, hit_time=None, is_miss=None,
-                 command=None, launch=True, launch_pos=None, launch_vel=None):
+                 command=None, launch=True, launch_pos=None, launch_vel=None,
+                 miss_offset: float = 0.6):
   """Override per-env scenario fields after reset and recompute the derived ones.
 
   launch=False suppresses the projectile (control episodes with the same schedule).
@@ -131,8 +132,8 @@ def set_scenario(env: ImpactJoystick, state, speed=None, hit_time=None, is_miss=
     info["proj_speed"] = jp.asarray(speed, jp.float32)
   if is_miss is not None:
     is_miss = jp.asarray(is_miss, bool)
-    # Near-miss: fixed 0.6 m lateral offset (the side is irrelevant by symmetry).
-    info["proj_lateral"] = jp.where(is_miss, 0.6, 0.0)
+    # Explicit evaluation override; it is not the environment's training range.
+    info["proj_lateral"] = jp.where(is_miss, float(miss_offset), 0.0)
     info["proj_is_miss"] = is_miss
   if hit_time is None:
     hit_time = info["t_hit_nominal"]
@@ -168,14 +169,32 @@ def no_brace(info, t):
   return jp.zeros_like(info["fell"])
 
 
-def oracle_brace(lead_s: jax.Array, hold_s: float, dt: float):
-  """Privileged rule: brace from t_hit - lead until t_hit + hold, only for true hits.
-  lead_s is per-env; a negative lead means never brace."""
+def oracle_brace(lead_s: jax.Array, hold_s: float, dt: float, target_time_s=None,
+                 commit_steps: int = 0, max_hold_s: float | None = None):
+  """Fixed privileged schedule on either nominal arrival or an explicit reference event.
+
+  In the reviewed protocol intervals are [start_step, release_step), minimum
+  commitment is enforced, and release is bounded by max_hold_s. A target NaN
+  explicitly means no reference event, so no intervention is scheduled. The
+  three-argument call preserves the historical inclusive nominal-arrival rule.
+  """
 
   def decide(info, t):
     tt = info["ep_step"].astype(jp.float32) * dt
-    on = (lead_s >= 0) & (tt >= info["t_hit_nominal"] - lead_s) & \
-         (tt <= info["t_hit_nominal"] + hold_s) & ~info["proj_is_miss"]
+    if target_time_s is None and commit_steps == 0 and max_hold_s is None:
+      on = (lead_s >= 0) & (tt >= info["t_hit_nominal"] - lead_s) & \
+           (tt <= info["t_hit_nominal"] + hold_s) & ~info["proj_is_miss"]
+      return on
+    target = info["t_hit_nominal"] if target_time_s is None else target_time_s
+    finite = jp.isfinite(target)
+    target = jp.where(finite, target, 0.0)
+    start = jp.ceil(jp.maximum(target - lead_s, 0.0) / dt - 1e-6).astype(jp.int32)
+    end = jp.ceil((target + hold_s) / dt - 1e-6).astype(jp.int32)
+    end = jp.maximum(end, start + commit_steps)
+    if max_hold_s is not None:
+      end = jp.minimum(end, start + int(np.floor(max_hold_s / dt + 1e-6)))
+    on = finite & (lead_s >= 0) & (info["ep_step"] >= start) & \
+         (info["ep_step"] < end) & ~info["proj_is_miss"]
     return on
 
   return decide
@@ -214,6 +233,21 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
     rng, k, kc = jax.random.split(rng, 3)
     keys = jax.random.split(k, n)
     logs = {}
+    d0 = state.data
+    pre = {
+        "action_step": jp.full((n,), t, jp.int32),
+        "pre_pelvis_pos": d0.xpos[:, pelvis],
+        "pre_pelvis_vel": d0.qvel[:, :3],
+        "pre_pelvis_fwd": d0.xmat[:, pelvis].reshape(n, 3, 3)[:, :, 0],
+        "pre_com": d0.subtree_com[:, pelvis],
+        "pre_feet_pos": d0.site_xpos[:, feet],
+        "pre_torso_up": d0.xmat[:, torso].reshape(n, 3, 3)[:, 2, 2],
+        "pre_feet_contact": jp.stack([d0.sensordata[:, a] > 0 for a in feet_adr], axis=-1),
+        "pre_proj_pos": state.info["obj_pos"], "pre_proj_vel": state.info["obj_vel"],
+        "pre_proj_launched": state.info["proj_launched"],
+        "pre_impact_contact": state.info["impact_contact"],
+        "pre_terminated": state.info["terminated"],
+    }
     if controller is not None:
       d0 = state.data
       pel = d0.xpos[:, pelvis]
@@ -221,10 +255,14 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
       # The robot's intended motion: commanded forward speed along its heading (the
       # instantaneous pelvis velocity sways by +-0.3 m/s during walking).
       fwd_xy = fwd[:, :2] / (jp.linalg.norm(fwd[:, :2], axis=-1, keepdims=True) + 1e-6)
-      pvel = jp.concatenate([fwd_xy * state.info["command"][:, :1], jp.zeros((n, 1))], axis=-1)
+      pvel = (jp.concatenate([fwd_xy * state.info["command"][:, :1], jp.zeros((n, 1))], axis=-1)
+              if controller.rule_cfg.release_mode == "legacy" else d0.qvel[:, :3])
       cstate, brace, logs = controller.step(cstate, state.info, pel, fwd, pvel, t, kc)
     else:
       brace = decide(state.info, t)
+    # Outcome is absorbing for preparation cost even though physics is unrolled
+    # to a common fixed horizon. Do not count post-fall preparation as a decision.
+    brace = brace & ~state.info["terminated"]
     info = dict(state.info)
     info["brace_active"] = brace
     state = state.replace(info=info)
@@ -232,6 +270,7 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
     state = wenv.step(state, act)
     d = state.data
     rec = {k: state.info[k] for k in TRAJ_INFO_KEYS}
+    rec.update(pre)
     rec.update({"ctrl_" + k: v for k, v in logs.items()})
     rec.update({
         "pelvis_pos": d.xpos[:, pelvis],
@@ -263,69 +302,11 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
 
 
 def episode_table(final_info: dict, traj: dict, dt: float) -> dict:
-  """Per-episode scalars from a rollout: scenario, outcome, progress, pre-impact state."""
-  n = final_info["fell"].shape[0]
-  T = traj["pelvis_pos"].shape[0]
-  # Forward progress: displacement projected on the pelvis heading at each step.
-  dp = np.diff(traj["pelvis_pos"][..., :2], axis=0)                 # (T-1, N, 2)
-  fwd = traj["pelvis_fwd"][:-1, :, :2]
-  fwd = fwd / (np.linalg.norm(fwd, axis=-1, keepdims=True) + 1e-9)
-  step_prog = np.sum(dp * fwd, axis=-1)                              # (T-1, N)
-  ts = final_info["term_step"]
-  alive = (np.arange(T - 1)[:, None] < np.where(ts < 0, T, ts)[None, :])
-  progress = np.sum(step_prog * alive, axis=0)                        # (N,) until first failure
-  cs = final_info["contact_step"]
-  # Censored: contact happened with less than `window` seconds of observation left.
-  window = 2.5
-  censored = (cs >= 0) & ((T - cs) * dt < window) & ~final_info["fell"]
-  pre = np.clip(cs - 1, 0, T - 1)
-  idx = np.arange(n)
-  com_pre = traj["com"][pre, idx]                                   # (N, 3)
-  com_prev = traj["com"][np.clip(pre - 1, 0, T - 1), idx]
-  com_vel = (com_pre - com_prev) / dt
-  feet_pre = traj["feet_pos"][pre, idx]                             # (N, 2, 3)
-  pvel = traj["proj_vel"][pre, idx]
-  out = {
-      "mass": final_info["proj_mass"], "speed": final_info["proj_speed"],
-      "momentum": final_info["proj_momentum"], "is_miss": final_info["proj_is_miss"],
-      "t_hit_nominal": final_info["t_hit_nominal"],
-      "launched": final_info["proj_launched"], "contact": final_info["impact_contact"],
-      "contact_step": cs, "fell": final_info["fell"],
-      "fell_before_launch": final_info["fell_before_launch"],
-      "term_reason": final_info["term_reason"], "term_step": final_info["term_step"],
-      "progress_m": progress, "censored": censored,
-      "brace_steps_total": np.sum(traj["brace_active"], axis=0),
-      "brace_onset_step": np.where(traj["brace_active"].any(axis=0), np.argmax(traj["brace_active"], axis=0), -1),
-      "com_x_pre": com_pre[:, 0], "com_y_pre": com_pre[:, 1], "com_z_pre": com_pre[:, 2],
-      "com_vx_pre": com_vel[:, 0], "com_vy_pre": com_vel[:, 1],
-      "lfoot_x_pre": feet_pre[:, 0, 0], "lfoot_y_pre": feet_pre[:, 0, 1],
-      "rfoot_x_pre": feet_pre[:, 1, 0], "rfoot_y_pre": feet_pre[:, 1, 1],
-      "proj_vx_pre": pvel[:, 0], "proj_vy_pre": pvel[:, 1], "proj_vz_pre": pvel[:, 2],
-  }
-  if "ctrl_p_hit" in traj:
-    pre_p = traj["ctrl_p_hit"][pre, idx]
-    out["p_hit_pre_contact"] = pre_p
-    out["n_detections"] = np.sum(traj["ctrl_det_valid"], axis=0)
-    out["false_prep"] = (final_info["proj_is_miss"] & traj["brace_active"].any(axis=0))
-  return {k: np.asarray(v) for k, v in out.items()}
+  """CPU analysis shared with tests; see statistics.episode_table."""
+  from foresight.eval import statistics
+  return statistics.episode_table(final_info, traj, dt)
 
 
-def write_csv(path: str | Path, table: dict, extra: Optional[dict] = None):
-  import csv
-  keys = list(table.keys())
-  n = len(table[keys[0]])
-  extra = extra or {}
-  with open(path, "w", newline="") as f:
-    w = csv.writer(f)
-    w.writerow(list(extra.keys()) + keys)
-    for i in range(n):
-      w.writerow([extra[k] for k in extra] + [_scalar(table[k][i]) for k in keys])
-
-
-def _scalar(v):
-  v = np.asarray(v)
-  if v.dtype == bool:
-    return int(v)
-  if np.issubdtype(v.dtype, np.floating):
-    return f"{float(v):.5g}"
-  return int(v)
+def write_csv(path, table, extra=None):
+  from foresight.eval import statistics
+  return statistics.write_csv(path, table, extra)
