@@ -1,4 +1,11 @@
-# Fleet Robust Execution: design and review package
+# Online Actuator Adaptation: proposals and design reviews
+
+The latest [research candidate 0.3](research_candidate/README.md) strengthens
+**Online Actuator Adaptation for Reliable Humanoid Locomotion** with an explicit
+uncertainty/command-hold correction rule, analytical reference, matched
+comparisons and a paper plan. It includes a fair comparison with the Fleet Robust
+Execution systems emphasis. The original 24-page design below is retained as
+versioned supporting material.
 
 Review draft 0.2 expands the four-page Fleet-Robust Execution specification into
 a technical design and experimental protocol. The selected architecture remains
@@ -9,8 +16,10 @@ position-target correction, confidence and fault supervision, and a C++ port.
 
 | Document | Purpose |
 | --- | --- |
+| [Strengthened research proposal, PDF](research_candidate/proposal.pdf) | 16-page method, experiments, paper criteria, costs and comparison of the two proposals |
+| [Research candidate review brief](research_candidate/claude_review_request.md) | Questions for Claude about correctness, research strength and proposal selection |
 | [Detailed paper, PDF](paper.pdf) | Typeset 24-page review document with equations, diagrams, experimental protocol and references |
-| [Detailed paper, Markdown](paper.md) | Canonical editable source for technical review and proposed changes |
+| [Detailed paper, Markdown](paper.md) | Editable source of the preceding 0.2 engineering design |
 | [Review of the four-page specification](specification_review.md) | Specific corrections to physics, measurement assumptions, timing and evidence claims |
 | [Independent review brief](claude_review_brief.md) | Self-contained instructions for Claude or another reviewer; requests minimal corrections within the selected architecture |
 
@@ -28,8 +37,8 @@ implemented and CPU-checked. GPU recovery, online identification, calibration,
 confidence logic, learned adapters and the C++ runtime are not measured results
 in this revision. The paper states module-specific status and required evidence.
 
-This package changes documentation only. It does not change the existing
-experiment launcher or constitute a new GPU experiment. The evidence cutoff is
+This release adds documentation and a standalone CPU analytical reference. It does
+not change the existing experiment launcher or constitute a new GPU experiment. The evidence cutoff is
 November 15, 2026. Update completed-work claims only against an actual source
 revision, checkpoint manifest and experiment output.
 

@@ -1,0 +1,844 @@
+{
+  "scope": "CPU scalar algebra checks and illustrative calculations only; no robot performance measurements",
+  "method": "interval projection with same-state unsaturated proportional-force comparison",
+  "case_count": 10,
+  "invalid_input_checks": 2,
+  "cases": [
+    {
+      "case": {
+        "name": "informative_gain_interval",
+        "gains": [
+          0.65,
+          0.75
+        ],
+        "errors": [
+          0.08,
+          0.12
+        ],
+        "estimate": 0.7,
+        "reference": 0.1,
+        "target_range": [
+          -0.5,
+          0.5
+        ],
+        "kp": 75.0,
+        "available_force": 25.0,
+        "max_offset": 0.2,
+        "slew_rate": 2.0,
+        "hold": 0.02,
+        "previous": 0.0,
+        "regularizer": 0.0,
+        "current_error": null
+      },
+      "result": {
+        "status": "FEASIBLE",
+        "candidate": 0.042857142857142864,
+        "effective_interval": [
+          0.0,
+          0.05333333333333334
+        ],
+        "requested_interval": [
+          0.0,
+          0.04
+        ],
+        "requested": 0.04,
+        "effective": 0.04000000000000001,
+        "sampled_max_squared_force_error_change": -1.6874999999999993,
+        "interior_and_corner_points_checked": 1005
+      }
+    },
+    {
+      "case": {
+        "name": "wider_interval",
+        "gains": [
+          0.6,
+          0.95
+        ],
+        "errors": [
+          0.08,
+          0.12
+        ],
+        "estimate": 0.7,
+        "reference": 0.1,
+        "target_range": [
+          -0.5,
+          0.5
+        ],
+        "kp": 75.0,
+        "available_force": 25.0,
+        "max_offset": 0.2,
+        "slew_rate": 2.0,
+        "hold": 0.02,
+        "previous": 0.0,
+        "regularizer": 0.0,
+        "current_error": null
+      },
+      "result": {
+        "status": "FEASIBLE",
+        "candidate": 0.042857142857142864,
+        "effective_interval": [
+          0.0,
+          0.008421052631578956
+        ],
+        "requested_interval": [
+          0.0,
+          0.008421052631578956
+        ],
+        "requested": 0.008421052631578956,
+        "effective": 0.008421052631578954,
+        "sampled_max_squared_force_error_change": -6.938893903907228e-17,
+        "interior_and_corner_points_checked": 1005
+      }
+    },
+    {
+      "case": {
+        "name": "healthy_gain_remains_plausible",
+        "gains": [
+          0.6,
+          1.02
+        ],
+        "errors": [
+          0.08,
+          0.12
+        ],
+        "estimate": 0.7,
+        "reference": 0.1,
+        "target_range": [
+          -0.5,
+          0.5
+        ],
+        "kp": 75.0,
+        "available_force": 25.0,
+        "max_offset": 0.2,
+        "slew_rate": 2.0,
+        "hold": 0.02,
+        "previous": 0.0,
+        "regularizer": 0.0,
+        "current_error": null
+      },
+      "result": {
+        "status": "FEASIBLE",
+        "candidate": 0.042857142857142864,
+        "effective_interval": [
+          0.0,
+          0.0
+        ],
+        "requested_interval": [
+          0.0,
+          0.0
+        ],
+        "requested": 0.0,
+        "effective": 0.0,
+        "sampled_max_squared_force_error_change": 3.552713678800501e-15,
+        "interior_and_corner_points_checked": 1005
+      }
+    },
+    {
+      "case": {
+        "name": "target_error_crosses_zero",
+        "gains": [
+          0.65,
+          0.75
+        ],
+        "errors": [
+          -0.01,
+          0.01
+        ],
+        "estimate": 0.7,
+        "reference": 0.1,
+        "target_range": [
+          -0.5,
+          0.5
+        ],
+        "kp": 75.0,
+        "available_force": 25.0,
+        "max_offset": 0.2,
+        "slew_rate": 2.0,
+        "hold": 0.02,
+        "previous": 0.0,
+        "regularizer": 0.0,
+        "current_error": null
+      },
+      "result": {
+        "status": "FEASIBLE",
+        "candidate": 0.0,
+        "effective_interval": [
+          0.0,
+          0.0
+        ],
+        "requested_interval": [
+          0.0,
+          0.0
+        ],
+        "requested": 0.0,
+        "effective": 0.0,
+        "sampled_max_squared_force_error_change": 1.3877787807814457e-17,
+        "interior_and_corner_points_checked": 1005
+      }
+    },
+    {
+      "case": {
+        "name": "limited_force_headroom",
+        "gains": [
+          0.6,
+          0.8
+        ],
+        "errors": [
+          0.08,
+          0.12
+        ],
+        "estimate": 0.7,
+        "reference": 0.1,
+        "target_range": [
+          -0.5,
+          0.5
+        ],
+        "kp": 75.0,
+        "available_force": 9.0,
+        "max_offset": 0.2,
+        "slew_rate": 2.0,
+        "hold": 0.02,
+        "previous": 0.0,
+        "regularizer": 0.0,
+        "current_error": null
+      },
+      "result": {
+        "status": "FEASIBLE",
+        "candidate": 0.042857142857142864,
+        "effective_interval": [
+          0.0,
+          0.03
+        ],
+        "requested_interval": [
+          0.0,
+          0.03
+        ],
+        "requested": 0.03,
+        "effective": 0.03,
+        "sampled_max_squared_force_error_change": -1.079999999999999,
+        "interior_and_corner_points_checked": 1005
+      }
+    },
+    {
+      "case": {
+        "name": "slew_conflicts_with_withdrawal",
+        "gains": [
+          0.6,
+          1.02
+        ],
+        "errors": [
+          0.08,
+          0.12
+        ],
+        "estimate": 0.7,
+        "reference": 0.1,
+        "target_range": [
+          -0.5,
+          0.5
+        ],
+        "kp": 75.0,
+        "available_force": 25.0,
+        "max_offset": 0.2,
+        "slew_rate": 2.0,
+        "hold": 0.02,
+        "previous": 0.08,
+        "regularizer": 0.0,
+        "current_error": null
+      },
+      "result": {
+        "status": "CONSTRAINT_CONFLICT",
+        "effective_interval": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "case": {
+        "name": "nominal_saturation_invalidates_comparison",
+        "gains": [
+          0.65,
+          0.75
+        ],
+        "errors": [
+          0.08,
+          0.12
+        ],
+        "estimate": 0.7,
+        "reference": 0.1,
+        "target_range": [
+          -0.5,
+          0.5
+        ],
+        "kp": 75.0,
+        "available_force": 5.0,
+        "max_offset": 0.2,
+        "slew_rate": 2.0,
+        "hold": 0.02,
+        "previous": 0.0,
+        "regularizer": 0.0,
+        "current_error": null
+      },
+      "result": {
+        "status": "UNSUPPORTED_SATURATION"
+      }
+    },
+    {
+      "case": {
+        "name": "clipped_target_preimage",
+        "gains": [
+          0.65,
+          0.75
+        ],
+        "errors": [
+          0.08,
+          0.12
+        ],
+        "estimate": 0.7,
+        "reference": 0.1,
+        "target_range": [
+          -0.5,
+          0.12
+        ],
+        "kp": 75.0,
+        "available_force": 25.0,
+        "max_offset": 0.2,
+        "slew_rate": 2.0,
+        "hold": 0.02,
+        "previous": 0.0,
+        "regularizer": 0.0,
+        "current_error": null
+      },
+      "result": {
+        "status": "FEASIBLE",
+        "candidate": 0.042857142857142864,
+        "effective_interval": [
+          0.0,
+          0.01999999999999999
+        ],
+        "requested_interval": [
+          0.0,
+          0.04
+        ],
+        "requested": 0.04,
+        "effective": 0.01999999999999999,
+        "sampled_max_squared_force_error_change": -2.1093749999999996,
+        "interior_and_corner_points_checked": 1005
+      }
+    },
+    {
+      "case": {
+        "name": "negative_error",
+        "gains": [
+          0.65,
+          0.75
+        ],
+        "errors": [
+          -0.12,
+          -0.08
+        ],
+        "estimate": 0.7,
+        "reference": 0.1,
+        "target_range": [
+          -0.5,
+          0.5
+        ],
+        "kp": 75.0,
+        "available_force": 25.0,
+        "max_offset": 0.2,
+        "slew_rate": 2.0,
+        "hold": 0.02,
+        "previous": 0.0,
+        "regularizer": 0.0,
+        "current_error": null
+      },
+      "result": {
+        "status": "FEASIBLE",
+        "candidate": -0.042857142857142864,
+        "effective_interval": [
+          -0.05333333333333334,
+          0.0
+        ],
+        "requested_interval": [
+          -0.04,
+          0.0
+        ],
+        "requested": -0.04,
+        "effective": -0.04,
+        "sampled_max_squared_force_error_change": -1.6875,
+        "interior_and_corner_points_checked": 1005
+      }
+    },
+    {
+      "case": {
+        "name": "gain_above_one",
+        "gains": [
+          1.05,
+          1.15
+        ],
+        "errors": [
+          0.08,
+          0.12
+        ],
+        "estimate": 1.1,
+        "reference": 0.1,
+        "target_range": [
+          -0.5,
+          0.5
+        ],
+        "kp": 75.0,
+        "available_force": 25.0,
+        "max_offset": 0.2,
+        "slew_rate": 2.0,
+        "hold": 0.02,
+        "previous": 0.0,
+        "regularizer": 0.0,
+        "current_error": null
+      },
+      "result": {
+        "status": "FEASIBLE",
+        "candidate": -0.009090909090909094,
+        "effective_interval": [
+          -0.007619047619047625,
+          0.0
+        ],
+        "requested_interval": [
+          -0.007619047619047625,
+          0.0
+        ],
+        "requested": -0.007619047619047625,
+        "effective": -0.0076190476190476225,
+        "sampled_max_squared_force_error_change": -1.6653345369377348e-16,
+        "interior_and_corner_points_checked": 1005
+      }
+    }
+  ],
+  "sweep": [
+    {
+      "upper_gain": 0.7,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.705,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.71,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.715,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.72,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.725,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.73,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.735,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.74,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.745,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.75,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.755,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.76,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.7649999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.77,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.7749999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.7799999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.7849999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.7899999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.7949999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.7999999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.04,
+      "effective": 0.04000000000000001
+    },
+    {
+      "upper_gain": 0.8049999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.03875776397515529,
+      "effective": 0.03875776397515529
+    },
+    {
+      "upper_gain": 0.8099999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.03753086419753088,
+      "effective": 0.03753086419753088
+    },
+    {
+      "upper_gain": 0.815,
+      "candidate": 0.042857142857142864,
+      "requested": 0.03631901840490799,
+      "effective": 0.036319018404908004
+    },
+    {
+      "upper_gain": 0.82,
+      "candidate": 0.042857142857142864,
+      "requested": 0.035121951219512205,
+      "effective": 0.0351219512195122
+    },
+    {
+      "upper_gain": 0.825,
+      "candidate": 0.042857142857142864,
+      "requested": 0.03393939393939395,
+      "effective": 0.033939393939393964
+    },
+    {
+      "upper_gain": 0.83,
+      "candidate": 0.042857142857142864,
+      "requested": 0.032771084337349404,
+      "effective": 0.032771084337349404
+    },
+    {
+      "upper_gain": 0.835,
+      "candidate": 0.042857142857142864,
+      "requested": 0.03161676646706588,
+      "effective": 0.03161676646706588
+    },
+    {
+      "upper_gain": 0.84,
+      "candidate": 0.042857142857142864,
+      "requested": 0.030476190476190483,
+      "effective": 0.03047619047619049
+    },
+    {
+      "upper_gain": 0.845,
+      "candidate": 0.042857142857142864,
+      "requested": 0.029349112426035513,
+      "effective": 0.029349112426035523
+    },
+    {
+      "upper_gain": 0.85,
+      "candidate": 0.042857142857142864,
+      "requested": 0.028235294117647063,
+      "effective": 0.028235294117647053
+    },
+    {
+      "upper_gain": 0.855,
+      "candidate": 0.042857142857142864,
+      "requested": 0.027134502923976612,
+      "effective": 0.027134502923976622
+    },
+    {
+      "upper_gain": 0.86,
+      "candidate": 0.042857142857142864,
+      "requested": 0.02604651162790698,
+      "effective": 0.02604651162790697
+    },
+    {
+      "upper_gain": 0.865,
+      "candidate": 0.042857142857142864,
+      "requested": 0.024971098265895955,
+      "effective": 0.024971098265895955
+    },
+    {
+      "upper_gain": 0.87,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0239080459770115,
+      "effective": 0.023908045977011502
+    },
+    {
+      "upper_gain": 0.875,
+      "candidate": 0.042857142857142864,
+      "requested": 0.022857142857142857,
+      "effective": 0.022857142857142854
+    },
+    {
+      "upper_gain": 0.8799999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.021818181818181844,
+      "effective": 0.021818181818181848
+    },
+    {
+      "upper_gain": 0.885,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0207909604519774,
+      "effective": 0.020790960451977397
+    },
+    {
+      "upper_gain": 0.8899999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.019775280898876424,
+      "effective": 0.019775280898876424
+    },
+    {
+      "upper_gain": 0.895,
+      "candidate": 0.042857142857142864,
+      "requested": 0.01877094972067039,
+      "effective": 0.018770949720670393
+    },
+    {
+      "upper_gain": 0.8999999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.017777777777777795,
+      "effective": 0.017777777777777795
+    },
+    {
+      "upper_gain": 0.905,
+      "candidate": 0.042857142857142864,
+      "requested": 0.016795580110497234,
+      "effective": 0.016795580110497227
+    },
+    {
+      "upper_gain": 0.9099999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.01582417582417584,
+      "effective": 0.015824175824175835
+    },
+    {
+      "upper_gain": 0.9149999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.014863387978142092,
+      "effective": 0.014863387978142087
+    },
+    {
+      "upper_gain": 0.9199999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.013913043478260882,
+      "effective": 0.01391304347826089
+    },
+    {
+      "upper_gain": 0.9249999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.012972972972972986,
+      "effective": 0.01297297297297298
+    },
+    {
+      "upper_gain": 0.9299999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.012043010752688184,
+      "effective": 0.012043010752688182
+    },
+    {
+      "upper_gain": 0.9349999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.011122994652406428,
+      "effective": 0.011122994652406432
+    },
+    {
+      "upper_gain": 0.94,
+      "candidate": 0.042857142857142864,
+      "requested": 0.01021276595744682,
+      "effective": 0.010212765957446815
+    },
+    {
+      "upper_gain": 0.945,
+      "candidate": 0.042857142857142864,
+      "requested": 0.00931216931216932,
+      "effective": 0.009312169312169327
+    },
+    {
+      "upper_gain": 0.95,
+      "candidate": 0.042857142857142864,
+      "requested": 0.008421052631578956,
+      "effective": 0.008421052631578954
+    },
+    {
+      "upper_gain": 0.955,
+      "candidate": 0.042857142857142864,
+      "requested": 0.007539267015706814,
+      "effective": 0.007539267015706813
+    },
+    {
+      "upper_gain": 0.96,
+      "candidate": 0.042857142857142864,
+      "requested": 0.006666666666666672,
+      "effective": 0.006666666666666668
+    },
+    {
+      "upper_gain": 0.965,
+      "candidate": 0.042857142857142864,
+      "requested": 0.005803108808290161,
+      "effective": 0.005803108808290158
+    },
+    {
+      "upper_gain": 0.97,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0049484536082474275,
+      "effective": 0.00494845360824743
+    },
+    {
+      "upper_gain": 0.975,
+      "candidate": 0.042857142857142864,
+      "requested": 0.004102564102564106,
+      "effective": 0.004102564102564099
+    },
+    {
+      "upper_gain": 0.98,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0032653061224489823,
+      "effective": 0.003265306122448977
+    },
+    {
+      "upper_gain": 0.985,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0024365482233502564,
+      "effective": 0.0024365482233502517
+    },
+    {
+      "upper_gain": 0.99,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0016161616161616175,
+      "effective": 0.0016161616161616127
+    },
+    {
+      "upper_gain": 0.9949999999999999,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0008040201005025312,
+      "effective": 0.0008040201005025255
+    },
+    {
+      "upper_gain": 1.0,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0,
+      "effective": 0.0
+    },
+    {
+      "upper_gain": 1.005,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0,
+      "effective": 0.0
+    },
+    {
+      "upper_gain": 1.01,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0,
+      "effective": 0.0
+    },
+    {
+      "upper_gain": 1.015,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0,
+      "effective": 0.0
+    },
+    {
+      "upper_gain": 1.02,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0,
+      "effective": 0.0
+    },
+    {
+      "upper_gain": 1.025,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0,
+      "effective": 0.0
+    },
+    {
+      "upper_gain": 1.03,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0,
+      "effective": 0.0
+    },
+    {
+      "upper_gain": 1.035,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0,
+      "effective": 0.0
+    },
+    {
+      "upper_gain": 1.04,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0,
+      "effective": 0.0
+    },
+    {
+      "upper_gain": 1.045,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0,
+      "effective": 0.0
+    },
+    {
+      "upper_gain": 1.05,
+      "candidate": 0.042857142857142864,
+      "requested": 0.0,
+      "effective": 0.0
+    }
+  ]
+}
