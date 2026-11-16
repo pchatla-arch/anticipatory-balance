@@ -1,0 +1,590 @@
+Adaptive gate: adaptive_gate_20261116T070551Z_220613; profile=gate.
+The attempt clock includes setup. Ten minutes are reserved for publication and stop checks.
+Installing/verifying the pinned fresh environment; setup limit is 25 minutes.
+Running: bash scripts/bootstrap_fresh_pod.sh
+Storage: /workspace -> / (overlay)
+This setup is on container storage. Keep uploaded results or download the review ZIP before replacing the pod.
+Platform: x86_64, glibc 2.39
+GPU 0: NVIDIA RTX A6000, driver 595.91.07, 46068 MiB
+Cloning into '/workspace/.foresight-bootstrap/clone.e6E80q/repo'...
+HEAD is now at 9de9938 Use torch.square instead of the power operator for computing quaternion error magnitude.
+Cloning into '/workspace/.foresight-bootstrap/clone.dgTE7c/repo'...
+HEAD is now at 1b86ece Merge pull request #213 from TetherIA/tetheria/add-aero-hand-open
+downloading uv 0.13.8 x86_64-unknown-linux-gnu
+installing to /workspace/.foresight-bootstrap/bin
+  uv
+  uvx
+everything's installed!
+[31mWARN[m: The following commands are shadowed by other commands in your PATH: uv uvx
+uv 0.13.8 (x86_64-unknown-linux-gnu)
+
+Installing the pinned fresh environment.
+Downloading cpython-3.12.16-linux-x86_64-gnu (download) (33.1MiB)
+ Downloaded cpython-3.12.16-linux-x86_64-gnu (download)
+Using CPython 3.12.16
+Creating virtual environment at: .venv
+   Building playground @ file:///workspace/mujoco_playground/rss2025
+Downloading nvidia-nvshmem-cu13 (57.6MiB)
+Downloading nvidia-cuda-cupti (10.2MiB)
+Downloading ruff (9.9MiB)
+Downloading babel (9.7MiB)
+Downloading grpcio (6.8MiB)
+Downloading pillow (6.8MiB)
+Downloading sympy (6.0MiB)
+Downloading numpy (16.0MiB)
+Downloading matplotlib (9.4MiB)
+Downloading tensorboard (5.3MiB)
+Downloading triton (236.5MiB)
+Downloading nvidia-curand (56.8MiB)
+Downloading nvidia-cusolver-cu12 (322.5MiB)
+Downloading nvidia-cudnn-cu13 (527.5MiB)
+Downloading jax-cuda12-plugin (8.5MiB)
+Downloading nvidia-cusolver (191.6MiB)
+Downloading nvidia-cuda-nvrtc (86.0MiB)
+Downloading nvidia-cublas (403.5MiB)
+Downloading nvidia-cusparselt-cu13 (162.3MiB)
+Downloading scipy (33.7MiB)
+Downloading nvidia-cudnn-cu12 (730.7MiB)
+Downloading mypy (14.8MiB)
+Downloading nvidia-cufft (204.2MiB)
+Downloading notebook (5.3MiB)
+Downloading nvidia-cuda-nvrtc-cu12 (85.4MiB)
+Downloading jupyterlab (16.4MiB)
+Downloading nvidia-nvshmem-cu12 (267.8MiB)
+Downloading nvidia-cuda-nvcc-cu12 (38.7MiB)
+Downloading jax-cuda12-pjrt (183.0MiB)
+Downloading warp-lang (141.9MiB)
+Downloading nvidia-cuda-cupti-cu12 (10.3MiB)
+Downloading nvidia-cublas-cu12 (554.3MiB)
+Downloading dm-control (53.8MiB)
+Downloading nvidia-nvjitlink (40.5MiB)
+Downloading wandb (19.4MiB)
+Downloading jaxlib (82.8MiB)
+Downloading nvidia-cufft-cu12 (191.6MiB)
+Downloading tensorstore (20.6MiB)
+Downloading onnx (8.5MiB)
+Downloading nvidia-nvjitlink-cu12 (37.9MiB)
+Downloading nvidia-nccl-cu13 (206.0MiB)
+Downloading nvidia-nccl-cu12 (335.2MiB)
+Downloading cuda-bindings (6.8MiB)
+Downloading mujoco-mjx (6.9MiB)
+Downloading virtualenv (5.3MiB)
+Downloading nvidia-cusparse-cu12 (349.5MiB)
+Downloading nvidia-cusparse (139.2MiB)
+Downloading tensorboard-data-server (6.3MiB)
+Downloading torch (528.9MiB)
+Downloading mujoco (29.2MiB)
+ Downloaded tensorboard
+ Downloaded notebook
+ Downloaded virtualenv
+Downloading lxml (5.0MiB)
+Downloading fonttools (5.2MiB)
+Downloading jedi (4.7MiB)
+ Downloaded sympy
+Downloading labmaze (4.6MiB)
+ Downloaded tensorboard-data-server
+ Downloaded grpcio
+ Downloaded pillow
+ Downloaded cuda-bindings
+Downloading uvloop (4.3MiB)
+Downloading nvidia-cuda-runtime-cu12 (3.3MiB)
+Downloading debugpy (3.8MiB)
+Downloading pytype (4.5MiB)
+ Downloaded mujoco-mjx
+Downloading jax (3.3MiB)
+ Downloaded jax-cuda12-plugin
+Downloading pyopengl (3.0MiB)
+ Downloaded onnx
+Downloading nvidia-cuda-cccl-cu12 (3.0MiB)
+ Downloaded matplotlib
+Downloading libcst (2.2MiB)
+ Downloaded babel
+ Downloaded ruff
+Downloading nvidia-cuda-runtime (2.1MiB)
+Downloading widgetsnbextension (2.1MiB)
+ Downloaded nvidia-cuda-cupti
+ Downloaded nvidia-cuda-cupti-cu12
+ Downloaded jedi
+Downloading pydantic-core (2.1MiB)
+Downloading networkx (2.0MiB)
+Downloading black (1.8MiB)
+ Downloaded nvidia-cuda-runtime-cu12
+Downloading isort (1.6MiB)
+ Downloaded fonttools
+ Downloaded lxml
+ Downloaded labmaze
+Downloading kiwisolver (1.4MiB)
+Downloading ast-serialize (1.3MiB)
+ Downloaded debugpy
+ Downloaded jax
+Downloading pygments (1.2MiB)
+ Downloaded uvloop
+Downloading nvidia-cufile (1.2MiB)
+ Downloaded pyopengl
+Downloading orbax-checkpoint (1.4MiB)
+ Downloaded nvidia-cuda-cccl-cu12
+ Downloaded nvidia-cuda-runtime
+ Downloaded libcst
+ Downloaded widgetsnbextension
+ Downloaded kiwisolver
+ Downloaded black
+ Downloaded isort
+ Downloaded pydantic-core
+ Downloaded ast-serialize
+ Downloaded networkx
+ Downloaded pygments
+ Downloaded nvidia-cufile
+ Downloaded pytype
+ Downloaded orbax-checkpoint
+ Downloaded mypy
+ Downloaded numpy
+ Downloaded jupyterlab
+ Downloaded wandb
+ Downloaded tensorstore
+      Built playground @ file:///workspace/mujoco_playground/rss2025
+ Downloaded mujoco
+ Downloaded scipy
+ Downloaded nvidia-nvjitlink-cu12
+ Downloaded nvidia-cuda-nvcc-cu12
+ Downloaded nvidia-nvjitlink
+ Downloaded dm-control
+ Downloaded nvidia-curand
+ Downloaded nvidia-nvshmem-cu13
+ Downloaded jaxlib
+ Downloaded nvidia-cuda-nvrtc-cu12
+ Downloaded nvidia-cuda-nvrtc
+ Downloaded nvidia-cusparse
+ Downloaded warp-lang
+ Downloaded nvidia-cusparselt-cu13
+ Downloaded jax-cuda12-pjrt
+ Downloaded nvidia-cufft-cu12
+ Downloaded nvidia-cusolver
+ Downloaded nvidia-cufft
+ Downloaded nvidia-nccl-cu13
+ Downloaded triton
+ Downloaded nvidia-nvshmem-cu12
+ Downloaded nvidia-cusolver-cu12
+ Downloaded nvidia-nccl-cu12
+ Downloaded nvidia-cusparse-cu12
+ Downloaded nvidia-cublas
+ Downloaded nvidia-cudnn-cu13
+ Downloaded nvidia-cublas-cu12
+ Downloaded torch
+ Downloaded nvidia-cudnn-cu12
+Prepared 262 packages in 16.86s
+Installed 262 packages in 2.83s
+ + absl-py==2.5.1
+ + aiofiles==25.1.0
+ + annotated-types==0.8.0
+ + anyio==4.15.1
+ + argon2-cffi==25.1.0
+ + argon2-cffi-bindings==26.1.0
+ + arrow==1.4.0
+ + ast-serialize==0.13.1
+ + astroid==4.3.4
+ + asttokens==3.0.2
+ + async-lru==2.4.0
+ + attrs==26.1.0
+ + babel==2.18.0
+ + beautifulsoup4==4.15.0
+ + black==26.5.1
+ + bleach==6.4.0
+ + blinker==1.9.0
+ + brax==0.14.2
+ + certifi==2026.10.19
+ + cffi==2.1.1
+ + cfgv==3.5.0
+ + charset-normalizer==3.5.2
+ + click==8.5.0
+ + cloudpickle==3.1.2
+ + comm==0.2.3
+ + contourpy==1.4.0
+ + cuda-bindings==13.4.4
+ + cuda-pathfinder==1.8.3
+ + cuda-toolkit==13.0.3.0
+ + cwevals==0.0.1b1
+ + cycler==0.12.1
+ + debugpy==1.8.22
+ + defusedxml==0.7.1
+ + dill==0.4.1
+ + distlib==0.4.4
+ + distro==1.9.0
+ + dm-control==1.0.49
+ + dm-env==1.6
+ + dm-tree==0.1.10
+ + etils==1.14.0
+ + execnet==2.1.2
+ + executing==2.3.0
+ + fastjsonschema==2.22.2
+ + filelock==4.2.4
+ + flask==3.1.3
+ + flask-cors==6.0.5
+ + flax==0.12.10
+ + fonttools==4.67.0
+ + fqdn==1.6.0
+ + fsspec==2026.9.0
+ + gitdb==4.0.12
+ + gitpython==3.2.1
+ + glfw==2.11.0
+ + googleapis-common-protos==1.75.5
+ + grpcio==1.84.0
+ + h11==0.16.0
+ + httpcore==1.0.9
+ + httpx==0.28.1
+ + humanize==4.16.0
+ + identify==2.6.20
+ + idna==3.20
+ + immutabledict==4.3.1
+ + importlab==0.8.1
+ + iniconfig==2.3.1
+ + ipykernel==7.4.0
+ + ipython==9.17.1
+ + ipython-pygments-lexers==1.1.1
+ + ipywidgets==8.1.9
+ + isoduration==20.11.0
+ + isort==9.0.2
+ + itsdangerous==2.2.0
+ + jax==0.12.0.1
+ + jax-cuda12-pjrt==0.12.0.1
+ + jax-cuda12-plugin==0.12.0.1
+ + jaxlib==0.12.0.1
+ + jaxopt==0.8.5
+ + jedi==0.20.1
+ + jinja2==3.1.6
+ + json5==0.17.3
+ + jsonpointer==3.4
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.9.1
+ + jupyter==1.1.1
+ + jupyter-builder==1.2.3
+ + jupyter-client==8.10.0
+ + jupyter-console==6.6.3
+ + jupyter-core==5.9.1
+ + jupyter-events==0.12.1
+ + jupyter-lsp==2.3.1
+ + jupyter-server==2.21.1
+ + jupyter-server-terminals==0.5.4
+ + jupyterlab==4.6.4
+ + jupyterlab-pygments==0.3.0
+ + jupyterlab-server==2.28.1
+ + jupyterlab-widgets==3.0.17
+ + kiwisolver==1.5.1
+ + labmaze==1.0.6
+ + lark==1.3.1
+ + libcst==1.9.0
+ + librt==0.16.0
+ + lxml==6.1.3
+ + markdown==3.11.2
+ + markdown-it-py==4.2.0
+ + markupsafe==3.0.4
+ + matplotlib==3.11.2
+ + matplotlib-inline==0.2.2
+ + mccabe==0.7.0
+ + mdurl==0.1.2
+ + mediapy==1.2.7
+ + mistune==3.4.0
+ + ml-collections==1.1.0
+ + ml-dtypes==0.6.0
+ + mpmath==1.3.0
+ + msgpack==1.2.3
+ + msgspec==0.22.0
+ + mujoco==3.16.0
+ + mujoco-mjx==3.16.0
+ + mypy==2.4.0
+ + mypy-extensions==1.1.0
+ + nbclient==0.11.0
+ + nbconvert==7.17.2
+ + nbformat==5.11.1
+ + nest-asyncio2==1.7.4
+ + networkx==3.7
+ + ninja==1.13.2
+ + nodeenv==1.11.0
+ + notebook==7.6.3
+ + notebook-shim==0.2.4
+ + numpy==2.5.4
+ + nvidia-cublas==13.1.1.3
+ + nvidia-cublas-cu12==12.9.2.10
+ + nvidia-cuda-cccl-cu12==12.9.27
+ + nvidia-cuda-cupti==13.0.85
+ + nvidia-cuda-cupti-cu12==12.9.79
+ + nvidia-cuda-nvcc-cu12==12.9.86
+ + nvidia-cuda-nvrtc==13.0.88
+ + nvidia-cuda-nvrtc-cu12==12.9.86
+ + nvidia-cuda-runtime==13.0.96
+ + nvidia-cuda-runtime-cu12==12.9.79
+ + nvidia-cudnn-cu12==9.27.0.42
+ + nvidia-cudnn-cu13==9.24.0.43
+ + nvidia-cufft==12.0.0.61
+ + nvidia-cufft-cu12==11.4.1.4
+ + nvidia-cufile==1.15.1.6
+ + nvidia-curand==10.4.0.35
+ + nvidia-cusolver==12.0.4.66
+ + nvidia-cusolver-cu12==11.7.5.82
+ + nvidia-cusparse==12.6.3.3
+ + nvidia-cusparse-cu12==12.5.10.65
+ + nvidia-cusparselt-cu13==0.8.1
+ + nvidia-nccl-cu12==2.32.3
+ + nvidia-nccl-cu13==2.30.7
+ + nvidia-nvjitlink==13.4.92
+ + nvidia-nvjitlink-cu12==12.9.86
+ + nvidia-nvshmem-cu12==3.8.0
+ + nvidia-nvshmem-cu13==3.4.5
+ + nvidia-nvtx==13.0.85
+ + onnx==1.23.2
+ + onnx-ir==1.1.0
+ + onnxscript==0.7.2
+ + opentelemetry-api==1.45.1
+ + opentelemetry-exporter-http-transport==0.66b1
+ + opentelemetry-exporter-otlp-common==0.66b1
+ + opentelemetry-exporter-otlp-proto-common==1.45.1
+ + opentelemetry-exporter-otlp-proto-http==1.45.1
+ + opentelemetry-proto==1.45.1
+ + opentelemetry-sdk==1.45.1
+ + opentelemetry-semantic-conventions==0.66b1
+ + opt-einsum==3.4.0
+ + optax==0.2.8
+ + orbax-checkpoint==0.12.8
+ + packaging==26.3
+ + pandocfilters==1.5.1
+ + parso==0.8.7
+ + pathspec==1.1.1
+ + pexpect==4.9.0
+ + pillow==13.0.0
+ + platformdirs==4.13.5
+ + playground==0.2.0 (from file:///workspace/mujoco_playground/rss2025)
+ + pluggy==1.7.0
+ + pre-commit==4.7.0
+ + prometheus-client==0.26.0
+ + prompt-toolkit==3.0.53
+ + protobuf==7.36.2
+ + psutil==7.2.2
+ + ptyprocess==0.7.0
+ + pure-eval==0.2.4
+ + pycnite==2024.7.31
+ + pycparser==3.11
+ + pydantic==2.14.1
+ + pydantic-core==2.50.1
+ + pydot==4.0.1
+ + pygments==2.21.0
+ + pyink==26.5.1
+ + pylint==4.1.3
+ + pyopengl==3.1.10
+ + pyparsing==3.3.3
+ + pytest==9.1.1
+ + pytest-xdist==3.8.0
+ + python-dateutil==2.9.0.post0
+ + python-discovery==1.6.4
+ + python-json-logger==4.2.0
+ + pytokens==0.4.1
+ + pytype==2024.10.11
+ + pyvers==0.2.3
+ + pyyaml==6.0.3
+ + pyzmq==27.2.0
+ + referencing==0.37.0
+ + requests==2.34.2
+ + rfc3339-validator==0.1.4
+ + rfc3986-validator==0.1.1
+ + rfc3987-syntax==1.1.0
+ + rich==15.0.0
+ + rpds-py==2026.9.1
+ + rsl-rl-lib==5.5.1
+ + ruff==0.17.1
+ + scipy==1.18.1
+ + send2trash==2.1.0
+ + setuptools==84.2.1
+ + simplejson==4.2.0
+ + six==1.17.0
+ + smmap==5.0.3
+ + sniffio==1.3.1
+ + soupsieve==3.0.3
+ + stack-data==0.6.3
+ + sympy==1.14.0
+ + tabulate==0.10.0
+ + tensorboard==2.21.0
+ + tensorboard-data-server==0.7.2
+ + tensorboardx==2.6.5
+ + tensordict==0.15.2
+ + tensorstore==0.1.85
+ + terminado==0.18.1
+ + tinycss2==1.5.1
+ + toml==0.10.2
+ + tomlkit==0.15.2
+ + torch==2.14.1
+ + tornado==6.6
+ + tqdm==4.70.1
+ + traitlets==5.16.1
+ + treescope==0.1.10
+ + trimesh==5.1.1
+ + triton==3.8.0
+ + typing-extensions==4.16.0
+ + typing-inspection==0.4.4
+ + tzdata==2026.5
+ + uri-template==1.3.0
+ + urllib3==2.8.0
+ + uvloop==0.23.0
+ + virtualenv==21.14.12
+ + wandb==0.31.0
+ + warp-lang==1.18.0
+ + wcwidth==0.9.3
+ + webcolors==25.10.0
+ + webencodings==0.6.1
+ + websocket-client==1.9.2
+ + websockets==17.3
+ + werkzeug==3.1.9
+ + widgetsnbextension==4.0.16
+ + wrapt==2.5.1
+ + xxhash==4.0.2
+ + zipp==4.1.2
+
+Verifying pinned package versions and JAX GPU execution.
+jax==0.12.0.1
+jaxlib==0.12.0.1
+jax-cuda12-plugin==0.12.0.1
+jax-cuda12-pjrt==0.12.0.1
+brax==0.14.2
+mujoco==3.16.0
+mujoco-mjx==3.16.0
+warp-lang==1.18.0
+tensorboardx==2.6.5
+matplotlib==3.11.2
+JAX devices: [CudaDevice(id=0)]
+JAX GPU execution: passed
+
+Fresh pinned environment installed and verified.
+Activate it with:
+  source /workspace/mujoco_playground/rss2025/.venv/bin/activate
+No training was started.
+
+Bootstrap exit status: 0
+Provenance: /workspace/.foresight-bootstrap/attempts/20261116T070551Z_z10bZm
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python scripts/preflight_session_h.py --out /workspace/adaptive-execution-gate/results/adaptive_gate_20261116T070551Z_220613/setup/preflight.json
+Python: /workspace/mujoco_playground/rss2025/.venv/bin/python
+JAX devices: [CudaDevice(id=0)]
+nominal_s1: restored /workspace/adaptive-execution-gate/checkpoints/nominal_s1/000202342400
+brace2_s1: restored /workspace/adaptive-execution-gate/checkpoints/brace2_s1/000202342400
+GPU and both checkpoint restores passed.
+Running: /workspace/mujoco_playground/rss2025/.venv/bin/python -u scripts/eval_adaptive_gate.py --out /workspace/adaptive-execution-gate/results/adaptive_gate_20261116T070551Z_220613 --profile gate
+Warp 1.18.0 initialized:
+   CUDA Toolkit 13.4, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA RTX A6000" (44 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.18.0
+Module mujoco.mjx.warp.ffi 4443472 load on device 'cuda:0' took 704.93 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.smooth 43a6a77 load on device 'cuda:0' took 8577.96 ms  (compiled)
+Module _nxn_broadphase__locals__kernel_95773766 9577376 load on device 'cuda:0' took 578.49 ms  (compiled)
+Module ccd_kernel_builder__locals__ccd_kernel_1a0e5f50 1a0e5f5 load on device 'cuda:0' took 28941.30 ms  (compiled)
+Module _primitive_narrowphase__locals__primitive_narrowphase_45a33c4c 45a33c4 load on device 'cuda:0' took 1582.22 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.constraint 8d4d513 load on device 'cuda:0' took 97.99 ms  (compiled)
+Module _friction_dof__locals__kernel_c23b2f31 c23b2f3 load on device 'cuda:0' took 301.25 ms  (compiled)
+Module _limit_slide_hinge__locals__kernel_9573ef9b 9573ef9 load on device 'cuda:0' took 332.71 ms  (compiled)
+Module _efc_contact_init__locals__kernel_9009dd76 9009dd7 load on device 'cuda:0' took 234.19 ms  (compiled)
+Module _efc_contact_jac_sparse__locals__kernel_54cecf88 54cecf8 load on device 'cuda:0' took 274.14 ms  (compiled)
+Module _efc_contact_update__locals__kernel_efb3ac6e efb3ac6 load on device 'cuda:0' took 320.61 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.sensor 8feaecd load on device 'cuda:0' took 5543.01 ms  (compiled)
+Module _contact_match_builder__locals___contact_match_4da0430b 4da0430 load on device 'cuda:0' took 386.32 ms  (compiled)
+Module _contact_sort__locals__contact_sort_bed1da43 6afef3a load on device 'cuda:0' took 213.82 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.forward 9a96b97 load on device 'cuda:0' took 5425.78 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.passive 0de6fd1 load on device 'cuda:0' took 7037.98 ms  (compiled)
+Module _qfrc_passive_kernel__locals__kernel_976399dd 976399d load on device 'cuda:0' took 147.42 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.forward bdd5619 load on device 'cuda:0' took 5115.30 ms  (compiled)
+Module _qfrc_smooth__locals__kernel_8b823980 8b82398 load on device 'cuda:0' took 143.20 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.support 770ef7d load on device 'cuda:0' took 353.33 ms  (compiled)
+Module _small_cholesky_factorize_solve_block__locals__kernel_9da335f1 a5c2521 load on device 'cuda:0' took 633.34 ms  (compiled)
+Module _tile_cholesky_factorize_solve_block__locals__kernel_f18d9752 acc0ae1 load on device 'cuda:0' took 10112.59 ms  (compiled)
+Module _solve_init_dof__locals__kernel_7cb1664a 7cb1664 load on device 'cuda:0' took 109.32 ms  (compiled)
+Module mujoco.mjx.third_party.mujoco_warp._src.solver 5b3c3b6 load on device 'cuda:0' took 1038.12 ms  (compiled)
+Module _solve_init_jaref_kernel__locals__kernel_ca465bd8 ca465bd load on device 'cuda:0' took 171.42 ms  (compiled)
+Module mul_m_kernel__locals___mul_m_f3de1cc7 f3de1cc load on device 'cuda:0' took 185.97 ms  (compiled)
+Module _update_constraint_efc__locals__kernel_0539aa50 0539aa5 load on device 'cuda:0' took 197.50 ms  (compiled)
+Module _update_constraint_init_qfrc_constraint_sparse__locals__kernel_801f2ee2 801f2ee load on device 'cuda:0' took 173.66 ms  (compiled)
+Module _update_gradient_zero_grad_dot__locals__kernel_b20934d7 b20934d load on device 'cuda:0' took 96.91 ms  (compiled)
+Module _update_gradient_grad__locals__kernel_c876081d c876081 load on device 'cuda:0' took 106.78 ms  (compiled)
+Module _update_gradient_init_h_sparse__locals__kernel_f82bfdd8 f82bfdd load on device 'cuda:0' took 147.53 ms  (compiled)
+Module _JTDACJ_sparse__locals__kernel_765abea5 765abea load on device 'cuda:0' took 254.19 ms  (compiled)
+Module _JTDACJ_sparse__locals__kernel_765abea5 bd2cd56 load on device 'cuda:0' took 691.12 ms  (compiled)
+Module _update_gradient_cholesky_blocked__locals__kernel_1f053eca 38eeb22 load on device 'cuda:0' took 13102.72 ms  (compiled)
+Module _linesearch_jv_fused_kernel__locals__kernel_bdad643e bdad643 load on device 'cuda:0' took 165.48 ms  (compiled)
+Module _linesearch_iterative_kernel__locals__kernel_f3a187e1 ee17086 load on device 'cuda:0' took 977.41 ms  (compiled)
+Module _update_constraint_efc__locals__kernel_e953547e e953547 load on device 'cuda:0' took 261.11 ms  (compiled)
+Module _update_gradient_zero_grad_dot__locals__kernel_e9f8c963 e9f8c96 load on device 'cuda:0' took 134.62 ms  (compiled)
+Module _update_gradient_grad__locals__kernel_87959044 8795904 load on device 'cuda:0' took 131.75 ms  (compiled)
+Module _update_gradient_h_incremental_sparse__locals__kernel_e8129775 e812977 load on device 'cuda:0' took 241.70 ms  (compiled)
+Module _update_gradient_cholesky_blocked_skip_unchanged__locals__kernel_dc0908fb 837e4e8 load on device 'cuda:0' took 10221.37 ms  (compiled)
+Module _solve_done__locals__kernel_54267c25 54267c2 load on device 'cuda:0' took 149.75 ms  (compiled)
+Traceback (most recent call last):
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 215, in _broadcast_shapes_uncached
+    return _try_broadcast_shapes(*rank_promoted_shapes, name='broadcast_shapes')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 128, in _try_broadcast_shapes
+    raise TypeError(f'{name} got incompatible shapes for broadcasting: '
+TypeError: broadcast_shapes got incompatible shapes for broadcasting: (32,), (0,), (0,).
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 193, in broadcast_shapes
+    return _broadcast_shapes_cached(*shapes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 199, in _broadcast_shapes_cached
+    return _broadcast_shapes_uncached(*shapes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 218, in _broadcast_shapes_uncached
+    raise ValueError(f"Incompatible shapes for broadcasting: shapes={list(shapes)}") from err
+ValueError: Incompatible shapes for broadcasting: shapes=[(32,), (0,), (0,)]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 215, in _broadcast_shapes_uncached
+    return _try_broadcast_shapes(*rank_promoted_shapes, name='broadcast_shapes')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/jax/_src/lax/lax.py", line 128, in _try_broadcast_shapes
+    raise TypeError(f'{name} got incompatible shapes for broadcasting: '
+TypeError: broadcast_shapes got incompatible shapes for broadcasting: (32,), (0,), (0,).
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/adaptive-execution-gate/scripts/eval_adaptive_gate.py", line 363, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/adaptive-execution-gate/scripts/eval_adaptive_gate.py", line 337, in main
+    screen = evaluate_phase('screen', SCREEN_SEED, plan['screen_episodes'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/adaptive-execution-gate/scripts/eval_adaptive_gate.py", line 309, in evaluate_phase
+    result = jax.device_get(execute(initial.replace(info=info)))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/adaptive-execution-gate/scripts/eval_adaptive_gate.py", line 175, in execute
+    (_, result), _ = jax.lax.scan(one_step, (initial, metrics), jp.arange(steps))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/adaptive-execution-gate/scripts/eval_adaptive_gate.py", line 120, in one_step
+    simulated = choose_rows(active, state, initial)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/adaptive-execution-gate/scripts/eval_adaptive_gate.py", line 92, in choose_rows
+    return jax.tree_util.tree_map(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/adaptive-execution-gate/scripts/eval_adaptive_gate.py", line 93, in <lambda>
+    lambda x, y: jp.where(mask.reshape(mask.shape + (1,) * (x.ndim - 1)), x, y),
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/jax/_src/numpy/lax_numpy.py", line 2816, in where
+    return util._where(condition, x, y)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/jax/_src/numpy/util.py", line 318, in _where
+    condition, x_arr, y_arr = _broadcast_arrays(condition, x, y)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/mujoco_playground/rss2025/.venv/lib/python3.12/site-packages/jax/_src/numpy/util.py", line 285, in _broadcast_arrays
+    result_shape = lax.broadcast_shapes(*shapes)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Incompatible shapes for broadcasting: shapes=[(32,), (0,), (0,)]
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+Gate stopped: Child process exited with status 1. See console.log.
+Traceback (most recent call last):
+  File "/workspace/adaptive-execution-gate/scripts/adaptive_gate_pod.py", line 173, in main
+    run_child([python, '-u', 'scripts/eval_adaptive_gate.py', '--out', str(output), '--profile', args.profile],
+  File "/workspace/adaptive-execution-gate/scripts/run_session_h.py", line 92, in run_child
+    raise RuntimeError(f'Child process exited with status {result}. See console.log.')
+RuntimeError: Child process exited with status 1. See console.log.
+Running: /usr/local/bin/python3 scripts/publish_experiment_results.py --run-dir /workspace/adaptive-execution-gate/results/adaptive_gate_20261116T070551Z_220613 --log /workspace/adaptive-execution-gate/results/adaptive_gate_20261116T070551Z_220613/console.log --exit-code 1

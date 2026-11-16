@@ -1,0 +1,19 @@
+{
+  "console_log_truncated": false,
+  "publisher_source_commit": "f5970231bed0e1be1eadc951137c2515a14efeb0",
+  "result_files_present": [
+    "config.json",
+    "console.log",
+    "plan.json",
+    "preflight.json",
+    "report.md",
+    "run.json",
+    "setup/preflight.json"
+  ],
+  "results_path": "results/adaptive_gate_20261116T070551Z_220613",
+  "run_exit_code": 1,
+  "run_id": "adaptive_gate_20261116T070551Z_220613",
+  "schema_version": 2,
+  "source_commit": "f5970231bed0e1be1eadc951137c2515a14efeb0",
+  "timestamp_utc": "2026-11-16T07:09:09Z"
+}
