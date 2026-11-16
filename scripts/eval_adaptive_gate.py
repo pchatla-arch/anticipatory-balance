@@ -76,6 +76,30 @@ def checkpoint_manifest(path):
     return {'step': path.name, 'tree_sha256': tree_hash.hexdigest(), 'files': files}
 
 
+def select_batched_rows(mask, new, old):
+    """Per-environment select between two batched states.
+
+    Only leaves batched along the environment axis are selected row by row. The
+    MuJoCo-Warp backend also carries unbatched leaves in Data (for example
+    zero-size (0,) buffers); those are shared by every environment, so they are
+    taken from `new` unchanged. Selecting them row-wise crashed the first GPU
+    gate runs with shapes (32,), (0,), (0,).
+    """
+    import jax
+    import jax.numpy as jp
+
+    n = mask.shape[0]
+
+    def pick(x, y):
+        if jp.ndim(x) == 0 or jp.shape(x)[0] != n:
+            if jp.shape(x) != jp.shape(y):
+                raise ValueError(f'unbatched leaf changed shape: {jp.shape(y)} -> {jp.shape(x)}')
+            return x
+        return jp.where(mask.reshape((n,) + (1,) * (jp.ndim(x) - 1)), x, y)
+
+    return jax.tree_util.tree_map(pick, new, old)
+
+
 def build_rollout(env, policy, steps=HORIZON):
     import jax
     import jax.numpy as jp
@@ -88,10 +112,7 @@ def build_rollout(env, policy, steps=HORIZON):
     def finite_rows(value):
         return jp.all(jp.isfinite(value), axis=tuple(range(1, value.ndim)))
 
-    def choose_rows(mask, new, old):
-        return jax.tree_util.tree_map(
-            lambda x, y: jp.where(mask.reshape(mask.shape + (1,) * (x.ndim - 1)), x, y),
-            new, old)
+    choose_rows = select_batched_rows
 
     @jax.jit
     def execute(initial):
