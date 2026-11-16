@@ -196,7 +196,10 @@ print(json.dumps({'args':sys.argv[1:], 'no_stop':os.environ.get('NO_STOP'),
             'git': '#!/usr/bin/env bash\n'
                    'if [[ " $* " == *" push "* && " $* " == *" --dry-run "* ]]; then\n'
                    '  printf \'%s\\n\' "$*" >> "${MOCK_GIT_CALLS:-/dev/null}"\n'
-                   '  [[ "${MOCK_GIT_PUSH:-no}" == ok ]]; exit\n'
+                   '  [[ "${MOCK_GIT_PUSH:-no}" == ok ]] && exit 0\n'
+                   '  [[ "${MOCK_GIT_PUSH:-no}" == token ]] && grep -q \':good_token_0123456789abcdef@\' '
+                   '"$FORESIGHT_SETUP_ROOT/.foresight-git-credentials" 2>/dev/null && exit 0\n'
+                   '  exit 128\n'
                    'fi\nexit 0\n',
             'nvidia-smi': '''#!/usr/bin/env bash
 case "$*" in

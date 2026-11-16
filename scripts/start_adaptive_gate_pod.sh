@@ -6,7 +6,7 @@ usage() {
   cat <<'EOF'
 Usage: bash start_adaptive_gate_pod.sh
 
-Installs missing Git/curl/CA/Python/tmux/util-linux/GitHub CLI system tools,
+Installs missing Git/curl/CA/Python/tmux/util-linux system tools,
 clones the Foresight release, installs its pinned Python 3.12 GPU environment,
 restores published frozen policies, and runs the adaptive actuator gate experiments in tmux:
 adaptive-gate. No PPO training is run.
@@ -20,8 +20,9 @@ Overrides:
   FORESIGHT_CODE_REF=portfolio/adaptive-execution-gate
   FORESIGHT_REPO=/workspace/adaptive-execution-gate
   FORESIGHT_VENV=/workspace/mujoco_playground/rss2025/.venv
-  FORESIGHT_SKIP_GITHUB_LOGIN=1  (skip all GitHub checks; existing Git push
-                                 credentials are now detected automatically)
+  FORESIGHT_GITHUB_TOKEN=...     (optional; otherwise a hidden prompt asks for a
+                                 GitHub token if saved Git credentials cannot push)
+  FORESIGHT_SKIP_GITHUB_LOGIN=1  (skip all GitHub checks)
   FORESIGHT_AUTO_STOP=1         (NO_STOP=1 overrides)
 
 The known working venv is checked, never upgraded. Fresh setup uses the pinned
@@ -66,16 +67,23 @@ bounded() {
   timeout "${timeout_options[@]}" --signal=TERM --kill-after=15s "${cap}s" "$@"
 }
 
-github_login() {
-  bounded 30 gh api --hostname github.com user --jq '.login' 2>/dev/null
+# GitHub access uses plain Git over HTTPS with a personal access token; the
+# GitHub CLI is not used. The token lives only in a mode-600 credential file on
+# the pod volume, read by Git's store helper. It is never printed, logged,
+# committed, or put in a remote URL.
+FORESIGHT_TOKEN_FILE="$FORESIGHT_SETUP_ROOT/.foresight-git-credentials"
+FORESIGHT_LEGACY_REPO="${FORESIGHT_LEGACY_REPO:-$FORESIGHT_SETUP_ROOT/anticipatory-balance}"
+
+use_credential_file() {
+  git -C "$FORESIGHT_REPO" config --local --replace-all credential.helper "store --file=$FORESIGHT_TOKEN_FILE"
+  git -C "$FORESIGHT_REPO" config --local credential.https://github.com.username pchatla-arch
 }
 
-# Earlier pods (bootstrap_pod.sh) saved the GitHub token with Git's credential
-# store and enabled that helper only inside the old checkout, so a fresh checkout
-# could not see it. Point the fresh checkout at the same helper; no secret is copied.
-FORESIGHT_LEGACY_REPO="${FORESIGHT_LEGACY_REPO:-$FORESIGHT_SETUP_ROOT/anticipatory-balance}"
+# Point the fresh checkout at credentials saved earlier: this launcher's token
+# file, the old checkout's helper (bootstrap_pod.sh), or ~/.git-credentials.
 adopt_existing_git_helper() {
   local helper=''
+  if [[ -s "$FORESIGHT_TOKEN_FILE" ]]; then use_credential_file; return 0; fi
   [[ -z "$(git -C "$FORESIGHT_REPO" config --get-all credential.helper 2>/dev/null)" ]] || return 0
   if [[ -e "$FORESIGHT_LEGACY_REPO/.git" ]]; then
     helper=$(git -C "$FORESIGHT_LEGACY_REPO" config --local --get credential.helper 2>/dev/null) || helper=''
@@ -86,7 +94,6 @@ adopt_existing_git_helper() {
   fi
   [[ -n "$helper" ]] || return 0
   git -C "$FORESIGHT_REPO" config --local credential.helper "$helper"
-  echo 'Reusing the Git credential helper from earlier pod sessions for this checkout.'
 }
 
 # The publisher pushes with plain Git, so the authoritative check is a
@@ -99,27 +106,25 @@ git_push_works() {
     push --dry-run --quiet origin HEAD:refs/heads/foresight/credential-probe >/dev/null 2>&1
 }
 
-ensure_gh() {
-  command -v gh >/dev/null && return 0
-  if [[ $(id -u) == 0 ]] && command -v apt-get >/dev/null; then
-    apt_step update -qq || true
-    apt_step install -y --no-install-recommends gh || true
+# Token from FORESIGHT_GITHUB_TOKEN, else a hidden prompt. GH_TOKEN/GITHUB_TOKEN are
+# deliberately ignored: pods often carry unrelated values in them.
+install_access_token() {
+  local token="${FORESIGHT_GITHUB_TOKEN:-}"
+  if [[ -z "$token" ]]; then
+    [[ -t 0 ]] || die 'Git cannot push to pchatla-arch/anticipatory-balance and no terminal is available for a token. Rerun in a terminal, or set FORESIGHT_GITHUB_TOKEN. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
+    echo
+    echo 'GitHub access token needed for pchatla-arch/anticipatory-balance (Contents: read and write).'
+    echo 'Paste it here on the pod (input is hidden), then press Enter. Never paste it into chat.'
+    IFS= read -r -s -t 600 -p 'Token: ' token || token=''
+    echo
   fi
-  command -v gh >/dev/null || \
-    die 'Existing Git credentials cannot push and the GitHub CLI could not be installed. Fix Git credentials for pchatla-arch, or install gh and retry. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
-}
-
-require_github_access() {
-  local github_user can_push
-  if ! github_user=$(github_login) || [[ "$github_user" != pchatla-arch ]]; then
-    die 'GitHub must authenticate as pchatla-arch in this shell. Run gh auth login --hostname github.com --git-protocol https on the pod; check GH_TOKEN/GITHUB_TOKEN overrides if set. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
-  fi
-  if ! can_push=$(bounded 30 gh api --hostname github.com repos/pchatla-arch/anticipatory-balance \
-      --jq '.permissions.push' 2>/dev/null); then
-    die 'Could not verify GitHub push permission for pchatla-arch/anticipatory-balance. No experiment has started. Correct repository access and retry, or stop the still-running pod in the RunPod dashboard.'
-  fi
-  [[ "$can_push" == true ]] || \
-    die 'The pchatla-arch account/token does not have verified push permission for pchatla-arch/anticipatory-balance. No experiment has started. Correct repository access and retry, or stop the still-running pod in the RunPod dashboard.'
+  token="${token//[[:space:]]/}"
+  [[ "$token" =~ ^[A-Za-z0-9_]{20,255}$ ]] || \
+    die 'That does not look like a GitHub token (expected ghp_... or github_pat_...). Nothing was saved. No experiment has started.'
+  ( umask 077; printf 'https://pchatla-arch:%s@github.com\n' "$token" > "$FORESIGHT_TOKEN_FILE" )
+  chmod 600 "$FORESIGHT_TOKEN_FILE"
+  token=''
+  use_credential_file
 }
 
 if [[ ${1:-} == --worker ]]; then
@@ -136,7 +141,9 @@ if [[ ${1:-} == --worker ]]; then
   exec > >(tee -a logs/fresh_pod.log) 2>&1
   # An existing tmux server can have different credential environment variables
   # from the launching shell. Recheck before setup or any paid experiment work.
-  if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]] && ! git_push_works; then require_github_access; fi
+  if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]] && ! git_push_works; then
+    die 'Git can no longer push to pchatla-arch/anticipatory-balance from the tmux worker. No experiment has started. Rerun the launcher to enter a new token, or stop the pod in the RunPod dashboard.'
+  fi
   exec python3 scripts/adaptive_gate_pod.py --profile "$ADAPTIVE_PROFILE"
 fi
 
@@ -241,44 +248,18 @@ fi
 [[ -f "$FORESIGHT_REPO/scripts/adaptive_gate_pod.py" ]] || die 'Selected revision lacks the reviewed pod session worker.'
 mkdir -p "$FORESIGHT_REPO/logs"
 
-FORESIGHT_GIT_READY=0
 if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]]; then
   adopt_existing_git_helper
   if git_push_works; then
-    FORESIGHT_GIT_READY=1
-    echo 'GitHub verified: existing Git credentials can push to pchatla-arch/anticipatory-balance. No login needed.'
+    echo 'GitHub verified: saved Git credentials can push to pchatla-arch/anticipatory-balance.'
   else
-    echo 'Existing Git credentials cannot push here; checking GitHub CLI login instead.'
-    ensure_gh
+    install_access_token
+    if ! git_push_works; then
+      rm -f -- "$FORESIGHT_TOKEN_FILE"
+      die 'GitHub refused that token for pushing to pchatla-arch/anticipatory-balance; it was deleted from the pod. Use a token with Contents read and write on this repository (classic: repo scope), not expired. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
+    fi
+    echo 'GitHub verified: the access token can push to pchatla-arch/anticipatory-balance. Saved for later runs on this volume.'
   fi
-fi
-if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 && "$FORESIGHT_GIT_READY" == 0 ]]; then
-  FORESIGHT_GITHUB_USER=$(github_login) || FORESIGHT_GITHUB_USER=''
-  if [[ "$FORESIGHT_GITHUB_USER" != pchatla-arch ]]; then
-    if [[ -n ${GH_TOKEN:-} || -n ${GITHUB_TOKEN:-} ]]; then
-      die 'GH_TOKEN/GITHUB_TOKEN does not authenticate as pchatla-arch. Correct or unset that override, then log in as pchatla-arch on the pod. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
-    fi
-    # Reuse the requested account when it is already stored by GitHub CLI.
-    if bounded 30 gh auth switch --hostname github.com --user pchatla-arch >/dev/null 2>&1; then
-      FORESIGHT_GITHUB_USER=$(github_login) || FORESIGHT_GITHUB_USER=''
-    fi
-    if [[ "$FORESIGHT_GITHUB_USER" != pchatla-arch ]]; then
-      if [[ -t 0 ]]; then
-        echo
-        echo 'Log in to GitHub as pchatla-arch before GPU work starts.'
-        echo 'Choose Paste an authentication token to enter your key directly on this pod, or choose browser login.'
-        echo 'Do not paste the token into chat or put it in the repository URL.'
-        bounded 600 --interactive gh auth login --hostname github.com --git-protocol https || \
-          die 'GitHub login was not completed. No experiment has started; rerun after login. The pod is still running; stop it in the RunPod dashboard if leaving.'
-      else
-        die 'No terminal for GitHub login as pchatla-arch. Run gh auth login --hostname github.com --git-protocol https on the pod, or use existing Git credentials with FORESIGHT_SKIP_GITHUB_LOGIN=1. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
-      fi
-    fi
-  fi
-  require_github_access
-  bounded 30 gh auth setup-git --hostname github.com
-  git -C "$FORESIGHT_REPO" config --local credential.https://github.com.username pchatla-arch
-  echo 'GitHub verified: pchatla-arch has repository push permission.'
 fi
 ADAPTIVE_WORKER_ENV=(
   "FORESIGHT_SETUP_ROOT=$FORESIGHT_SETUP_ROOT" "FORESIGHT_CODE_REF=$FORESIGHT_CODE_REF"

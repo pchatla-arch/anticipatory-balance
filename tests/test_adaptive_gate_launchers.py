@@ -33,7 +33,7 @@ class AdaptiveLauncherTests(unittest.TestCase):
 
     def invoke(self, args=(), env=None, script='start_adaptive_gate.sh'):
         return subprocess.run(['bash', str(ROOT / 'scripts' / script), *args],
-                              env={**self.env, **(env or {})},
+                              env={**self.env, **(env or {})}, stdin=subprocess.DEVNULL,
                               capture_output=True, text=True, timeout=15)
 
     def clock(self):
@@ -88,10 +88,10 @@ PY
     def test_permission_and_exact_deadline_reach_only_new_tmux_worker(self):
         repo = self.make_auth_fixture()
         (repo / 'scripts/adaptive_gate_pod.py').touch()
-        for can_push, expected in (('true', True), ('false', False)):
+        for can_push, expected in (('ok', True), ('no', False)):
             self.reset_auth_calls()
             clock = self.clock()
-            result = self.invoke(env={**clock, 'MOCK_CAN_PUSH': can_push}, script='start_adaptive_gate_pod.sh')
+            result = self.invoke(env={**clock, 'MOCK_GIT_PUSH': can_push}, script='start_adaptive_gate_pod.sh')
             self.assertEqual(self.started.exists(), expected, result.stdout + result.stderr)
             self.assertEqual(result.returncode == 0, expected, result.stdout + result.stderr)
             if expected:
@@ -106,49 +106,78 @@ PY
         launched = self.root / 'python_started.txt'
         (repo / 'scripts/adaptive_gate_pod.py').write_text(
             'import os\nfrom pathlib import Path\nPath(os.environ["MOCK_PYTHON_STARTED"]).touch()\n')
-        for login, expected in (('pchatla-arch', True), ('wrong-account', False)):
+        for push, expected in (('ok', True), ('no', False)):
             launched.unlink(missing_ok=True)
-            result = self.invoke(['--worker'], env={**self.clock(), 'MOCK_LOGIN': login,
+            result = self.invoke(['--worker'], env={**self.clock(), 'MOCK_GIT_PUSH': push,
                                  'MOCK_PYTHON_STARTED': str(launched)}, script='start_adaptive_gate_pod.sh')
             self.assertEqual(launched.exists(), expected, result.stdout + result.stderr)
             self.assertEqual(result.returncode == 0, expected)
 
 
-    def test_existing_git_credentials_skip_github_cli_login(self):
+    GOOD = 'good_token_0123456789abcdef'
+
+    def test_saved_git_credentials_need_no_token_and_no_gh(self):
         repo = self.make_auth_fixture()
         (repo / 'scripts/adaptive_gate_pod.py').touch()
         git_calls = self.root / 'git_calls.txt'
-        # gh would refuse (wrong account, no push), but working Git credentials suffice.
-        result = self.invoke(env={**self.clock(), 'MOCK_GIT_PUSH': 'ok', 'MOCK_LOGIN': 'wrong-account',
-                                  'MOCK_CAN_PUSH': 'false', 'MOCK_GIT_CALLS': str(git_calls)},
+        result = self.invoke(env={**self.clock(), 'MOCK_GIT_PUSH': 'ok', 'MOCK_GIT_CALLS': str(git_calls)},
                              script='start_adaptive_gate_pod.sh')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertTrue(self.started.exists())
-        self.assertIn('existing Git credentials can push', result.stdout)
-        self.assertFalse(self.gh_calls.exists(), 'GitHub CLI must not be used when Git can push')
-        probe = git_calls.read_text()
-        self.assertIn('--dry-run', probe)
-        self.assertIn('origin HEAD:refs/heads/foresight/credential-probe', probe)
+        self.assertIn('saved Git credentials can push', result.stdout)
+        self.assertFalse(self.gh_calls.exists(), 'the GitHub CLI must not be used')
+        self.assertIn('origin HEAD:refs/heads/foresight/credential-probe', git_calls.read_text())
 
-    def test_failed_git_probe_falls_back_to_github_cli_check(self):
+    def test_access_token_from_environment_is_saved_privately_and_never_printed(self):
         repo = self.make_auth_fixture()
         (repo / 'scripts/adaptive_gate_pod.py').touch()
-        result = self.invoke(env={**self.clock(), 'MOCK_GIT_PUSH': 'no', 'MOCK_LOGIN': 'wrong-account',
-                                  'MOCK_CAN_PUSH': 'false'}, script='start_adaptive_gate_pod.sh')
+        result = self.invoke(env={**self.clock(), 'MOCK_GIT_PUSH': 'token',
+                                  'FORESIGHT_GITHUB_TOKEN': self.GOOD},
+                             script='start_adaptive_gate_pod.sh')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(self.started.exists())
+        self.assertIn('access token can push', result.stdout)
+        self.assertNotIn(self.GOOD, result.stdout + result.stderr)
+        self.assertNotIn(self.GOOD, self.started.read_text())
+        saved = self.root / '.foresight-git-credentials'
+        self.assertEqual(saved.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(saved.read_text(), f'https://pchatla-arch:{self.GOOD}@github.com\n')
+        self.assertFalse(self.gh_calls.exists())
+
+    def test_rejected_token_is_deleted_and_nothing_starts(self):
+        repo = self.make_auth_fixture()
+        (repo / 'scripts/adaptive_gate_pod.py').touch()
+        result = self.invoke(env={**self.clock(), 'MOCK_GIT_PUSH': 'token',
+                                  'FORESIGHT_GITHUB_TOKEN': 'wrong_token_0123456789abcdef'},
+                             script='start_adaptive_gate_pod.sh')
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse(self.started.exists())
-        self.assertIn('checking GitHub CLI login instead', result.stdout)
+        self.assertIn('refused that token', result.stderr)
+        self.assertFalse((self.root / '.foresight-git-credentials').exists())
+        self.assertNotIn('wrong_token_0123456789abcdef', result.stdout + result.stderr)
 
-    def test_worker_accepts_existing_git_credentials(self):
+    def test_malformed_token_or_no_terminal_fails_before_saving(self):
         repo = self.make_auth_fixture()
-        launched = self.root / 'python_started.txt'
-        (repo / 'scripts/adaptive_gate_pod.py').write_text(
-            'import os\nfrom pathlib import Path\nPath(os.environ["MOCK_PYTHON_STARTED"]).touch()\n')
-        result = self.invoke(['--worker'], env={**self.clock(), 'MOCK_LOGIN': 'wrong-account',
-                             'MOCK_GIT_PUSH': 'ok', 'MOCK_PYTHON_STARTED': str(launched)},
-                             script='start_adaptive_gate_pod.sh')
-        self.assertTrue(launched.exists(), result.stdout + result.stderr)
-        self.assertEqual(result.returncode, 0)
+        (repo / 'scripts/adaptive_gate_pod.py').touch()
+        for token, message in (('not a token!', 'does not look like a GitHub token'),
+                               ('', 'no terminal is available')):
+            with self.subTest(token=token):
+                result = self.invoke(env={**self.clock(), 'MOCK_GIT_PUSH': 'token',
+                                          'FORESIGHT_GITHUB_TOKEN': token},
+                                     script='start_adaptive_gate_pod.sh')
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(message, result.stderr)
+                self.assertFalse(self.started.exists())
+                self.assertFalse((self.root / '.foresight-git-credentials').exists())
+
+    def test_saved_token_file_is_reused_on_the_next_run(self):
+        repo = self.make_auth_fixture()
+        (repo / 'scripts/adaptive_gate_pod.py').touch()
+        saved = self.root / '.foresight-git-credentials'
+        saved.write_text(f'https://pchatla-arch:{self.GOOD}@github.com\n')
+        result = self.invoke(env={**self.clock(), 'MOCK_GIT_PUSH': 'token'}, script='start_adaptive_gate_pod.sh')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('saved Git credentials can push', result.stdout)
 
 
 class AdaptiveWorkerTests(unittest.TestCase):
