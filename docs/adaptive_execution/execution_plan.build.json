@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "document_id": "OAA-PLAN",
+  "version": "0.1.0",
+  "document_status": "Proposed amendment - Prasuna approval pending",
+  "built_at_utc": "2026-11-16T06:33:44.215054+00:00",
+  "inputs": {
+    "docs/adaptive_execution/build_execution_plan.py": "6ed01d122ecdaf735234df0812fb57eac0718970af20728a35dc10cea815358f",
+    "docs/adaptive_execution/build_paper.py": "4e8c50f6636586e3effcd08fdeb69f7398b7187a5a36afdef8c17b9e2cc088d6",
+    "docs/adaptive_execution/execution_plan.md": "b8c1ad4c173c08c0b82a2b0c304dfd653a427ff480bbf2880f44cd6f04a57a1e"
+  },
+  "outputs": {
+    "docs/adaptive_execution/execution_plan.pdf": "2b211dcc25c08cb4c80a42cb38ed67174c936dd250591401e3df7964ce5446c8"
+  },
+  "pages": 8,
+  "build_environment": {
+    "python": "3.12.14",
+    "packages": {
+      "reportlab": "4.4.9",
+      "matplotlib": "3.10.8",
+      "Pillow": "13.0.0",
+      "pypdf": "6.21.4"
+    },
+    "pandoc": "pandoc 3.1.11.1",
+    "font_sha256": {
+      "LiberationMono-Bold.ttf": "ddce09ee3483b2d5faf61f0baba8592e76e0ac6dd4ab36683e5334c288bf5eef",
+      "LiberationMono-BoldItalic.ttf": "2ec6f3e5bd9b24c7fb04c229a1ee64f600e4072c03a041c96c2d62974c2ede2c",
+      "LiberationMono-Italic.ttf": "016743fc425a1b61eb349c72c02f3da6a1349d1da7a5d9aded27321397eed955",
+      "LiberationMono-Regular.ttf": "5883330d94debd992952cd8f0571b225f478c2d797d3f36c7521b0a5c9bde0f2",
+      "LiberationSans-Bold.ttf": "1b5f2da6f4cadce4c05b9ecebe3a6fcd374eb95ae443605e799f4c3287978939",
+      "LiberationSans-BoldItalic.ttf": "352e9dc2be89f210dbd3c0fd5dfaf97135de70e0beb5f22378601861462493a7",
+      "LiberationSans-Italic.ttf": "93ff5260834141b6f9d8f2b846d427f3a5dc492dbdce8ebdad406e38a38f34bb",
+      "LiberationSans-Regular.ttf": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3",
+      "LiberationSerif-Bold.ttf": "443a4dbd694b6e4689925947b456e0532e10b19c90fa32eb39ea6c2cd9db9ebd",
+      "LiberationSerif-BoldItalic.ttf": "4b2635d2ec4d992373dcae577c742a98ecfd841ffc1b8a103b5f10db163dbc7a",
+      "LiberationSerif-Italic.ttf": "de18fe26337e03241952dca46398d5b66f3c5738d080bfd284f66e67b926f597",
+      "LiberationSerif-Regular.ttf": "9caef765d2e891c10dd73658894f01e660fe0c1c83e0bda7d6edf561d8f623d4"
+    }
+  },
+  "math_width_warnings": [],
+  "visual_review": {
+    "status": "passed",
+    "evidence": "docs/adaptive_execution/document_qa.json",
+    "note": "All eight pages passed internal document visual QA; not Claude peer review or Prasuna approval. See evidence for final-source hashes and page inspection method."
+  },
+  "scope": "CPU documentation build only; no experiment or approval is implied"
+}

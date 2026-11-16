@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-11-15",
+  "evidence_cutoff_commit": "f5970231bed0e1be1eadc951137c2515a14efeb0",
+  "changelog_path": "docs/adaptive_execution/CHANGELOG.md",
+  "decision_log_path": "docs/adaptive_execution/decision_log.md",
+  "current_release_identity": "Use the Git commit containing this registry plus content hashes; do not insert a self-referential commit SHA.",
+  "documents": [
+    {
+      "document_id": "OAA-PROP",
+      "version": "0.3.1",
+      "source_path": "docs/adaptive_execution/research_candidate/proposal.md",
+      "pdf_path": "docs/adaptive_execution/research_candidate/proposal.pdf",
+      "version_marker": "revision 0.3.1",
+      "owner": "ChatGPT",
+      "reviewer": "Claude",
+      "review_status": "pending",
+      "review_evidence": null,
+      "approval_status": "not_recorded",
+      "approval_decision_id": null,
+      "provenance_status": "legacy_byte_verified",
+      "build_manifest_path": null,
+      "changelog_heading": "## OAA-PROP 0.3.1",
+      "artifacts": {
+        "docs/adaptive_execution/research_candidate/proposal.md": "bbc472e05875cd4e82dfea166933f6484ffb3c75362f6a2392c4fa08d910ed93",
+        "docs/adaptive_execution/research_candidate/proposal.pdf": "ccd74d83cc383de5b988f99d75a85b1b006eef84c0cd7b05fcc4e8a53a845fab"
+      },
+      "selected_family": "0.3",
+      "selection_decision_id": "D-001",
+      "published_revision": "1614b65c65ae89090b76741fab8716225b50c1f2",
+      "provenance_note": "Exact legacy source/PDF bytes registered from the published revision; no historical build manifest is fabricated."
+    },
+    {
+      "document_id": "OAA-PLAN",
+      "version": "0.1.0",
+      "source_path": "docs/adaptive_execution/execution_plan.md",
+      "pdf_path": "docs/adaptive_execution/execution_plan.pdf",
+      "version_marker": "**Version:** 0.1.0",
+      "owner": "ChatGPT",
+      "reviewer": "Claude",
+      "review_status": "pending",
+      "review_evidence": null,
+      "approval_status": "pending",
+      "approval_decision_id": null,
+      "provenance_status": "build_manifest",
+      "build_manifest_path": "docs/adaptive_execution/execution_plan.build.json",
+      "changelog_heading": "## OAA-PLAN 0.1.0",
+      "artifacts": {
+        "docs/adaptive_execution/execution_plan.md": "b8c1ad4c173c08c0b82a2b0c304dfd653a427ff480bbf2880f44cd6f04a57a1e",
+        "docs/adaptive_execution/execution_plan.pdf": "2b211dcc25c08cb4c80a42cb38ed67174c936dd250591401e3df7964ce5446c8",
+        "docs/adaptive_execution/build_execution_plan.py": "6ed01d122ecdaf735234df0812fb57eac0718970af20728a35dc10cea815358f",
+        "docs/adaptive_execution/build_paper.py": "4e8c50f6636586e3effcd08fdeb69f7398b7187a5a36afdef8c17b9e2cc088d6",
+        "docs/adaptive_execution/execution_plan.build.json": "7ee6ea7c6d508b409f277abf1c6d5959ebeb3a33d2a1f63fc9303aecace79c23"
+      },
+      "reviewed_base_commit": "f5970231bed0e1be1eadc951137c2515a14efeb0",
+      "provenance_note": "First explicitly versioned plan; current PR commit identifies this proposed release. Claude review and Prasuna approval are pending."
+    },
+    {
+      "document_id": "OAA-DESIGN",
+      "version": "0.2",
+      "source_path": "docs/adaptive_execution/paper.md",
+      "pdf_path": "docs/adaptive_execution/paper.pdf",
+      "version_marker": "Review draft 0.2",
+      "owner": "ChatGPT",
+      "reviewer": "Claude",
+      "review_status": "changes_requested",
+      "review_evidence": "https://github.com/pchatla-arch/anticipatory-balance/blob/5c0043a5a3f494c37f67b28e7e50760493ab8eb7/docs/adaptive_execution/reviews/review_v0.2.md",
+      "approval_status": "superseded",
+      "approval_decision_id": null,
+      "provenance_status": "legacy_byte_verified",
+      "build_manifest_path": null,
+      "changelog_heading": "## OAA-DESIGN 0.2",
+      "artifacts": {
+        "docs/adaptive_execution/paper.md": "6adbf0130377256a2eaef18c2f9e69a6b737e9b9f8284db2984d51bfe27ec827",
+        "docs/adaptive_execution/paper.pdf": "277e8567f388390d446b43088224e1ef84dd827d54603378bbda2110295fed6b"
+      },
+      "published_revision": "d44883d2345f76709b6163e4b6b21808b456b957",
+      "provenance_note": "Historical engineering design retained for reference; corrected telemetry and selected method live in OAA-PROP0.3.1. Legacy bytes only."
+    }
+  ],
+  "history": [
+    {
+      "document_id": "OAA-DESIGN",
+      "version": "0.2",
+      "release_commit": "d44883d2345f76709b6163e4b6b21808b456b957",
+      "provenance_status": "legacy_byte_verified",
+      "artifacts": {
+        "docs/adaptive_execution/paper.md": {
+          "git_blob_sha1": "8d52ec7e8a36a29ed395991c57e0ee5882a27afb"
+        },
+        "docs/adaptive_execution/paper.pdf": {
+          "git_blob_sha1": "17b0c17ad73bad6ea8a68b9408ac9be4f8744915"
+        }
+      }
+    },
+    {
+      "document_id": "OAA-PROP",
+      "version": "0.3",
+      "release_commit": "e7c7854038ba040e8586660f77bac8bec81af26f",
+      "provenance_status": "legacy_byte_verified",
+      "artifacts": {
+        "docs/adaptive_execution/research_candidate/proposal.md": {
+          "git_blob_sha1": "d9e452455126f7cd1de1122880340c73cf0d60c5"
+        },
+        "docs/adaptive_execution/research_candidate/proposal.pdf": {
+          "git_blob_sha1": "309a774ef925d18d7d416d70ad7573bf13486fe9"
+        }
+      }
+    },
+    {
+      "document_id": "OAA-PROP",
+      "version": "0.3.1",
+      "release_commit": "1614b65c65ae89090b76741fab8716225b50c1f2",
+      "provenance_status": "legacy_byte_verified",
+      "artifacts": {
+        "docs/adaptive_execution/research_candidate/proposal.md": {
+          "git_blob_sha1": "7dd0d1b2755bb618458815efb1dacc0bde865d2c"
+        },
+        "docs/adaptive_execution/research_candidate/proposal.pdf": {
+          "git_blob_sha1": "bd2cf913db44e49c28fb87f17c619d3f937d38ca"
+        }
+      }
+    },
+    {
+      "document_id": "OAA-PLAN",
+      "version": "legacy-unversioned",
+      "release_commit": "b9103ec0a67724f598ccb91bdcd00221464e31fd",
+      "merge_commit": "f5970231bed0e1be1eadc951137c2515a14efeb0",
+      "provenance_status": "legacy_byte_verified",
+      "artifacts": {
+        "docs/adaptive_execution/execution_plan.md": {
+          "git_blob_sha1": "4e1508b6b3f4119c3ff57c52acba7766e919235e"
+        }
+      }
+    }
+  ]
+}

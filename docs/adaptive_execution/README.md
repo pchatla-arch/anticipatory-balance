@@ -12,6 +12,43 @@ defines the synchronized effort channel, separates confounds by measurement
 condition, and explains what the preliminary authority screen does and does not
 establish. The true-gain GPU gate remains independent of effort-based estimation.
 
+## Versioned execution and document control
+
+The [execution plan](execution_plan.md) ([PDF](execution_plan.pdf)) is now
+**OAA-PLAN 0.1.0**, the first controlled plan revision. This is a proposed
+amendment to Prasuna's merged PR #16; Claude cross-review and Prasuna's merge are
+pending. GitHub is the canonical working record, with one owner and reviewer
+per work package. The plan contains the work split, dependencies, gates, compute
+rules and next 72-hour handoff.
+
+| Document | Current version | Role/status |
+| --- | --- | --- |
+| OAA-PROP | 0.3.1 | Selected research family 0.3; current technical revision published, full cross-review pending |
+| OAA-PLAN | 0.1.0 | Proposed execution amendment; Prasuna remains gatekeeper |
+| OAA-DESIGN | 0.2 | Historical engineering design retained as support |
+
+Use [CHANGELOG.md](CHANGELOG.md) for detailed changes, rationale, experimental
+impact, checks and limitations. [decision_log.md](decision_log.md) records actual
+Prasuna decisions separately from pending gates. The machine-readable
+[document register](document_versions.json) binds current files to SHA-256
+identities and records immutable historical commits. Legacy PDFs are registered
+as byte-verified artifacts without inventing old build provenance.
+
+Before each document PR, update its own version and changelog, rebuild/review
+its PDF where applicable, and run the read-only standard-library check:
+
+```bash
+python3 scripts/check_adaptive_documents.py --json
+```
+
+For later revisions, also pass `--baseline /path/to/previous_document_versions.json`
+using the registry from that PR's base commit. Changed controlled artifacts then
+require a higher version and a new changelog entry. The checker never regenerates
+or rehashes stale documents. It checks declared evidence references, not the
+truth of results or authenticity of a person's approval. The new plan's exact
+build and visual inspection are in [execution_plan.build.json](execution_plan.build.json)
+and [document_qa.json](document_qa.json).
+
 Review draft 0.2 expands the four-page Fleet-Robust Execution specification into
 a technical design and experimental protocol. The selected architecture remains
 a frozen G1 PPO policy, optional calibration, online actuator estimation, bounded

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "document_id": "OAA-PLAN",
+  "version": "0.1.0",
+  "source": {
+    "path": "docs/adaptive_execution/execution_plan.md",
+    "sha256": "b8c1ad4c173c08c0b82a2b0c304dfd653a427ff480bbf2880f44cd6f04a57a1e"
+  },
+  "pdf": {
+    "path": "docs/adaptive_execution/execution_plan.pdf",
+    "sha256": "2b211dcc25c08cb4c80a42cb38ed67174c936dd250591401e3df7964ce5446c8",
+    "pages": 8
+  },
+  "reviewed_at_utc": "2026-11-16T06:34:53.335769+00:00",
+  "review_date": "2026-11-15",
+  "review_timezone": "America/Los_Angeles",
+  "pages_reviewed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "status": "passed",
+  "scope": "Internal document visual QA only; not Claude peer review or Prasuna approval.",
+  "checks": [
+    "Text clipping",
+    "Table wrapping and repeated headers",
+    "Headings",
+    "Footer collisions"
+  ],
+  "procedure": "All eight pages of the prior build were visually inspected. After the final WP 2.1 dependency edit, all eight pages were re-rendered; page 5 was visually re-inspected, and pages 1-4 and 6-8 were confirmed pixel-identical to the inspected renderings.",
+  "final_reinspection_pages": [
+    5
+  ],
+  "unchanged_verified_pages": [
+    1,
+    2,
+    3,
+    4,
+    6,
+    7,
+    8
+  ],
+  "render_command": "pdftoppm -scale-to 1500 -png docs/adaptive_execution/execution_plan.pdf <scratch-output-prefix>",
+  "rendered_page_sha256": {
+    "1": "6ea6b581b40c7e4e3ae97ed72dd09baf5b4910f5d30b15420c37294e81aebc7c",
+    "2": "2a8dce193efcd9d3f6f8068840449da1e160313c019dddef4beaac3578146c15",
+    "3": "159a979e6e220204481ce4447d6d69fcf3ae5d86c5245ad04d7d0a2b6a0b02a1",
+    "4": "4d93483c321ffed6209a20c8cd02fcf2e164edd38f907a04cfc5845ed161b593",
+    "5": "6b7fce19f917defd38594d8b955e5468eaaffc4ccc7f978ccda781f8004086bc",
+    "6": "603c052026a461ed1c2cd3c7ea85760576516394cb52bc624ef6c347e198b7c6",
+    "7": "29d1c61a4d35ef0f05968161f99d30a2e1cd722438f8dbb5af0d6b38115ce99b",
+    "8": "4cfc7884bb1b8934356f673b1853346128bb074832f228e1c2773e3f419040b0"
+  },
+  "issues": []
+}

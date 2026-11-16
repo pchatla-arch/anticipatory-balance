@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-11-15",
+  "scope": "Local documentation consistency check; no experiment, peer-review acceptance or gate approval",
+  "command": [
+    "python3",
+    "scripts/check_adaptive_documents.py",
+    "--json"
+  ],
+  "registry_sha256": "2967ad79aa7776d39891725bd92e587113f02cde0f677f8bc0141a97be51a62b",
+  "checker_sha256": "968eabb30ab930fd9359fd39ae9225d084030d13fe426e9c006a8383557dd170",
+  "exit_code": 0,
+  "result": {
+    "ok": true,
+    "documents_checked": 3,
+    "history_entries_checked": 4,
+    "errors": [],
+    "limitations": [
+      "Historical bytes and external evidence URLs are not fetched.",
+      "Reference existence does not authenticate human approval or prove scientific claims.",
+      "PDF signature/hash checks do not replace rendering and visual review."
+    ]
+  }
+}
