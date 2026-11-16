@@ -20,7 +20,8 @@ Overrides:
   FORESIGHT_CODE_REF=portfolio/adaptive-execution-gate
   FORESIGHT_REPO=/workspace/adaptive-execution-gate
   FORESIGHT_VENV=/workspace/mujoco_playground/rss2025/.venv
-  FORESIGHT_SKIP_GITHUB_LOGIN=1  (trust existing Git credentials)
+  FORESIGHT_SKIP_GITHUB_LOGIN=1  (skip all GitHub checks; existing Git push
+                                 credentials are now detected automatically)
   FORESIGHT_AUTO_STOP=1         (NO_STOP=1 overrides)
 
 The known working venv is checked, never upgraded. Fresh setup uses the pinned
@@ -69,6 +70,45 @@ github_login() {
   bounded 30 gh api --hostname github.com user --jq '.login' 2>/dev/null
 }
 
+# Earlier pods (bootstrap_pod.sh) saved the GitHub token with Git's credential
+# store and enabled that helper only inside the old checkout, so a fresh checkout
+# could not see it. Point the fresh checkout at the same helper; no secret is copied.
+FORESIGHT_LEGACY_REPO="${FORESIGHT_LEGACY_REPO:-$FORESIGHT_SETUP_ROOT/anticipatory-balance}"
+adopt_existing_git_helper() {
+  local helper=''
+  [[ -z "$(git -C "$FORESIGHT_REPO" config --get-all credential.helper 2>/dev/null)" ]] || return 0
+  if [[ -e "$FORESIGHT_LEGACY_REPO/.git" ]]; then
+    helper=$(git -C "$FORESIGHT_LEGACY_REPO" config --local --get credential.helper 2>/dev/null) || helper=''
+  fi
+  if [[ -z "$helper" ]] && { [[ -s "$HOME/.git-credentials" ]] || \
+      [[ -s "${XDG_CONFIG_HOME:-$HOME/.config}/git/credentials" ]]; }; then
+    helper=store
+  fi
+  [[ -n "$helper" ]] || return 0
+  git -C "$FORESIGHT_REPO" config --local credential.helper "$helper"
+  echo 'Reusing the Git credential helper from earlier pod sessions for this checkout.'
+}
+
+# The publisher pushes with plain Git, so the authoritative check is a
+# non-interactive dry-run push of a new probe branch through the same remote.
+# Nothing is created on GitHub; GitHub refuses the dry run without write access.
+git_push_works() {
+  bounded 60 env GIT_TERMINAL_PROMPT=0 GCM_INTERACTIVE=never SSH_ASKPASS_REQUIRE=never \
+    GIT_SSH_COMMAND='ssh -o BatchMode=yes -o ConnectTimeout=15 -o ConnectionAttempts=1' \
+    git -C "$FORESIGHT_REPO" -c credential.interactive=never \
+    push --dry-run --quiet origin HEAD:refs/heads/foresight/credential-probe >/dev/null 2>&1
+}
+
+ensure_gh() {
+  command -v gh >/dev/null && return 0
+  if [[ $(id -u) == 0 ]] && command -v apt-get >/dev/null; then
+    apt_step update -qq || true
+    apt_step install -y --no-install-recommends gh || true
+  fi
+  command -v gh >/dev/null || \
+    die 'Existing Git credentials cannot push and the GitHub CLI could not be installed. Fix Git credentials for pchatla-arch, or install gh and retry. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
+}
+
 require_github_access() {
   local github_user can_push
   if ! github_user=$(github_login) || [[ "$github_user" != pchatla-arch ]]; then
@@ -96,7 +136,7 @@ if [[ ${1:-} == --worker ]]; then
   exec > >(tee -a logs/fresh_pod.log) 2>&1
   # An existing tmux server can have different credential environment variables
   # from the launching shell. Recheck before setup or any paid experiment work.
-  if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]]; then require_github_access; fi
+  if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]] && ! git_push_works; then require_github_access; fi
   exec python3 scripts/adaptive_gate_pod.py --profile "$ADAPTIVE_PROFILE"
 fi
 
@@ -147,8 +187,6 @@ for FORESIGHT_TOOL in git curl python3 tmux flock findmnt timeout; do
   command -v "$FORESIGHT_TOOL" >/dev/null || FORESIGHT_MISSING=1
 done
 [[ -s /etc/ssl/certs/ca-certificates.crt ]] || FORESIGHT_MISSING=1
-FORESIGHT_NEED_GH=0
-if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]] && ! command -v gh >/dev/null; then FORESIGHT_NEED_GH=1; fi
 if (( FORESIGHT_MISSING )); then
   [[ $(id -u) == 0 ]] || die 'Missing system tools need root. Use the normal root shell on an Ubuntu/Debian RunPod image.'
   command -v apt-get >/dev/null || die 'This installer expects an Ubuntu/Debian pod image with apt-get.'
@@ -156,15 +194,6 @@ if (( FORESIGHT_MISSING )); then
   apt_step update -qq
   FORESIGHT_PACKAGES=(git curl ca-certificates python3 tmux util-linux coreutils)
   apt_step install -y --no-install-recommends "${FORESIGHT_PACKAGES[@]}"
-fi
-if (( FORESIGHT_NEED_GH )); then
-  if [[ $(id -u) == 0 ]] && command -v apt-get >/dev/null; then
-    if (( ! FORESIGHT_MISSING )); then apt_step update -qq || true; fi
-    apt_step install -y --no-install-recommends gh || true
-  fi
-  if ! command -v gh >/dev/null; then
-    die 'GitHub CLI could not be installed. With working Git credentials, retry using FORESIGHT_SKIP_GITHUB_LOGIN=1. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
-  fi
 fi
 
 mkdir -p "$FORESIGHT_SETUP_ROOT"
@@ -212,7 +241,18 @@ fi
 [[ -f "$FORESIGHT_REPO/scripts/adaptive_gate_pod.py" ]] || die 'Selected revision lacks the reviewed pod session worker.'
 mkdir -p "$FORESIGHT_REPO/logs"
 
+FORESIGHT_GIT_READY=0
 if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]]; then
+  adopt_existing_git_helper
+  if git_push_works; then
+    FORESIGHT_GIT_READY=1
+    echo 'GitHub verified: existing Git credentials can push to pchatla-arch/anticipatory-balance. No login needed.'
+  else
+    echo 'Existing Git credentials cannot push here; checking GitHub CLI login instead.'
+    ensure_gh
+  fi
+fi
+if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 && "$FORESIGHT_GIT_READY" == 0 ]]; then
   FORESIGHT_GITHUB_USER=$(github_login) || FORESIGHT_GITHUB_USER=''
   if [[ "$FORESIGHT_GITHUB_USER" != pchatla-arch ]]; then
     if [[ -n ${GH_TOKEN:-} || -n ${GITHUB_TOKEN:-} ]]; then

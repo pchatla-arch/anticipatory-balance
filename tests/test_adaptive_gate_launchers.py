@@ -114,6 +114,43 @@ PY
             self.assertEqual(result.returncode == 0, expected)
 
 
+    def test_existing_git_credentials_skip_github_cli_login(self):
+        repo = self.make_auth_fixture()
+        (repo / 'scripts/adaptive_gate_pod.py').touch()
+        git_calls = self.root / 'git_calls.txt'
+        # gh would refuse (wrong account, no push), but working Git credentials suffice.
+        result = self.invoke(env={**self.clock(), 'MOCK_GIT_PUSH': 'ok', 'MOCK_LOGIN': 'wrong-account',
+                                  'MOCK_CAN_PUSH': 'false', 'MOCK_GIT_CALLS': str(git_calls)},
+                             script='start_adaptive_gate_pod.sh')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(self.started.exists())
+        self.assertIn('existing Git credentials can push', result.stdout)
+        self.assertFalse(self.gh_calls.exists(), 'GitHub CLI must not be used when Git can push')
+        probe = git_calls.read_text()
+        self.assertIn('--dry-run', probe)
+        self.assertIn('origin HEAD:refs/heads/foresight/credential-probe', probe)
+
+    def test_failed_git_probe_falls_back_to_github_cli_check(self):
+        repo = self.make_auth_fixture()
+        (repo / 'scripts/adaptive_gate_pod.py').touch()
+        result = self.invoke(env={**self.clock(), 'MOCK_GIT_PUSH': 'no', 'MOCK_LOGIN': 'wrong-account',
+                                  'MOCK_CAN_PUSH': 'false'}, script='start_adaptive_gate_pod.sh')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(self.started.exists())
+        self.assertIn('checking GitHub CLI login instead', result.stdout)
+
+    def test_worker_accepts_existing_git_credentials(self):
+        repo = self.make_auth_fixture()
+        launched = self.root / 'python_started.txt'
+        (repo / 'scripts/adaptive_gate_pod.py').write_text(
+            'import os\nfrom pathlib import Path\nPath(os.environ["MOCK_PYTHON_STARTED"]).touch()\n')
+        result = self.invoke(['--worker'], env={**self.clock(), 'MOCK_LOGIN': 'wrong-account',
+                             'MOCK_GIT_PUSH': 'ok', 'MOCK_PYTHON_STARTED': str(launched)},
+                             script='start_adaptive_gate_pod.sh')
+        self.assertTrue(launched.exists(), result.stdout + result.stderr)
+        self.assertEqual(result.returncode, 0)
+
+
 class AdaptiveWorkerTests(unittest.TestCase):
     def test_deadline_does_not_restart_after_setup(self):
         started, deadline, remaining = worker.parse_deadline(
