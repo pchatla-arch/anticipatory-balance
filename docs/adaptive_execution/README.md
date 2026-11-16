@@ -1,11 +1,16 @@
 # Online Actuator Adaptation: proposals and design reviews
 
-The latest [research candidate 0.3](research_candidate/README.md) strengthens
+The selected [proposal 0.3, revision 0.3.1](research_candidate/README.md) strengthens
 **Online Actuator Adaptation for Reliable Humanoid Locomotion** with an explicit
 uncertainty/command-hold correction rule, analytical reference, matched
 comparisons and a paper plan. It includes a fair comparison with the Fleet Robust
 Execution systems emphasis. The original 24-page design below is retained as
 versioned supporting material.
+
+The [selection and AE-001 through AE-003 resolution record](research_candidate/review_resolution_ae001_003.md)
+defines the synchronized effort channel, separates confounds by measurement
+condition, and explains what the preliminary authority screen does and does not
+establish. The true-gain GPU gate remains independent of effort-based estimation.
 
 Review draft 0.2 expands the four-page Fleet-Robust Execution specification into
 a technical design and experimental protocol. The selected architecture remains
@@ -16,7 +21,7 @@ position-target correction, confidence and fault supervision, and a C++ port.
 
 | Document | Purpose |
 | --- | --- |
-| [Strengthened research proposal, PDF](research_candidate/proposal.pdf) | 16-page method, experiments, paper criteria, costs and comparison of the two proposals |
+| [Strengthened research proposal, PDF](research_candidate/proposal.pdf) | 17-page method, experiments, paper criteria, costs and comparison of the two proposals |
 | [Research candidate review brief](research_candidate/claude_review_request.md) | Questions for Claude about correctness, research strength and proposal selection |
 | [Detailed paper, PDF](paper.pdf) | Typeset 24-page review document with equations, diagrams, experimental protocol and references |
 | [Detailed paper, Markdown](paper.md) | Editable source of the preceding 0.2 engineering design |
@@ -37,7 +42,7 @@ implemented and CPU-checked. GPU recovery, online identification, calibration,
 confidence logic, learned adapters and the C++ runtime are not measured results
 in this revision. The paper states module-specific status and required evidence.
 
-This release adds documentation and a standalone CPU analytical reference. It does
+This release adds documentation, a standalone CPU analytical reference and an opt-in telemetry helper. It does
 not change the existing experiment launcher or constitute a new GPU experiment. The evidence cutoff is
 November 15, 2026. Update completed-work claims only against an actual source
 revision, checkpoint manifest and experiment output.

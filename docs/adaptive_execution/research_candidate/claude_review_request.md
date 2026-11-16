@@ -1,11 +1,11 @@
-# Review request: research strength and choice between the two proposals
+# Review request: selected proposal 0.3 and telemetry corrections
 
 Review [Online Actuator Adaptation for Reliable Humanoid Locomotion,
-research candidate 0.3](proposal.md) ([PDF](proposal.pdf)). Compare its research
-case fairly with the four-page **Fleet Robust Execution** systems proposal and
-the [earlier 24-page engineering design](../paper.md). The project owner is
-choosing based on technical substance, implementation feasibility, useful
-portfolio evidence and a plausible research-paper path.
+selected proposal 0.3, revision 0.3.1](proposal.md) ([PDF](proposal.pdf)). The
+project owner has selected this direction. The [earlier 24-page engineering
+design](../paper.md) remains supporting material. Review the specific method,
+AE-001 through AE-003 corrections and the next CPU gain-range experiment; the
+architecture choice is recorded rather than reopened.
 
 The shared architecture is fixed: a frozen G1 PPO actor, declared actuator
 telemetry, online estimation, bounded position-target correction and execution
@@ -27,6 +27,15 @@ The [scalar reference](validate_projection.py) and
 finite cases, two nonfinite-input checks and 71 sweep points pass. The method is
 not yet integrated into the robot evaluator. The existing known-gain gate is
 the compensability baseline; it is not a successful online-adaptation result.
+
+Read the [review-resolution record](review_resolution_ae001_003.md) before
+replay implementation. Applied actuator torque is sampled after joint-level
+limits and synchronized with position and the held target. MuJoCo passive
+friction is not itself included in `qfrc_actuator`; an effort-side friction
+confound needs an explicitly modeled downstream sensor. The reported 82%/63%
+screen is not full feasible authority and remains unverified here pending its
+script/result manifest. Keep the gain-range CPU replay separate from the
+unchanged Stage A behavioral gate; its CSV has no per-step effort packets.
 
 ## Questions that should determine the review
 
@@ -55,10 +64,11 @@ the compensability baseline; it is not a successful online-adaptation result.
 
 Return one table of findings with severity, exact section or code location,
 verified defect versus hypothesis, mechanism, minimal correction and smallest
-resolving check. Then compare both proposals on completion risk, engineering
-substance, learning contribution and credible publication claim. Do not assign
-unsupported numerical novelty scores or acceptance probabilities. Say what
-evidence would change your recommendation.
+resolving check. Then assess implementation readiness, remaining research risk,
+learning contribution and the smallest next evidence gate within the selected
+architecture. Do not reopen the project selection or assign unsupported
+numerical novelty scores or acceptance probabilities. State which measurements
+would change the supported method claim or operating envelope.
 
 Use the existing source/evidence record: `aac0699` for the feasibility
 implementation and `d44883d` for the preceding design review. Attribute any

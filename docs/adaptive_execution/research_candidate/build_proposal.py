@@ -136,7 +136,7 @@ class ProposalDoc(base.PaperDoc):
         canvas.setFillColor(base.MUTED)
         canvas.setFont("Body", 7.8)
         canvas.drawString(42, 768, "ONLINE ACTUATOR ADAPTATION  |  Research proposal")
-        canvas.drawRightString(570, 768, "Review draft 0.3")
+        canvas.drawRightString(570, 768, "Selected plan 0.3.1")
         canvas.setStrokeColor(base.LINE)
         canvas.setLineWidth(.5)
         canvas.line(42, 759, 570, 759)
@@ -160,6 +160,15 @@ def main() -> None:
     base.in_refs = False
     base.math_warnings.clear()
     story = base.convert(ast["blocks"])
+    # Keep this short equation introduction with its displayed optimization.
+    for index, item in enumerate(story):
+        if (isinstance(item, base.Paragraph)
+                and item.getPlainText() == "The single primary optimization is"):
+            equation = story[index + 1]
+            content = (equation._content if isinstance(equation, base.KeepTogether)
+                       else [equation])
+            story[index:index + 2] = [base.KeepTogether([item, *content])]
+            break
     pdf = ROOT / "proposal.pdf"
     ProposalDoc(str(pdf)).multiBuild(story)
     reader = base.PdfReader(pdf)

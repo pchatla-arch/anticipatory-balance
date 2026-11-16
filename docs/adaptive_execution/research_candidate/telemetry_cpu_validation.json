@@ -1,0 +1,172 @@
+{
+  "schema": "adaptive-actuator-telemetry-cpu-validation-v1",
+  "recorded_at_utc": "2026-11-16T06:04:04.705491+00:00",
+  "scope": "Sampler correctness and G1 model-interface acceptance only. No walking policy rollout, humanoid recovery, online estimator, noisy sensor experiment, Warp/GPU parity or GPU timing is measured.",
+  "published_parent_revision": "e7c7854038ba040e8586660f77bac8bec81af26f",
+  "local_git_head": "eb493be055603652ce01a73c66e96dd564a28d34",
+  "source_identity": "New sampler and tests are uncommitted at validation; exact tested file SHA-256 hashes below identify the evaluated sources.",
+  "working_directory": "/workspace/scratch/ff48d6d3d990/adaptive_execution_gate",
+  "environment": {
+    "versions": {
+      "python": "3.12.14",
+      "numpy": "2.3.5",
+      "jax": "0.12.0.1",
+      "jaxlib": "0.12.0.1",
+      "mujoco": "3.16.0",
+      "mujoco-mjx": "3.16.0",
+      "brax": "0.14.2",
+      "warp-lang": "1.18.0"
+    },
+    "jax_platforms": "cpu",
+    "devices": [
+      "cpu:0"
+    ],
+    "packages_installed_by_validation": false
+  },
+  "unit_test_run": {
+    "command": "JAX_PLATFORMS=cpu /workspace/scratch/ff48d6d3d990/foresight_cpu_test_env/bin/python -m unittest discover -s tests -p test_adaptive_telemetry.py -v",
+    "exit_code": 0,
+    "executed": 10,
+    "passed": 10,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds_reported_by_unittest": 3.365,
+    "tests": [
+      "NativeTelemetryTests.test_post_step_force_is_stale_and_sampler_aligns_without_mutation",
+      "NativeTelemetryTests.test_exact_gain_recovered_without_gain_label_in_packet",
+      "NativeTelemetryTests.test_joint_only_clipping_uses_applied_force_and_rejects_regression",
+      "NativeTelemetryTests.test_actuator_only_clipping_rejects_regression",
+      "NativeTelemetryTests.test_effective_target_matches_control_clipping",
+      "NativeTelemetryTests.test_passive_friction_and_damping_are_not_actuator_effort",
+      "NativeTelemetryTests.test_unsupported_mapping_and_nonproportional_model_rejected",
+      "MjxTelemetryTests.test_cpu_backend",
+      "MjxTelemetryTests.test_jit_vmap_native_parity_and_functional_input",
+      "MjxTelemetryTests.test_mjx_saturation_and_nonfinite_sample_rejected"
+    ],
+    "portable_command": "JAX_PLATFORMS=cpu python -m unittest discover -s tests -p test_adaptive_telemetry.py -v"
+  },
+  "g1_interface_check": {
+    "status": "pass",
+    "environment_class": "ImpactJoystick",
+    "environment_impl": "jax",
+    "sampling_backend": "native MuJoCo",
+    "policy_rollout": false,
+    "full_G1_jit": false,
+    "nu": 29,
+    "nq": 43,
+    "nv": 41,
+    "qpos_addresses": [
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35
+    ],
+    "dof_addresses": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "projectile_qpos_address": 36,
+    "projectile_dof_address": 35,
+    "gain_trials": [
+      {
+        "gain_used_only_by_simulator": 1.0,
+        "excited_joints": 29,
+        "regression_valid_joints": 29,
+        "max_force_identity_error_nm": 1.1102230246251565e-15,
+        "max_gain_recovery_error": 1.5543122344752192e-15,
+        "source_time_s": 0.04,
+        "input_state_preserved": true
+      },
+      {
+        "gain_used_only_by_simulator": 0.7,
+        "excited_joints": 29,
+        "regression_valid_joints": 29,
+        "max_force_identity_error_nm": 1.887379141862766e-15,
+        "max_gain_recovery_error": 2.4424906541753444e-15,
+        "source_time_s": 0.04,
+        "input_state_preserved": true
+      }
+    ]
+  },
+  "g1_check_command": "JAX_PLATFORMS=cpu /workspace/scratch/ff48d6d3d990/foresight_cpu_test_env/bin/python /workspace/scratch/ff48d6d3d990/tmp/adaptive_telemetry/check_g1_interface.py",
+  "g1_check_harness_sha256": "9d6a58af731228a17faa2f10791b20e3a07664147ead844edd66e40cf7f17543",
+  "g1_portable_reproduction_command": "JAX_PLATFORMS=cpu python - <<'PY'\nfrom importlib import metadata\nfrom pathlib import Path\nimport hashlib\nimport json\nimport platform\nimport subprocess\nimport sys\n\nsys.path.insert(0, str(Path.cwd()))\n\nimport jax\nimport mujoco\nimport numpy as np\n\nfrom foresight.adaptive.telemetry import ActuatorTelemetryLayout, sample_native_actuators\nfrom foresight.envs.g1_impact.impact_joystick import ImpactJoystick, default_config\n\nroot = Path.cwd()\ncfg = default_config()\ncfg.impact.resample_on_autoreset = False\ncfg.impact.reset_perturb = 0.\nenv = ImpactJoystick(config=cfg, config_overrides={'impl': 'jax'})\nmodel = env.mj_model\nlayout = ActuatorTelemetryLayout.from_model(model)\nassert model.nu == 29, model.nu\nassert layout.qpos_adrs.shape == (29,) and layout.dof_adrs.shape == (29,)\nassert len(np.unique(layout.qpos_adrs)) == 29\nassert len(np.unique(layout.dof_adrs)) == 29\nassert np.min(layout.qpos_adrs) >= 7\nassert np.min(layout.dof_adrs) >= 6\nassert not np.any(np.isin(layout.qpos_adrs,\n                         np.arange(env._proj_qpos_adr, env._proj_qpos_adr+7)))\nassert not np.any(np.isin(layout.dof_adrs,\n                         np.arange(env._proj_qvel_adr, env._proj_qvel_adr+6)))\nnominal_kp = model.actuator_gainprm[:, 0].copy()\nnominal_bias = model.actuator_biasprm[:, 1].copy()\ntrials = []\nfor gain in (1., .7):\n    model.actuator_gainprm[:, 0] = nominal_kp * gain\n    model.actuator_biasprm[:, 1] = nominal_bias * gain\n    data = mujoco.MjData(model)\n    mujoco.mj_resetDataKeyframe(model, data, 0)\n    data.time = .04\n    velocities = np.linspace(-.2, .2, model.nu)\n    data.qvel[:6] = .123\n    data.qvel[layout.dof_adrs] = velocities\n    data.qvel[env._proj_qvel_adr:env._proj_qvel_adr+6] = -.321\n    offsets = np.where(np.arange(model.nu) % 2, -.01, .01)\n    data.ctrl[:] = data.qpos[layout.qpos_adrs] + offsets\n    # Deliberately stale force caches must not be forwarded to the packet.\n    data.actuator_force[:] = -999.\n    data.qfrc_actuator[:] = -777.\n    before = {k: np.array(getattr(data, k), copy=True)\n              for k in ('time', 'qpos', 'qvel', 'ctrl', 'actuator_force',\n                        'qfrc_actuator', 'qacc_warmstart', 'sensordata')}\n    packet = sample_native_actuators(model, data, layout)\n    error = packet.held_target_rad - packet.joint_position_rad\n    excited = np.abs(error) > 1e-9\n    valid = np.asarray(packet.regression_valid)\n    assert int(excited.sum()) == 29\n    assert valid.all()\n    expected = gain * nominal_kp * error\n    np.testing.assert_allclose(packet.applied_joint_torque_nm, expected,\n                               rtol=1e-12, atol=1e-12)\n    np.testing.assert_array_equal(packet.joint_position_rad, data.qpos[layout.qpos_adrs])\n    np.testing.assert_array_equal(packet.joint_velocity_rad_s, velocities)\n    np.testing.assert_array_equal(packet.raw_actuator_force_nm, packet.applied_joint_torque_nm)\n    assert float(packet.source_time_s) == .04\n    for key, value in before.items():\n        np.testing.assert_array_equal(getattr(data, key), value)\n    inferred = packet.applied_joint_torque_nm / (nominal_kp * error)\n    trials.append({'gain_used_only_by_simulator': gain,\n                   'excited_joints': int(excited.sum()),\n                   'regression_valid_joints': int(valid.sum()),\n                   'max_force_identity_error_nm': float(np.max(np.abs(packet.applied_joint_torque_nm-expected))),\n                   'max_gain_recovery_error': float(np.max(np.abs(inferred-gain))),\n                   'source_time_s': float(packet.source_time_s),\n                   'input_state_preserved': True})\nmodel.actuator_gainprm[:, 0] = nominal_kp\nmodel.actuator_biasprm[:, 1] = nominal_bias\nresult = {'status': 'pass', 'environment_class': 'ImpactJoystick',\n          'environment_impl': 'jax', 'sampling_backend': 'native MuJoCo',\n          'policy_rollout': False, 'full_G1_jit': False,\n          'nu': model.nu, 'nq': model.nq, 'nv': model.nv,\n          'qpos_addresses': layout.qpos_adrs.tolist(),\n          'dof_addresses': layout.dof_adrs.tolist(),\n          'projectile_qpos_address': int(env._proj_qpos_adr),\n          'projectile_dof_address': int(env._proj_qvel_adr),\n          'gain_trials': trials}\nprint(json.dumps(result, indent=2, allow_nan=False))\nPY\n",
+  "attempt_notes": [
+    {
+      "stage": "initial temporary G1 harness import",
+      "status": "failed before model construction",
+      "reason": "The external temporary script lacked the repository root on sys.path.",
+      "resolution": "Explicitly prepend the current repository directory; then rerun the same acceptance checks.",
+      "model_or_sampler_failure": false
+    }
+  ],
+  "tested_file_sha256": {
+    "foresight/adaptive/telemetry.py": "608f0b36c6810170f6a53b660650079c710be1ad210eaa3745d6475fae0694e6",
+    "tests/test_adaptive_telemetry.py": "e23393983a4a1ac327242061d956a6e0bf0cd23ad588a82269228ef7ef582513",
+    "foresight/envs/g1_impact/impact_joystick.py": "679f21f8e1e41bb276cf65d032e035c0d2504ebd38aa87e614fea7985531079d",
+    "foresight/envs/g1_impact/parent_shim.py": "767024785af06b5f4d9d779bfef107128e5c9439dc49bc16902d9b51f3ee331a",
+    "foresight/envs/g1_impact/scene.py": "e8e620771b018a5641745aff55f9a5b464e2a0d3af306b32ed2cf0c379929c31",
+    "foresight/envs/g1_impact/xmls/scene_impact_flat.xml.tmpl": "620ec9f2fcc9a4533ed0c4a7a7abecee4e54dc05903faa1f57826f8a146b73c1",
+    "upstream/mujoco_playground/rss2025/mujoco_playground/_src/locomotion/g1/xmls/g1_mjx_feetonly.xml": "fae73d06ae6957ab38e59c67cac5b3665db6de27cd741602dd93951e3f82b72c"
+  },
+  "not_verified": [
+    "GPU/Warp native parity",
+    "extra-forward GPU cost",
+    "integration with the live gate loop",
+    "sensor-noise and timestamp-arrival pipeline",
+    "online identification or locomotion recovery"
+  ]
+}

@@ -2,11 +2,13 @@
 
 **Prasuna Chatla | pchatla@stanford.edu**
 
-**Technical design and experimental protocol | Research proposal 0.3 | November 15, 2026**
+**Technical design and experimental protocol | Selected proposal 0.3, revision 0.3.1 | November 15, 2026**
 
 **Decision summary.** This revision strengthens the original one-page proposal into a specific research candidate. Its method uses the range of actuator gains consistent with timestamped telemetry, possible joint motion during the next command hold, and available command authority to determine which correction is justified. The research test is whether this rule improves useful recovery while reducing harmful correction compared with a well-tuned heuristic under the same information and limits. The selected system boundary remains a frozen G1 PPO policy, an estimator, bounded position-target correction, and an execution supervisor. The four-page Fleet Robust Execution proposal emphasizes building and validating this component; this version adds a defined algorithm and the experiments needed to assess a paper claim.
 
 **Evidence status.** The existing gain-fault wrapper and privileged feasibility gate have CPU checks [1]. This revision adds a CPU-only scalar reference and analytical illustrations: ten finite cases, two invalid-input checks, and 71 uncertainty-sweep points pass. These are not robot recovery results. The proposed estimator, integrated correction rule, GPU comparisons, learned alternatives and C++ runtime remain to be implemented or measured. The earlier 24-page engineering design remains supporting material [2].
+
+**Selection and review update.** Proposal 0.3 is selected. Revision 0.3.1 incorporates AE-001 through AE-003: synchronized effort/state sampling, applied actuator torque after joint limits, and confounds defined per measurement channel [13]. An opt-in telemetry reference is separate from the unchanged true-gain behavioral gate. A reported healthy-walking envelope screen is encouraging but has not been independently reproduced; its percentages are not full correction-authority or recovery results. The next work remains the existing GPU compensability gate and a CPU gain-set/authority replay.
 
 ## Abstract
 
@@ -57,7 +59,11 @@ d(x)=\operatorname{clip}_{\mathcal R}(r_k+x)-r_k,
 \qquad z_k=r_k+d(x_k).
 $$
 
-The measurement channel supplies actual actuator effort, not merely commanded current. Effort, encoder position and the issued target must correspond to the same source timestamp. At source time $t_i$, define
+The measurement channel supplies a declared measure of applied actuator effort. A current-based estimate requires its own calibrated conversion and error model. Effort, encoder position and the issued target must correspond to the same source timestamp and physics evaluation. For the initial one-actuator-per-joint, unit-gear model, the simulator reference uses `qfrc_actuator` at the actuator's joint DoF after joint-level force limits. `actuator_force` remains a separate diagnostic before those joint limits. It may already include actuator-level clipping. Passive damping, dry friction and contact contributions are not added to this reference effort. [14]
+
+AE-001 forbids pairing a stored post-step force with the differently timed returned joint position. The opt-in sampler refreshes forward dynamics on an isolated copy, under the same active simulator model and held control, then samples time, effective target, position, velocity and applied actuator torque together. It does not advance time or replace the walker state and observation caches. The alternative is recording state at the original force evaluation. Noise, bias and transport delay are applied only after a valid source packet exists. Arrival time remains distinct from capture time. AE-002 requires flags for both actuator-level and joint-level clipping; saturated samples are rejected from this unsaturated regression. The simulator model may contain the injected gain to generate physics, but the estimator packet contains no gain or onset label. [13,14]
+
+At source time $t_i$, define
 
 $$
 \phi_i=z_i-q_i^{\rm meas},\qquad y_i=\tau_i^{\rm meas}/K_p.
@@ -70,7 +76,7 @@ $$
 \qquad \epsilon_i=b_\tau/K_p+g_{\max}b_q.
 $$
 
-Bias and timestamp-alignment uncertainty require additional declared bounds. Saturated samples cannot use this unsaturated regression. Their rejection must use permitted status/measurement channels, not hidden simulator labels.
+Bias and timestamp-alignment uncertainty require additional declared bounds. Saturation status must be a declared permitted channel, or inferred conservatively from measured effort and supported limits; hidden fault labels are forbidden. Imperfect saturation detection requires its own ablation. The sampler's exact simulator status is an idealized reference, not proof that equivalent hardware telemetry is available.
 
 Known bounded errors support conditional set inclusion. Gaussian or heavy-tailed errors do not have finite deterministic bounds: selected envelopes then support empirical coverage statements, with violations retained and reported. Bounds are selected on development trajectories and coverage assessed on independent episodes, by fault, contact phase and measurement age. Per-sample coverage is not a trajectory-wide guarantee.
 
@@ -184,7 +190,7 @@ Requested-slew limits can make the feasible set empty when a new estimate requir
 
 ### Identifiability and nuisance changes
 
-Unknown multiplicative effort-sensor scale c changes the regression to y approximately equal to c times g times the target error. This channel alone identifies a product, not physical gain. Independently calibrated scale, a declared bounded scale set, or another validated measurement model is required. This does not assert impossibility for every possible multimodal dynamics model. Contact and external loads change motion and excitation but do not automatically invalidate a synchronized actual-actuator-force relation. Estimated effort reconstructed from inverse dynamics introduces additional contact, inertia and load assumptions. The no-effort condition therefore requires its own declared motion-history estimator or an unavailable-identification status.
+Unknown multiplicative effort-sensor scale c changes the regression to y approximately equal to c times g times the target error. This channel alone identifies a product, not physical gain. Independently calibrated scale, a declared bounded scale set, or another validated measurement model is required. This does not assert impossibility for every possible multimodal dynamics model. Contact, payload, external loads and passive mechanical losses change motion and excitation without automatically invalidating the synchronized unsaturated actuator-effort relation. Friction or damping is a direct effort confound only if an explicitly modeled downstream sensor or reconstruction includes those losses. Changing MuJoCo passive friction alone does not create that sensor model. Estimated effort reconstructed from inverse dynamics introduces additional contact, inertia and load assumptions. No-effort identification is a separate later learned-history or model-based study; it is not part of the initial effort-regression gate. With no justified replacement measurement model, the physical gain set remains broad and the proposed correction may be unavailable. [14]
 
 An especially important test changes a degraded gain back to healthy gain without announcing the transition. A correction that was useful just before recovery may become harmful while delayed telemetry still indicates the old response. This test exposes detection and withdrawal limits directly; it is not covered by a continuous bounded-drift certificate.
 
@@ -208,6 +214,8 @@ The table below uses illustrative parameters: $K_p=75$ Nm/rad, an estimated gain
 ![Figure 2. Analytical illustration with an unchanged point estimate and increasingly uncertain gain. The projection reduces correction as healthy response becomes plausible. This plot contains no humanoid performance measurements.](figures/authority_example.svg)
 
 The early information/authority check is consequential. If valid intervals and realistic motion envelopes permit almost no nonzero correction during walking, better estimation or a smaller computation time will not automatically rescue the method. Quantify permitted correction and its overlap with useful oracle corrections before investing in learned adapters. A strict rule that never intervenes cannot earn a recovery claim. A relaxed criterion would be a separately specified variant with different claims and validation, rather than a silent post-test change.
+
+A hold-error envelope excluding zero is only a necessary screen. For positive error and a gain interval strictly below one, its no-worse-force upper bound is $2(1/g_{\max}-1)e_{\min}$ before force, target and slew constraints; this can approach zero despite passing the screen. Healthy-walking samples measure possible kinematic opportunity under a hypothetical degraded gain: a valid gain set containing the actual healthy value one still requires zero correction. Instantaneous measured speed alone is not a bound on future motion. Include encoder/velocity error, measurement age and a declared acceleration or speed envelope; assess coverage after faults as well as during healthy motion. Report the sign screen, full feasible interval and attainable correction magnitude separately, per joint group. The review-response note records the preliminary reported percentages and missing provenance without promoting them to verified results.
 
 ## Deep RL and learned inference
 
@@ -268,9 +276,11 @@ If this gate fails, diagnose actuator authority, physical model and healthy cont
 
 ### Stage 2: make identification and false compensation measurable
 
-Use the selected compensable regime and unchanged controller. Cross actual gain changes with three telemetry conditions: exact synchronized effort for plumbing, explicitly declared noisy/delayed effort for the primary experiment, and no effort as a separately specified motion-history condition. Sensor settings are declared simulation assumptions; simulator ground-truth effort is not a substitute for a deployment channel.
+Use the selected compensable regime and unchanged controller. First check exact synchronized applied actuator effort, then run the primary experiment with declared measurement noise, bias, delay and saturation-status assumptions. Sensor settings are simulation assumptions; simulator ground-truth effort is not a substitute for a deployment channel. The existing Stage A CSV contains episode aggregates, not synchronized per-step packets. CPU gain replay needs its own trace generator or an explicit packet recorder; synthetic forces on a fixed trajectory must be labeled as such.
 
-Run healthy actuators under contact/friction changes, external loading and telemetry bias or staleness. Include unannounced recovery from degraded to healthy gain, as well as degradation onset. Keep these nuisance cases within the healthy controller’s meaningful task range. They test whether tracking error causes unjustified actuator correction. Include weakly excited motion and saturation as distinct information/authority limits. A no-effort condition cannot reuse the force-regression estimator unchanged.
+AE-003 assigns confounds by measurement channel. For direct applied-actuator-effort telemetry, test sensor scale, bias, time mismatch, delay and saturation handling. Payload, contact and passive-friction changes remain useful consistency, excitation and locomotion tests, but do not themselves add an omitted term to the aligned force equation. For an explicitly modeled downstream or reconstructed effort channel, add declared friction/damping losses. Motion-only estimation faces payload, external-force and contact ambiguity and belongs to a separately specified later study. A correctly handled saturation event removes valid samples or authority; it need not fool the estimator. Do not demand a nonzero false-adaptation rate by manufacturing an inconsistent sensor model.
+
+Include unannounced recovery from degraded to healthy gain, as well as degradation onset. Keep nuisance cases within the healthy controller's meaningful task range. Report excitation and identification by joint group: low nominal stiffness and small tracking error can make the same absolute torque noise much more consequential. The next CPU replay measures gain-set coverage, time to exclude healthy gain, width after age/hold expansion, feasible correction magnitude, saturated/rejected samples and withdrawal conflicts. Bounded-error intersections do not automatically contract at the rate of an independent Gaussian confidence interval, especially under persistent bias.
 
 Exact effort with nonzero target error can make gain nearly algebraically observable. Unknown effort scale and gain can instead be confounded. Show both cases rather than manufacturing difficulty with an unexplained noise level. Report predictive error, interval coverage, information availability, correction magnitude and task loss; parameter accuracy alone is insufficient. An uncertainty interval earns its nominal coverage through measurements on held-out conditions, not through the name of its covariance matrix.
 
@@ -333,7 +343,7 @@ At the user's stated $2.50 per hour, a two-hour initial pod allocation costs $5.
 
 Previous Foresight issues are addressed as operational requirements. Pin source and environment versions instead of repairing a working venv during a paid experiment. Record exact model, normalization, observation and action-history contracts. Restore checkpoint payloads from durable storage and verify them; a Git push containing reports does not by itself preserve an ignored checkpoint directory. Save checkpoints outside ephemeral pod storage with a manifest and hashes, and verify a download before termination. Pair exogenous scenarios rather than forcing identical post-intervention robot states. Preserve failed and nonfinite episodes, and test report generation independently of training. Separate batch throughput, controller latency and rendering behavior. Complete the launcher and dry-run checks before asking for GPU time.
 
-## Choosing between the two proposals
+## Selection rationale
 
 The proposals share a useful component boundary. The choice concerns the principal deliverable and the extra evidence required; it does not require building two unrelated controllers.
 
@@ -347,9 +357,9 @@ The proposals share a useful component boundary. The choice concerns the princip
 | Publication basis | A strong systems result would need substantial integration or reuse evidence | A plausible empirical methods paper if the stated mechanism produces repeatable comparative benefit |
 | Portfolio value | Particularly useful for calibration, control integration and embedded software ownership | Adds deeper discussion of inference, robust control, learning comparisons and experimental reasoning |
 
-**Recommendation.** For the stated goal of combining robotics software ownership with deep RL and a credible research paper, select the strengthened Online Actuator Adaptation plan, subject to the inexpensive compensability and information/authority gates. Retain the Fleet execution interface and runtime deliverables as its engineering backbone. This recommendation is conditional on technical evidence, not on a claimed novelty score. The four-page Fleet proposal remains a reasonable choice when the priority is a bounded component delivery with lower research risk.
+**Selection recorded.** The project owner selected the strengthened Online Actuator Adaptation plan. The Fleet execution interface and runtime deliverables remain its engineering backbone. Compensability and information/authority gates still determine the supported scope. A null comparison can leave a useful engineering component, but falsifiability alone does not establish novelty or publishability; those depend on the contribution and evidence. The comparison above is retained as the rationale for selection.
 
-Before selection, the most useful reviewer question is: **does the specific proposed projection offer a plausible advantage over a well-tuned heuristic under the same measurements, command limits and task distribution, and can the planned experiments distinguish that advantage from conservative nonintervention?** A concrete objection to that mechanism should be resolved before training another policy.
+The next method review should ask: **does the specific proposed projection offer a plausible advantage over a well-tuned heuristic under the same measurements, command limits and task distribution, and can the planned experiments distinguish that advantage from conservative nonintervention?** A concrete objection to that mechanism should be resolved before training another policy.
 
 ## References
 
@@ -378,4 +388,8 @@ Primary sources reviewed through November 15, 2026. Literature results are cited
 **[11]** M. Tanaskovic, L. Fagiano and V. Gligorovski. Adaptive model predictive control for linear time varying MIMO systems. Automatica 105:237-245, 2019. https://fagiano.faculty.polimi.it/docs/papers/Adaptive_MPC_LTV_Automatica_2019.pdf
 
 **[12]** A. Daniels et al. Active Fault Identification and Robust Control for Unknown Bounded Faults via Volume-Based Costs. arXiv:2508.12010, 2025 preprint. https://arxiv.org/abs/2508.12010
+
+**[13]** Independent review of design draft 0.2, findings R1-R3 / AE-001 through AE-003. Commit 5c0043a5a3f494c37f67b28e7e50760493ab8eb7. https://github.com/pchatla-arch/anticipatory-balance/blob/5c0043a5a3f494c37f67b28e7e50760493ab8eb7/docs/adaptive_execution/reviews/review_v0.2.md . Resolution and selection record: `review_resolution_ae001_003.md` beside this proposal.
+
+**[14]** MuJoCo official documentation: actuation, passive forces, friction loss and joint force clamping. https://mujoco.readthedocs.io/en/stable/computation/index.html ; https://mujoco.readthedocs.io/en/stable/modeling.html#force-limits . Simulator-reference semantics are checked against the installed MuJoCo implementation; a hardware sensor requires its own contract.
 

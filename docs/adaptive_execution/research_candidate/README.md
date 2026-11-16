@@ -1,6 +1,10 @@
 # Online Actuator Adaptation: strengthened research proposal
 
-Research candidate 0.3, reviewed November 15, 2026.
+Selected proposal 0.3, revision 0.3.1, November 15, 2026.
+
+The project owner selected this research direction. Revision 0.3.1 incorporates
+AE-001 through AE-003 and adds an opt-in synchronized telemetry reference. See
+the [selection and review-resolution record](review_resolution_ae001_003.md).
 
 This proposal develops the original **Online Actuator Adaptation for Reliable
 Humanoid Locomotion** into a specific method and comparative paper plan. The
@@ -11,16 +15,15 @@ authority to project an estimated inverse into a feasible correction interval.
 
 ## Read and review
 
-- [16-page proposal, PDF](proposal.pdf)
+- [17-page proposal, PDF](proposal.pdf)
 - [Editable proposal](proposal.md)
-- [Claude review and option-selection brief](claude_review_request.md)
+- [Selected-method review brief](claude_review_request.md)
 - [Earlier 24-page engineering design](../paper.pdf)
 
-The final proposal section compares this research emphasis with the four-page
-Fleet Robust Execution systems emphasis. The proposals share their underlying
-execution interface. The choice is whether to prioritize a bounded component
-delivery or undertake the additional method comparisons needed for a research
-claim. The proposed algorithm has no measured humanoid-recovery result yet.
+The final proposal section retains the comparison with the four-page Fleet
+Robust Execution systems emphasis as the rationale for selection. The shared
+execution interface and runtime deliverables remain in scope. The proposed
+algorithm has no measured humanoid-recovery result yet.
 
 ## What is implemented here
 
@@ -43,6 +46,16 @@ python3 docs/adaptive_execution/research_candidate/validate_projection.py
 The existing known-gain feasibility gate remains the integration baseline. The
 timestamped estimator, full proposed controller, GPU recovery evaluation, learned
 alternatives and C++ runtime remain to be implemented or measured.
+
+The opt-in [telemetry module](../../../foresight/adaptive/telemetry.py) samples
+state and post-joint-limit actuator torque from one forward evaluation. Its
+[CPU tests](../../../tests/test_adaptive_telemetry.py) cover alignment, clipping,
+mapping assumptions and native/MJX behavior. The
+[CPU validation record](telemetry_cpu_validation.json) also records a native
+interface check on all 29 actuators of the actual G1 model. This helper is not inserted into
+the existing Stage A loop. That loop saves episode aggregates, not per-step
+estimation packets; a gain-range replay needs a separate trace generator or
+recorder. The helper does not implement delay injection or the gain estimator.
 
 ## Build the document
 
