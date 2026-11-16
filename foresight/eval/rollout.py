@@ -184,7 +184,7 @@ def oracle_brace(lead_s: jax.Array, hold_s: float, dt: float):
 def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: int,
             brace_policy=None, decide: Callable = no_brace,
             scenario_fn: Optional[Callable] = None, reset_keys: Optional[jax.Array] = None,
-            controller=None):
+            controller=None, record_qpos: bool = False):
   """Run `steps` control steps for every env in `wenv` (built by batched_env).
 
   scenario_fn(state) -> state is applied right after reset (use set_scenario).
@@ -244,6 +244,8 @@ def rollout(env: ImpactJoystick, wenv, nominal_policy, rng: jax.Array, steps: in
         "feet_contact": jp.stack([d.sensordata[:, a] > 0 for a in feet_adr], axis=-1),
         "done": state.done,
     })
+    if record_qpos:
+      rec["qpos"] = d.qpos
     return (state, rng, cstate), rec
 
   @jax.jit
