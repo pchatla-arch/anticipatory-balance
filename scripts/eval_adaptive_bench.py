@@ -156,15 +156,52 @@ def render_report(summary, meta):
     return "\n".join(lines)
 
 
-def registration_record(args, families, methods, telemetry_names, margins):
-    return {
-        "split": args.split, "families": families, "methods": methods, "telemetry": telemetry_names,
-        "episodes": args.episodes, "steps": args.steps, "schedule": args.schedule,
+def checkpoint_digest(path):
+    """SHA-256 over the checkpoint directory's file names and bytes, in sorted order."""
+    h = hashlib.sha256()
+    for f in sorted(Path(path).rglob("*")):
+        if f.is_file():
+            h.update(str(f.relative_to(path)).encode()); h.update(f.read_bytes())
+    return h.hexdigest()
+
+
+def registration_record(args, families, methods, telemetry, margins, rls_cfg, heur_cfg, checkpoint,
+                        candidate_config=None):
+    """The complete protocol of a run (AE-012): everything that decides what is simulated and
+    how it is scored. A test run must match a record written before it on every key here."""
+    record = {
+        "split": args.split, "split_seed": SPLIT_SEED[args.split],
+        "family_seeds": {f: family_seed(args.split, f) for f in families},
+        "families": families, "methods": methods, "telemetry": sorted(telemetry),
+        "telemetry_configs": {k: v._asdict() for k, v in sorted(telemetry.items())},
+        "episodes": args.episodes, "steps": args.steps, "schedule": args.schedule, "impl": args.impl,
+        "rls": rls_cfg._asdict(), "heuristic": heur_cfg._asdict(),
+        "checkpoint_sha256": checkpoint_digest(checkpoint),
         "reference_method": REFERENCE_METHOD, "paired_metrics": list(PAIRED_METRICS),
         "noninferiority_margins_loss": margins,
         "primary": "paired mean difference in postfault_loss, candidate minus heuristic_gate, on gain families",
         "secondary": "harmful_offset_rad on healthy and nuisance families; fall_rate; withdrawal_steps on return families",
     }
+    if candidate_config is not None:
+        record["candidate_config"] = candidate_config
+    return record
+
+
+PROTOCOL_META = ("registered_at", "registration_sha256", "git_commit", "registration_commit")
+
+
+def git_commit():
+    try:
+        return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    except (subprocess.CalledProcessError, OSError):
+        return None
+
+
+def check_registration(recorded, actual):
+    """Return the protocol keys on which a prior registration and the current run disagree.
+    Every key of either record counts except the bookkeeping fields."""
+    keys = (set(recorded) | set(actual)) - set(PROTOCOL_META)
+    return sorted(k for k in keys if recorded.get(k) != actual.get(k))
 
 
 def main(argv=None):
@@ -184,6 +221,8 @@ def main(argv=None):
     parser.add_argument("--heuristic", type=Path, help="JSON with tuned HeuristicConfig/RLSConfig fields (frozen on val)")
     parser.add_argument("--margin", type=float, default=0.005, help="noninferiority loss margin on healthy/nuisance families")
     parser.add_argument("--trace", action="store_true", help="save per-step traces of the first batch of every cell (npz)")
+    parser.add_argument("--register-only", action="store_true",
+                        help="write the complete protocol record to --out/registration.json and exit without simulating")
     args = parser.parse_args(argv)
     args.out.mkdir(parents=True, exist_ok=True)
     started = time.monotonic()
@@ -229,16 +268,25 @@ def main(argv=None):
             parser.error(f"unknown method {m}")
     # Healthy and nuisance families carry a noninferiority margin; gain families are superiority tests.
     margins = {f: args.margin for f in families if B.FAMILIES[f].gain == 1.0}
-    registration = registration_record(args, families, methods, sorted(telemetry), margins)
+    checkpoint = R.latest_checkpoint(ROOT / "checkpoints/nominal_s1")
+    registration = registration_record(args, families, methods, telemetry, margins, rls_cfg, heur_cfg, checkpoint)
+    registration["git_commit"] = git_commit()
+    if args.register_only:
+        registration["registered_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        write_json(args.out / "registration.json", registration)
+        print("registration written to", args.out / "registration.json", "(no physics run)")
+        return 0
     if args.split == "test":
         if not args.registration or not args.registration.exists():
             parser.error("--split test requires an existing --registration file written before this run")
         recorded = json.loads(args.registration.read_text())
-        for key in ("families", "methods", "telemetry", "episodes", "steps", "schedule"):
-            if recorded.get(key) != registration[key]:
-                parser.error(f"registration mismatch on {key}: {recorded.get(key)!r} vs {registration[key]!r}")
+        mismatched = check_registration(recorded, registration)
+        if mismatched:
+            parser.error("registration mismatch on " + ", ".join(
+                f"{k}: {recorded.get(k)!r} vs {registration.get(k)!r}" for k in mismatched))
         registration["registered_at"] = recorded.get("registered_at")
         registration["registration_sha256"] = hashlib.sha256(args.registration.read_bytes()).hexdigest()
+        registration["registration_commit"] = recorded.get("git_commit")
     else:
         registration["registered_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     write_json(args.out / "registration.json", registration)
@@ -250,7 +298,6 @@ def main(argv=None):
     cfg.push_config.enable = False
     cfg.episode_length = args.steps
     env = AdaptiveJoystick(config=cfg, config_overrides={"impl": args.impl}, telemetry=True)
-    checkpoint = R.latest_checkpoint(ROOT / "checkpoints/nominal_s1")
     policy = R.load_policy(checkpoint, deterministic=True)
     schedule = B.WALK_ONLY if args.schedule == "walk" else B.WALK_TURN_STOP_RESUME
     versions = {}

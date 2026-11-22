@@ -90,6 +90,38 @@ class HarnessTests(unittest.TestCase):
                 H.main(["--out", tmp, "--split", "test", "--registration", str(reg), "--allow-cpu", "--impl", "jax",
                         "--families", "gain_070", "--methods", "none", "--episodes", "4", "--steps", "10", "--schedule", "walk"])
 
+    def test_registration_binds_the_whole_protocol(self):
+        """AE-012: a test run must match the prior record on split, seeds, margins, configs and
+        checkpoint, not only on the scenario dimensions; --register-only writes that record."""
+        common = ["--allow-cpu", "--impl", "jax", "--families", "healthy", "--methods", "heuristic_gate",
+                  "--telemetry", "declared", "--episodes", "2", "--steps", "10", "--schedule", "walk"]
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "reg"
+            self.assertEqual(H.main(["--out", str(out), "--split", "test", "--register-only"] + common), 0)
+            record = json.loads((out / "registration.json").read_text())
+            for key in ("split", "family_seeds", "noninferiority_margins_loss", "telemetry_configs", "rls",
+                        "heuristic", "checkpoint_sha256", "impl"):
+                self.assertIn(key, record)
+            self.assertEqual(record["split"], "test")
+            self.assertEqual(record["family_seeds"], {"healthy": H.family_seed("test", "healthy")})
+            # the same invocation agrees with its own record on every protocol key
+            self.assertEqual(H.check_registration(record, record), [])
+            mutations = {
+                "split": "dev", "noninferiority_margins_loss": {"healthy": 0.123},
+                "family_seeds": {"healthy": 11000}, "checkpoint_sha256": "0" * 64,
+                "heuristic": dict(record["heuristic"], dead_band=0.5),
+                "telemetry_configs": {"declared": dict(record["telemetry_configs"]["declared"], latency_max=0)},
+            }
+            for key, value in mutations.items():
+                mutated = dict(record, **{key: value})
+                self.assertEqual(H.check_registration(mutated, record), [key], key)
+            # the development registration from the first test is rejected on split and more, before physics
+            dev = dict(record, split="dev", noninferiority_margins_loss={"healthy": 0.005})
+            reg = Path(tmp) / "dev_registration.json"
+            reg.write_text(json.dumps(dev))
+            with self.assertRaises(SystemExit):
+                H.main(["--out", tmp, "--split", "test", "--registration", str(reg), "--margin", "0.123"] + common)
+
 
 @unittest.skipUnless(os.environ.get("FORESIGHT_RUN_CPU_PHYSICS") == "1",
                      "set FORESIGHT_RUN_CPU_PHYSICS=1 to run the closed loop on CPU")
