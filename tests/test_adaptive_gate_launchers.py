@@ -5,6 +5,7 @@ import contextlib
 import io
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -70,6 +71,91 @@ PY
             self.assertEqual(data['FORESIGHT_REPO'], '/workspace/adaptive-execution-gate')
             self.assertEqual(data['FORESIGHT_CODE_REF'], 'portfolio/adaptive-execution-gate')
             self.assertEqual(data['NO_STOP'], '1')
+
+    def test_explicit_source_pin_reaches_download_and_worker(self):
+        pin = 'ab' * 20
+        result = self.invoke(['smoke'], {'FORESIGHT_CODE_REF': pin})
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(json.loads(result.stdout.splitlines()[-1])['FORESIGHT_CODE_REF'], pin)
+        self.assertIn(f'/{pin}/scripts/start_adaptive_gate_pod.sh', self.calls.read_text())
+
+    def test_check_access_uses_publisher_remote_without_starting_a_worker(self):
+        repo = self.root / 'existing project'
+        (repo / 'scripts').mkdir(parents=True)
+        shutil.copy(ROOT / 'scripts/publish_experiment_results.py', repo / 'scripts')
+        real_git = shutil.which('git')
+        env = {**self.env, 'GIT_CONFIG_NOSYSTEM': '1', 'GIT_CONFIG_GLOBAL': os.devnull,
+               'FORESIGHT_REPO': str(repo), 'REAL_GIT': real_git,
+               'PROBE_LOG': str(self.root / 'probe')}
+        subprocess.run([real_git, 'init', '-q', str(repo)], env=env, check=True)
+        subprocess.run([real_git, '-C', str(repo), 'remote', 'add', 'origin',
+                        'https://github.com/pchatla-arch/anticipatory-balance.git'],
+                       env=env, check=True)
+        fake = self.bin / 'git'
+        fake.write_text('''#!/usr/bin/env bash
+if [[ " $* " == *" push "* ]]; then
+  [[ " $* " == *" push --dry-run --quiet origin HEAD:refs/heads/foresight/credential-probe "* ]] || exit 2
+  printf '%s' 'probe' > "$PROBE_LOG"
+  exit "$MOCK_PUSH_STATUS"
+fi
+exec "$REAL_GIT" "$@"
+''')
+        fake.chmod(0o755)
+        for status in (0, 128):
+            result = self.invoke(['check-access'], {**env, 'MOCK_PUSH_STATUS': str(status)})
+            self.assertEqual(result.returncode == 0, status == 0, result.stdout + result.stderr)
+            self.assertEqual(Path(env['PROBE_LOG']).read_text(), 'probe')
+            Path(env['PROBE_LOG']).unlink()
+            self.assertFalse(self.calls.exists())
+        subprocess.run([real_git, '-C', str(repo), 'remote', 'set-url', '--push', 'origin',
+                        'https://github.com/other/repository.git'], env=env, check=True)
+        result = self.invoke(['check-access'], {**env, 'MOCK_PUSH_STATUS': '0'})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(Path(env['PROBE_LOG']).exists())
+
+    def test_repair_access_validates_remote_and_repairs_without_worker(self):
+        checkout = self.make_auth_fixture()
+        shutil.copy(ROOT / 'scripts/publish_experiment_results.py', checkout / 'scripts')
+        self.download.write_bytes((ROOT / 'scripts/start_adaptive_gate_pod.sh').read_bytes())
+        real_git = shutil.which('git')
+        env = {**self.env, 'REAL_GIT': real_git, 'GIT_CONFIG_NOSYSTEM': '1',
+               'GIT_CONFIG_GLOBAL': os.devnull, 'FORESIGHT_CODE_REF': 'ab' * 20,
+               'FORESIGHT_GITHUB_TOKEN': self.GOOD}
+        subprocess.run([real_git, 'init', '-q', str(checkout)], env=env, check=True)
+        def git(*args):
+            return subprocess.check_output([real_git, '-C', str(checkout), *args], env=env)
+        git('-c', 'user.name=fixture', '-c', 'user.email=fixture@example.com',
+            'commit', '--allow-empty', '-qm', 'fixture')
+        git('remote', 'add', 'origin', 'https://github.com/other/repository.git')
+        head = git('rev-parse', 'HEAD')
+        dirty_file = checkout / 'ongoing-run'
+        dirty_file.write_text('preserve')
+        (self.bin / 'git').write_text('''#!/usr/bin/env bash
+case " $* " in
+  *" push "*)
+    [[ " $* " == *" --dry-run "* ]] || exit 99
+    credential=$(printf 'protocol=https\nhost=github.com\n\n' | "$REAL_GIT" -C "$FORESIGHT_REPO" credential fill 2>/dev/null) || exit 1
+    [[ "$credential" == *"password=good_token_0123456789abcdef"* ]]; exit ;;
+  *" clone "*|*" checkout "*|*" fetch "*|*" reset "*) exit 99 ;;
+esac
+exec "$REAL_GIT" "$@"
+''')
+        (self.bin / 'nvidia-smi').write_text('#!/bin/sh\nexit 99\n')
+        saved = self.root / '.foresight-git-credentials'
+        rejected = self.invoke(['repair-access'], env=env)
+        self.assertNotEqual(rejected.returncode, 0)
+        self.assertFalse(saved.exists())
+        self.assertNotIn(self.GOOD, rejected.stdout + rejected.stderr)
+        dest = 'https://github.com/pchatla-arch/anticipatory-balance.git'
+        git('remote', 'set-url', 'origin', dest)
+        result = self.invoke(['repair-access'], env=env)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(saved.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(git('rev-parse', 'HEAD'), head)
+        self.assertEqual(git('remote', 'get-url', 'origin').decode().strip(), dest)
+        self.assertEqual(dirty_file.read_text(), 'preserve')
+        self.assertNotIn(self.GOOD, result.stdout + result.stderr)
+        self.assertFalse(self.started.exists())
 
     def test_invalid_budget_and_revision_fail_before_download(self):
         for values in ({'ADAPTIVE_MAX_MINUTES': '121'}, {'ADAPTIVE_MAX_MINUTES': '14'},
@@ -155,6 +241,53 @@ PY
         self.assertNotIn('gho_secretvalue0123456789', result.stdout + result.stderr + self.started.read_text())
         self.assertFalse((self.root / '.foresight-git-credentials').exists())
         self.assertNotIn('login', self.gh_calls.read_text())
+
+    def test_real_git_uses_selected_helper_with_conflicting_credentials(self):
+        # Git reads both global and repository-local helpers. Use real Git for
+        # configuration and credential lookup, and keep every transport offline.
+        checkout = self.make_auth_fixture()
+        (checkout / 'scripts/adaptive_gate_pod.py').touch()
+        for source in ('file', 'gh'):
+            with self.subTest(source=source), tempfile.TemporaryDirectory() as case:
+                real_git = shutil.which('git')
+                env = {**self.env, **self.clock(), 'GIT_CONFIG_NOSYSTEM': '1',
+                       'GIT_CONFIG_GLOBAL': str(Path(case) / 'gitconfig'),
+                       'REAL_GIT': real_git, 'TEST_SOURCE': source,
+                       'GH_TOKEN': 'ambient', 'GITHUB_TOKEN': 'ambient'}
+                subprocess.run([real_git, 'init', '-q', str(checkout)], env=env, check=True)
+                stale = Path(case) / 'stale'
+                stale.write_text('https://pchatla-arch:stale@github.com\n')
+                subprocess.run([real_git, 'config', '--global', 'credential.helper',
+                                f'store --file={stale}'], env=env, check=True)
+                subprocess.run([real_git, '-C', str(checkout), 'config', '--local',
+                                '--unset-all', 'credential.helper'], env=env, check=False)
+                saved = self.root / '.foresight-git-credentials'
+                if source == 'file':
+                    saved.write_text(f'https://pchatla-arch:{self.GOOD}@github.com\n')
+                else:
+                    saved.unlink()
+                (self.bin / 'git').write_text('''#!/usr/bin/env bash
+case " $* " in
+  *" config "*) exec "$REAL_GIT" "$@" ;;
+  *" push "*)
+    data=$(printf 'protocol=https\nhost=github.com\n\n' | "$REAL_GIT" -C "$FORESIGHT_REPO" credential fill) || exit 1
+    [[ "$data" == *"password=good_token_0123456789abcdef"* ]]; exit ;;
+esac
+exit 0
+''')
+                (self.bin / 'gh').write_text('''#!/usr/bin/env bash
+[[ "$TEST_SOURCE" == gh && -z "${GH_TOKEN:-}${GITHUB_TOKEN:-}" ]] || exit 1
+case "$1 $2" in
+  'auth token') printf '%s' 'stored-account' ;;
+  'auth git-credential') printf 'username=pchatla-arch\npassword=good_token_0123456789abcdef\n' ;;
+  *) exit 2 ;;
+esac
+''')
+                self.started.unlink(missing_ok=True)
+                result = self.invoke(env=env, script='start_adaptive_gate_pod.sh')
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertTrue(self.started.exists())
+                self.assertNotIn(self.GOOD, result.stdout + result.stderr)
 
     def test_rejected_token_is_deleted_and_nothing_starts(self):
         repo = self.make_auth_fixture()
