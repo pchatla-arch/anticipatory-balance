@@ -1,0 +1,90 @@
+{
+  "candidate": {
+    "source_commit": "5584a40871e7e1b30a980ffa049f9b2f83debb65",
+    "source_tree": "037bd1d85b3780e3c0761a02cee73cb66d574a68",
+    "command": [
+      "python",
+      "scripts/eval_adaptive_bench.py",
+      "--out",
+      "<output-directory>",
+      "--impl",
+      "jax",
+      "--allow-cpu",
+      "--split",
+      "dev",
+      "--methods",
+      "candidate",
+      "--candidate-config",
+      "docs/adaptive_execution/research_candidate/wp22_dev_config.json",
+      "--families",
+      "gain_070,gain_070_return,sensor_scale_080,healthy",
+      "--telemetry",
+      "exact,declared",
+      "--episodes",
+      "8",
+      "--batch",
+      "8",
+      "--steps",
+      "300",
+      "--schedule",
+      "walk_turn_stop_resume",
+      "--trace"
+    ],
+    "env": {
+      "JAX_PLATFORMS": "cpu",
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1"
+    },
+    "elapsed_seconds": 263.5,
+    "sha256": {
+      "episodes.csv": "cf404be3e598074d5d3fe153ce231070f2aa890b2bb5e5a7af91940fd1655648",
+      "registration.json": "bed143895952b6142c3aad66141d5a9c38dfb27f89cbb2ea82e23553f818e2f7",
+      "config.json": "9cc1f9a9376818128b859abfc24866d497a8d7b0f55f9d6ca0f1150e0fc468fd",
+      "summary.json": "d47404189bd51cab64bfed0b0ddd43138bb645ff255b92e7bd810499b1c7e0c9"
+    },
+    "public_tree_equivalent_commit": "e51d2d7bdbc2e1dccd377c4d752c8b944af72477",
+    "public_pr": "https://github.com/pchatla-arch/anticipatory-balance/pull/39"
+  },
+  "heuristic_gate": {
+    "source_commit": "c5397f89d91c1885c9d97263d024dcbc55b1cd1c",
+    "source_tree": "20de1e467ab9ae702f263d373c1205e1c006e27f",
+    "command": [
+      "python",
+      "scripts/eval_adaptive_bench.py",
+      "--out",
+      "<output-directory>",
+      "--impl",
+      "jax",
+      "--allow-cpu",
+      "--split",
+      "dev",
+      "--methods",
+      "heuristic_gate",
+      "--families",
+      "gain_070,gain_070_return,sensor_scale_080,healthy",
+      "--telemetry",
+      "exact,declared",
+      "--episodes",
+      "8",
+      "--batch",
+      "8",
+      "--steps",
+      "300",
+      "--schedule",
+      "walk_turn_stop_resume",
+      "--trace"
+    ],
+    "env": {
+      "JAX_PLATFORMS": "cpu",
+      "OPENBLAS_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1"
+    },
+    "elapsed_seconds": 242.2,
+    "sha256": {
+      "episodes.csv": "ec2363e6ec7adc03a967e213ba2eeaea8b921049dce022083d5f4a9f2f3862b5",
+      "registration.json": "fd32f2a01b62e70783ad18909664b510c0b78b83f1ab0794c6fb7d4d3671df3b",
+      "config.json": "3de006ca025cb4aa7e2806796ec1d4611ebccad17d9738bcbd1caf9c33ceca8f",
+      "summary.json": "aaa6636540b0c0674b6c4283694a4d03ba6ce743d3485a2483a252494972850a"
+    }
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "work_package": "2.2",
+  "purpose": "Paired exploratory closed-loop CPU development comparison after connecting the WP 1.2 numerical primitives. It cannot decide G0/G1/G2 or support a held-out claim.",
+  "declared_at_utc": "2026-11-22T08:15:51+00:00",
+  "bench_code_and_reference_results_commit": "c5397f89d91c1885c9d97263d024dcbc55b1cd1c",
+  "published_reference_execution_commit": "a45b10c0820e3eb45d0edfbbe9c1cf1cc6f261d8",
+  "projection_commit": "3938008044ab09d9135657097155bcdf2f3254ac",
+  "cpu_versions": {
+    "jax": "0.12.0.1",
+    "mujoco": "3.16.0",
+    "mujoco-mjx": "3.16.0",
+    "warp-lang": "1.18.0",
+    "brax": "0.14.2"
+  },
+  "source_hashes": {
+    "scripts/eval_adaptive_bench.py": "a8f1283dcb7390a04a27c8ebfc157874695e7d20a63a73903bd2edc4318f7a7e",
+    "foresight/adaptive/bench.py": "92533d90e5d2d7ed70fc84d24ae61bd5376cc1dc5079fccb5d10a0b073334b30",
+    "foresight/adaptive/sensing.py": "46f3e024c734e19a5b6b75d588d735f7e4aea9d138196a987fa241b7e61a72b7",
+    "foresight/adaptive/estimation.py": "350e0f4a6b87460e90bf938577796423814a1612de885370edd1788cf3e3d217",
+    "foresight/adaptive/actuator_env.py": "6330733c04601b763bc4289b185988e5953e0bb9f01be7d77dcbe113015954c3"
+  },
+  "archived_reference_sha256": {
+    "config.json": "7bf4d2d8046d130635866cc72309c6b1ba5ed48f393c5e7b7edf51234c939f39",
+    "registration.json": "5ae0940e7f17ce7520a66af5d487046bfc1d64984c77862718ccdcb6fa6ffadd",
+    "episodes.csv": "d36fe4f1f3d8c711ec5c86a7f23ad98def25a50c5657479ddba54a9aa48f7dd0",
+    "summary.json": "b775c6265cddf59b02a4d4c17bb408229026c6da5dc91308e0ac1672fd154504"
+  },
+  "families_order": [
+    "gain_070",
+    "gain_070_return",
+    "sensor_scale_080",
+    "healthy"
+  ],
+  "split": "dev",
+  "split_seed": 11000,
+  "family_seed_increment": 37,
+  "episodes_per_cell": 8,
+  "batch": 8,
+  "steps": 300,
+  "schedule": "walk_turn_stop_resume",
+  "telemetry": [
+    "declared",
+    "exact"
+  ],
+  "methods": [
+    "candidate",
+    "heuristic_gate"
+  ],
+  "backend": "cpu JAX physics",
+  "trace_first_batch": true,
+  "frozen_comparator_config": {
+    "min_samples": 5,
+    "max_residual_rms": 0.05,
+    "min_excitation_rad": 0.01,
+    "dead_band": 0.05,
+    "max_age_steps": 5
+  },
+  "frozen_rls_config": {
+    "forgetting": 0.98,
+    "initial_cov": 1000.0,
+    "prior_gain": 1.0,
+    "gain_min": 0.2,
+    "gain_max": 1.5,
+    "ewma": 0.9,
+    "min_excitation_rad": 0.001
+  },
+  "candidate_config": "record candidate source SHA and complete config as separate pre-rollout freeze after integration; no outcome-driven changes",
+  "scientific_design": "One frozen candidate versus independent author default heuristic; the tuned-heuristic comparison remains pending. All rows retained. Publish CPU-only raw results and pairing by family, telemetry, scenario and seed.",
+  "metrics": [
+    "postfault_loss",
+    "harmful_offset_rad",
+    "progress_m",
+    "fall_rate",
+    "withdrawal_steps",
+    "control_bound_violations"
+  ],
+  "margins_dev_descriptive_only": {
+    "sensor_scale_080": 0.005,
+    "healthy": 0.005
+  },
+  "attempt_budget": "One completed development run per method on the fixed grid. Incomplete attempts retained. Technical startup failure can be recorded and retried on unchanged scientific configuration. No validation or test.",
+  "pairing_rule": "Run comparator separately from the unmodified PR35 source and candidate on WP2.2 source with the same environment, checkpoint, scenario order and CLI. Validate exact scenario IDs/onsets/returns/speeds. Check fresh comparator vs archived default heuristic. Persist differences; report each pair using fresh comparator. If local fresh comparator fails, archive reuse requires corresponding provenance and row structure."
+}
