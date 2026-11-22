@@ -7,20 +7,17 @@ AA228/CS238 (Decision Making under Uncertainty) final project, Stanford, Autumn 
 Simulation only: Unitree G1 in MuJoCo Playground (rss2025, MJX + MuJoCo-Warp), frozen PPO
 skills, a POMDP decision layer on top. Author: Prasuna Chatla.
 
-**Technical notes:** [Controllers, frozen skills, and bracing decisions](docs/technical_notes/controllers_and_freezing.md)
-explains the implemented policies, zero-command walking versus BRACE, and what Session H varies.
-[Numerical precision](docs/technical_notes/numerical_precision.md) covers the FP32/FP64 reporting
-incident and FP16/BF16/INT8/FP8 tradeoffs. The [technical notes index](docs/technical_notes/README.md)
-links both references and their separate discussion threads.
+## When is an interruption worth it?
 
-Status at a glance (Nov 14): every layer is built and exercised. Sessions A–C (about 5 GPU-h)
-located the disturbance regime, produced a capture-point reference, fixed the evaluation
-protocol, passed the preparation gate with BRACE v2 (failure 0.70 → 0.42 at 0.5 s lead on
-identical impacts), confirmed depth rendering in the batched loop, and produced the first
-decision frontier: the belief rule is the most selective method but braces too late at 10 Hz
-detections. Session D (rate × latency sweep, calibration, measured depth detector) and Session E
-(oracle-gap ladder, ablations, object-aware PPO baseline) run from `scripts/start.sh d` and
-`scripts/start.sh e`. Details in [Where we are](#6-where-we-are).
+A robot can prevent falls by bracing more often, but every brace interrupts its walk. We compared two ways to spend the same average preparation time. A belief rule uses each object's uncertain path and expected impact to decide when to brace. The baseline tosses a coin once per encounter. If enabled, an ordinary time-to-contact (TTC) rule still uses the detections to choose when to brace. The frequency of enabling TTC was set on a separate development set.
+
+![Held-out comparison of hit failures, preparations on scheduled near-misses, and average recorded time in BRACE](analysis/decision_tradeoff/heldout_tradeoff.png)
+
+At 10 Hz with 100 ms added delay, the belief rule spent **0.480 s** braced per encounter, against **0.478 s** for the baseline in expectation. It braced on **26.68%** of scheduled near-misses, compared with **46.28%** for the baseline. On intended hits, **46.55%** failed with the belief rule and **47.50%** with the baseline. The paired 95% interval for the difference in hit failures spans zero. On a second trained skill pair, the belief rule also prepared on fewer near-misses, but more intended hits ended in failure. These are simulations. The archive counts recorded brace time, which can include steps after termination.
+
+[Read the six-page paper](paper/foresight.pdf) · [Reproduce these results on CPU](analysis/decision_tradeoff/) · [Inspect the archived episode evidence](docs/SESSION_G_REVIEW.md)
+
+**Engineering resources.** [Controller inventory](docs/technical_notes/controllers_and_freezing.md) · [Numerical precision in closed-loop evaluation](docs/technical_notes/numerical_precision.md) · [Technical notes](docs/technical_notes/README.md).
 
 ---
 
@@ -42,40 +39,19 @@ Preparing too early wastes the cost; preparing too late leaves no time for the p
 
 ## 2. How the problem is solved
 
-The problem is split into layers so that each one has a measurable output and the decision layer
-can be isolated:
+The modular controller uses the same frozen walking and bracing skills for each decision rule. PPO supplies the actions that move the humanoid. The comparison changes who decides when to switch skills.
 
+```mermaid
+flowchart TD
+    A["Simulated camera depth or timestamped detector sample"] --> B["Gaussian position and velocity estimate, with mass samples"]
+    B --> C["Estimate hit probability, time to contact and impact severity"]
+    C --> D["Choose CONTINUE or BRACE, with minimum commitment"]
+    D --> E["Run the selected frozen PPO skill"]
+    E --> F["G1 motion and the next observation"]
+    F --> A
 ```
- depth detections ──► particle filter (belief over object pos, vel, mass)
-       (late, noisy,          │
-        intermittent)         ▼
-                     decision rule: CONTINUE | BRACE   (10 Hz, 300 ms commitment)
-                              │
-                              ▼
-            frozen 50 Hz PPO skills: walker ──or── BRACE   ──► G1 physics ──► outcome
-```
 
-* **Skills** (frozen before any decision experiment): a PPO walker and a PPO BRACE posture, both
-  from Playground's G1 joystick recipe. Freezing them means every decision rule is compared on the
-  same action capabilities; nothing learned at the low level can masquerade as decision quality.
-* **Belief**: a particle filter over object position, velocity and mass. A delayed detection is
-  applied at its capture time and the transitions after it are replayed, so a late observation is
-  used correctly rather than as if it were current. Mass stays a prior (conditioned on apparent
-  size once the projectile radius varies), so the belief over impulse is a mixture.
-* **Decision**: a rule that maps the belief to CONTINUE or BRACE. The main candidate is the
-  belief-weighted myopic commit rule, which under the linear inverted pendulum (LIP) model reduces
-  to one inequality that can be derived on a whiteboard:
-
-  $$p\,\Delta P\, c_{\text{fall}} > c_{\text{prep}}\,\tau_{\text{commit}} + \Delta C_{\text{track}}
-  \quad\text{and}\quad \mathbb{E}_b[t_{\text{hit}}] - t > \tau_{\text{brace}}$$
-
-  Brace when the probability of impact times the failure-risk reduction that bracing buys, priced
-  at the failure cost, exceeds the cost of the commitment and of the tracking lost, and only if the
-  expected time to impact still leaves room for the posture to form.
-* **Dynamics reference**: the LIP capture point, $x_{cp} = x + \dot x/\omega$,
-  $\omega = \sqrt{g/z}$, gives a zero-step impulse budget $J_{\max} = m\,\omega\,(x_{edge} - x_{cp})$.
-  It is used as the explanatory model and as a screening feature, and it is checked against the
-  learned controller rather than assumed.
+The Gaussian filter accounts for a detection's capture time under its constant-velocity flight model. Mass remains unobserved and is integrated over its assumed prior. The threshold acts on estimated time to contact. The lead-conditioned belief rule also estimates how much a brace could reduce failure given the available time to prepare. Its response model was fitted to the privileged timing trials. The capture-point calculation is a separate standing-balance reference. In the reported held-out comparison, detections arrive at 10 Hz and the simulated control period is 20 ms. [Method and experiment definitions](paper/foresight.tex)
 
 ## 3. Methods available, and why this one
 
@@ -88,13 +64,13 @@ can be isolated:
 | QMDP | Bellman backups on a reduced model, then belief-weighted action values | adds lookahead over the reduced dynamics; still assumes uncertainty vanishes next step |
 | POMCP | observation-dependent lookahead by Monte-Carlo tree search | real-time budget is tight at 10 Hz; stretch comparison for whether waiting ever helps |
 | Learned gate (DQN on belief features) | learn the switch from data | needs the same belief anyway; useful ablation of model vs learning |
-| End-to-end PPO with the object in the observation | one policy, no explicit belief | the reviewer's question: does the modular layer earn its place? planned as the strongest baseline |
+| End-to-end PPO with the object in the observation | one policy, no explicit belief | the reviewer's question: does the modular layer earn its place? evaluated separately in E14 |
 
-The myopic commit rule is chosen first because every term in it is either a belief statistic, a
+The initial experiments used the myopic commit rule because every term in it is either a belief statistic, a
 cost, or an LIP quantity, so its behaviour is interpretable, its failure modes are diagnosable,
 and it answers the thesis question directly: *does acting on the belief (including mass
 ambiguity) beat acting on a point estimate, and does the gap grow with perception latency?*
-QMDP, POMCP and the learned gate are added once the core comparison is stable.
+QMDP, POMCP and the learned gate were considered during planning. The final held-out comparison evaluated TTC, lead-conditioned belief, blind waiting, and one-step observation lookahead.
 
 ## 4. Experiments
 
@@ -128,7 +104,7 @@ finish_and_stop). Individual tools: `train_skill.py`, `eval_fall_rate.py`, `lip_
 `depth_pilot.py`, `depth_detector.py`, `calibration.py`, `plot_rate_sweep.py`, `oracle_gap.py`,
 `plot_fall_surfaces.py`, `save_run.py`.
 
-## 5. Outcomes so far
+## 5. Early results (Sessions A–C)
 
 ![fall surfaces](results/figures/fall_surfaces.png)
 
@@ -178,26 +154,22 @@ false-preparation rate on near-misses, one panel per latency; lower-left is bett
 
 * **First frontier (E10):** reactive 0.69, oracle 0.36; the time-to-contact threshold reaches
   0.55 at 37–51% false preparations; the belief rule is the most selective (0.60 at 18%) but never
-  goes lower, because at 10 Hz the hit probability resolves 0.2–0.3 s before contact, exactly when
-  the brace needs 0.22 s. About half of the attainable benefit is lost to perception timing, not
-  to the rule. Sessions D and E are designed around that finding.
+  goes lower in this early sweep. Later calibration and release-rule ablations traced a substantial part of the shortfall to switching back to walking before contact.
 * **Note on training ranges.** The committed skills were trained with the projectile mass
   randomized over the nominal 1–8 kg for every skill (one shared randomizer); they are evaluated at
   4–16 kg. Each skill now has its own randomizer with its config's range (`foresight/skills/register.py`).
 
-## 6. Where we are
+## 6. Evidence and remaining work
 
-| | |
-|---|---|
-| Done (Sessions A–C) | env, training pipeline, 3 walker seeds (eval reward 7.32–7.62, 20 min each), BRACE v1 and v2, batched paired evaluation with replayed trajectories and controls, LIP module, parametric detector, Rao-Blackwellized belief, decision rules, response model, depth-render pilot, E1–E7 and E10; status update submitted Nov 13 |
-| Gate | passed: BRACE v2 cuts failure given contact from 0.70 to 0.42 at 0.5 s lead on identical impacts (E6b) |
-| Session D (done) | E8 measured depth detector (94.5% detection, 3 cm noise, 90° FOV); E11 frontier at 25 and 50 Hz: more sensing did **not** help; E9 calibration: the belief resolves 0.46 s before contact, so the rule, not the belief, was at fault |
-| Diagnosis and fix | the rule re-checked its start condition (incl. t_hit > τ_brace) to decide whether to *stay* braced and released BRACE 0.22 s before contact once the commitment expired; BRACE is now held until the object passes (`foresight/decision/rules.py`) |
-| Session E (done) | E15 corrected-rule frontier: reactive 0.69 → threshold 0.30–0.31, belief 0.30–0.34 at zero latency (below the 0.5 s oracle's 0.36); E12 ladder: sensing rate/noise account for <10% of the remaining gap; E13: old release logic reproduces the defect, point mass prior costs 0.05, commitment window irrelevant; E14 object-aware PPO 0.41–0.44 with 35% more progress |
-| Session F (done) | lead-conditioned response model; E16 `belief_lead` and `belief_voi` (one-step lookahead with an observation branch): recover a third of the latency gap, match the threshold at 10 Hz/100 ms; E17 closed loop from rendered depth: equal failure, half the false preparations, 46 ms per frame of 256 robots |
-| Paper | `paper/foresight.tex` (7 pages, two-column), built from the committed results |
-| Then | seeds for both skills (Session G), belief-PPO gate (optional), reproducibility check from a clean clone, submission Dec 4 |
-| Compute | ~9.5 GPU-h used |
+| Question | Evidence |
+| --- | --- |
+| Does preparation help? | On 1,433 intended hits per trained skill pair, a fixed 0.5 s privileged lead reduced failures from 68.60% to 35.59% for pair 1 and from 67.55% to 46.89% for pair 2. |
+| Why did the first rules underperform? | The initial rule reused its start condition when deciding whether to stay braced. The release ablation and subsequent fixes are documented in the paper. |
+| How much does selectivity cost? | On 2,048 held-out encounters the always-enabled 0.3 s TTC controller had 73 fewer falls than the lead-conditioned belief rule and braced on 216 more scheduled near-misses. The CPU analysis above compares both with an episode-randomized baseline at similar average preparation time. |
+| Does the perception chain run online? | In the E17b simulated depth scene, TTC failed on 131/367 intended hits versus 113/367 under parametric sensing. The parked object was visible before launch. Session H passed both small depth checks, then stopped during the hold check. |
+| What experiment could change the conclusion? | Compare belief with a single deterministic TTC threshold tuned on separate calibration episodes for equal *pre-termination* brace time. Evaluate the frozen threshold on fresh seeds and report risk together with the achieved budget match. |
+
+[Course manuscript](paper/foresight.pdf) · [Run-by-run audit](docs/SESSION_G_REVIEW.md) · [Session H stage report](https://github.com/pchatla-arch/anticipatory-balance/blob/1d9ee6d3493f58db22954bd0d5c5fe7944826405/results/session_h_20261115T211850Z_1f77c1/report.md)
 
 Results are committed as small files under `results/<run>/` (`save_run.py`: eval curves, configs,
 console logs, `summary.json`); the final checkpoints are committed under `checkpoints/<tag>/`.
@@ -210,7 +182,7 @@ foresight/envs/g1_impact/   ImpactJoystick: Playground G1 joystick + launched pr
 foresight/lip/              linear inverted pendulum / capture point (J_max, predicted fall)
 foresight/eval/rollout.py   checkpoint loading, batched paired rollouts, mode switching, episode tables
 foresight/skills/           env registration for Playground's PPO trainer (G1Impact, G1ImpactBrace)
-foresight/perception/ belief/ decision/   next drop
+foresight/perception/ belief/ decision/   detector, filter and rule implementations
 scripts/                    train_skill, eval_*, lip_overlay, validate_contact, plot_fall_surfaces, run_session_*.sh
 tests/                      LIP tests, parent-shim test, dummy checkpoint for CPU smoke tests
 ```

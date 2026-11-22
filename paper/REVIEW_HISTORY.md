@@ -1,5 +1,15 @@
 # Foresight course paper revision history
 
+## 2026-11-21 · Review 2: what does the belief buy at the same preparation time?
+
+The first review established the individual controllers' operating points. This revision adds an exploratory experiment using three archived episode sets, a figure with paired uncertainty, and a prospective comparison that would address the strongest alternative explanation.
+
+- **Decision and comparison.** At 10 Hz and 100 ms delay, set the probability of enabling the 0.3 s TTC policy by matching its expected recorded time in BRACE to the lead-conditioned belief rule on E18. Score that fixed mixture on E18h. Estimate its expectation from both saved policy outcomes in each scenario. E18h had already been examined when this analysis was designed.
+- **Result.** Across 1,407 held-out scheduled hits the difference in failure probability (belief minus mixture) was −0.95 percentage points, with a paired 95% interval of [−2.41, +0.53]. Across 641 scheduled near-misses, preparation decreased by 19.61 points [15.72, 23.44]. The mean time difference across all encounters was +1.15 ms [−13.59, +16.12].
+- **Transfer.** The second policy pair had 13.33 points less preparation on near-misses but 1.76 points more failure on scheduled hits. The two policy pairs change the frozen skills and share the first pair's response fit. Historical durations may include steps after termination.
+- **Paper and repository.** The six-page author-review manuscript updates the abstract, comparison protocol, interpretation, limitations and supporting literature. Figure 4 is reproducible from the archived episode arrays. The repository overview now leads with the results readers can reproduce. [Paper](foresight.pdf) · [analysis and figure](../analysis/decision_tradeoff/).
+- **Prospective work.** A prepared-checkout runner selects one deterministic TTC threshold on 512 calibration scenarios using duration only. It freezes the choice for 2,048 new paired scenarios and measures applied time through termination. The full GPU experiment is pending. [Protocol and commands](../analysis/decision_tradeoff/#prospective-comparison-with-a-deterministic-threshold).
+
 ## 2026-11-21 · Review 1 for the December report
 
 Prasuna Chatla retains the final wording, claims, AI-use disclosure and submission decision. This review updates the LaTeX report and its compiled PDF. It uses archived Foresight experiments through Session G and the partial Session H record. No new course experiment was required for these corrections.
