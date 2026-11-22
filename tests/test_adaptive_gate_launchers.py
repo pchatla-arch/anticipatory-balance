@@ -142,7 +142,19 @@ PY
         saved = self.root / '.foresight-git-credentials'
         self.assertEqual(saved.stat().st_mode & 0o777, 0o600)
         self.assertEqual(saved.read_text(), f'https://pchatla-arch:{self.GOOD}@github.com\n')
-        self.assertFalse(self.gh_calls.exists())
+        self.assertNotIn('login', self.gh_calls.read_text() if self.gh_calls.exists() else '')
+
+    def test_existing_gh_login_is_reused_without_token_prompt(self):
+        repo = self.make_auth_fixture()
+        (repo / 'scripts/adaptive_gate_pod.py').touch()
+        result = self.invoke(env={**self.clock(), 'MOCK_GIT_PUSH': 'gh', 'MOCK_GH_TOKEN': 'gho_secretvalue0123456789'},
+                             script='start_adaptive_gate_pod.sh')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(self.started.exists())
+        self.assertIn('existing GitHub CLI login can push', result.stdout)
+        self.assertNotIn('gho_secretvalue0123456789', result.stdout + result.stderr + self.started.read_text())
+        self.assertFalse((self.root / '.foresight-git-credentials').exists())
+        self.assertNotIn('login', self.gh_calls.read_text())
 
     def test_rejected_token_is_deleted_and_nothing_starts(self):
         repo = self.make_auth_fixture()

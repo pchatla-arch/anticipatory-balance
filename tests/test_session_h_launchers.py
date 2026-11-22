@@ -199,6 +199,8 @@ print(json.dumps({'args':sys.argv[1:], 'no_stop':os.environ.get('NO_STOP'),
                    '  [[ "${MOCK_GIT_PUSH:-no}" == ok ]] && exit 0\n'
                    '  [[ "${MOCK_GIT_PUSH:-no}" == token ]] && grep -q \':good_token_0123456789abcdef@\' '
                    '"$FORESIGHT_SETUP_ROOT/.foresight-git-credentials" 2>/dev/null && exit 0\n'
+                   '  [[ "${MOCK_GIT_PUSH:-no}" == gh && -n "${MOCK_GH_TOKEN:-}" ]] && grep -q "auth token" '
+                   '"$MOCK_GH_CALLS" 2>/dev/null && exit 0\n'
                    '  exit 128\n'
                    'fi\nexit 0\n',
             'nvidia-smi': '''#!/usr/bin/env bash
@@ -230,6 +232,7 @@ if [[ "$1" == api ]]; then
     *) exit 91 ;;
   esac
 fi
+if [[ "$1 $2" == 'auth token' ]]; then printf '%s' "${MOCK_GH_TOKEN:-}"; [[ -n "${MOCK_GH_TOKEN:-}" ]]; exit; fi
 if [[ "$1 $2" == 'auth switch' ]]; then
   if [[ "$MOCK_SWITCH_EXIT" == 0 ]]; then touch "$MOCK_SWITCHED"; fi
   exit "$MOCK_SWITCH_EXIT"

@@ -106,6 +106,18 @@ git_push_works() {
     push --dry-run --quiet origin HEAD:refs/heads/foresight/credential-probe >/dev/null 2>&1
 }
 
+# An existing GitHub CLI login on the pod (as on 2026-11-16) is reused through
+# gh's own Git credential helper. gh is never installed or asked to log in here.
+adopt_gh_login() {
+  command -v gh >/dev/null || return 1
+  [[ -n "$(bounded 30 gh auth token --hostname github.com 2>/dev/null)" ]] || return 1
+  git -C "$FORESIGHT_REPO" config --local --replace-all credential.helper ''
+  git -C "$FORESIGHT_REPO" config --local --add credential.helper '!gh auth git-credential'
+  if git_push_works; then return 0; fi
+  git -C "$FORESIGHT_REPO" config --local --unset-all credential.helper || true
+  return 1
+}
+
 # Token from FORESIGHT_GITHUB_TOKEN, else a hidden prompt. GH_TOKEN/GITHUB_TOKEN are
 # deliberately ignored: pods often carry unrelated values in them.
 install_access_token() {
@@ -252,6 +264,8 @@ if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]]; then
   adopt_existing_git_helper
   if git_push_works; then
     echo 'GitHub verified: saved Git credentials can push to pchatla-arch/anticipatory-balance.'
+  elif adopt_gh_login; then
+    echo 'GitHub verified: the existing GitHub CLI login can push to pchatla-arch/anticipatory-balance.'
   else
     install_access_token
     if ! git_push_works; then
