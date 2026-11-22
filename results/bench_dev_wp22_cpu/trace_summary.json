@@ -1,0 +1,640 @@
+{
+  "trace_gain_070_declared_candidate": {
+    "sha256": "a17c0c76e478d32857247864e3dcebe6d4158afaa712fd4cea4e2a22be9628cf",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 592,
+    "max_abs_effective_offset_rad": 0.19407132267951965,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 832,
+      "10": 44245,
+      "11": 725,
+      "12": 346,
+      "13": 97,
+      "14": 23218,
+      "15": 137
+    },
+    "reason_names": {
+      "APPLY": 832,
+      "NO_EFFECTIVE_CHANGE": 44245,
+      "NO_TELEMETRY": 725,
+      "REACQUIRING": 346,
+      "MODEL_MISMATCH": 97,
+      "UNSUPPORTED_FORCE": 23218,
+      "CONSTRAINT_CONFLICT": 137
+    },
+    "joint_group_output": {
+      "hip": {
+        "joint_count": 6,
+        "observed_joint_ticks": 14400,
+        "nonzero_effective_joint_ticks": 204,
+        "mean_abs_effective_rad": 0.00033151640673168004,
+        "reason_counts": {
+          "APPLY": 193,
+          "NO_EFFECTIVE_CHANGE": 13422,
+          "NO_TELEMETRY": 150,
+          "REACQUIRING": 95,
+          "MODEL_MISMATCH": 41,
+          "UNSUPPORTED_FORCE": 488,
+          "CONSTRAINT_CONFLICT": 11
+        }
+      },
+      "knee": {
+        "joint_count": 2,
+        "observed_joint_ticks": 4800,
+        "nonzero_effective_joint_ticks": 437,
+        "mean_abs_effective_rad": 0.004003218375146389,
+        "reason_counts": {
+          "APPLY": 356,
+          "NO_EFFECTIVE_CHANGE": 4270,
+          "NO_TELEMETRY": 50,
+          "REACQUIRING": 31,
+          "MODEL_MISMATCH": 9,
+          "UNSUPPORTED_FORCE": 3,
+          "CONSTRAINT_CONFLICT": 81
+        }
+      },
+      "ankle": {
+        "joint_count": 4,
+        "observed_joint_ticks": 9600,
+        "nonzero_effective_joint_ticks": 328,
+        "mean_abs_effective_rad": 0.0012416124809533358,
+        "reason_counts": {
+          "APPLY": 283,
+          "NO_EFFECTIVE_CHANGE": 9104,
+          "NO_TELEMETRY": 100,
+          "REACQUIRING": 53,
+          "MODEL_MISMATCH": 15,
+          "CONSTRAINT_CONFLICT": 45
+        }
+      }
+    }
+  },
+  "trace_gain_070_exact_candidate": {
+    "sha256": "d9bb11af35247497d137dd7f36578f4f663830a232d1f162ecd9f2f139ad2cc8",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 1599,
+    "max_abs_effective_offset_rad": 0.20000001788139343,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 5430,
+      "10": 60877,
+      "11": 232,
+      "12": 334,
+      "13": 96,
+      "14": 963,
+      "15": 1668
+    },
+    "reason_names": {
+      "APPLY": 5430,
+      "NO_EFFECTIVE_CHANGE": 60877,
+      "NO_TELEMETRY": 232,
+      "REACQUIRING": 334,
+      "MODEL_MISMATCH": 96,
+      "UNSUPPORTED_FORCE": 963,
+      "CONSTRAINT_CONFLICT": 1668
+    },
+    "joint_group_output": {
+      "hip": {
+        "joint_count": 6,
+        "observed_joint_ticks": 14400,
+        "nonzero_effective_joint_ticks": 3076,
+        "mean_abs_effective_rad": 0.01252892054617405,
+        "reason_counts": {
+          "APPLY": 2401,
+          "NO_EFFECTIVE_CHANGE": 11132,
+          "NO_TELEMETRY": 48,
+          "REACQUIRING": 96,
+          "MODEL_MISMATCH": 48,
+          "CONSTRAINT_CONFLICT": 675
+        }
+      },
+      "knee": {
+        "joint_count": 2,
+        "observed_joint_ticks": 4800,
+        "nonzero_effective_joint_ticks": 2116,
+        "mean_abs_effective_rad": 0.03750889003276825,
+        "reason_counts": {
+          "APPLY": 1596,
+          "NO_EFFECTIVE_CHANGE": 2620,
+          "NO_TELEMETRY": 16,
+          "REACQUIRING": 32,
+          "MODEL_MISMATCH": 16,
+          "CONSTRAINT_CONFLICT": 520
+        }
+      },
+      "ankle": {
+        "joint_count": 4,
+        "observed_joint_ticks": 9600,
+        "nonzero_effective_joint_ticks": 1906,
+        "mean_abs_effective_rad": 0.016275590285658836,
+        "reason_counts": {
+          "APPLY": 1433,
+          "NO_EFFECTIVE_CHANGE": 7564,
+          "NO_TELEMETRY": 32,
+          "REACQUIRING": 66,
+          "MODEL_MISMATCH": 32,
+          "CONSTRAINT_CONFLICT": 473
+        }
+      }
+    }
+  },
+  "trace_gain_070_return_declared_candidate": {
+    "sha256": "5ad56e51006f31cfbb61500faff82cf938c4b548ee96718b0a699246b7c957f1",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 352,
+    "max_abs_effective_offset_rad": 0.18048766255378723,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 455,
+      "10": 44485,
+      "11": 783,
+      "12": 516,
+      "13": 177,
+      "14": 23101,
+      "15": 83
+    },
+    "reason_names": {
+      "APPLY": 455,
+      "NO_EFFECTIVE_CHANGE": 44485,
+      "NO_TELEMETRY": 783,
+      "REACQUIRING": 516,
+      "MODEL_MISMATCH": 177,
+      "UNSUPPORTED_FORCE": 23101,
+      "CONSTRAINT_CONFLICT": 83
+    },
+    "joint_group_output": {
+      "hip": {
+        "joint_count": 6,
+        "observed_joint_ticks": 14400,
+        "nonzero_effective_joint_ticks": 116,
+        "mean_abs_effective_rad": 0.00018999450549017638,
+        "reason_counts": {
+          "APPLY": 113,
+          "NO_EFFECTIVE_CHANGE": 13404,
+          "NO_TELEMETRY": 162,
+          "REACQUIRING": 167,
+          "MODEL_MISMATCH": 64,
+          "UNSUPPORTED_FORCE": 487,
+          "CONSTRAINT_CONFLICT": 3
+        }
+      },
+      "knee": {
+        "joint_count": 2,
+        "observed_joint_ticks": 4800,
+        "nonzero_effective_joint_ticks": 314,
+        "mean_abs_effective_rad": 0.0029299568850547075,
+        "reason_counts": {
+          "APPLY": 246,
+          "NO_EFFECTIVE_CHANGE": 4344,
+          "NO_TELEMETRY": 54,
+          "REACQUIRING": 61,
+          "MODEL_MISMATCH": 27,
+          "CONSTRAINT_CONFLICT": 68
+        }
+      },
+      "ankle": {
+        "joint_count": 4,
+        "observed_joint_ticks": 9600,
+        "nonzero_effective_joint_ticks": 108,
+        "mean_abs_effective_rad": 0.00037645691190846264,
+        "reason_counts": {
+          "APPLY": 96,
+          "NO_EFFECTIVE_CHANGE": 9262,
+          "NO_TELEMETRY": 108,
+          "REACQUIRING": 92,
+          "MODEL_MISMATCH": 30,
+          "CONSTRAINT_CONFLICT": 12
+        }
+      }
+    }
+  },
+  "trace_gain_070_return_exact_candidate": {
+    "sha256": "1340b674f530785ac304206e01dd9bb373cbf0f4fddb204941f0b0c6e6fd4258",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 1064,
+    "max_abs_effective_offset_rad": 0.20000001788139343,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 3743,
+      "10": 62804,
+      "11": 232,
+      "12": 428,
+      "13": 193,
+      "14": 1021,
+      "15": 1179
+    },
+    "reason_names": {
+      "APPLY": 3743,
+      "NO_EFFECTIVE_CHANGE": 62804,
+      "NO_TELEMETRY": 232,
+      "REACQUIRING": 428,
+      "MODEL_MISMATCH": 193,
+      "UNSUPPORTED_FORCE": 1021,
+      "CONSTRAINT_CONFLICT": 1179
+    },
+    "joint_group_output": {
+      "hip": {
+        "joint_count": 6,
+        "observed_joint_ticks": 14400,
+        "nonzero_effective_joint_ticks": 2399,
+        "mean_abs_effective_rad": 0.009769800119102001,
+        "reason_counts": {
+          "APPLY": 1834,
+          "NO_EFFECTIVE_CHANGE": 11714,
+          "NO_TELEMETRY": 48,
+          "REACQUIRING": 144,
+          "MODEL_MISMATCH": 97,
+          "CONSTRAINT_CONFLICT": 563
+        }
+      },
+      "knee": {
+        "joint_count": 2,
+        "observed_joint_ticks": 4800,
+        "nonzero_effective_joint_ticks": 1413,
+        "mean_abs_effective_rad": 0.025928622111678123,
+        "reason_counts": {
+          "APPLY": 1068,
+          "NO_EFFECTIVE_CHANGE": 3305,
+          "NO_TELEMETRY": 16,
+          "REACQUIRING": 48,
+          "MODEL_MISMATCH": 32,
+          "CONSTRAINT_CONFLICT": 331
+        }
+      },
+      "ankle": {
+        "joint_count": 4,
+        "observed_joint_ticks": 9600,
+        "nonzero_effective_joint_ticks": 1140,
+        "mean_abs_effective_rad": 0.00888147298246622,
+        "reason_counts": {
+          "APPLY": 841,
+          "NO_EFFECTIVE_CHANGE": 8282,
+          "NO_TELEMETRY": 32,
+          "REACQUIRING": 96,
+          "MODEL_MISMATCH": 64,
+          "CONSTRAINT_CONFLICT": 285
+        }
+      }
+    }
+  },
+  "trace_healthy_declared_candidate": {
+    "sha256": "6c04379d78be5e54d124f048959fade1f5b59d8c89efeff88e95d7373dd090c6",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 5,
+    "max_abs_effective_offset_rad": 0.0034345388412475586,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 5,
+      "10": 45642,
+      "11": 667,
+      "12": 386,
+      "13": 43,
+      "14": 22857
+    },
+    "reason_names": {
+      "APPLY": 5,
+      "NO_EFFECTIVE_CHANGE": 45642,
+      "NO_TELEMETRY": 667,
+      "REACQUIRING": 386,
+      "MODEL_MISMATCH": 43,
+      "UNSUPPORTED_FORCE": 22857
+    },
+    "joint_group_output": {
+      "hip": {
+        "joint_count": 6,
+        "observed_joint_ticks": 14400,
+        "nonzero_effective_joint_ticks": 0,
+        "mean_abs_effective_rad": 0.0,
+        "reason_counts": {
+          "NO_EFFECTIVE_CHANGE": 13900,
+          "NO_TELEMETRY": 138,
+          "REACQUIRING": 72,
+          "UNSUPPORTED_FORCE": 290
+        }
+      },
+      "knee": {
+        "joint_count": 2,
+        "observed_joint_ticks": 4800,
+        "nonzero_effective_joint_ticks": 0,
+        "mean_abs_effective_rad": 0.0,
+        "reason_counts": {
+          "NO_EFFECTIVE_CHANGE": 4727,
+          "NO_TELEMETRY": 46,
+          "REACQUIRING": 24,
+          "UNSUPPORTED_FORCE": 3
+        }
+      },
+      "ankle": {
+        "joint_count": 4,
+        "observed_joint_ticks": 9600,
+        "nonzero_effective_joint_ticks": 5,
+        "mean_abs_effective_rad": 9.602556474419544e-07,
+        "reason_counts": {
+          "APPLY": 5,
+          "NO_EFFECTIVE_CHANGE": 9426,
+          "NO_TELEMETRY": 92,
+          "REACQUIRING": 64,
+          "MODEL_MISMATCH": 13
+        }
+      }
+    }
+  },
+  "trace_healthy_exact_candidate": {
+    "sha256": "3811c21273f67d2a009d3e43fb9098005be3121d8c7030e6d8221c7bb1647927",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 0,
+    "max_abs_effective_offset_rad": 0.0,
+    "observed_joint_tick_reason_code_histogram": {
+      "10": 68102,
+      "11": 232,
+      "12": 232,
+      "14": 1034
+    },
+    "reason_names": {
+      "NO_EFFECTIVE_CHANGE": 68102,
+      "NO_TELEMETRY": 232,
+      "REACQUIRING": 232,
+      "UNSUPPORTED_FORCE": 1034
+    },
+    "joint_group_output": {
+      "hip": {
+        "joint_count": 6,
+        "observed_joint_ticks": 14400,
+        "nonzero_effective_joint_ticks": 0,
+        "mean_abs_effective_rad": 0.0,
+        "reason_counts": {
+          "NO_EFFECTIVE_CHANGE": 14304,
+          "NO_TELEMETRY": 48,
+          "REACQUIRING": 48
+        }
+      },
+      "knee": {
+        "joint_count": 2,
+        "observed_joint_ticks": 4800,
+        "nonzero_effective_joint_ticks": 0,
+        "mean_abs_effective_rad": 0.0,
+        "reason_counts": {
+          "NO_EFFECTIVE_CHANGE": 4768,
+          "NO_TELEMETRY": 16,
+          "REACQUIRING": 16
+        }
+      },
+      "ankle": {
+        "joint_count": 4,
+        "observed_joint_ticks": 9600,
+        "nonzero_effective_joint_ticks": 0,
+        "mean_abs_effective_rad": 0.0,
+        "reason_counts": {
+          "NO_EFFECTIVE_CHANGE": 9536,
+          "NO_TELEMETRY": 32,
+          "REACQUIRING": 32
+        }
+      }
+    }
+  },
+  "trace_sensor_scale_080_declared_candidate": {
+    "sha256": "a5d9c2bf013a31b84634860888b17d8eddc9c4520d199f30fa9c424c3f8fb9a3",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 316,
+    "max_abs_effective_offset_rad": 0.07369233667850494,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 404,
+      "10": 46561,
+      "11": 667,
+      "12": 383,
+      "13": 33,
+      "14": 21539,
+      "15": 13
+    },
+    "reason_names": {
+      "APPLY": 404,
+      "NO_EFFECTIVE_CHANGE": 46561,
+      "NO_TELEMETRY": 667,
+      "REACQUIRING": 383,
+      "MODEL_MISMATCH": 33,
+      "UNSUPPORTED_FORCE": 21539,
+      "CONSTRAINT_CONFLICT": 13
+    },
+    "joint_group_output": {
+      "hip": {
+        "joint_count": 6,
+        "observed_joint_ticks": 14400,
+        "nonzero_effective_joint_ticks": 75,
+        "mean_abs_effective_rad": 6.554060382768512e-05,
+        "reason_counts": {
+          "APPLY": 75,
+          "NO_EFFECTIVE_CHANGE": 13983,
+          "NO_TELEMETRY": 138,
+          "REACQUIRING": 74,
+          "UNSUPPORTED_FORCE": 130
+        }
+      },
+      "knee": {
+        "joint_count": 2,
+        "observed_joint_ticks": 4800,
+        "nonzero_effective_joint_ticks": 232,
+        "mean_abs_effective_rad": 0.001086377422325313,
+        "reason_counts": {
+          "APPLY": 223,
+          "NO_EFFECTIVE_CHANGE": 4498,
+          "NO_TELEMETRY": 46,
+          "REACQUIRING": 24,
+          "CONSTRAINT_CONFLICT": 9
+        }
+      },
+      "ankle": {
+        "joint_count": 4,
+        "observed_joint_ticks": 9600,
+        "nonzero_effective_joint_ticks": 110,
+        "mean_abs_effective_rad": 0.0002079728728858754,
+        "reason_counts": {
+          "APPLY": 106,
+          "NO_EFFECTIVE_CHANGE": 9335,
+          "NO_TELEMETRY": 92,
+          "REACQUIRING": 56,
+          "MODEL_MISMATCH": 7,
+          "CONSTRAINT_CONFLICT": 4
+        }
+      }
+    }
+  },
+  "trace_sensor_scale_080_exact_candidate": {
+    "sha256": "06a64b515ddfbc81d1709cb8b42285ce1e245bac1c8c36625b338fdca540dbe4",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 2334,
+    "max_abs_effective_offset_rad": 0.16652041673660278,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 7683,
+      "10": 59377,
+      "11": 232,
+      "12": 236,
+      "14": 1018,
+      "15": 1054
+    },
+    "reason_names": {
+      "APPLY": 7683,
+      "NO_EFFECTIVE_CHANGE": 59377,
+      "NO_TELEMETRY": 232,
+      "REACQUIRING": 236,
+      "UNSUPPORTED_FORCE": 1018,
+      "CONSTRAINT_CONFLICT": 1054
+    },
+    "joint_group_output": {
+      "hip": {
+        "joint_count": 6,
+        "observed_joint_ticks": 14400,
+        "nonzero_effective_joint_ticks": 3169,
+        "mean_abs_effective_rad": 0.0074812318198382854,
+        "reason_counts": {
+          "APPLY": 2847,
+          "NO_EFFECTIVE_CHANGE": 11135,
+          "NO_TELEMETRY": 48,
+          "REACQUIRING": 48,
+          "CONSTRAINT_CONFLICT": 322
+        }
+      },
+      "knee": {
+        "joint_count": 2,
+        "observed_joint_ticks": 4800,
+        "nonzero_effective_joint_ticks": 2580,
+        "mean_abs_effective_rad": 0.022530928254127502,
+        "reason_counts": {
+          "APPLY": 2257,
+          "NO_EFFECTIVE_CHANGE": 2188,
+          "NO_TELEMETRY": 16,
+          "REACQUIRING": 16,
+          "CONSTRAINT_CONFLICT": 323
+        }
+      },
+      "ankle": {
+        "joint_count": 4,
+        "observed_joint_ticks": 9600,
+        "nonzero_effective_joint_ticks": 2272,
+        "mean_abs_effective_rad": 0.011727817356586456,
+        "reason_counts": {
+          "APPLY": 1873,
+          "NO_EFFECTIVE_CHANGE": 7263,
+          "NO_TELEMETRY": 32,
+          "REACQUIRING": 33,
+          "CONSTRAINT_CONFLICT": 399
+        }
+      }
+    }
+  },
+  "trace_gain_070_declared_heuristic_gate": {
+    "sha256": "188843119768a031b89b9e40951c7fbf12701c79f2f0d3a88be2addd7d7931c0",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 1773,
+    "max_abs_effective_offset_rad": 0.20000001788139343,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 14548,
+      "1": 1701,
+      "2": 19838,
+      "3": 15,
+      "4": 33469,
+      "5": 29
+    }
+  },
+  "trace_gain_070_exact_heuristic_gate": {
+    "sha256": "ea9be49d93973a2fbfeb44a126d206f7547d38226de4398394ac0553534fb421",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 1589,
+    "max_abs_effective_offset_rad": 0.20000001788139343,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 17537,
+      "1": 1177,
+      "2": 970,
+      "3": 12,
+      "4": 49904
+    }
+  },
+  "trace_gain_070_return_declared_heuristic_gate": {
+    "sha256": "dc6e9e74ab8cd5ba6fe85f16f3c73e4faafd26e503677e3e26ca820dc5d303dc",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 1810,
+    "max_abs_effective_offset_rad": 0.20000000298023224,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 13625,
+      "1": 1752,
+      "2": 20775,
+      "3": 15,
+      "4": 33404,
+      "5": 29
+    }
+  },
+  "trace_gain_070_return_exact_heuristic_gate": {
+    "sha256": "fc5d9a6cb79593e5fddd8480076c7e076eb68f217c4f4f5f4aa82d9cc63b9eb7",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 1588,
+    "max_abs_effective_offset_rad": 0.20000000298023224,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 16665,
+      "1": 1168,
+      "2": 1672,
+      "3": 15,
+      "4": 50080
+    }
+  },
+  "trace_healthy_declared_heuristic_gate": {
+    "sha256": "359aabe1e5940ba872f7e55470eadb6fd8f37dad62d7b9ec56a2fd96ed103630",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 229,
+    "max_abs_effective_offset_rad": 0.049255430698394775,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 362,
+      "1": 1576,
+      "2": 18744,
+      "3": 13,
+      "4": 48847,
+      "5": 58
+    }
+  },
+  "trace_healthy_exact_heuristic_gate": {
+    "sha256": "59104e2f24c1649e6ea10ab946e634e9b4cb3b85433fb5cc6f92de2d544557ae",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 0,
+    "max_abs_effective_offset_rad": 0.0,
+    "observed_joint_tick_reason_code_histogram": {
+      "1": 1168,
+      "3": 13,
+      "4": 68419
+    }
+  },
+  "trace_sensor_scale_080_declared_heuristic_gate": {
+    "sha256": "f10b0ba8fa27567c2df166aeb566fa98623322190f3e0da85e4b660e2e406331",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 2343,
+    "max_abs_effective_offset_rad": 0.20000001788139343,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 49169,
+      "1": 1667,
+      "2": 18742,
+      "3": 18,
+      "4": 3,
+      "5": 1
+    }
+  },
+  "trace_sensor_scale_080_exact_heuristic_gate": {
+    "sha256": "ba785d79b423ab4bb776cec5052caa6d92b1a648ec3dcc88a65c32982e0bc35e",
+    "observed_episode_ticks": 2400,
+    "joint_count": 29,
+    "ticks_any_nonzero_effective_offset": 2360,
+    "max_abs_effective_offset_rad": 0.16529780626296997,
+    "observed_joint_tick_reason_code_histogram": {
+      "0": 68417,
+      "1": 1166,
+      "3": 17
+    }
+  }
+}

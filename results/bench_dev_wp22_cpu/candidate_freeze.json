@@ -1,0 +1,105 @@
+{
+  "frozen_at_utc": "2026-11-22T08:20:57+00:00",
+  "wp22_source_commit": "5584a40871e7e1b30a980ffa049f9b2f83debb65",
+  "frozen_candidate_config": {
+    "gain_drift_per_s": 0.0,
+    "hold_speed_rad_s": 10.0,
+    "force_margin_nm": 0.01,
+    "roundoff_effort_bound_nm": 0.0001,
+    "reacquire_packets": 2,
+    "regularizer": 0.0
+  },
+  "candidate_config_path": "docs/adaptive_execution/research_candidate/wp22_dev_config.json",
+  "candidate_config_sha256": "e0f0586a0db57a37b022bfab97f0a695dc85c181118780c3d656cd8d73932d81",
+  "dev_plan_sha256": "8d46a8a486078a0d1248af91d1b435159348ef021360e27175581fe81c6c1c12",
+  "reference_source_commit": "c5397f89d91c1885c9d97263d024dcbc55b1cd1c",
+  "checkpoint_step": "000202342400",
+  "checkpoint_tree_sha256": "14bd6650f06c4e3171b6e2d2403ef0da5d9dd3604709f0c22b488329dd0223de",
+  "python_dependencies": [
+    {
+      "package": "mujoco",
+      "pod_lock": "3.16.0",
+      "installed": "3.16.0",
+      "match": true
+    },
+    {
+      "package": "mujoco-mjx",
+      "pod_lock": "3.16.0",
+      "installed": "3.16.0",
+      "match": true
+    },
+    {
+      "package": "warp-lang",
+      "pod_lock": "1.18.0",
+      "installed": "1.18.0",
+      "match": true
+    },
+    {
+      "package": "jax",
+      "pod_lock": "0.12.0.1",
+      "installed": "0.12.0.1",
+      "match": true
+    },
+    {
+      "package": "jaxlib",
+      "pod_lock": "0.12.0.1",
+      "installed": "0.12.0.1",
+      "match": true
+    },
+    {
+      "package": "brax",
+      "pod_lock": "0.14.2",
+      "installed": "0.14.2",
+      "match": true
+    },
+    {
+      "package": "flax",
+      "pod_lock": "0.12.10",
+      "installed": "0.12.10",
+      "match": true
+    },
+    {
+      "package": "optax",
+      "pod_lock": "0.2.8",
+      "installed": "0.2.8",
+      "match": true
+    },
+    {
+      "package": "orbax-checkpoint",
+      "pod_lock": "0.12.8",
+      "installed": "0.12.8",
+      "match": true
+    },
+    {
+      "package": "numpy",
+      "pod_lock": "2.5.4",
+      "installed": "2.5.4",
+      "match": true
+    },
+    {
+      "package": "ml-collections",
+      "pod_lock": "1.1.0",
+      "installed": "1.1.0",
+      "match": true
+    },
+    {
+      "package": "etils",
+      "pod_lock": "1.14.0",
+      "installed": "1.14.0",
+      "match": true
+    }
+  ],
+  "sources_sha256": {
+    "docs/adaptive_execution/research_candidate/wp22_dev_config.json": "e0f0586a0db57a37b022bfab97f0a695dc85c181118780c3d656cd8d73932d81",
+    "foresight/adaptive/__init__.py": "9ecc75add2781b3cf978310f6dd50b4c1a32d1fcab5e6e90aabc2c4cb220d50c",
+    "foresight/adaptive/actuator_env.py": "6330733c04601b763bc4289b185988e5953e0bb9f01be7d77dcbe113015954c3",
+    "foresight/adaptive/bench.py": "516c43688826c238adccc426dd3928a226003e004af23bd7692631f27a6daaf0",
+    "foresight/adaptive/candidate.py": "e8a7797053c43812e87b1d122663a952b55925ca45e25982225cc547cf7d63a3",
+    "foresight/adaptive/estimation.py": "350e0f4a6b87460e90bf938577796423814a1612de885370edd1788cf3e3d217",
+    "foresight/adaptive/gate_analysis.py": "0b4419303584f0849d8b257398bd3638ca79e1e7a72cb0c29eefbc23311705dd",
+    "foresight/adaptive/projection.py": "d38a00fc5ed3349d7333380cb2e54bfde617d4b6ac509a4aa28931aba1dff479",
+    "foresight/adaptive/sensing.py": "46f3e024c734e19a5b6b75d588d735f7e4aea9d138196a987fa241b7e61a72b7",
+    "foresight/adaptive/telemetry.py": "608f0b36c6810170f6a53b660650079c710be1ad210eaa3745d6475fae0694e6",
+    "scripts/eval_adaptive_bench.py": "01183cf09f3e445749dc95423f075a900347fb5e03da0c9d1afe3a7bcd23523c"
+  }
+}
