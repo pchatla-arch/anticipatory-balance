@@ -61,7 +61,9 @@ print(json.dumps({k:v for k,v in os.environ.items()
                   if k.startswith(('FORESIGHT_', 'ADAPTIVE_')) or k == 'NO_STOP'}))
 PY
 ''')
-        for args, profile, minutes in (([], 'gate', 120), (['smoke'], 'smoke', 30)):
+        for args, profile, minutes in (([], 'gate', 120), (['smoke'], 'smoke', 30),
+                                      (['calibrate-identity'], 'calibrate-identity', 45),
+                                      (['bench'], 'bench', 90)):
             result = self.invoke(args, {'NO_STOP': '1'})
             self.assertEqual(result.returncode, 0, result.stderr)
             data = json.loads(result.stdout.splitlines()[-1])
@@ -78,6 +80,22 @@ PY
             result = self.invoke(env=values)
             self.assertNotEqual(result.returncode, 0)
             self.assertFalse(self.calls.exists())
+
+    def test_calibration_budget_above_ceiling_fails_before_download(self):
+        result = self.invoke(['calibrate-identity'], {'ADAPTIVE_MAX_MINUTES': '46'})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(self.calls.exists())
+
+    def test_s1b_rejects_oversized_attempt_before_setup(self):
+        result = self.invoke(['bench'], {'ADAPTIVE_MAX_MINUTES': '91'})
+        self.assertNotEqual(result.returncode, 0)
+        now = int(time.time())
+        result = self.invoke(env={'ADAPTIVE_PROFILE': 'bench', 'ADAPTIVE_STARTED_EPOCH': str(now),
+                                  'ADAPTIVE_DEADLINE_EPOCH': str(now + 91 * 60)},
+                             script='start_adaptive_gate_pod.sh')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('90 minutes', result.stdout)
+        self.assertFalse(self.calls.exists())
 
     def test_pod_entry_requires_outer_deadline_before_gpu_work(self):
         result = self.invoke(script='start_adaptive_gate_pod.sh')
@@ -221,7 +239,8 @@ class AdaptiveWorkerTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     worker.validate_outputs(output)
 
-    def run_fixture(self, *, timeout=False, scientific='fail', upload_ok=True, determinism=None):
+    def run_fixture(self, *, timeout=False, scientific='fail', upload_ok=True, determinism=None,
+                    profile='gate', calibration_batches=64, duration_minutes=None):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name)
@@ -231,13 +250,19 @@ class AdaptiveWorkerTests(unittest.TestCase):
             calls.append((command, budget))
             if 'scripts/preflight_session_h.py' in command:
                 Path(command[-1]).write_text('{}\n')
-            if 'scripts/eval_adaptive_gate.py' in command:
+            if ('scripts/eval_adaptive_gate.py' in command
+                    or 'scripts/calibrate_gate_identity.py' in command):
                 output = Path(command[command.index('--out') + 1])
                 if timeout:
                     raise TimeoutError('fixture experiment deadline')
-                (output / 'summary.json').write_text(json.dumps({'scientific_gate_status': scientific}))
+                summary = {'scientific_gate_status': scientific}
+                if profile == 'calibrate-identity':
+                    summary.update(profile='gpu_calibration', batches=calibration_batches, rows=64*calibration_batches)
+                (output / 'summary.json').write_text(json.dumps(summary))
                 (output / 'episodes.csv').write_text('scenario_id,fell\n1,0\n')
                 (output / 'report.md').write_text('Fixture result.\n')
+            if 'scripts/s1_dev_bench.py' in command and 'gpu' in command and timeout:
+                raise TimeoutError('fixture bench deadline')
             if 'scripts/publish_experiment_results.py' in command:
                 if not upload_ok:
                     return 1
@@ -252,8 +277,10 @@ class AdaptiveWorkerTests(unittest.TestCase):
         old_cwd = Path.cwd()
         self.addCleanup(os.chdir, old_cwd)
         now = int(time.time())
-        env = {'ADAPTIVE_STARTED_EPOCH': str(now - 1800),
-               'ADAPTIVE_DEADLINE_EPOCH': str(now + 5400),
+        duration_minutes = duration_minutes or {'calibrate-identity': 45, 'bench': 90}.get(profile, 120)
+        elapsed = min(1800, duration_minutes * 10) if profile == 'bench' else 1800
+        env = {'ADAPTIVE_STARTED_EPOCH': str(now - elapsed),
+               'ADAPTIVE_DEADLINE_EPOCH': str(now - elapsed + duration_minutes * 60),
                'FORESIGHT_SETUP_ROOT': str(root)}
         if determinism is not None:
             env['ADAPTIVE_DETERMINISTIC'] = determinism
@@ -267,7 +294,7 @@ class AdaptiveWorkerTests(unittest.TestCase):
             stack.enter_context(mock.patch.object(worker.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, 'a' * 40 + '\n', '')))
             stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
             stack.enter_context(contextlib.redirect_stderr(io.StringIO()))
-            code = worker.main(['--profile', 'gate'])
+            code = worker.main(['--profile', profile])
         os.chdir(old_cwd)
         latest = json.loads((root / 'logs/last_run.json').read_text())
         record = json.loads((Path(latest['run_dir']) / 'run.json').read_text())
@@ -294,6 +321,42 @@ class AdaptiveWorkerTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertEqual(record['status'], 'failed')
         self.assertFalse([entry for entry in calls if 'scripts/eval_adaptive_gate.py' in entry[0]], 'no GPU work on a bad setting')
+
+    def test_calibration_uses_dedicated_entry_and_cannot_return_scientific_pass(self):
+        code, latest, record, calls = self.run_fixture(profile='calibrate-identity', scientific='inconclusive')
+        self.assertEqual(code, 0)
+        self.assertEqual(record['protocol_version'], 'adaptive-identity-calibration-v1')
+        self.assertEqual(latest['publication_status'], 'verified')
+        self.assertTrue(any('--gpu-calibration' in command for command, _ in calls))
+        self.assertFalse(any('scripts/eval_adaptive_gate.py' in command for command, _ in calls))
+        for args in (dict(scientific='pass'), dict(scientific='inconclusive', calibration_batches=63)):
+            code, latest, record, _ = self.run_fixture(profile='calibrate-identity', **args)
+            self.assertEqual(code, 1)
+            self.assertEqual(record['status'], 'failed')
+            self.assertEqual(latest['publication_status'], 'verified')
+            self.assertNotEqual(record.get('scientific_gate_status'), 'pass')
+
+    def test_s1b_cpu_and_gpu_share_cutoff_and_publish_incomplete_on_timeout(self):
+        for minutes, reserve in ((90, 18 * 60), (30, 10 * 60)):
+            with self.subTest(minutes=minutes):
+                code, latest, record, calls = self.run_fixture(profile='bench', duration_minutes=minutes, timeout=True)
+                self.assertEqual(code, 124)
+                self.assertFalse(record['matrix_complete'])
+                self.assertEqual(record['status'], 'timed_out')
+                self.assertEqual(latest['publication_status'], 'verified')
+                self.assertEqual(record['cleanup_reserve_seconds'], reserve)
+                cutoff = record['launcher_deadline_epoch'] - reserve
+                self.assertEqual(record['work_cutoff_epoch'], cutoff)
+                phases = [(cmd[cmd.index('scripts/s1_dev_bench.py') + 1], seconds)
+                          for cmd, seconds in calls if 'scripts/s1_dev_bench.py' in cmd]
+                self.assertEqual([name for name, _ in phases], ['cpu-smoke', 'gpu'])
+                for _, seconds in phases:
+                    self.assertLessEqual(seconds, cutoff - int(time.time()) + 1)
+        code, _, record, _ = self.run_fixture(profile='bench')
+        self.assertEqual(code, 0)
+        self.assertTrue(record['matrix_complete'])
+        with self.assertRaisesRegex(ValueError, '90 minutes'):
+            self.run_fixture(profile='bench', duration_minutes=91)
 
     def test_timeout_still_publishes_partial_evidence(self):
         code, latest, record, _ = self.run_fixture(timeout=True)

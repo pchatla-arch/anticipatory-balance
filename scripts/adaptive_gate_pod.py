@@ -79,9 +79,19 @@ def validate_outputs(output):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--profile', choices=('smoke', 'gate'), default='gate')
+    parser.add_argument('--profile', choices=('smoke', 'gate', 'calibrate-identity', 'bench'), default='gate')
     args = parser.parse_args(argv)
     started_epoch, deadline_epoch, seconds_left = parse_deadline(os.environ)
+    bench = args.profile == 'bench'
+    calibration = args.profile == 'calibrate-identity'
+    if calibration and deadline_epoch - started_epoch > 45 * 60:
+        raise ValueError('Identity calibration budget must not exceed 45 minutes.')
+    work_reserve = CLEANUP_RESERVE
+    if bench:
+        duration = deadline_epoch - started_epoch
+        if duration > 90 * 60:
+            raise ValueError('S1b bench budget must not exceed 90 minutes.')
+        work_reserve = max(CLEANUP_RESERVE, duration - duration * 4 // 5)
     deadline = time.monotonic() + seconds_left
     invocation = uuid.uuid4().hex
     os.environ['FORESIGHT_INVOCATION_ID'] = invocation
@@ -103,13 +113,20 @@ def main(argv=None):
     setup_output = output / 'setup'
     setup_output.mkdir()
     record = {'run_id': run_id, 'source_commit': None, 'mode': args.profile,
-              'protocol_version': 'adaptive-servo-gain-gate-v1',
+              'protocol_version': 'adaptive-identity-calibration-v1' if calibration else 'adaptive-servo-gain-gate-v1',
               'status': 'running', 'started_utc': stamp, 'stage': 'setup',
               'launcher_started_epoch': started_epoch, 'launcher_deadline_epoch': deadline_epoch,
-              'cleanup_reserve_seconds': CLEANUP_RESERVE,
+              'cleanup_reserve_seconds': work_reserve,
               'interpretation': 'Known-parameter gain compensation over a frozen G1 walker. '
                   'An operational completion is not evidence that the scientific gate passed. '
                   'No online estimator, lag compensation, or learned residual is tested.'}
+    if bench:
+        record['protocol_version'] = 'oaa-s1-dev-v1'
+        record['work_cutoff_epoch'] = deadline_epoch - work_reserve
+        record['matrix_complete'] = False
+        record['interpretation'] = 'S1 exploratory paired development comparison. Gate decisions are reserved for Prasuna.'
+    if calibration:
+        record['interpretation'] = 'Two repeats of the healthy walker on independent calibration seeds. G0 is undecided.'
     latest = {'schema_version': 1, 'run_id': run_id, 'run_dir': str(output),
               'invocation_id': invocation, 'source_commit': None, 'mode': args.profile,
               'status': 'running', 'experiment_status': 'running',
@@ -155,18 +172,18 @@ def main(argv=None):
             atomic_json(output / 'run.json', record)
             save_latest()
             emit(f'Adaptive gate: {run_id}; profile={args.profile}.')
-            emit('The attempt clock includes setup. Ten minutes are reserved for publication and stop checks.')
-            remaining_timeout(deadline, 15, CLEANUP_RESERVE)
+            emit(f'The attempt clock includes setup. {work_reserve} seconds are reserved for publication and stop checks.')
+            remaining_timeout(deadline, 15, work_reserve)
             require_idle_gpu()
             command, cap, message = setup_command(setup_root, venv, setup_output)
             # Keep environment provenance inside the publisher's allowlisted names.
             if command[1:2] == ['scripts/preflight_session_h.py']:
                 command[-1] = str(setup_output / 'preflight.json')
             emit(message)
-            run_child(command, env, log, remaining_timeout(deadline, cap, CLEANUP_RESERVE))
+            run_child(command, env, log, remaining_timeout(deadline, cap, work_reserve))
             if not (setup_output / 'preflight.json').exists():
                 run_child([python, 'scripts/preflight_session_h.py', '--out', str(setup_output / 'preflight.json')],
-                          env, log, remaining_timeout(deadline, 240, CLEANUP_RESERVE))
+                          env, log, remaining_timeout(deadline, 240, work_reserve))
             require_idle_gpu()
             record['stage'] = 'evaluation'
             atomic_json(output / 'run.json', record)
@@ -175,10 +192,28 @@ def main(argv=None):
             determinism = os.environ.get('ADAPTIVE_DETERMINISTIC', 'auto')
             if determinism not in ('auto', 'on', 'off'):
                 raise ValueError(f'ADAPTIVE_DETERMINISTIC must be auto, on or off, not {determinism!r}')
-            run_child([python, '-u', 'scripts/eval_adaptive_gate.py', '--out', str(output), '--profile', args.profile,
-                       '--deterministic', determinism],
-                      env, log, remaining_timeout(deadline, 120 * 60, CLEANUP_RESERVE))
-            record['scientific_gate_status'] = validate_outputs(output)
+            if bench:
+                entry = [python, '-u', 'scripts/s1_dev_bench.py']
+                run_child(entry + ['cpu-smoke', '--out', str(output)], env, log,
+                          remaining_timeout(deadline, 120 * 60, work_reserve))
+                experiment = entry + ['gpu', '--out', str(output)]
+            elif calibration:
+                if determinism != 'auto':
+                    raise ValueError('Identity calibration requires the pinned default Warp execution and auto XLA flags.')
+                experiment = [python, '-u', 'scripts/calibrate_gate_identity.py', '--gpu-calibration', '--out', str(output)]
+            else:
+                experiment = [python, '-u', 'scripts/eval_adaptive_gate.py', '--out', str(output), '--profile', args.profile,
+                              '--deterministic', determinism]
+            run_child(experiment, env, log, remaining_timeout(deadline, 120 * 60, work_reserve))
+            scientific_status = 'development_only' if bench else validate_outputs(output)
+            if calibration:
+                result = read_strict_json(output / 'summary.json')
+                if (result.get('profile') != 'gpu_calibration' or result.get('batches') != 64
+                        or result.get('rows') != 4096 or scientific_status != 'inconclusive'):
+                    raise ValueError('Incomplete calibration or unexpected scientific disposition.')
+            if bench:
+                record['matrix_complete'] = True
+            record['scientific_gate_status'] = scientific_status
             record['status'] = 'completed'
             emit(f'Pipeline completed; scientific gate={record["scientific_gate_status"]}.')
         except (KeyboardInterrupt, Exception) as error:

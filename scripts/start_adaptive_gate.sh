@@ -4,16 +4,18 @@ set -Eeuo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: bash start_adaptive_gate.sh [gate|smoke]
+Usage: bash start_adaptive_gate.sh [gate|smoke|calibrate-identity|bench]
        bash start_adaptive_gate.sh retry-publish RUN_ID
 
 Run the gain-compensation feasibility gate using the published frozen G1 walker.
-No PPO training or online estimator is run. The gate asks whether a bounded,
+The separate bench profile runs the WP 2.4 S1 development comparison from its committed manifest.
+The gate asks whether a bounded,
 privileged correction can recover a deliberately degraded actuator response.
 
 Default: gate, with a 120-minute attempt budget measured from this launcher,
-including setup; smoke defaults to 30 minutes. Ten minutes are reserved for
-result publication and stop checks. This is not a guaranteed billing cap:
+including setup. Smoke defaults to 30 minutes, identity calibration to 45 and the
+S1b bench to 90. S1b ends setup and evaluation by 80% of the attempt budget,
+leaving at least ten minutes for result publication and stop checks. This is not a guaranteed billing cap:
 failed upload or unavailable RunPod controls leave the pod running.
 
 Before GPU work the launcher verifies Git push access (saved credentials, or a
@@ -39,7 +41,7 @@ EOF
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 if [[ ${1:-} == --help || ${1:-} == -h || ${1:-} == help ]]; then usage; exit 0; fi
 ADAPTIVE_PROFILE=${1:-gate}
-case "$ADAPTIVE_PROFILE" in gate|smoke|retry-publish) ;; *) usage >&2; exit 2 ;; esac
+case "$ADAPTIVE_PROFILE" in gate|smoke|calibrate-identity|bench|retry-publish) ;; *) usage >&2; exit 2 ;; esac
 FORESIGHT_SETUP_ROOT=${FORESIGHT_SETUP_ROOT:-/workspace}
 FORESIGHT_REPO=${FORESIGHT_REPO:-$FORESIGHT_SETUP_ROOT/adaptive-execution-gate}
 FORESIGHT_VENV=${FORESIGHT_VENV:-$FORESIGHT_SETUP_ROOT/mujoco_playground/rss2025/.venv}
@@ -71,11 +73,20 @@ fi
 (( $# <= 1 )) || { usage >&2; exit 2; }
 if [[ "$ADAPTIVE_PROFILE" == smoke ]]; then
   ADAPTIVE_MAX_MINUTES=${ADAPTIVE_MAX_MINUTES:-30}
+elif [[ "$ADAPTIVE_PROFILE" == calibrate-identity ]]; then
+  ADAPTIVE_MAX_MINUTES=${ADAPTIVE_MAX_MINUTES:-45}
+elif [[ "$ADAPTIVE_PROFILE" == bench ]]; then
+  ADAPTIVE_MAX_MINUTES=${ADAPTIVE_MAX_MINUTES:-90}
 else
   ADAPTIVE_MAX_MINUTES=${ADAPTIVE_MAX_MINUTES:-120}
 fi
 [[ "$ADAPTIVE_MAX_MINUTES" =~ ^[0-9]+$ ]] || die 'ADAPTIVE_MAX_MINUTES must be an integer from 15 to 120.'
 (( 10#$ADAPTIVE_MAX_MINUTES >= 15 && 10#$ADAPTIVE_MAX_MINUTES <= 120 )) || die 'ADAPTIVE_MAX_MINUTES must be an integer from 15 to 120.'
+if [[ "$ADAPTIVE_PROFILE" == calibrate-identity ]]; then
+  (( 10#$ADAPTIVE_MAX_MINUTES <= 45 )) || die 'Identity calibration budget must not exceed 45 minutes.'
+elif [[ "$ADAPTIVE_PROFILE" == bench ]]; then
+  (( 10#$ADAPTIVE_MAX_MINUTES <= 90 )) || die 'S1b bench budget must not exceed 90 minutes.'
+fi
 ADAPTIVE_STARTED_EPOCH=$(date +%s)
 ADAPTIVE_DEADLINE_EPOCH=$((ADAPTIVE_STARTED_EPOCH + 10#$ADAPTIVE_MAX_MINUTES * 60))
 export ADAPTIVE_PROFILE ADAPTIVE_MAX_MINUTES ADAPTIVE_STARTED_EPOCH ADAPTIVE_DEADLINE_EPOCH

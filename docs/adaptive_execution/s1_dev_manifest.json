@@ -1,0 +1,21 @@
+{
+  "protocol": "oaa-s1-dev-v1",
+  "split": "dev",
+  "implementation": "warp",
+  "schedule": "walk_turn_stop_resume",
+  "episodes_per_cell": 32,
+  "steps": 400,
+  "batch": 32,
+  "families": ["healthy", "gain_085", "gain_070", "gain_055", "gain_070_return", "gain_070_hips", "gain_070_left", "sensor_scale_080", "sensor_bias", "damping_x3", "stale_telemetry"],
+  "telemetry": ["exact", "declared", "declared_fast"],
+  "methods": ["none", "oracle", "estimated_inverse", "heuristic_gate", "candidate"],
+  "checkpoint_tree": "b63c0e7e2e8aad2fec80918ff853d0cc5779a604",
+  "attempts": 1,
+  "max_wall_minutes": 90,
+  "work_cutoff_percent": 80,
+  "cleanup_reserve_minutes": 10,
+  "frozen_inputs": {
+    "heuristic": null,
+    "candidate": null
+  }
+}

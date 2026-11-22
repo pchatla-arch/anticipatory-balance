@@ -1,0 +1,9 @@
+{
+  "profile": "cpu_dry_run",
+  "batches": 1,
+  "rows": 64,
+  "terminal_disagreements": 0,
+  "max_score": 0.0,
+  "elapsed_seconds": 24.529587321000008,
+  "scientific_gate_status": "inconclusive"
+}
