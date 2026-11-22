@@ -1,0 +1,79 @@
+{
+  "mode": "development",
+  "split": "dev",
+  "impl": "jax",
+  "platform": "cpu",
+  "source_commit": "aa51278507b4354cf6cb3a164ffb44b3f9642aa4",
+  "source_tree": "ffe43ffab89910f78f65240e7d23e2e634493f6f",
+  "checkpoint": "/workspace/scratch/a92174288b11/pilot_science_src/checkpoints/nominal_s1/000202342400",
+  "checkpoint_tree_sha256": "14bd6650f06c4e3171b6e2d2403ef0da5d9dd3604709f0c22b488329dd0223de",
+  "seed_base": 811000,
+  "family_seeds": {
+    "gain_070": 829204,
+    "gain_070_return": 841562,
+    "healthy": 845114,
+    "sensor_scale_080": 816772
+  },
+  "families": [
+    "gain_070",
+    "gain_070_return",
+    "healthy",
+    "sensor_scale_080"
+  ],
+  "methods": [
+    "none",
+    "oracle",
+    "heuristic_gate",
+    "candidate",
+    "candidate_velocity"
+  ],
+  "channels": {
+    "declared": {
+      "position_noise_rad": 0.002,
+      "torque_noise_nm": 0.5,
+      "position_bias_rad": 0.0,
+      "torque_bias_nm": 0.0,
+      "torque_scale": 1.0,
+      "latency_min": 1,
+      "latency_max": 3,
+      "dropout": 0.02,
+      "bound_position_rad": 0.006,
+      "bound_torque_nm": 1.5,
+      "velocity_error_rad_s": 0.5,
+      "bound_velocity_rad_s": 0.5
+    },
+    "declared_fast": {
+      "position_noise_rad": 0.002,
+      "torque_noise_nm": 0.5,
+      "position_bias_rad": 0.0,
+      "torque_bias_nm": 0.0,
+      "torque_scale": 1.0,
+      "latency_min": 0,
+      "latency_max": 0,
+      "dropout": 0.02,
+      "bound_position_rad": 0.006,
+      "bound_torque_nm": 1.5,
+      "velocity_error_rad_s": 0.5,
+      "bound_velocity_rad_s": 0.5
+    }
+  },
+  "episodes": 8,
+  "batch": 8,
+  "steps": 300,
+  "schedule": "walk_turn_stop_resume",
+  "sensor_velocity_error": "uniform source-time independent error, shared key by scenario and tick",
+  "speed_config": {
+    "gain_drift_per_s": 0.0,
+    "hold_speed_rad_s": 10.0,
+    "force_margin_nm": 0.01,
+    "roundoff_effort_bound_nm": 0.0001,
+    "reacquire_packets": 2,
+    "regularizer": 0.0
+  },
+  "acceleration_rad_s2": 400.0,
+  "baseline": {
+    "status": "awaiting_frozen_wp21"
+  },
+  "attempt_budget": 1,
+  "expected_episode_rows": 320
+}
