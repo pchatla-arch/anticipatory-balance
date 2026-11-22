@@ -64,7 +64,9 @@ class TelemetryConfig(NamedTuple):
         return self
 
 
-EXACT = TelemetryConfig()
+# "Exact" still declares tiny bounds: with b = 0 a set-membership update would treat
+# floating-point rounding as a model violation.
+EXACT = TelemetryConfig(bound_position_rad=1e-5, bound_torque_nm=1e-3)
 DECLARED = TelemetryConfig(position_noise_rad=2e-3, torque_noise_nm=0.5,
                            latency_min=1, latency_max=3, dropout=0.02,
                            bound_position_rad=6e-3, bound_torque_nm=1.5)

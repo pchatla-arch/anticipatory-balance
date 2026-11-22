@@ -28,6 +28,7 @@ from pathlib import Path
 import subprocess
 import sys
 import time
+import zlib
 
 import numpy as np
 
@@ -38,6 +39,12 @@ SPLIT_SEED = {"dev": 11000, "val": 12000, "test": 13000}
 TELEMETRY_PRESETS = {"exact": "EXACT", "declared": "DECLARED"}
 REFERENCE_METHOD = "heuristic_gate"
 PAIRED_METRICS = ("postfault_loss", "harmful_offset_rad", "progress_m")
+
+
+def family_seed(split, family_name):
+    """Scenario seed depends on the split and the family name only, never on list position,
+    so the same family draws the same scenarios in every run of that split."""
+    return SPLIT_SEED[split] + 37 * (zlib.crc32(family_name.encode()) % 997)
 
 
 def write_json(path, value):
@@ -263,11 +270,18 @@ def main(argv=None):
         "candidate_available": candidate is not None,
     }
     write_json(args.out / "config.json", meta)
+    write_json(args.out / "actuators.json", {
+        "names": list(env.actuator_joint_names),
+        "kp": [float(v) for v in env.mj_model.actuator_gainprm[:, 0]],
+        "leg_mask": [bool(v) for v in env.leg_actuator_mask],
+        "ctrl_range": [[float(a), float(b)] for a, b in env.mj_model.actuator_ctrlrange],
+        "ctrl_limited": [bool(v) for v in env.mj_model.actuator_ctrllimited],
+    })
     reset = jax.jit(jax.vmap(env.reset))
     rows = []
-    for fam_index, fname in enumerate(families):
+    for fname in families:
         family = B.FAMILIES[fname]
-        seed = SPLIT_SEED[args.split] + 37 * fam_index
+        seed = family_seed(args.split, fname)
         scenario = B.draw_scenarios(family, seed, args.episodes, env)
         for tele_name, tele_cfg in sorted(telemetry.items()):
             # A family's own sensor confound composes with the channel model: the confound

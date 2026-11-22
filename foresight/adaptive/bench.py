@@ -233,7 +233,7 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
             rls = jax.vmap(lambda s, p, m: E.rls_update(s, p, m, kp, method.rls))(rls, pkt_j, mask[:, j])
             if method.candidate is not None:
                 cand = method.candidate.update(cand, pkt_j, mask[:, j], rls, t)
-        return mstate._replace(rls=rls, queue=queue, candidate=cand)
+        return mstate._replace(rls=rls, queue=queue, candidate=cand), packets
 
     def method_correction(mstate, reference, t, simulated):
         if method.name == "oracle_external":
@@ -302,8 +302,9 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
                 mstate = mstate._replace(reason=reason)
             simulated = simulated.replace(info=info, obs=obs)
             next_state = advance(simulated, safe_action)
-            if uses_estimator or method.candidate is not None:
-                mstate = method_update(mstate, next_state.info, t, sensor_keys)
+            measured = None
+            if uses_estimator or method.candidate is not None or trace:
+                mstate, measured = method_update(mstate, next_state.info, t, sensor_keys)
             finite = (finite_rows(next_state.data.qpos) & finite_rows(next_state.data.qvel)
                       & finite_rows(next_state.data.xpos) & finite_rows(next_state.data.sensordata)
                       & finite_rows(next_state.obs["state"]) & action_finite)
@@ -361,7 +362,12 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
                 ys = {"g_hat": g_hat, "requested": next_state.info["adaptive_step_delta"],
                       "effective": effective, "reason": mstate.reason, "loss": loss,
                       "alive": observed, "gain_true_active": ~plant_healthy,
-                      "command": cmd, "velocity": velocity(next_state.data)}
+                      "command": cmd, "velocity": velocity(next_state.data),
+                      # The measured packet captured at the end of this step (WP 1.3 replay input).
+                      "pkt_arrival": measured.arrival_step, "pkt_target": measured.target_rad,
+                      "pkt_position": measured.position_rad, "pkt_velocity": measured.velocity_rad_s,
+                      "pkt_torque": measured.torque_nm, "pkt_valid": measured.valid,
+                      "reference": reference, "q_true": jax.vmap(env.measured_joint_positions)(simulated.data)}
             return (state, mstate, out), ys
 
         mstate0 = method_init(n)
