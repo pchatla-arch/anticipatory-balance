@@ -79,9 +79,12 @@ def validate_outputs(output):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--profile', choices=('smoke', 'gate'), default='gate')
+    parser.add_argument('--profile', choices=('smoke', 'gate', 'calibrate-identity'), default='gate')
     args = parser.parse_args(argv)
     started_epoch, deadline_epoch, seconds_left = parse_deadline(os.environ)
+    calibration = args.profile == 'calibrate-identity'
+    if calibration and deadline_epoch - started_epoch > 45 * 60:
+        raise ValueError('Identity calibration budget must not exceed 45 minutes.')
     deadline = time.monotonic() + seconds_left
     invocation = uuid.uuid4().hex
     os.environ['FORESIGHT_INVOCATION_ID'] = invocation
@@ -103,13 +106,15 @@ def main(argv=None):
     setup_output = output / 'setup'
     setup_output.mkdir()
     record = {'run_id': run_id, 'source_commit': None, 'mode': args.profile,
-              'protocol_version': 'adaptive-servo-gain-gate-v1',
+              'protocol_version': 'adaptive-identity-calibration-v1' if calibration else 'adaptive-servo-gain-gate-v1',
               'status': 'running', 'started_utc': stamp, 'stage': 'setup',
               'launcher_started_epoch': started_epoch, 'launcher_deadline_epoch': deadline_epoch,
               'cleanup_reserve_seconds': CLEANUP_RESERVE,
               'interpretation': 'Known-parameter gain compensation over a frozen G1 walker. '
                   'An operational completion is not evidence that the scientific gate passed. '
                   'No online estimator, lag compensation, or learned residual is tested.'}
+    if calibration:
+        record['interpretation'] = 'Two repeats of the healthy walker on independent calibration seeds. G0 is undecided.'
     latest = {'schema_version': 1, 'run_id': run_id, 'run_dir': str(output),
               'invocation_id': invocation, 'source_commit': None, 'mode': args.profile,
               'status': 'running', 'experiment_status': 'running',
@@ -175,10 +180,21 @@ def main(argv=None):
             determinism = os.environ.get('ADAPTIVE_DETERMINISTIC', 'auto')
             if determinism not in ('auto', 'on', 'off'):
                 raise ValueError(f'ADAPTIVE_DETERMINISTIC must be auto, on or off, not {determinism!r}')
-            run_child([python, '-u', 'scripts/eval_adaptive_gate.py', '--out', str(output), '--profile', args.profile,
-                       '--deterministic', determinism],
-                      env, log, remaining_timeout(deadline, 120 * 60, CLEANUP_RESERVE))
-            record['scientific_gate_status'] = validate_outputs(output)
+            if calibration:
+                if determinism != 'auto':
+                    raise ValueError('Identity calibration requires the pinned default Warp execution and auto XLA flags.')
+                experiment = [python, '-u', 'scripts/calibrate_gate_identity.py', '--gpu-calibration', '--out', str(output)]
+            else:
+                experiment = [python, '-u', 'scripts/eval_adaptive_gate.py', '--out', str(output), '--profile', args.profile,
+                              '--deterministic', determinism]
+            run_child(experiment, env, log, remaining_timeout(deadline, 120 * 60, CLEANUP_RESERVE))
+            scientific_status = validate_outputs(output)
+            if calibration:
+                result = read_strict_json(output / 'summary.json')
+                if (result.get('profile') != 'gpu_calibration' or result.get('batches') != 64
+                        or result.get('rows') != 4096 or scientific_status != 'inconclusive'):
+                    raise ValueError('Incomplete calibration or unexpected scientific disposition.')
+            record['scientific_gate_status'] = scientific_status
             record['status'] = 'completed'
             emit(f'Pipeline completed; scientific gate={record["scientific_gate_status"]}.')
         except (KeyboardInterrupt, Exception) as error:
