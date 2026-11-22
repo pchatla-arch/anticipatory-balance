@@ -66,5 +66,34 @@ class WarpTraceTests(unittest.TestCase):
             self.assertEqual(out['alive'].shape, (n,))
 
 
+
+class ReproducibilityCheckTests(unittest.TestCase):
+    """The CPU/pod reproducibility probe reports first divergence with step, channel and units."""
+
+    def test_first_divergence_locates_step_channel_and_onset_relation(self):
+        from check_warp_reproducibility import first_divergence, compare, KEYS
+        steps, n, nu = 10, 3, 4
+        a = {'ctrl': np.zeros((steps, n, nu)), 'qpos': np.zeros((steps, n, 7)), 'actuator_force': np.zeros((steps, n, nu))}
+        b = {k: v.copy() for k, v in a.items()}
+        b['ctrl'][6, 1, 2] = 1e-7      # first divergence
+        b['ctrl'][8, 0, 3] = 5e-3      # largest divergence
+        onsets = np.array([5, 7, 9])
+        report = first_divergence(a, b, onsets)
+        self.assertTrue(report['qpos']['bitwise_equal'])
+        ctrl = report['ctrl']
+        self.assertFalse(ctrl['bitwise_equal'])
+        self.assertEqual((ctrl['first_divergence']['step'], ctrl['first_divergence']['env'], ctrl['first_divergence']['channel']), (6, 1, 2))
+        self.assertTrue(ctrl['first_divergence']['before_onset'], 'env 1 onset is 7, divergence at step 6')
+        self.assertEqual(ctrl['first_divergence']['onset_step_of_that_env'], 7)
+        self.assertEqual((ctrl['largest']['step'], ctrl['largest']['channel']), (8, 3))
+        self.assertAlmostEqual(ctrl['largest']['abs_difference'], 5e-3)
+        self.assertIn('rad', ctrl['units'])
+        same = {k: np.ones(n) for k in KEYS}
+        other = dict(same, max_force=np.ones(n) + 1e-3)
+        self.assertTrue(compare(same, same)['bitwise_equal'])
+        self.assertFalse(compare(same, other)['bitwise_equal'])
+        self.assertAlmostEqual(compare(same, other)['max_abs_difference']['max_force'], 1e-3)
+
+
 if __name__ == '__main__':
     unittest.main()

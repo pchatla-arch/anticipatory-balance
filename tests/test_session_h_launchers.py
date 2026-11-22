@@ -4,6 +4,7 @@ from __future__ import annotations
 import contextlib
 import importlib.util
 import io
+import fcntl
 import json
 import os
 from pathlib import Path
@@ -11,6 +12,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 
@@ -265,6 +267,19 @@ exit 2
     def reset_auth_calls(self):
         for path in (self.started, self.gh_calls, self.switched):
             path.unlink(missing_ok=True)
+        # The worker's `exec > >(tee ...)` child inherits the setup lock descriptor, so the
+        # lock can stay held for a moment after a worker exits. Wait for it before the next
+        # invocation instead of letting flock -n fail spuriously.
+        lock = self.root / '.foresight-setup.lock'
+        if lock.exists():
+            deadline = time.time() + 5
+            while time.time() < deadline:
+                with open(lock, 'w') as handle:
+                    try:
+                        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                        break
+                    except BlockingIOError:
+                        time.sleep(0.02)
 
     def test_push_permission_is_required_before_worker_start_unless_explicitly_skipped(self):
         self.make_auth_fixture()

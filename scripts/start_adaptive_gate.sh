@@ -80,6 +80,9 @@ ADAPTIVE_STARTED_EPOCH=$(date +%s)
 ADAPTIVE_DEADLINE_EPOCH=$((ADAPTIVE_STARTED_EPOCH + 10#$ADAPTIVE_MAX_MINUTES * 60))
 export ADAPTIVE_PROFILE ADAPTIVE_MAX_MINUTES ADAPTIVE_STARTED_EPOCH ADAPTIVE_DEADLINE_EPOCH
 export FORESIGHT_SETUP_ROOT FORESIGHT_REPO FORESIGHT_VENV FORESIGHT_CODE_REF FORESIGHT_AUTO_STOP
+# ADAPTIVE_DETERMINISTIC=auto|on|off: bit-exact physics and XLA ops (technical note AE-008); off is the escape hatch.
+[[ "${ADAPTIVE_DETERMINISTIC:-auto}" == auto || "${ADAPTIVE_DETERMINISTIC:-}" == on || "${ADAPTIVE_DETERMINISTIC:-}" == off ]] || die 'ADAPTIVE_DETERMINISTIC must be auto, on or off.'
+export ADAPTIVE_DETERMINISTIC="${ADAPTIVE_DETERMINISTIC:-auto}"
 command -v curl >/dev/null || die 'curl is required to download the launcher.'
 printf 'Adaptive execution: %s; %s-minute attempt budget including setup. No PPO training.\n' "$ADAPTIVE_PROFILE" "$ADAPTIVE_MAX_MINUTES"
 printf 'Only a verified upload permits an automatic stop request; check RunPod if any step fails.\n'

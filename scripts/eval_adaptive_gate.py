@@ -36,12 +36,49 @@ def write_json(path, value):
     temporary.replace(path)
 
 
-def conditions(selected=None):
+def conditions(selected=None, repeat_probe=True):
+    """Arms in execution order. `healthy_repeat` re-executes the healthy arm with identical
+    inputs as a run-to-run reproducibility probe for the physics backend; it is a control,
+    never a candidate."""
     result = [('healthy', 1., False), ('identity', 1., True)]
+    if repeat_probe:
+        result.append(('healthy_repeat', 1., False))
     for code, gain in GAINS:
         if selected is None or selected == code:
             result.extend([(f'{code}_plain', gain, False), (f'{code}_oracle', gain, True)])
     return result
+
+
+def configure_determinism(enabled):
+    """Request bit-exact run-to-run execution before JAX initializes its backend.
+
+    XLA's GPU deterministic-ops flag is appended to XLA_FLAGS. The MuJoCo-Warp model
+    option is applied separately by `deterministic_model`, because it lives on the model.
+    """
+    if not enabled:
+        return False
+    flag = '--xla_gpu_deterministic_ops=true'
+    current = os.environ.get('XLA_FLAGS', '')
+    if flag not in current.split():
+        os.environ['XLA_FLAGS'] = (current + ' ' + flag).strip()
+    return True
+
+
+def deterministic_model(model, impl):
+    """Return the MJX model with MuJoCo-Warp's full determinism mask, or unchanged for JAX.
+
+    MuJoCo-Warp accumulates constraint and passive forces with floating-point atomics,
+    whose order is not fixed on CUDA, so two executions of one batch differ at the last
+    bit and a walking episode amplifies that over 400 steps. The pod smoke run of
+    2026-11-22 showed the healthy and identity arms differing by up to 0.065 N.m in peak
+    force for that reason. DeterminismType.ALL requests stable contact ordering,
+    canonical constraint rows and order-invariant atomic reductions.
+    """
+    if impl != 'warp':
+        return model, None
+    from mujoco.mjx.third_party.mujoco_warp._src.types import DeterminismType
+    mask = int(DeterminismType.ALL)
+    return model.tree_replace({'opt._impl.deterministic': mask}), mask
 
 
 def scenarios(seed, count):
@@ -213,6 +250,14 @@ def render_report(summary, rows):
             rr = [r for r in rows if r['phase'] == phase and r['condition'] == label]
             lines.append(f"| {phase} | {label} | {len(rr)} | {np.mean([r['fell'] for r in rr]):.3f} | "
                          f"{np.mean([r['postfault_loss'] for r in rr]):.4f} | {np.mean([r['progress_m'] for r in rr]):.3f} |")
+    for phase in ('screen', 'confirm'):
+        block = summary.get('confirmation' if phase == 'confirm' else 'screen') or {}
+        controls = block.get('controls', {})
+        if controls.get('run_to_run_reproducible') is not None:
+            fmt = lambda v: 'undefined' if v is None else f'{v:.3g}'  # noqa: E731
+            verdict = 'reproduced the healthy arm bitwise' if controls['run_to_run_reproducible'] else 'differed from the healthy arm'
+            lines += ['', f"{phase}: the healthy repeat {verdict} (largest metric difference "
+                      f"{fmt(controls['repeat_max_difference'])}); identity largest difference {fmt(controls['identity_max_difference'])}."]
     lines += ['', 'The same initial states, commands, onset times and noise streams are used within each phase. '
               'Confirmation uses new scenario seeds. All screened severities remain in episodes.csv.', '',
               'The loss is mean squared planar local-velocity error, capped at 4 (m/s)^2, over the fixed '
@@ -231,8 +276,13 @@ def main(argv=None):
     parser.add_argument('--profile', choices=('smoke', 'gate'), default='gate')
     parser.add_argument('--impl', choices=('warp', 'jax'), default='warp')
     parser.add_argument('--allow-cpu', action='store_true', help='Local engineering checks only; no scientific gate claim.')
+    parser.add_argument('--deterministic', choices=('auto', 'on', 'off'), default='auto',
+                        help='Bit-exact run-to-run physics and XLA ops. auto: on for every pod run (GPU), off for --allow-cpu.')
+    parser.add_argument('--no-repeat-probe', dest='repeat_probe', action='store_false',
+                        help='Skip the healthy_repeat reproducibility arm (kept by default; it costs one arm per batch).')
     args = parser.parse_args(argv)
     args.out.mkdir(parents=True, exist_ok=True)
+    deterministic = configure_determinism(args.deterministic == 'on' or (args.deterministic == 'auto' and not args.allow_cpu))
     from foresight.adaptive.gate_analysis import analyze_phase, choose_candidate
     plan = {
         'protocol': PROTOCOL, 'profile': args.profile, 'horizon_steps': HORIZON, 'ctrl_dt_s': DT,
@@ -246,6 +296,10 @@ def main(argv=None):
         'oracle': 'Known gain; measured joint position; 50 Hz bounded position-target correction.',
         'hypothesis': 'Some moderate gain loss degrades walking and a bounded known-gain correction recovers at least half the loss.',
         'not_tested': ['online identification', 'lag', 'maximum torque loss', 'vision', 'learned residual', 'hardware'],
+        'controls': {'healthy': 'nominal walker, correction off', 'identity': 'gain 1, correction on; must equal healthy bitwise',
+                     'healthy_repeat': 'healthy executed again with identical inputs; measures run-to-run reproducibility'
+                     if args.repeat_probe else 'not run'},
+        'deterministic_execution_requested': deterministic,
     }
     write_json(args.out / 'plan.json', plan)
     import jax
@@ -258,7 +312,8 @@ def main(argv=None):
     if not args.allow_cpu and not any(d.platform == 'gpu' for d in devices):
         raise RuntimeError('GPU required for the pod experiment. --allow-cpu is reserved for local checks.')
     if args.allow_cpu and args.impl == 'warp':
-        parser.error('--allow-cpu requires --impl jax')
+        print('Warp backend on CPU: this is the pod backend executed slowly (about 1.5 s per control step for '
+              '8 walkers); use it to check the GPU code path, not for timing.', flush=True)
     cfg = default_config()
     cfg.impact.resample_on_autoreset = False
     cfg.impact.miss_fraction = 0.
@@ -266,6 +321,9 @@ def main(argv=None):
     cfg.push_config.enable = False
     cfg.episode_length = HORIZON
     env = AdaptiveJoystick(config=cfg, config_overrides={'impl': args.impl})
+    physics_determinism_mask = None
+    if deterministic:
+        env._mjx_model, physics_determinism_mask = deterministic_model(env.mjx_model, args.impl)
     if not np.isclose(env.dt, DT) or env.mjx_model.nu != 29:
         raise RuntimeError('Unexpected control period or actor action interface.')
     if int(np.sum(env.leg_actuator_mask)) != 12:
@@ -291,6 +349,14 @@ def main(argv=None):
         'devices': [str(d) for d in devices], 'versions': versions,
         'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
         'protocol': PROTOCOL, 'policy_checkpoint': config['checkpoint'],
+        'physics_impl': args.impl,
+        'deterministic_execution': {
+            'requested': deterministic,
+            'xla_flags': os.environ.get('XLA_FLAGS', ''),
+            'mujoco_warp_opt_deterministic': physics_determinism_mask,
+            'model_opt_deterministic': int(env.mjx_model.opt._impl.deterministic) if args.impl == 'warp' else None,
+        },
+        'repeat_probe': args.repeat_probe,
     }
     write_json(args.out / 'preflight.json', preflight)
     reset = jax.jit(jax.vmap(env.reset))
@@ -320,7 +386,7 @@ def main(argv=None):
                 preflight['invalid_reset_phase'] = phase
                 write_json(args.out / 'preflight.json', preflight)
                 raise RuntimeError('Nonfinite reset detected before policy/physics execution; see preflight.json.')
-            for label, gain, oracle in conditions(selected):
+            for label, gain, oracle in conditions(selected, args.repeat_probe):
                 arm_started = time.monotonic()
                 info = dict(initial.info)
                 g = np.where(env.leg_actuator_mask, gain, 1.).astype(np.float32)
