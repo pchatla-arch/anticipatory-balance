@@ -37,12 +37,15 @@ if (( $# > 1 )) || [[ $# == 1 && $1 != --worker ]]; then usage >&2; exit 2; fi
 FORESIGHT_SETUP_ROOT="${FORESIGHT_SETUP_ROOT:-/workspace}"
 FORESIGHT_CODE_REF="${FORESIGHT_CODE_REF:-portfolio/adaptive-execution-gate}"
 ADAPTIVE_PROFILE="${ADAPTIVE_PROFILE:-gate}"
-[[ "$ADAPTIVE_PROFILE" == gate || "$ADAPTIVE_PROFILE" == smoke ]] || { echo 'Invalid ADAPTIVE_PROFILE'; exit 2; }
+[[ "$ADAPTIVE_PROFILE" == gate || "$ADAPTIVE_PROFILE" == smoke || "$ADAPTIVE_PROFILE" == calibrate-identity ]] || { echo 'Invalid ADAPTIVE_PROFILE'; exit 2; }
 [[ ${ADAPTIVE_STARTED_EPOCH:-} =~ ^[0-9]+$ && ${ADAPTIVE_DEADLINE_EPOCH:-} =~ ^[0-9]+$ ]] || {
   echo 'Use start_adaptive_gate.sh to establish the original attempt deadline.'; exit 2;
 }
 ADAPTIVE_DURATION=$((ADAPTIVE_DEADLINE_EPOCH - ADAPTIVE_STARTED_EPOCH))
 (( ADAPTIVE_DURATION >= 900 && ADAPTIVE_DURATION <= 7200 )) || { echo 'Invalid attempt duration'; exit 2; }
+if [[ "$ADAPTIVE_PROFILE" == calibrate-identity ]] && (( ADAPTIVE_DURATION > 2700 )); then
+  echo 'Calibration budget exceeds 45 minutes.'; exit 2
+fi
 FORESIGHT_SKIP_GITHUB_LOGIN="${FORESIGHT_SKIP_GITHUB_LOGIN:-0}"
 [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 || "$FORESIGHT_SKIP_GITHUB_LOGIN" == 1 ]] || { echo 'Invalid FORESIGHT_SKIP_GITHUB_LOGIN'; exit 2; }
 [[ "$FORESIGHT_SETUP_ROOT" == /* ]] || { echo 'FORESIGHT_SETUP_ROOT must be absolute'; exit 2; }

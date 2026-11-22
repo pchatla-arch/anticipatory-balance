@@ -61,7 +61,8 @@ print(json.dumps({k:v for k,v in os.environ.items()
                   if k.startswith(('FORESIGHT_', 'ADAPTIVE_')) or k == 'NO_STOP'}))
 PY
 ''')
-        for args, profile, minutes in (([], 'gate', 120), (['smoke'], 'smoke', 30)):
+        for args, profile, minutes in (([], 'gate', 120), (['smoke'], 'smoke', 30),
+                                      (['calibrate-identity'], 'calibrate-identity', 45)):
             result = self.invoke(args, {'NO_STOP': '1'})
             self.assertEqual(result.returncode, 0, result.stderr)
             data = json.loads(result.stdout.splitlines()[-1])
@@ -78,6 +79,11 @@ PY
             result = self.invoke(env=values)
             self.assertNotEqual(result.returncode, 0)
             self.assertFalse(self.calls.exists())
+
+    def test_calibration_budget_above_ceiling_fails_before_download(self):
+        result = self.invoke(['calibrate-identity'], {'ADAPTIVE_MAX_MINUTES': '46'})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(self.calls.exists())
 
     def test_pod_entry_requires_outer_deadline_before_gpu_work(self):
         result = self.invoke(script='start_adaptive_gate_pod.sh')
@@ -221,7 +227,8 @@ class AdaptiveWorkerTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     worker.validate_outputs(output)
 
-    def run_fixture(self, *, timeout=False, scientific='fail', upload_ok=True, determinism=None):
+    def run_fixture(self, *, timeout=False, scientific='fail', upload_ok=True, determinism=None,
+                    profile='gate', calibration_batches=64):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name)
@@ -231,11 +238,15 @@ class AdaptiveWorkerTests(unittest.TestCase):
             calls.append((command, budget))
             if 'scripts/preflight_session_h.py' in command:
                 Path(command[-1]).write_text('{}\n')
-            if 'scripts/eval_adaptive_gate.py' in command:
+            if ('scripts/eval_adaptive_gate.py' in command
+                    or 'scripts/calibrate_gate_identity.py' in command):
                 output = Path(command[command.index('--out') + 1])
                 if timeout:
                     raise TimeoutError('fixture experiment deadline')
-                (output / 'summary.json').write_text(json.dumps({'scientific_gate_status': scientific}))
+                summary = {'scientific_gate_status': scientific}
+                if profile == 'calibrate-identity':
+                    summary.update(profile='gpu_calibration', batches=calibration_batches, rows=64*calibration_batches)
+                (output / 'summary.json').write_text(json.dumps(summary))
                 (output / 'episodes.csv').write_text('scenario_id,fell\n1,0\n')
                 (output / 'report.md').write_text('Fixture result.\n')
             if 'scripts/publish_experiment_results.py' in command:
@@ -253,7 +264,7 @@ class AdaptiveWorkerTests(unittest.TestCase):
         self.addCleanup(os.chdir, old_cwd)
         now = int(time.time())
         env = {'ADAPTIVE_STARTED_EPOCH': str(now - 1800),
-               'ADAPTIVE_DEADLINE_EPOCH': str(now + 5400),
+               'ADAPTIVE_DEADLINE_EPOCH': str(now + (900 if profile == 'calibrate-identity' else 5400)),
                'FORESIGHT_SETUP_ROOT': str(root)}
         if determinism is not None:
             env['ADAPTIVE_DETERMINISTIC'] = determinism
@@ -267,7 +278,7 @@ class AdaptiveWorkerTests(unittest.TestCase):
             stack.enter_context(mock.patch.object(worker.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, 'a' * 40 + '\n', '')))
             stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
             stack.enter_context(contextlib.redirect_stderr(io.StringIO()))
-            code = worker.main(['--profile', 'gate'])
+            code = worker.main(['--profile', profile])
         os.chdir(old_cwd)
         latest = json.loads((root / 'logs/last_run.json').read_text())
         record = json.loads((Path(latest['run_dir']) / 'run.json').read_text())
@@ -294,6 +305,20 @@ class AdaptiveWorkerTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertEqual(record['status'], 'failed')
         self.assertFalse([entry for entry in calls if 'scripts/eval_adaptive_gate.py' in entry[0]], 'no GPU work on a bad setting')
+
+    def test_calibration_uses_dedicated_entry_and_cannot_return_scientific_pass(self):
+        code, latest, record, calls = self.run_fixture(profile='calibrate-identity', scientific='inconclusive')
+        self.assertEqual(code, 0)
+        self.assertEqual(record['protocol_version'], 'adaptive-identity-calibration-v1')
+        self.assertEqual(latest['publication_status'], 'verified')
+        self.assertTrue(any('--gpu-calibration' in command for command, _ in calls))
+        self.assertFalse(any('scripts/eval_adaptive_gate.py' in command for command, _ in calls))
+        for args in (dict(scientific='pass'), dict(scientific='inconclusive', calibration_batches=63)):
+            code, latest, record, _ = self.run_fixture(profile='calibrate-identity', **args)
+            self.assertEqual(code, 1)
+            self.assertEqual(record['status'], 'failed')
+            self.assertEqual(latest['publication_status'], 'verified')
+            self.assertNotEqual(record.get('scientific_gate_status'), 'pass')
 
     def test_timeout_still_publishes_partial_evidence(self):
         code, latest, record, _ = self.run_fixture(timeout=True)
