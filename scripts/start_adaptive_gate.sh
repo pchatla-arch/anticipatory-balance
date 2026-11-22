@@ -16,7 +16,8 @@ including setup; smoke defaults to 30 minutes. Ten minutes are reserved for
 result publication and stop checks. This is not a guaranteed billing cap:
 failed upload or unavailable RunPod controls leave the pod running.
 
-The launcher verifies GitHub account pchatla-arch before GPU work, runs in tmux
+Before GPU work the launcher verifies Git push access (saved credentials, or a
+GitHub access token entered at a hidden prompt), runs in tmux
 adaptive-gate, automatically uploads compact results, then requests this pod's
 Stop only after its exact upload is verified and its GPU is idle.
 
@@ -27,7 +28,8 @@ Overrides:
   FORESIGHT_REPO=/workspace/adaptive-execution-gate
   FORESIGHT_VENV=/workspace/mujoco_playground/rss2025/.venv
   FORESIGHT_AUTO_STOP=1                    (NO_STOP=1 disables stopping)
-  FORESIGHT_SKIP_GITHUB_LOGIN=1             (trust existing Git credentials)
+  FORESIGHT_GITHUB_TOKEN=...                (optional; else prompted if needed)
+  FORESIGHT_SKIP_GITHUB_LOGIN=1             (skip all GitHub checks)
 
 An existing working venv is checked without upgrades. Fresh setup uses the
 repository's pinned bootstrap. retry-publish does not rerun experiments.
