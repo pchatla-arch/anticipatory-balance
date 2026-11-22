@@ -13,8 +13,9 @@ The gate asks whether a bounded,
 privileged correction can recover a deliberately degraded actuator response.
 
 Default: gate, with a 120-minute attempt budget measured from this launcher,
-including setup; smoke defaults to 30 minutes and calibrate-identity to 45 minutes. Ten minutes are reserved for
-result publication and stop checks. This is not a guaranteed billing cap:
+including setup. Smoke defaults to 30 minutes, identity calibration to 45 and the
+S1b bench to 90. S1b ends setup and evaluation by 80% of the attempt budget,
+leaving at least ten minutes for result publication and stop checks. This is not a guaranteed billing cap:
 failed upload or unavailable RunPod controls leave the pod running.
 
 Before GPU work the launcher verifies Git push access (saved credentials, or a
@@ -74,6 +75,8 @@ if [[ "$ADAPTIVE_PROFILE" == smoke ]]; then
   ADAPTIVE_MAX_MINUTES=${ADAPTIVE_MAX_MINUTES:-30}
 elif [[ "$ADAPTIVE_PROFILE" == calibrate-identity ]]; then
   ADAPTIVE_MAX_MINUTES=${ADAPTIVE_MAX_MINUTES:-45}
+elif [[ "$ADAPTIVE_PROFILE" == bench ]]; then
+  ADAPTIVE_MAX_MINUTES=${ADAPTIVE_MAX_MINUTES:-90}
 else
   ADAPTIVE_MAX_MINUTES=${ADAPTIVE_MAX_MINUTES:-120}
 fi
@@ -81,6 +84,8 @@ fi
 (( 10#$ADAPTIVE_MAX_MINUTES >= 15 && 10#$ADAPTIVE_MAX_MINUTES <= 120 )) || die 'ADAPTIVE_MAX_MINUTES must be an integer from 15 to 120.'
 if [[ "$ADAPTIVE_PROFILE" == calibrate-identity ]]; then
   (( 10#$ADAPTIVE_MAX_MINUTES <= 45 )) || die 'Identity calibration budget must not exceed 45 minutes.'
+elif [[ "$ADAPTIVE_PROFILE" == bench ]]; then
+  (( 10#$ADAPTIVE_MAX_MINUTES <= 90 )) || die 'S1b bench budget must not exceed 90 minutes.'
 fi
 ADAPTIVE_STARTED_EPOCH=$(date +%s)
 ADAPTIVE_DEADLINE_EPOCH=$((ADAPTIVE_STARTED_EPOCH + 10#$ADAPTIVE_MAX_MINUTES * 60))

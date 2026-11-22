@@ -18,8 +18,10 @@ class DevelopmentBenchTest(unittest.TestCase):
         self.assertEqual(args[args.index('--impl') + 1], 'warp')
         self.assertNotIn('--registration', args)
         self.assertNotIn('--allow-cpu', args)
+        for smoke in (False, True):
+            self.assertEqual(s1.dimensions(self.plan, smoke)[1], ['exact', 'declared', 'declared_fast'])
         families, telemetry, methods, episodes, _, steps = s1.dimensions(self.plan, False)
-        self.assertEqual((len(families), len(telemetry), len(methods), episodes, steps), (11, 2, 5, 32, 400))
+        self.assertEqual((len(families), len(telemetry), len(methods), episodes, steps), (11, 3, 5, 32, 400))
 
     def test_incomplete_or_changed_protocol_fails(self):
         plan = {**self.plan, 'split': 'test'}

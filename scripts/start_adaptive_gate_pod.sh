@@ -12,8 +12,8 @@ restores published frozen policies, and runs the adaptive actuator gate experime
 adaptive-gate. No PPO training is run.
 
 The public start_adaptive_gate.sh wrapper establishes the original 120-minute
-attempt deadline (smoke 30 minutes), including setup and a 10-minute cleanup
-reserve. Call this entry through that wrapper. No PPO training is run.
+gate deadline (smoke 30 minutes, calibration 45, S1b bench 90), including setup.
+S1b stops work by 80% of its budget and always leaves at least ten minutes for cleanup. Call this entry through that wrapper. No PPO training is run.
 
 Overrides:
   FORESIGHT_SETUP_ROOT=/workspace
@@ -46,6 +46,14 @@ ADAPTIVE_DURATION=$((ADAPTIVE_DEADLINE_EPOCH - ADAPTIVE_STARTED_EPOCH))
 if [[ "$ADAPTIVE_PROFILE" == calibrate-identity ]] && (( ADAPTIVE_DURATION > 2700 )); then
   echo 'Calibration budget exceeds 45 minutes.'; exit 2
 fi
+ADAPTIVE_WORK_DEADLINE=$((ADAPTIVE_DEADLINE_EPOCH - 600))
+if [[ "$ADAPTIVE_PROFILE" == bench ]]; then
+  (( ADAPTIVE_DURATION <= 5400 )) || { echo 'S1b bench budget exceeds 90 minutes.'; exit 2; }
+  ADAPTIVE_BENCH_CUTOFF=$((ADAPTIVE_STARTED_EPOCH + ADAPTIVE_DURATION * 4 / 5))
+  if (( ADAPTIVE_BENCH_CUTOFF < ADAPTIVE_WORK_DEADLINE )); then
+    ADAPTIVE_WORK_DEADLINE=$ADAPTIVE_BENCH_CUTOFF
+  fi
+fi
 FORESIGHT_SKIP_GITHUB_LOGIN="${FORESIGHT_SKIP_GITHUB_LOGIN:-0}"
 [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 || "$FORESIGHT_SKIP_GITHUB_LOGIN" == 1 ]] || { echo 'Invalid FORESIGHT_SKIP_GITHUB_LOGIN'; exit 2; }
 [[ "$FORESIGHT_SETUP_ROOT" == /* ]] || { echo 'FORESIGHT_SETUP_ROOT must be absolute'; exit 2; }
@@ -64,7 +72,7 @@ bounded() {
   shift
   local timeout_options=()
   if [[ ${1:-} == --interactive ]]; then timeout_options=(--foreground); shift; fi
-  remaining=$((ADAPTIVE_DEADLINE_EPOCH - $(date +%s) - 600))
+  remaining=$((ADAPTIVE_WORK_DEADLINE - $(date +%s)))
   (( remaining > 0 )) || die 'The attempt budget is exhausted. No further setup or experiment will start; check RunPod.'
   (( cap <= remaining )) || cap=$remaining
   timeout "${timeout_options[@]}" --signal=TERM --kill-after=15s "${cap}s" "$@"
@@ -124,13 +132,18 @@ adopt_gh_login() {
 # Token from FORESIGHT_GITHUB_TOKEN, else a hidden prompt. GH_TOKEN/GITHUB_TOKEN are
 # deliberately ignored: pods often carry unrelated values in them.
 install_access_token() {
-  local token="${FORESIGHT_GITHUB_TOKEN:-}"
+  local token="${FORESIGHT_GITHUB_TOKEN:-}" prompt_seconds=600
   if [[ -z "$token" ]]; then
     [[ -t 0 ]] || die 'Git cannot push to pchatla-arch/anticipatory-balance and no terminal is available for a token. Rerun in a terminal, or set FORESIGHT_GITHUB_TOKEN. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
     echo
     echo 'GitHub access token needed for pchatla-arch/anticipatory-balance (Contents: read and write).'
     echo 'Paste it here on the pod (input is hidden), then press Enter. Never paste it into chat.'
-    IFS= read -r -s -t 600 -p 'Token: ' token || token=''
+    if [[ "$ADAPTIVE_PROFILE" == bench ]]; then
+      local remaining=$((ADAPTIVE_WORK_DEADLINE - $(date +%s)))
+      (( remaining > 0 )) || die 'S1b work cutoff reached before Git authentication.'
+      (( remaining >= prompt_seconds )) || prompt_seconds=$remaining
+    fi
+    IFS= read -r -s -t "$prompt_seconds" -p 'Token: ' token || token=''
     echo
   fi
   token="${token//[[:space:]]/}"
@@ -265,7 +278,7 @@ if [[ "$ADAPTIVE_PROFILE" == bench ]]; then
   [[ "$FORESIGHT_CODE_REF" =~ ^[0-9a-f]{40}$ ]] || die 'Use an immutable S1 source commit.'
   [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]] || die 'S1 requires verified Git push access.'
   [[ "$FORESIGHT_AUTO_STOP" == 1 && "${NO_STOP:-0}" == 0 ]] || die 'S1 requires the verified publication and stop finalizer.'
-  python3 "$FORESIGHT_REPO/scripts/s1_dev_bench.py" check
+  bounded 90 python3 "$FORESIGHT_REPO/scripts/s1_dev_bench.py" check
 fi
 mkdir -p "$FORESIGHT_REPO/logs"
 
@@ -310,7 +323,7 @@ echo 'Setup and the adaptive actuator gate are running in tmux: adaptive-gate'
 echo "Isolated checkout: $FORESIGHT_REPO"
 echo "Live log: $FORESIGHT_REPO/logs/fresh_pod.log"
 echo 'Detach without stopping: Ctrl-B, then D.'
-echo "The original attempt deadline includes setup; the worker reserves 10 minutes for publication/stop."
+echo "The original attempt deadline includes setup; the worker reserves at least 10 minutes for publication/stop."
 echo "Automatic stop requested: $FORESIGHT_AUTO_STOP (NO_STOP=${NO_STOP:-0}); requires verified upload and RunPod controls."
 echo 'If upload or stop controls fail, the pod stays running; stop it manually in the RunPod dashboard.'
 echo 'Next: tmux attach -t adaptive-gate'

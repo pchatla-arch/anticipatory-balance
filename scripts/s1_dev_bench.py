@@ -31,7 +31,8 @@ def read(path):
 def frozen_inputs(plan):
     if plan['split'] != 'dev' or plan['implementation'] != 'warp':
         raise ValueError('The S1 pod profile allows only development instances with Warp.')
-    if plan['attempts'] != 1 or plan['max_wall_minutes'] != 120 or plan['cleanup_reserve_minutes'] != 10:
+    if (plan['attempts'] != 1 or plan['max_wall_minutes'] != 90
+            or plan['work_cutoff_percent'] != 80 or plan['cleanup_reserve_minutes'] != 10):
         raise ValueError('The S1 attempt budget has changed.')
     if git('show', f'HEAD:{MANIFEST}') != (ROOT / MANIFEST).read_bytes():
         raise ValueError('Commit the S1 manifest before launching.')
@@ -60,7 +61,7 @@ def frozen_inputs(plan):
 
 def dimensions(plan, smoke):
     if smoke:
-        return ['healthy'], ['declared'], ['heuristic_gate', 'candidate'], 2, 2, 2
+        return ['healthy'], plan['telemetry'], ['heuristic_gate', 'candidate'], 2, 2, 2
     return (plan['families'], plan['telemetry'], plan['methods'], plan['episodes_per_cell'],
             plan['batch'], plan['steps'])
 
