@@ -1,6 +1,6 @@
 {
   "rls": {
-    "forgetting": 0.95
+    "forgetting": 0.9
   },
   "heuristic": {
     "dead_band": 0.03,

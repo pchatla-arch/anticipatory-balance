@@ -5,11 +5,11 @@
       "invalid_episodes": 0,
       "fall_rate": 0.0,
       "pre_fault_failures": 0,
-      "mean_postfault_loss": 0.030366047052666545,
-      "mean_progress_m": 0.7837755642831326,
-      "mean_harmful_offset_rad": 0.005356466630473733,
-      "mean_applied_offset_rad": 0.09552595376968384,
-      "mean_gain_abs_error": 0.07764420751482248,
+      "mean_postfault_loss": 0.02979296282865107,
+      "mean_progress_m": 0.7698007747530937,
+      "mean_harmful_offset_rad": 0.005748924653744325,
+      "mean_applied_offset_rad": 0.09601952155431112,
+      "mean_gain_abs_error": 0.07754377648234367,
       "withdrawal_steps_median": null,
       "never_withdrew": 0,
       "control_bound_violations": 0,
@@ -20,12 +20,12 @@
       "invalid_episodes": 0,
       "fall_rate": 0.0,
       "pre_fault_failures": 0,
-      "mean_postfault_loss": 0.02627012529410422,
-      "mean_progress_m": 0.6805070377886295,
-      "mean_harmful_offset_rad": 0.014010353130288422,
-      "mean_applied_offset_rad": 0.06239924987157186,
-      "mean_gain_abs_error": 0.08969848975539207,
-      "withdrawal_steps_median": 31.5,
+      "mean_postfault_loss": 0.025602229638025165,
+      "mean_progress_m": 0.6707869283854961,
+      "mean_harmful_offset_rad": 0.01392889127600938,
+      "mean_applied_offset_rad": 0.062177628676096594,
+      "mean_gain_abs_error": 0.0899806683883071,
+      "withdrawal_steps_median": 28.5,
       "never_withdrew": 0,
       "control_bound_violations": 0,
       "lost_packets_mean": 6.0
@@ -35,10 +35,10 @@
       "invalid_episodes": 0,
       "fall_rate": 0.0,
       "pre_fault_failures": 0,
-      "mean_postfault_loss": 0.02297718496993184,
-      "mean_progress_m": 0.7419665269553661,
-      "mean_harmful_offset_rad": 0.0060349287814460695,
-      "mean_applied_offset_rad": 0.006034928758939107,
+      "mean_postfault_loss": 0.021781918592751026,
+      "mean_progress_m": 0.7584560476243496,
+      "mean_harmful_offset_rad": 0.0061463917954824865,
+      "mean_applied_offset_rad": 0.006146391828854878,
       "mean_gain_abs_error": 0.0,
       "withdrawal_steps_median": null,
       "never_withdrew": 0,
@@ -50,10 +50,10 @@
       "invalid_episodes": 0,
       "fall_rate": 0.0,
       "pre_fault_failures": 0,
-      "mean_postfault_loss": 0.0332487216219306,
-      "mean_progress_m": 0.8024914190173149,
-      "mean_harmful_offset_rad": 0.08407203387469053,
-      "mean_applied_offset_rad": 0.08407203435897827,
+      "mean_postfault_loss": 0.03379305941052735,
+      "mean_progress_m": 0.7975859940052032,
+      "mean_harmful_offset_rad": 0.08346136473119259,
+      "mean_applied_offset_rad": 0.08346136411031088,
       "mean_gain_abs_error": 0.0,
       "withdrawal_steps_median": null,
       "never_withdrew": 0,
@@ -81,7 +81,7 @@
       "brax": "0.14.2"
     },
     "checkpoint": "/home/claude/anticipatory-balance/checkpoints/nominal_s1/000202342400",
-    "source_commit": "1144514a66a22d240413a826a11f8259c248dcae",
+    "source_commit": "8a8d931657ed3b14035c10fa0ab4069793b85659",
     "rls": {
       "forgetting": 0.9,
       "initial_cov": 1000.0,
@@ -109,7 +109,9 @@
         "latency_max": 3,
         "dropout": 0.02,
         "bound_position_rad": 0.006,
-        "bound_torque_nm": 1.5
+        "bound_torque_nm": 1.5,
+        "velocity_error_rad_s": 0.5,
+        "bound_velocity_rad_s": 0.5
       }
     },
     "families": {
@@ -133,7 +135,9 @@
           "latency_max": 0,
           "dropout": 0.0,
           "bound_position_rad": 1e-05,
-          "bound_torque_nm": 0.001
+          "bound_torque_nm": 0.001,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
         },
         "description": ""
       },
@@ -160,7 +164,9 @@
           "latency_max": 0,
           "dropout": 0.0,
           "bound_position_rad": 1e-05,
-          "bound_torque_nm": 0.001
+          "bound_torque_nm": 0.001,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
         },
         "description": "unannounced return to healthy gain"
       },
@@ -184,7 +190,9 @@
           "latency_max": 0,
           "dropout": 0.0,
           "bound_position_rad": 1e-05,
-          "bound_torque_nm": 0.001
+          "bound_torque_nm": 0.001,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
         },
         "description": "no plant change; measures false adaptation at rest"
       },
@@ -208,12 +216,14 @@
           "latency_max": 0,
           "dropout": 0.0,
           "bound_position_rad": 0.0,
-          "bound_torque_nm": 0.0
+          "bound_torque_nm": 0.0,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
         },
         "description": "healthy motor, effort sensor reads 80%: identifiability confound"
       }
     },
     "candidate_available": false
   },
-  "elapsed_seconds": 292.5
+  "elapsed_seconds": 217.1
 }

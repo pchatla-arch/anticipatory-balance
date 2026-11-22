@@ -1,13 +1,13 @@
 # Adaptive execution bench: dev split
 
-Source 1144514a66a22d240413a826a11f8259c248dcae, physics jax, 300 control steps, schedule walk_turn_stop_resume, 8 episodes per cell.
+Source 8a8d931657ed3b14035c10fa0ab4069793b85659, physics jax, 300 control steps, schedule walk_turn_stop_resume, 8 episodes per cell.
 
 | Family | Telemetry | Method | n | Falls | Post-fault loss | Harmful offset (rad) | Gain error | Withdrawal (steps) |
 |---|---|---|---:|---:|---:|---:|---:|---:|
-| gain_070 | declared | heuristic_gate | 8 | 0.000 | 0.0337 | 0.0019 | 0.090 | — |
-| gain_070_return | declared | heuristic_gate | 8 | 0.000 | 0.0276 | 0.0266 | 0.116 | — |
-| healthy | declared | heuristic_gate | 8 | 0.000 | 0.0231 | 0.0010 | 0.000 | — |
-| sensor_scale_080 | declared | heuristic_gate | 8 | 0.000 | 0.0336 | 0.0833 | 0.000 | — |
+| gain_070 | declared | heuristic_gate | 8 | 0.000 | 0.0343 | 0.0020 | 0.089 | — |
+| gain_070_return | declared | heuristic_gate | 8 | 0.000 | 0.0267 | 0.0269 | 0.115 | — |
+| healthy | declared | heuristic_gate | 8 | 0.000 | 0.0218 | 0.0011 | 0.000 | — |
+| sensor_scale_080 | declared | heuristic_gate | 8 | 0.000 | 0.0332 | 0.0843 | 0.000 | — |
 
 Paired differences are method minus `heuristic_gate` on identical scenarios and sensor draws (95% bootstrap intervals).
 

@@ -15,11 +15,12 @@
           "min_excitation_rad": 0.01
         }
       },
-      "objective": 0.05175775804867347,
-      "loss": 0.030684998142533004,
-      "harm": 0.042145519812280936,
+      "objective": 0.0518674595374614,
+      "loss": 0.03053082898259163,
+      "harm": 0.04267326110973954,
       "falls": 0.0,
-      "seconds": 257.5
+      "seconds": 0.0,
+      "resumed": true
     },
     {
       "tag": "s0_rls_forgetting_0.9",
@@ -35,11 +36,12 @@
           "min_excitation_rad": 0.01
         }
       },
-      "objective": 0.05084482695286473,
-      "loss": 0.02831808617338538,
-      "harm": 0.045053481558958684,
+      "objective": 0.05009953521812956,
+      "loss": 0.027697596233338118,
+      "harm": 0.04480387796958288,
       "falls": 0.0,
-      "seconds": 294.5
+      "seconds": 0.0,
+      "resumed": true
     },
     {
       "tag": "s0_rls_forgetting_0.95",
@@ -55,11 +57,12 @@
           "min_excitation_rad": 0.01
         }
       },
-      "objective": 0.050056172308201585,
-      "loss": 0.02848796104080975,
-      "harm": 0.043136422534783676,
+      "objective": 0.05050885826194038,
+      "loss": 0.028938365750946105,
+      "harm": 0.04314098502198856,
       "falls": 0.0,
-      "seconds": 333.3
+      "seconds": 0.0,
+      "resumed": true
     },
     {
       "tag": "s0_rls_forgetting_0.98",
@@ -75,18 +78,19 @@
           "min_excitation_rad": 0.01
         }
       },
-      "objective": 0.05175775804867347,
-      "loss": 0.030684998142533004,
-      "harm": 0.042145519812280936,
+      "objective": 0.0518674595374614,
+      "loss": 0.03053082898259163,
+      "harm": 0.04267326110973954,
       "falls": 0.0,
-      "seconds": 270.3
+      "seconds": 0.0,
+      "resumed": true
     }
   ],
   "best": {
-    "tag": "s0_rls_forgetting_0.95",
+    "tag": "s0_rls_forgetting_0.9",
     "config": {
       "rls": {
-        "forgetting": 0.95
+        "forgetting": 0.9
       },
       "heuristic": {
         "dead_band": 0.05,
@@ -96,10 +100,11 @@
         "min_excitation_rad": 0.01
       }
     },
-    "objective": 0.050056172308201585,
-    "loss": 0.02848796104080975,
-    "harm": 0.043136422534783676,
+    "objective": 0.05009953521812956,
+    "loss": 0.027697596233338118,
+    "harm": 0.04480387796958288,
     "falls": 0.0,
-    "seconds": 333.3
+    "seconds": 0.0,
+    "resumed": true
   }
 }

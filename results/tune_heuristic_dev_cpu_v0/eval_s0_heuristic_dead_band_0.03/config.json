@@ -16,9 +16,9 @@
     "brax": "0.14.2"
   },
   "checkpoint": "/home/claude/anticipatory-balance/checkpoints/nominal_s1/000202342400",
-  "source_commit": "1f9ab5c07895640c5025502a05c02d2ea753eb04",
+  "source_commit": "b6862641938fe5cd5a7fa8af6de477ad50e732c5",
   "rls": {
-    "forgetting": 0.95,
+    "forgetting": 0.9,
     "initial_cov": 1000.0,
     "prior_gain": 1.0,
     "gain_min": 0.2,
@@ -44,7 +44,9 @@
       "latency_max": 3,
       "dropout": 0.02,
       "bound_position_rad": 0.006,
-      "bound_torque_nm": 1.5
+      "bound_torque_nm": 1.5,
+      "velocity_error_rad_s": 0.5,
+      "bound_velocity_rad_s": 0.5
     }
   },
   "families": {
@@ -68,7 +70,9 @@
         "latency_max": 0,
         "dropout": 0.0,
         "bound_position_rad": 1e-05,
-        "bound_torque_nm": 0.001
+        "bound_torque_nm": 0.001,
+        "velocity_error_rad_s": 0.0,
+        "bound_velocity_rad_s": 0.0
       },
       "description": ""
     },
@@ -95,7 +99,9 @@
         "latency_max": 0,
         "dropout": 0.0,
         "bound_position_rad": 1e-05,
-        "bound_torque_nm": 0.001
+        "bound_torque_nm": 0.001,
+        "velocity_error_rad_s": 0.0,
+        "bound_velocity_rad_s": 0.0
       },
       "description": "unannounced return to healthy gain"
     },
@@ -119,7 +125,9 @@
         "latency_max": 0,
         "dropout": 0.0,
         "bound_position_rad": 1e-05,
-        "bound_torque_nm": 0.001
+        "bound_torque_nm": 0.001,
+        "velocity_error_rad_s": 0.0,
+        "bound_velocity_rad_s": 0.0
       },
       "description": "no plant change; measures false adaptation at rest"
     },
@@ -143,7 +151,9 @@
         "latency_max": 0,
         "dropout": 0.0,
         "bound_position_rad": 0.0,
-        "bound_torque_nm": 0.0
+        "bound_torque_nm": 0.0,
+        "velocity_error_rad_s": 0.0,
+        "bound_velocity_rad_s": 0.0
       },
       "description": "healthy motor, effort sensor reads 80%: identifiability confound"
     }
