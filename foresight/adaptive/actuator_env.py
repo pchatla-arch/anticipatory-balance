@@ -233,7 +233,11 @@ class AdaptiveJoystick(ImpactJoystick):
         active = ((info["ep_step"] >= info["adaptive_onset_step"])
                   & (info["ep_step"] < return_step))
         gain = jp.where(active, info["adaptive_gain"], 1.0)
-        enabled = (active & info["adaptive_oracle"]) | external
+        # The oracle is enabled whenever requested: with a healthy plant its desired offset is
+        # exactly zero, so before onset nothing changes, and after an unannounced return to
+        # healthy gain its withdrawal obeys the same slew limit as every other method instead
+        # of vanishing in one step.
+        enabled = info["adaptive_oracle"] | external
         nominal_target = self._default_pose + action * self._config.action_scale
         reference = jp.where(
             self._adaptive_ctrl_limited,
