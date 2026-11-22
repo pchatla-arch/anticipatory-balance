@@ -116,6 +116,7 @@ class StepContractTests(unittest.TestCase):
         self.env._sim_dt = .002
         self.env._default_pose = jp.zeros(1)
         self.env._adaptive_joint_qpos = jp.array([0])
+        self.env._adaptive_joint_dof = jp.array([0])
         self.env._adaptive_ctrl_range = jp.array([[-1., 1.]])
         self.env._adaptive_ctrl_limited = jp.array([False])
         self.env.max_correction_rad = .2
