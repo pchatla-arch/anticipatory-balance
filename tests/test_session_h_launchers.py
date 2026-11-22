@@ -4,6 +4,7 @@ from __future__ import annotations
 import contextlib
 import importlib.util
 import io
+import fcntl
 import json
 import os
 from pathlib import Path
@@ -11,6 +12,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 
@@ -192,7 +194,17 @@ print(json.dumps({'args':sys.argv[1:], 'no_stop':os.environ.get('NO_STOP'),
         # All external programs that could contact a service or start GPU work
         # are mocked; local flock/tee and shell control flow remain real.
         mock_tools = {
-            'git': '#!/usr/bin/env bash\nexit 0\n',
+            # A dry-run push succeeds only when a test grants existing Git credentials.
+            'git': '#!/usr/bin/env bash\n'
+                   'if [[ " $* " == *" push "* && " $* " == *" --dry-run "* ]]; then\n'
+                   '  printf \'%s\\n\' "$*" >> "${MOCK_GIT_CALLS:-/dev/null}"\n'
+                   '  [[ "${MOCK_GIT_PUSH:-no}" == ok ]] && exit 0\n'
+                   '  [[ "${MOCK_GIT_PUSH:-no}" == token ]] && grep -q \':good_token_0123456789abcdef@\' '
+                   '"$FORESIGHT_SETUP_ROOT/.foresight-git-credentials" 2>/dev/null && exit 0\n'
+                   '  [[ "${MOCK_GIT_PUSH:-no}" == gh && -n "${MOCK_GH_TOKEN:-}" ]] && grep -q "auth token" '
+                   '"$MOCK_GH_CALLS" 2>/dev/null && exit 0\n'
+                   '  exit 128\n'
+                   'fi\nexit 0\n',
             'nvidia-smi': '''#!/usr/bin/env bash
 case "$*" in
   *query-compute-apps*) ;;
@@ -222,6 +234,7 @@ if [[ "$1" == api ]]; then
     *) exit 91 ;;
   esac
 fi
+if [[ "$1 $2" == 'auth token' ]]; then printf '%s' "${MOCK_GH_TOKEN:-}"; [[ -n "${MOCK_GH_TOKEN:-}" ]]; exit; fi
 if [[ "$1 $2" == 'auth switch' ]]; then
   if [[ "$MOCK_SWITCH_EXIT" == 0 ]]; then touch "$MOCK_SWITCHED"; fi
   exit "$MOCK_SWITCH_EXIT"
@@ -254,6 +267,19 @@ exit 2
     def reset_auth_calls(self):
         for path in (self.started, self.gh_calls, self.switched):
             path.unlink(missing_ok=True)
+        # The worker's `exec > >(tee ...)` child inherits the setup lock descriptor, so the
+        # lock can stay held for a moment after a worker exits. Wait for it before the next
+        # invocation instead of letting flock -n fail spuriously.
+        lock = self.root / '.foresight-setup.lock'
+        if lock.exists():
+            deadline = time.time() + 5
+            while time.time() < deadline:
+                with open(lock, 'w') as handle:
+                    try:
+                        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                        break
+                    except BlockingIOError:
+                        time.sleep(0.02)
 
     def test_push_permission_is_required_before_worker_start_unless_explicitly_skipped(self):
         self.make_auth_fixture()

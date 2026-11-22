@@ -1,0 +1,108 @@
+{
+  "devices": [
+    "cpu:0"
+  ],
+  "steps": 160,
+  "envs": 8,
+  "seed": 73011,
+  "modes": {
+    "default": {
+      "mujoco_warp_opt_deterministic": 0,
+      "all_finite": true,
+      "identity_vs_healthy": {
+        "bitwise_equal": true,
+        "max_abs_difference": {
+          "term_step": 0.0,
+          "first_nonfinite_step": 0.0,
+          "pre_fault_failed": 0.0,
+          "loss_sum": 0.0,
+          "progress": 0.0,
+          "bound_sum": 0.0,
+          "control_clip_sum": 0.0,
+          "exposed": 0.0,
+          "max_correction": 0.0,
+          "max_slew": 0.0,
+          "max_force": 0.0
+        }
+      },
+      "repeat_vs_healthy": {
+        "bitwise_equal": true,
+        "max_abs_difference": {
+          "term_step": 0.0,
+          "first_nonfinite_step": 0.0,
+          "pre_fault_failed": 0.0,
+          "loss_sum": 0.0,
+          "progress": 0.0,
+          "bound_sum": 0.0,
+          "control_clip_sum": 0.0,
+          "exposed": 0.0,
+          "max_correction": 0.0,
+          "max_slew": 0.0,
+          "max_force": 0.0
+        }
+      },
+      "healthy_summary": {
+        "falls": 0,
+        "loss_sum_mean": 0.7952792644500732,
+        "progress_mean": 0.6179544925689697
+      }
+    },
+    "deterministic": {
+      "mujoco_warp_opt_deterministic": 7,
+      "all_finite": true,
+      "identity_vs_healthy": {
+        "bitwise_equal": true,
+        "max_abs_difference": {
+          "term_step": 0.0,
+          "first_nonfinite_step": 0.0,
+          "pre_fault_failed": 0.0,
+          "loss_sum": 0.0,
+          "progress": 0.0,
+          "bound_sum": 0.0,
+          "control_clip_sum": 0.0,
+          "exposed": 0.0,
+          "max_correction": 0.0,
+          "max_slew": 0.0,
+          "max_force": 0.0
+        }
+      },
+      "repeat_vs_healthy": {
+        "bitwise_equal": true,
+        "max_abs_difference": {
+          "term_step": 0.0,
+          "first_nonfinite_step": 0.0,
+          "pre_fault_failed": 0.0,
+          "loss_sum": 0.0,
+          "progress": 0.0,
+          "bound_sum": 0.0,
+          "control_clip_sum": 0.0,
+          "exposed": 0.0,
+          "max_correction": 0.0,
+          "max_slew": 0.0,
+          "max_force": 0.0
+        }
+      },
+      "healthy_summary": {
+        "falls": 0,
+        "loss_sum_mean": 0.7952792644500732,
+        "progress_mean": 0.6179544925689697
+      }
+    }
+  },
+  "deterministic_vs_default_healthy": {
+    "bitwise_equal": true,
+    "max_abs_difference": {
+      "term_step": 0.0,
+      "first_nonfinite_step": 0.0,
+      "pre_fault_failed": 0.0,
+      "loss_sum": 0.0,
+      "progress": 0.0,
+      "bound_sum": 0.0,
+      "control_clip_sum": 0.0,
+      "exposed": 0.0,
+      "max_correction": 0.0,
+      "max_slew": 0.0,
+      "max_force": 0.0
+    }
+  }
+}

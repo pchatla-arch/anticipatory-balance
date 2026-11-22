@@ -170,7 +170,13 @@ def main(argv=None):
             require_idle_gpu()
             record['stage'] = 'evaluation'
             atomic_json(output / 'run.json', record)
-            run_child([python, '-u', 'scripts/eval_adaptive_gate.py', '--out', str(output), '--profile', args.profile],
+            # ADAPTIVE_DETERMINISTIC=off is the escape hatch if the deterministic Warp kernels fail
+            # on a GPU; the evaluator records the requested mode in preflight.json either way.
+            determinism = os.environ.get('ADAPTIVE_DETERMINISTIC', 'auto')
+            if determinism not in ('auto', 'on', 'off'):
+                raise ValueError(f'ADAPTIVE_DETERMINISTIC must be auto, on or off, not {determinism!r}')
+            run_child([python, '-u', 'scripts/eval_adaptive_gate.py', '--out', str(output), '--profile', args.profile,
+                       '--deterministic', determinism],
                       env, log, remaining_timeout(deadline, 120 * 60, CLEANUP_RESERVE))
             record['scientific_gate_status'] = validate_outputs(output)
             record['status'] = 'completed'

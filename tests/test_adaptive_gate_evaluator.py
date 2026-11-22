@@ -149,8 +149,40 @@ class AdaptiveEvaluatorTests(unittest.TestCase):
         self.assertTrue(np.all((screen['onset'] >= 75) & (screen['onset'] <= 125)))
         arms = evaluator.conditions('gain_070')
         self.assertEqual([arm[0] for arm in arms],
-                         ['healthy', 'identity', 'gain_070_plain', 'gain_070_oracle'])
+                         ['healthy', 'identity', 'healthy_repeat', 'gain_070_plain', 'gain_070_oracle'])
         self.assertEqual(arms[0][1], arms[1][1])
+        # The probe is the healthy arm again: same gain, correction off.
+        self.assertEqual(arms[2][1:], arms[0][1:])
+        self.assertEqual([arm[0] for arm in evaluator.conditions('gain_070', repeat_probe=False)],
+                         ['healthy', 'identity', 'gain_070_plain', 'gain_070_oracle'])
+
+    def test_deterministic_execution_flags_and_model_option(self):
+        import os
+        saved = os.environ.get('XLA_FLAGS')
+        try:
+            os.environ['XLA_FLAGS'] = '--xla_gpu_autotune_level=0'
+            self.assertFalse(evaluator.configure_determinism(False))
+            self.assertEqual(os.environ['XLA_FLAGS'], '--xla_gpu_autotune_level=0')
+            self.assertTrue(evaluator.configure_determinism(True))
+            self.assertEqual(os.environ['XLA_FLAGS'].split(),
+                             ['--xla_gpu_autotune_level=0', '--xla_gpu_deterministic_ops=true'])
+            evaluator.configure_determinism(True)
+            self.assertEqual(os.environ['XLA_FLAGS'].count('deterministic_ops'), 1)
+        finally:
+            if saved is None:
+                os.environ.pop('XLA_FLAGS', None)
+            else:
+                os.environ['XLA_FLAGS'] = saved
+        sentinel = object()
+        self.assertEqual(evaluator.deterministic_model(sentinel, 'jax'), (sentinel, None))
+
+        class FakeModel:
+            def tree_replace(self, updates):
+                self.updates = updates
+                return self
+        model, mask = evaluator.deterministic_model(FakeModel(), 'warp')
+        self.assertEqual(mask, 7, 'CONTACTS | CONSTRAINT | ATOMICS')
+        self.assertEqual(model.updates, {'opt._impl.deterministic': 7})
 
 
 if __name__ == '__main__':

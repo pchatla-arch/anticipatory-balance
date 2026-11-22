@@ -33,9 +33,12 @@ def _boolean(value):
     raise ValueError(f"Invalid boolean: {value!r}")
 
 
+CONTROLS = ("healthy", "identity", "healthy_repeat")
+
+
 def _group(rows, phase):
     groups = {}
-    allowed = {"healthy", "identity"} | {
+    allowed = set(CONTROLS) | {
         f"{key}_{arm}" for key in CANDIDATE_ORDER for arm in ("plain", "oracle")}
     for source in rows:
         missing = set(REQUIRED) - source.keys()
@@ -54,7 +57,7 @@ def _group(rows, phase):
             if not np.isfinite(value) or value != int(value):
                 raise ValueError(f"{key} must be a finite integer")
             row[key] = int(value)
-        expected_gain = 1.0 if name in ("healthy", "identity") else int(name[5:8]) / 100
+        expected_gain = 1.0 if name in CONTROLS else int(name[5:8]) / 100
         if (not np.isclose(row["gain"], expected_gain, rtol=0, atol=1e-7)
                 or row["oracle"] != (name == "identity" or name.endswith("_oracle"))
                 or not np.isfinite(row["speed_cmd_mps"]) or row["onset_step"] < 0
@@ -134,11 +137,21 @@ def analyze_phase(rows, confirmation=False):
     torque_checked = all("torque_limit_excess_nm" in r for arm in groups.values() for r in arm)
     torque_ok = not any(arm["torque_limit_violations"] for arm in summaries.values())
     identity_keys = (*METRICS, *(key for key in IDENTITY_EXTRA if all(key in r for arm in groups.values() for r in arm)))
-    differences = [abs(a[k] - b[k]) for a, b in zip(groups["healthy"], groups["identity"]) for k in identity_keys]
-    identity_difference = max(differences) if np.isfinite(differences).all() else None
-    identity_ok = (identity_difference is not None and identity_difference <= THRESHOLDS["identity_tolerance"]
-                   and all(a[k] == b[k] for a, b in zip(groups["healthy"], groups["identity"])
-                           for k in ("fell", "nonfinite", "termination_step")))
+
+    def control_difference(name):
+        """Largest absolute metric difference between the healthy arm and `name`, and exact equality."""
+        differences = [abs(a[k] - b[k]) for a, b in zip(groups["healthy"], groups[name]) for k in identity_keys]
+        largest = max(differences) if np.isfinite(differences).all() else None
+        exact = (largest is not None and largest <= THRESHOLDS["identity_tolerance"]
+                 and all(a[k] == b[k] for a, b in zip(groups["healthy"], groups[name])
+                         for k in ("fell", "nonfinite", "termination_step")))
+        return largest, exact
+
+    identity_difference, identity_ok = control_difference("identity")
+    # Optional probe: the healthy arm executed a second time with identical inputs.
+    # It separates a backend that is not run-to-run reproducible (GPU floating-point
+    # atomics) from a code path that actually differs under the identity adapter.
+    repeat_difference, repeat_ok = control_difference("healthy_repeat") if "healthy_repeat" in groups else (None, None)
     healthy_ok = healthy["fall_rate"] <= 1 - THRESHOLDS["healthy_survival_min"] + 1e-12
     prefault_ok = all(a["pre_fault_failed"] == b["pre_fault_failed"] for arm in groups.values()
                       for a, b in zip(groups["healthy"], arm))
@@ -147,7 +160,9 @@ def analyze_phase(rows, confirmation=False):
                   controls=dict(healthy=healthy_ok, identity=bool(identity_ok), prefault_pairing=prefault_ok,
                                 bounds=bounds_ok, torque_limits_checked=torque_checked,
                                 torque_limits=torque_ok if torque_checked else None,
-                                identity_max_difference=identity_difference), candidates={}, reasons=[])
+                                identity_max_difference=identity_difference,
+                                run_to_run_reproducible=repeat_ok,
+                                repeat_max_difference=repeat_difference), candidates={}, reasons=[])
     for key in candidates:
         plain, oracle = summaries[f"{key}_plain"], summaries[f"{key}_oracle"]
         valid = all(s["mean_loss"] is not None and not s["invalid_episodes"] for s in (healthy, plain, oracle))
@@ -177,7 +192,17 @@ def analyze_phase(rows, confirmation=False):
     if not healthy_ok:
         result["reasons"].append("Healthy walker survival is below 90%; fault test is inconclusive.")
     if not identity_ok:
-        result["reasons"].append("Healthy-model adapter did not reproduce the healthy control.")
+        if repeat_ok is False:
+            result["reasons"].append(
+                "Healthy-model adapter did not reproduce the healthy control, and neither did a repeat of the "
+                f"healthy arm (largest difference {repeat_difference:.3g}): the backend is not run-to-run "
+                "reproducible, so the bitwise identity control cannot be evaluated on this run.")
+        elif repeat_ok:
+            result["reasons"].append(
+                "Healthy-model adapter did not reproduce the healthy control although the backend is run-to-run "
+                "reproducible: the identity adapter changes the executed code path.")
+        else:
+            result["reasons"].append("Healthy-model adapter did not reproduce the healthy control.")
     if not prefault_ok:
         result["reasons"].append("Arms disagree on failures before fault onset; attribution is invalid.")
     result["selected_candidate"] = choose_candidate(result)
