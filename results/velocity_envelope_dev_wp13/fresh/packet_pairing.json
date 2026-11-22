@@ -1,0 +1,17 @@
+{
+  "common_source_packets": 585,
+  "additional_horizon_tail_released_immediately": [
+    [
+      0,
+      298
+    ],
+    [
+      0,
+      299
+    ],
+    [
+      1,
+      299
+    ]
+  ]
+}

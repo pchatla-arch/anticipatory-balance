@@ -1,0 +1,618 @@
+{
+  "cells": {
+    "gain_070|declared|candidate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.0500332354567945,
+      "mean_progress_m": 1.3132847249507904,
+      "mean_applied_offset_rad": 0.010958443780740103,
+      "mean_gain_abs_error": 0.08247221074998379,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 4.875,
+      "mean_original_harness_healthy_offset_rad": 6.045337954674324e-07,
+      "mean_actual_healthy_offset_rad": 6.045337836697417e-07
+    },
+    "gain_070|declared|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.031014664564281702,
+      "mean_progress_m": 0.7849639356136322,
+      "mean_applied_offset_rad": 0.07761662244796752,
+      "mean_gain_abs_error": 0.08306298311799765,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 4.875,
+      "mean_original_harness_healthy_offset_rad": 0.00208373046714172,
+      "mean_actual_healthy_offset_rad": 0.0020837305088407788
+    },
+    "gain_070|exact|candidate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.030208144336938858,
+      "mean_progress_m": 0.7937999367713928,
+      "mean_applied_offset_rad": 0.0899727169672648,
+      "mean_gain_abs_error": 0.05293481471017003,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0,
+      "mean_original_harness_healthy_offset_rad": 0.0,
+      "mean_actual_healthy_offset_rad": 0.0
+    },
+    "gain_070|exact|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.03089219657704234,
+      "mean_progress_m": 0.7928653918206692,
+      "mean_applied_offset_rad": 0.07808489640553792,
+      "mean_gain_abs_error": 0.050307834055274725,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0,
+      "mean_original_harness_healthy_offset_rad": 0.0,
+      "mean_actual_healthy_offset_rad": 0.0
+    },
+    "gain_070_return|declared|candidate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.043407986871898174,
+      "mean_progress_m": 1.0407076552510262,
+      "mean_applied_offset_rad": 0.005331444407312331,
+      "mean_gain_abs_error": 0.1079763351008296,
+      "withdrawal_steps_median": 0.0,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 6.25,
+      "mean_original_harness_healthy_offset_rad": 8.770196462748459e-05,
+      "mean_actual_healthy_offset_rad": 8.770196374637587e-05
+    },
+    "gain_070_return|declared|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.025217754067853093,
+      "mean_progress_m": 0.7422685772180557,
+      "mean_applied_offset_rad": 0.04912359100686306,
+      "mean_gain_abs_error": 0.10726298484951258,
+      "withdrawal_steps_median": 37.0,
+      "never_withdrew": 7,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 6.25,
+      "mean_original_harness_healthy_offset_rad": 0.027494477573782206,
+      "mean_actual_healthy_offset_rad": 0.027494476029754807
+    },
+    "gain_070_return|exact|candidate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.02502466505393386,
+      "mean_progress_m": 0.7599347233772278,
+      "mean_applied_offset_rad": 0.047545357395934906,
+      "mean_gain_abs_error": 0.08011214528232813,
+      "withdrawal_steps_median": 3.0,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0,
+      "mean_original_harness_healthy_offset_rad": 0.0018053683088510297,
+      "mean_actual_healthy_offset_rad": 0.0018053682130996429
+    },
+    "gain_070_return|exact|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.024365226505324244,
+      "mean_progress_m": 0.7485541552305222,
+      "mean_applied_offset_rad": 0.04740585260657422,
+      "mean_gain_abs_error": 0.07776110246777534,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 8,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0,
+      "mean_original_harness_healthy_offset_rad": 0.023312684381380677,
+      "mean_actual_healthy_offset_rad": 0.023312686961212532
+    },
+    "healthy|declared|candidate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.025387977715581656,
+      "mean_progress_m": 0.7052501402795315,
+      "mean_applied_offset_rad": 3.841022650400797e-06,
+      "mean_gain_abs_error": 0.03569214860908687,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 4.125,
+      "mean_original_harness_healthy_offset_rad": 0.0,
+      "mean_actual_healthy_offset_rad": 3.841022650400797e-06
+    },
+    "healthy|declared|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.02627757005393505,
+      "mean_progress_m": 0.703181803226471,
+      "mean_applied_offset_rad": 0.0007973338446269433,
+      "mean_gain_abs_error": 0.035158812534064054,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 4.125,
+      "mean_original_harness_healthy_offset_rad": 0.002161763455660548,
+      "mean_actual_healthy_offset_rad": 0.0007973338582087308
+    },
+    "healthy|exact|candidate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.02536610746756196,
+      "mean_progress_m": 0.7053412534296513,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 1.9247316962456296e-08,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0,
+      "mean_original_harness_healthy_offset_rad": 0.0,
+      "mean_actual_healthy_offset_rad": 0.0
+    },
+    "healthy|exact|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.02536610746756196,
+      "mean_progress_m": 0.7053412534296513,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 1.9247316962456296e-08,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0,
+      "mean_original_harness_healthy_offset_rad": 0.0,
+      "mean_actual_healthy_offset_rad": 0.0
+    },
+    "sensor_scale_080|declared|candidate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.02727807406336069,
+      "mean_progress_m": 0.8472235128283501,
+      "mean_applied_offset_rad": 0.002936960980296135,
+      "mean_gain_abs_error": 0.21225425601005554,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 6.25,
+      "mean_original_harness_healthy_offset_rad": 0.003911518375389278,
+      "mean_actual_healthy_offset_rad": 0.0029369608491348724
+    },
+    "sensor_scale_080|declared|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.029040538473054767,
+      "mean_progress_m": 0.8331511542201042,
+      "mean_applied_offset_rad": 0.08345223029454549,
+      "mean_gain_abs_error": 0.2128682006150484,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 6.25,
+      "mean_original_harness_healthy_offset_rad": 0.08325134683400393,
+      "mean_actual_healthy_offset_rad": 0.08345223642575245
+    },
+    "sensor_scale_080|exact|candidate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.025497306371107697,
+      "mean_progress_m": 0.8626044690608978,
+      "mean_applied_offset_rad": 0.06316267887751262,
+      "mean_gain_abs_error": 0.19999251887202263,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0,
+      "mean_original_harness_healthy_offset_rad": 0.07146832766011357,
+      "mean_actual_healthy_offset_rad": 0.06316265555680729
+    },
+    "sensor_scale_080|exact|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.027474554488435388,
+      "mean_progress_m": 0.8573578931391239,
+      "mean_applied_offset_rad": 0.07984461625417073,
+      "mean_gain_abs_error": 0.19999399781227112,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0,
+      "mean_original_harness_healthy_offset_rad": 0.07975721824914217,
+      "mean_actual_healthy_offset_rad": 0.07984461215169479
+    }
+  },
+  "paired_vs_reference": {
+    "gain_070|declared|candidate": {
+      "postfault_loss": {
+        "mean_difference": 0.0190185708925128,
+        "ci95": [
+          0.014395899209193885,
+          0.02454339533578604
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.5283207893371582,
+        "ci95": [
+          0.42319385781884195,
+          0.6489473586902021
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "original_harness_healthy_offset_rad": {
+        "mean_difference": -0.0020831259333462526,
+        "ci95": [
+          -0.002799433051870359,
+          -0.0013175439329160103
+        ],
+        "n": 8
+      },
+      "actual_healthy_offset_rad": {
+        "mean_difference": -0.002083125975057109,
+        "ci95": [
+          -0.0027994331973468785,
+          -0.0013175439016090886
+        ],
+        "n": 8
+      }
+    },
+    "gain_070|exact|candidate": {
+      "postfault_loss": {
+        "mean_difference": -0.0006840522401034832,
+        "ci95": [
+          -0.0017450712795834989,
+          0.0002995994931552554
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.0009345449507236481,
+        "ci95": [
+          -0.02091338261961937,
+          0.02641239576041697
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "original_harness_healthy_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "actual_healthy_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    },
+    "gain_070_return|declared|candidate": {
+      "postfault_loss": {
+        "mean_difference": 0.01819023280404508,
+        "ci95": [
+          0.01100840070284903,
+          0.02512587920646183
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.29843907803297043,
+        "ci95": [
+          0.2066006138920784,
+          0.38325784523040046
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "original_harness_healthy_offset_rad": {
+        "mean_difference": -0.02740677560915472,
+        "ci95": [
+          -0.029464555213849053,
+          -0.025116163201613608
+        ],
+        "n": 8
+      },
+      "actual_healthy_offset_rad": {
+        "mean_difference": -0.02740677406600843,
+        "ci95": [
+          -0.029464554851140023,
+          -0.025116160120957326
+        ],
+        "n": 8
+      }
+    },
+    "gain_070_return|exact|candidate": {
+      "postfault_loss": {
+        "mean_difference": 0.0006594385486096144,
+        "ci95": [
+          -1.815910218283526e-06,
+          0.001287714741192758
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.011380568146705627,
+        "ci95": [
+          -0.005687801539897918,
+          0.028659906610846518
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "original_harness_healthy_offset_rad": {
+        "mean_difference": -0.021507316072529647,
+        "ci95": [
+          -0.023669457452706412,
+          -0.01926000706371269
+        ],
+        "n": 8
+      },
+      "actual_healthy_offset_rad": {
+        "mean_difference": -0.02150731874811289,
+        "ci95": [
+          -0.02366945855003781,
+          -0.019260010191781193
+        ],
+        "n": 8
+      }
+    },
+    "healthy|declared|candidate": {
+      "postfault_loss": {
+        "mean_difference": -0.0008895923383533955,
+        "ci95": [
+          -0.0015014922013506294,
+          -0.000207114371005446
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.0020683370530605316,
+        "ci95": [
+          -0.010069408267736436,
+          0.017840870656073073
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true,
+      "original_harness_healthy_offset_rad": {
+        "mean_difference": -0.002161763455660548,
+        "ci95": [
+          -0.0030265140912888455,
+          -0.0013928942717029713
+        ],
+        "n": 8
+      },
+      "actual_healthy_offset_rad": {
+        "mean_difference": -0.00079349283555833,
+        "ci95": [
+          -0.001059844727807407,
+          -0.0005364983944018604
+        ],
+        "n": 8
+      }
+    },
+    "healthy|exact|candidate": {
+      "postfault_loss": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true,
+      "original_harness_healthy_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "actual_healthy_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    },
+    "sensor_scale_080|declared|candidate": {
+      "postfault_loss": {
+        "mean_difference": -0.0017624644096940756,
+        "ci95": [
+          -0.003755379747599363,
+          3.963429480791062e-06
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.01407235860824585,
+        "ci95": [
+          -0.006835472956299782,
+          0.037181046791374656
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true,
+      "original_harness_healthy_offset_rad": {
+        "mean_difference": -0.07933982845861465,
+        "ci95": [
+          -0.0830052197103214,
+          -0.07597714006260504
+        ],
+        "n": 8
+      },
+      "actual_healthy_offset_rad": {
+        "mean_difference": -0.08051527557661757,
+        "ci95": [
+          -0.08293065197804633,
+          -0.07812659226125107
+        ],
+        "n": 8
+      }
+    },
+    "sensor_scale_080|exact|candidate": {
+      "postfault_loss": {
+        "mean_difference": -0.00197724811732769,
+        "ci95": [
+          -0.0025125012150965633,
+          -0.0014109965763054791
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.0052465759217739105,
+        "ci95": [
+          -0.01015982385724783,
+          0.022671492211520667
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true,
+      "original_harness_healthy_offset_rad": {
+        "mean_difference": -0.008288890589028597,
+        "ci95": [
+          -0.010661131609231234,
+          -0.005985414609313011
+        ],
+        "n": 8
+      },
+      "actual_healthy_offset_rad": {
+        "mean_difference": -0.016681956594887498,
+        "ci95": [
+          -0.018154168363350133,
+          -0.01501983194916586
+        ],
+        "n": 8
+      }
+    }
+  },
+  "reference": "heuristic_gate",
+  "physical_health_audit": {
+    "issue": "AE-011 (#38)",
+    "metric": "actual_healthy_offset_rad",
+    "source": "Time series of maximum absolute effective correction across 29 joints and per-episode alive flags, recomputed from original NPZ traces after acquisition. All gain-one cells use all observed ticks. Gain-loss cells use observed ticks before onset and on/after true return. This is an intervention magnitude, not a measured injury or physical harm."
+  },
+  "margin_source": {
+    "outcome": "postfault_loss (m/s)^2",
+    "margin": 0.005,
+    "families": [
+      "sensor_scale_080",
+      "healthy"
+    ],
+    "source": "PR35 CLI --margin default recorded in comparator registration and development_plan.json",
+    "scope": "descriptive development comparison; no held-out decision or offset-magnitude margin"
+  }
+}

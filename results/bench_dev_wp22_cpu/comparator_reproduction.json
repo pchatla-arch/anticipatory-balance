@@ -1,0 +1,95 @@
+{
+  "archived_ref": "a45b10c0820e3eb45d0edfbbe9c1cf1cc6f261d8",
+  "archived_results_sha": "c5397f89d91c1885c9d97263d024dcbc55b1cd1c",
+  "paired_rows": 64,
+  "comparison": {
+    "gain": {
+      "differing_rows": 0,
+      "max_abs_delta": 0.0
+    },
+    "onset_step": {
+      "differing_rows": 0,
+      "max_abs_delta": 0
+    },
+    "return_step": {
+      "differing_rows": 0,
+      "max_abs_delta": 0
+    },
+    "speed_cmd_mps": {
+      "differing_rows": 0,
+      "max_abs_delta": 0.0
+    },
+    "fell": {
+      "differing_rows": 0,
+      "max_abs_delta": 0
+    },
+    "nonfinite": {
+      "differing_rows": 0,
+      "max_abs_delta": 0
+    },
+    "termination_step": {
+      "differing_rows": 0,
+      "max_abs_delta": 0
+    },
+    "pre_fault_failed": {
+      "differing_rows": 0,
+      "max_abs_delta": 0
+    },
+    "postfault_loss": {
+      "differing_rows": 0,
+      "max_abs_delta": 0.0
+    },
+    "progress_m": {
+      "differing_rows": 0,
+      "max_abs_delta": 0.0
+    },
+    "correction_bound_fraction": {
+      "differing_rows": 0,
+      "max_abs_delta": 0.0
+    },
+    "control_clip_fraction": {
+      "differing_rows": 0,
+      "max_abs_delta": 0.0
+    },
+    "max_correction_rad": {
+      "differing_rows": 0,
+      "max_abs_delta": 0.0
+    },
+    "max_slew_rad_s": {
+      "differing_rows": 0,
+      "max_abs_delta": 0.0
+    },
+    "max_abs_actuator_force_nm": {
+      "differing_rows": 0,
+      "max_abs_delta": 0.0
+    },
+    "harmful_offset_rad": {
+      "differing_rows": 0,
+      "max_abs_delta": 0.0
+    },
+    "mean_applied_offset_rad": {
+      "differing_rows": 0,
+      "max_abs_delta": 0.0
+    },
+    "withdrawal_steps": {
+      "differing_rows": 0,
+      "max_abs_delta": 0
+    },
+    "gain_abs_error": {
+      "differing_rows": 0,
+      "max_abs_delta": 0.0
+    },
+    "apply_steps": {
+      "differing_rows": 0,
+      "max_abs_delta": 0
+    },
+    "lost_packets": {
+      "differing_rows": 0,
+      "max_abs_delta": 0
+    },
+    "released_packets": {
+      "differing_rows": 0,
+      "max_abs_delta": 0
+    }
+  }
+}
