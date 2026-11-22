@@ -1,0 +1,60 @@
+Warp backend on CPU: this is the pod backend executed slowly (about 1.5 s per control step for 8 walkers); use it to check the GPU code path, not for timing.
+Warp CUDA warning: Could not find or load the NVIDIA CUDA driver. GPU execution will not be available.
+Warp 1.18.0 initialized:
+   CUDA Toolkit 13.4, CUDA driver not available (NVRTC compilation available)
+   Devices:
+     "cpu"      : "CPU"
+   Kernel cache:
+     /home/agent/.cache/warp/1.18.0
+Installed MuJoCo-Warp lacks DeterminismType.ALL, opt._impl.deterministic. Running default Warp smoke for diagnostics only.
+Module mujoco.mjx.warp.ffi 74dc481 load on device 'cpu' took 1.83 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.smooth 6e0b827 load on device 'cpu' took 0.64 ms  (cached)
+Module _nxn_broadphase__locals__kernel_95773766 dcb0d20 load on device 'cpu' took 5.35 ms  (cached)
+Module ccd_kernel_builder__locals__ccd_kernel_1a0e5f50 961b7f8 load on device 'cpu' took 0.46 ms  (cached)
+Module _primitive_narrowphase__locals__primitive_narrowphase_45a33c4c 4e07017 load on device 'cpu' took 0.41 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.constraint 9b8b8b5 load on device 'cpu' took 0.27 ms  (cached)
+Module _friction_dof__locals__kernel_c23b2f31 8722f38 load on device 'cpu' took 0.38 ms  (cached)
+Module _limit_slide_hinge__locals__kernel_9573ef9b 212c55b load on device 'cpu' took 5.38 ms  (cached)
+Module _efc_contact_init__locals__kernel_9009dd76 d00057e load on device 'cpu' took 0.29 ms  (cached)
+Module _efc_contact_jac_sparse__locals__kernel_54cecf88 993ed9c load on device 'cpu' took 0.27 ms  (cached)
+Module _efc_contact_update__locals__kernel_efb3ac6e 240d38d load on device 'cpu' took 1.92 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.sensor d51c428 load on device 'cpu' took 0.49 ms  (cached)
+Module _contact_match_builder__locals___contact_match_4da0430b a336920 load on device 'cpu' took 0.23 ms  (cached)
+Module _contact_sort__locals__contact_sort_bed1da43 30a64b4 load on device 'cpu' took 0.34 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.forward 9ce2c3d load on device 'cpu' took 0.69 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.passive be3b261 load on device 'cpu' took 0.49 ms  (cached)
+Module _qfrc_passive_kernel__locals__kernel_976399dd 84abb8d load on device 'cpu' took 0.18 ms  (cached)
+Module _qfrc_smooth__locals__kernel_8b823980 59d943b load on device 'cpu' took 0.18 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.support 756d400 load on device 'cpu' took 0.22 ms  (cached)
+Module _small_cholesky_factorize_solve_block__locals__kernel_9da335f1 f1514dc load on device 'cpu' took 0.22 ms  (cached)
+Module _tile_cholesky_factorize_solve_block__locals__kernel_f18d9752 c7907c7 load on device 'cpu' took 0.20 ms  (cached)
+Module _solve_init_dof__locals__kernel_7cb1664a 4e5183c load on device 'cpu' took 0.17 ms  (cached)
+Module mujoco.mjx.third_party.mujoco_warp._src.solver e673165 load on device 'cpu' took 0.31 ms  (cached)
+Module _solve_init_jaref_kernel__locals__kernel_ca465bd8 4922c23 load on device 'cpu' took 0.17 ms  (cached)
+Module mul_m_kernel__locals___mul_m_f3de1cc7 eb7d115 load on device 'cpu' took 0.21 ms  (cached)
+Module _update_constraint_efc__locals__kernel_0539aa50 4308317 load on device 'cpu' took 0.22 ms  (cached)
+Module _update_constraint_init_qfrc_constraint_sparse__locals__kernel_801f2ee2 f9e8906 load on device 'cpu' took 0.17 ms  (cached)
+Module _update_gradient_zero_grad_dot__locals__kernel_b20934d7 c9b5417 load on device 'cpu' took 0.17 ms  (cached)
+Module _update_gradient_grad__locals__kernel_c876081d 9aee840 load on device 'cpu' took 0.19 ms  (cached)
+Module _update_gradient_init_h_sparse__locals__kernel_f82bfdd8 1642645 load on device 'cpu' took 0.17 ms  (cached)
+Module _JTDACJ_sparse__locals__kernel_765abea5 b8fdb4c load on device 'cpu' took 0.20 ms  (cached)
+Module _update_gradient_cholesky_blocked__locals__kernel_1f053eca 48090e7 load on device 'cpu' took 0.27 ms  (cached)
+Module _linesearch_jv_fused_kernel__locals__kernel_bdad643e b0be627 load on device 'cpu' took 0.17 ms  (cached)
+Module _linesearch_iterative_kernel__locals__kernel_f3a187e1 8737d6a load on device 'cpu' took 0.39 ms  (cached)
+Module _update_constraint_efc__locals__kernel_e953547e d702c2d load on device 'cpu' took 0.21 ms  (cached)
+Module _update_gradient_zero_grad_dot__locals__kernel_e9f8c963 b37b671 load on device 'cpu' took 0.17 ms  (cached)
+Module _update_gradient_grad__locals__kernel_87959044 6e0339b load on device 'cpu' took 0.20 ms  (cached)
+Module _update_gradient_h_incremental_sparse__locals__kernel_e8129775 40dbb20 load on device 'cpu' took 0.22 ms  (cached)
+Module _update_gradient_cholesky_blocked_skip_unchanged__locals__kernel_dc0908fb 5ce2b0c load on device 'cpu' took 0.45 ms  (cached)
+Module _solve_done__locals__kernel_54267c25 4593e4d load on device 'cpu' took 0.48 ms  (cached)
+Module _next_time_builder__locals___next_time_bc454e15 e015120 load on device 'cpu' took 0.34 ms  (cached)
+screen healthy scenarios 0:8: failure=0.000, loss=0.0126, time=379.9s
+screen identity scenarios 0:8: failure=0.000, loss=0.0126, time=381.0s
+screen healthy_repeat scenarios 0:8: failure=0.000, loss=0.0126, time=374.1s
+screen gain_085_plain scenarios 0:8: failure=0.000, loss=0.0136, time=373.4s
+screen gain_085_oracle scenarios 0:8: failure=0.000, loss=0.0125, time=374.4s
+screen gain_070_plain scenarios 0:8: failure=0.125, loss=0.4543, time=377.0s
+screen gain_070_oracle scenarios 0:8: failure=0.000, loss=0.0137, time=374.9s
+screen gain_055_plain scenarios 0:8: failure=1.000, loss=3.1508, time=370.3s
+screen gain_055_oracle scenarios 0:8: failure=0.000, loss=0.0223, time=407.1s
+Operational experiment completed. Scientific gate: inconclusive. See summary.json; no online estimator was run.

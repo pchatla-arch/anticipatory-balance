@@ -1,0 +1,215 @@
+{
+  "protocol": "adaptive-servo-gain-gate-v1",
+  "profile": "smoke",
+  "screen": {
+    "protocol_version": "adaptive-servo-gain-gate-v1",
+    "phase": "screen",
+    "thresholds": {
+      "healthy_survival_min": 0.9,
+      "fault_survival_min": 0.2,
+      "absolute_loss_gap_min": 0.03,
+      "relative_loss_gap_min": 0.25,
+      "fall_increase_min": 0.15,
+      "recovery_fraction_min": 0.5,
+      "identity_tolerance": 1e-06,
+      "bootstrap_draws": 2000,
+      "bootstrap_seed": 228,
+      "bootstrap_confidence": 0.95,
+      "correction_bound_rad": 0.2,
+      "slew_bound_rad_s": 2.0,
+      "bound_tolerance": 1e-05
+    },
+    "candidate_order": [
+      "gain_085",
+      "gain_070",
+      "gain_055"
+    ],
+    "arms": {
+      "healthy": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.01257738471031189,
+        "mean_progress_m": 3.0364076793193817,
+        "mean_bound_fraction": 0.0
+      },
+      "identity": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.01257738471031189,
+        "mean_progress_m": 3.0364076793193817,
+        "mean_bound_fraction": 0.0
+      },
+      "healthy_repeat": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.01257738471031189,
+        "mean_progress_m": 3.0364076793193817,
+        "mean_bound_fraction": 0.0
+      },
+      "gain_085_plain": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.013642928912304342,
+        "mean_progress_m": 3.2952199280261993,
+        "mean_bound_fraction": 0.0
+      },
+      "gain_085_oracle": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.012465611100196838,
+        "mean_progress_m": 3.0363282561302185,
+        "mean_bound_fraction": 0.032023413549932433
+      },
+      "gain_070_plain": {
+        "n": 8,
+        "fall_rate": 0.125,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 1,
+        "mean_loss": 0.45428706845268607,
+        "mean_progress_m": 5.516810327768326,
+        "mean_bound_fraction": 0.0
+      },
+      "gain_070_oracle": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.013701212825253606,
+        "mean_progress_m": 3.048426866531372,
+        "mean_bound_fraction": 0.14958365934400886
+      },
+      "gain_055_plain": {
+        "n": 8,
+        "fall_rate": 1.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 8,
+        "mean_loss": 3.1508446037769318,
+        "mean_progress_m": 1.8929309993982315,
+        "mean_bound_fraction": 0.0
+      },
+      "gain_055_oracle": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.022268974571488798,
+        "mean_progress_m": 3.226392447948456,
+        "mean_bound_fraction": 0.2930322250782781
+      }
+    },
+    "numerical_ok": true,
+    "controls": {
+      "healthy": true,
+      "identity": true,
+      "prefault_pairing": true,
+      "bounds": true,
+      "torque_limits_checked": false,
+      "torque_limits": null,
+      "identity_max_difference": 0.0,
+      "run_to_run_reproducible": true,
+      "repeat_max_difference": 0.0
+    },
+    "candidates": {
+      "gain_085": {
+        "passed": false,
+        "checks": {
+          "degradation": false,
+          "recoverable": true,
+          "recovered_half_gap": true,
+          "no_fall_regression": true,
+          "positive_paired_ci": true
+        },
+        "loss_gap": 0.0010655442019924521,
+        "loss_reduction": 0.0011773178121075034,
+        "recovery_fraction": 1.1048981449160409,
+        "paired_loss_reduction_ci95": [
+          0.00023236261622514576,
+          0.002085466010612435
+        ],
+        "near_healthy_fall_rate": true
+      },
+      "gain_070": {
+        "passed": true,
+        "checks": {
+          "degradation": true,
+          "recoverable": true,
+          "recovered_half_gap": true,
+          "no_fall_regression": true,
+          "positive_paired_ci": true
+        },
+        "loss_gap": 0.4417096837423742,
+        "loss_reduction": 0.44058585562743247,
+        "recovery_fraction": 0.9974557313178645,
+        "paired_loss_reduction_ci95": [
+          0.1540158747229725,
+          0.867225235211663
+        ],
+        "near_healthy_fall_rate": true
+      },
+      "gain_055": {
+        "passed": false,
+        "checks": {
+          "degradation": true,
+          "recoverable": false,
+          "recovered_half_gap": true,
+          "no_fall_regression": true,
+          "positive_paired_ci": true
+        },
+        "loss_gap": 3.13826721906662,
+        "loss_reduction": 3.128575629205443,
+        "recovery_fraction": 0.9969118022192962,
+        "paired_loss_reduction_ci95": [
+          3.064621314636315,
+          3.1889248234161642
+        ],
+        "near_healthy_fall_rate": true
+      }
+    },
+    "reasons": [],
+    "selected_candidate": "gain_070",
+    "status": "pass"
+  },
+  "physics_mode": "default_warp_diagnostic",
+  "confirmation": null,
+  "scientific_gate_status": "inconclusive",
+  "interpretation": "Installed MuJoCo-Warp lacks DeterminismType.ALL, opt._impl.deterministic. Default-backend engineering smoke only.",
+  "selected_candidate": "gain_070",
+  "elapsed_seconds": 3415.59
+}

@@ -1,0 +1,22 @@
+{
+  "console_log_truncated": false,
+  "publisher_source_commit": "fdf5754be8e17071b324c0f49fd8ffaec0eeac15",
+  "result_files_present": [
+    "config.json",
+    "console.log",
+    "episodes.csv",
+    "paired.json",
+    "plan.json",
+    "preflight.json",
+    "report.md",
+    "run.json",
+    "setup.json",
+    "summary.json"
+  ],
+  "results_path": "results/adaptive_gate_cpu_smoke_20261122T072339Z_fdf5754",
+  "run_exit_code": 0,
+  "run_id": "adaptive_gate_cpu_smoke_20261122T072339Z_fdf5754",
+  "schema_version": 2,
+  "source_commit": "fdf5754be8e17071b324c0f49fd8ffaec0eeac15",
+  "timestamp_utc": "2026-11-22T08:21:27Z"
+}

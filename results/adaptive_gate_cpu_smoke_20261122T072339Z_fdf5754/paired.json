@@ -1,0 +1,274 @@
+{
+  "scope": "CPU row-level episode summaries only. Exact field equality does not establish trajectory or CUDA bitwise identity.",
+  "rows": 72,
+  "paired_ids": [
+    "seed73011_env00000",
+    "seed73011_env00001",
+    "seed73011_env00002",
+    "seed73011_env00003",
+    "seed73011_env00004",
+    "seed73011_env00005",
+    "seed73011_env00006",
+    "seed73011_env00007"
+  ],
+  "pairs": {
+    "healthy_vs_identity": {
+      "all_reported_fields_exact": true,
+      "fields": {
+        "control_clip_fraction": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "correction_bound_fraction": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "fault_exposed_steps": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "fell": {
+          "different_scenarios": []
+        },
+        "first_nonfinite_step": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "max_abs_actuator_force_nm": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "max_correction_rad": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "max_slew_rad_s": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "nonfinite": {
+          "different_scenarios": []
+        },
+        "postfault_loss": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "pre_fault_failed": {
+          "different_scenarios": []
+        },
+        "progress_m": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "termination_step": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        }
+      }
+    },
+    "healthy_vs_healthy_repeat": {
+      "all_reported_fields_exact": true,
+      "fields": {
+        "control_clip_fraction": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "correction_bound_fraction": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "fault_exposed_steps": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "fell": {
+          "different_scenarios": []
+        },
+        "first_nonfinite_step": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "max_abs_actuator_force_nm": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "max_correction_rad": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "max_slew_rad_s": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "nonfinite": {
+          "different_scenarios": []
+        },
+        "postfault_loss": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "pre_fault_failed": {
+          "different_scenarios": []
+        },
+        "progress_m": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "termination_step": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        }
+      }
+    },
+    "identity_vs_healthy_repeat": {
+      "all_reported_fields_exact": true,
+      "fields": {
+        "control_clip_fraction": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "correction_bound_fraction": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "fault_exposed_steps": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "fell": {
+          "different_scenarios": []
+        },
+        "first_nonfinite_step": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "max_abs_actuator_force_nm": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "max_correction_rad": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "max_slew_rad_s": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "nonfinite": {
+          "different_scenarios": []
+        },
+        "postfault_loss": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "pre_fault_failed": {
+          "different_scenarios": []
+        },
+        "progress_m": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        },
+        "termination_step": {
+          "different_scenarios": [],
+          "max_abs_difference": 0.0
+        }
+      }
+    }
+  },
+  "per_arm_flags": {
+    "gain_055_oracle": {
+      "falls": [],
+      "marked_nonfinite": [],
+      "nonfinite_fields": {},
+      "pre_fault_failures": [],
+      "magnitude_violations": [],
+      "slew_violations": []
+    },
+    "gain_055_plain": {
+      "falls": [
+        "seed73011_env00000",
+        "seed73011_env00001",
+        "seed73011_env00002",
+        "seed73011_env00003",
+        "seed73011_env00004",
+        "seed73011_env00005",
+        "seed73011_env00006",
+        "seed73011_env00007"
+      ],
+      "marked_nonfinite": [],
+      "nonfinite_fields": {},
+      "pre_fault_failures": [],
+      "magnitude_violations": [],
+      "slew_violations": []
+    },
+    "gain_070_oracle": {
+      "falls": [],
+      "marked_nonfinite": [],
+      "nonfinite_fields": {},
+      "pre_fault_failures": [],
+      "magnitude_violations": [],
+      "slew_violations": []
+    },
+    "gain_070_plain": {
+      "falls": [
+        "seed73011_env00006"
+      ],
+      "marked_nonfinite": [],
+      "nonfinite_fields": {},
+      "pre_fault_failures": [],
+      "magnitude_violations": [],
+      "slew_violations": []
+    },
+    "gain_085_oracle": {
+      "falls": [],
+      "marked_nonfinite": [],
+      "nonfinite_fields": {},
+      "pre_fault_failures": [],
+      "magnitude_violations": [],
+      "slew_violations": []
+    },
+    "gain_085_plain": {
+      "falls": [],
+      "marked_nonfinite": [],
+      "nonfinite_fields": {},
+      "pre_fault_failures": [],
+      "magnitude_violations": [],
+      "slew_violations": []
+    },
+    "healthy": {
+      "falls": [],
+      "marked_nonfinite": [],
+      "nonfinite_fields": {},
+      "pre_fault_failures": [],
+      "magnitude_violations": [],
+      "slew_violations": []
+    },
+    "healthy_repeat": {
+      "falls": [],
+      "marked_nonfinite": [],
+      "nonfinite_fields": {},
+      "pre_fault_failures": [],
+      "magnitude_violations": [],
+      "slew_violations": []
+    },
+    "identity": {
+      "falls": [],
+      "marked_nonfinite": [],
+      "nonfinite_fields": {},
+      "pre_fault_failures": [],
+      "magnitude_violations": [],
+      "slew_violations": []
+    }
+  },
+  "control_verdicts": {
+    "healthy": true,
+    "identity": true,
+    "prefault_pairing": true,
+    "bounds": true,
+    "torque_limits_checked": false,
+    "torque_limits": null,
+    "identity_max_difference": 0.0,
+    "run_to_run_reproducible": true,
+    "repeat_max_difference": 0.0
+  }
+}

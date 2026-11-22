@@ -1,0 +1,40 @@
+{
+  "run_id": "adaptive_gate_cpu_smoke_20261122T072339Z_fdf5754",
+  "source_commit": "fdf5754be8e17071b324c0f49fd8ffaec0eeac15",
+  "status": "completed",
+  "exit_code": 0,
+  "work_package": "0.1",
+  "scientific_gate_status": "inconclusive",
+  "scope": "Exact evaluator entry on CPU with the pinned Warp backend. GPU repeatability and the compensability gate remain undecided.",
+  "command": "JAX_PLATFORMS=cpu python scripts/eval_adaptive_gate.py --out <evidence directory> --profile smoke --impl warp --allow-cpu",
+  "elapsed_seconds": 3415.59,
+  "physics_mode": "default_warp_diagnostic",
+  "checkpoint_step": "000202342400",
+  "checkpoint_tree_sha256": "14bd6650f06c4e3171b6e2d2403ef0da5d9dd3604709f0c22b488329dd0223de",
+  "watched_dependency_count": 12,
+  "package_versions": {
+    "mujoco": "3.16.0",
+    "mujoco-mjx": "3.16.0",
+    "warp-lang": "1.18.0",
+    "jax": "0.12.0.1",
+    "jaxlib": "0.12.0.1",
+    "brax": "0.14.2",
+    "flax": "0.12.10",
+    "optax": "0.2.8",
+    "orbax-checkpoint": "0.12.8",
+    "numpy": "2.5.4",
+    "ml-collections": "1.1.0",
+    "etils": "1.14.0"
+  },
+  "lock_git_blob": "01c0761262ca13a0ba0abc8b863f3e494189e05e",
+  "lock_sha256": "fb6ce33c1401df37e9f49b2df6a6796691c44c0259f7faff93624ac028a5c089",
+  "raw_file_sha256": {
+    "plan.json": "c9dc8b42a5bf4e3cacfeddef7ba9cefb5b3475a3a13ede3a5a4a861abc6c13bf",
+    "preflight.json": "3a0f511e65ce71ccdc070a2f524d538ea01cc72dbd4695234e4a3b34ddcbb422",
+    "config.json": "05d0138422d6a9c69d94391420e26a89daa99135539f5a146471bf9e0a00d114",
+    "episodes.csv": "3da5cf062bd48d802d8706fd2d9b30c0784b832510cec067995ec35fca7bfb2b",
+    "summary.json": "d616f76734e1a5cc4346bd50e1a1feea65f3d4e8a21f75366f948e023187acbc",
+    "report.md": "e0065d0f134b50ff8035a0a36b26fad71770983451883c6ea0e2b23e4e8ff7db"
+  },
+  "comparison": "paired.json"
+}

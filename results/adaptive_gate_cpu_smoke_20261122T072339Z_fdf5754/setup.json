@@ -1,0 +1,80 @@
+{
+  "packages": [
+    {
+      "package": "mujoco",
+      "pod_lock": "3.16.0",
+      "installed": "3.16.0",
+      "match": true
+    },
+    {
+      "package": "mujoco-mjx",
+      "pod_lock": "3.16.0",
+      "installed": "3.16.0",
+      "match": true
+    },
+    {
+      "package": "warp-lang",
+      "pod_lock": "1.18.0",
+      "installed": "1.18.0",
+      "match": true
+    },
+    {
+      "package": "jax",
+      "pod_lock": "0.12.0.1",
+      "installed": "0.12.0.1",
+      "match": true
+    },
+    {
+      "package": "jaxlib",
+      "pod_lock": "0.12.0.1",
+      "installed": "0.12.0.1",
+      "match": true
+    },
+    {
+      "package": "brax",
+      "pod_lock": "0.14.2",
+      "installed": "0.14.2",
+      "match": true
+    },
+    {
+      "package": "flax",
+      "pod_lock": "0.12.10",
+      "installed": "0.12.10",
+      "match": true
+    },
+    {
+      "package": "optax",
+      "pod_lock": "0.2.8",
+      "installed": "0.2.8",
+      "match": true
+    },
+    {
+      "package": "orbax-checkpoint",
+      "pod_lock": "0.12.8",
+      "installed": "0.12.8",
+      "match": true
+    },
+    {
+      "package": "numpy",
+      "pod_lock": "2.5.4",
+      "installed": "2.5.4",
+      "match": true
+    },
+    {
+      "package": "ml-collections",
+      "pod_lock": "1.1.0",
+      "installed": "1.1.0",
+      "match": true
+    },
+    {
+      "package": "etils",
+      "pod_lock": "1.14.0",
+      "installed": "1.14.0",
+      "match": true
+    }
+  ],
+  "python": "3.12.14",
+  "parity": true,
+  "lock_sha256": "fb6ce33c1401df37e9f49b2df6a6796691c44c0259f7faff93624ac028a5c089",
+  "lock_git_blob": "01c0761262ca13a0ba0abc8b863f3e494189e05e"
+}
