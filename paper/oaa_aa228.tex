@@ -1,0 +1,257 @@
+% AA228/CS238 final paper skeleton: Online Actuator Adaptation 0.3 as decision making under
+% uncertainty. Structure, formal statement, figure/table plan and placeholders by Claude;
+% all prose is Prasuna's. Every number below marked \todo{} is copied from a result file
+% (results/..., summary.json) and checked by ChatGPT before submission.
+%
+% Rubric map (10 pts each unless noted): problem clearly stated -> Sec. 2; approach clearly
+% stated -> Sec. 3; appropriateness of approach -> Sec. 3.4; analysis and results -> Sec. 5;
+% clarity of figures/tables -> Figs. 1-4, Tables 1-3; discussion and conclusion -> Sec. 6-7;
+% references and prior work -> Sec. 4 + bibliography; structure, writing, abstract.
+\documentclass[10pt,twocolumn]{article}
+\usepackage[margin=0.7in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,graphicx,microtype,xcolor,url}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\graphicspath{{../results/}{../results/figures/}{figures/}}
+\newcommand{\todo}[1]{\textcolor{red!70!black}{[#1]}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Gset}{\mathcal{G}}
+\newcommand{\Eset}{\mathcal{E}}
+\newcommand{\Xset}{\mathcal{X}}
+\setlength{\parskip}{1pt}
+\setlength{\columnsep}{18pt}
+
+\title{When to Correct: Identification-Aware Actuator Adaptation\\for a Frozen Humanoid Walking Policy}
+\author{Prasuna Chatla\\ Stanford University, AA228/CS238 (Autumn 2026) \\ \texttt{pchatla@stanford.edu}}
+\date{Draft skeleton, \today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+% Prasuna: 150-200 words. Problem (hidden actuator change under a frozen policy), why it is a
+% decision problem under uncertainty (delayed, noisy, confoundable telemetry; intervening on a
+% healthy robot is harmful), the approach (set-membership belief over the gain, correction
+% chosen under the belief with hard constraints), the comparison (oracle, estimated inverse,
+% tuned heuristic gate, robust PPO), and the three headline numbers.
+\todo{abstract}
+\end{abstract}
+
+\section{Introduction}
+% Prasuna: one paragraph on the operational problem (a walking humanoid whose leg servos lose
+% stiffness during a task; the locomotion policy is frozen and cannot be retrained online), one
+% on why "estimate the gain and invert it" is not enough (the estimate is uncertain, the
+% telemetry is late, a biased effort sensor looks exactly like a weak motor, and the actuator
+% may recover unannounced), one stating the question and the contributions.
+\todo{intro}
+
+\paragraph{Contributions.}
+(1) A formulation of actuator adaptation for a frozen policy as sequential decision making
+under uncertainty with a set-membership belief over the hidden gain. (2) An execution rule that
+converts the belief, the telemetry age and the command-hold model into a feasible correction
+interval and a closed-form projection. (3) A paired benchmark separating genuine actuator
+changes from sensing and mechanical nuisances, including unannounced recovery. (4) A
+comparison against the fully observed oracle, a certainty-equivalent inverse, a tuned
+heuristic gate and a policy trained with actuator randomization. \todo{adjust to results}
+
+\section{Problem}
+\paragraph{Plant and interface.}
+A Unitree G1 humanoid in MuJoCo \citep{todorov2012mujoco} walks under a frozen PPO
+\citep{schulman2017ppo} joystick policy from MuJoCo Playground \citep{zakka2025playground},
+commanded at 50\,Hz with 500\,Hz physics. Each of the 12 leg joints is driven by a
+proportional position servo; the policy outputs a target $r_k$ per joint and the servo applies
+\begin{equation}
+\tau_k = g\,K_p\,(z_k - q_k),
+\qquad z_k = r_k + d_k ,
+\label{eq:servo}
+\end{equation}
+% How to read: torque equals the (hidden) gain g times the nominal stiffness K_p times the
+% tracking error between the issued target z and the measured joint angle q. The adapter may
+% add an offset d to the policy's target; it may not touch the policy or K_p.
+where $g$ is a hidden multiplicative gain ($g=1$ healthy), $K_p$ the nominal stiffness, and
+$d_k$ the correction the execution layer adds to the policy's target. Joint damping and force
+limits are unchanged by the fault.
+
+\paragraph{Hidden state, observations, actions.}
+The hidden state is the gain schedule $g_t$ (healthy, degraded to $g\in\{0.85,0.70,0.55\}$ at
+an unknown onset, possibly returning to $1$ unannounced). Observations are telemetry packets
+$(z_i, q_i^{\rm meas}, \tau_i^{\rm meas})$ captured at source time $t_i$ and delivered with
+latency, noise, bias, an unknown effort-sensor scale, and dropout. The action is the
+requested offset $x_k$, subject to amplitude ($|x_k|\le 0.2$\,rad), slew ($|x_k - x_{k-1}|\le
+2\,\text{rad/s}\cdot 20$\,ms) and the servo's control range. The cost is the capped squared
+planar-velocity tracking error over a fixed horizon after onset, with a fall charged the cap
+for the remaining steps; intervention on a healthy plant is measured separately as the mean
+applied offset while $g_t=1$.
+
+\paragraph{Why this is decision making under uncertainty.}
+% Prasuna: in your words. The key sentences: the gain is never observed; the same telemetry is
+% consistent with several gains (a 0.8 effort-sensor scale on a healthy motor produces exactly
+% the packets of a 0.8 motor); acting on a point estimate that is wrong is costly in both
+% directions; and the information available to the controller depends on excitation and
+% packet age, so the right amount of correction depends on how much the controller knows.
+\todo{framing paragraph}
+The problem is a partially observable sequential decision problem: belief over $g$, action
+$x_k$ under that belief, cost on the realized trajectory. We compare four ways of acting
+under this uncertainty (Table~\ref{tab:methods}): the fully observed policy (oracle), the
+certainty-equivalent policy (invert the point estimate), a gated certainty-equivalent policy
+(invert only when tuned evidence thresholds pass), and a belief-constrained policy that
+permits only corrections that cannot increase force error for any gain in the belief set.
+Actuator-randomized PPO is the open-loop alternative: optimize over the prior and infer
+nothing online.
+
+\begin{table}[t]\centering\small
+\caption{Methods compared. All share the frozen policy, the released telemetry, and the common correction limits.}\label{tab:methods}
+\begin{tabular}{llll}\toprule
+Method & Belief & Decision rule & Privileged? \\\midrule
+None & -- & $x_k=0$ & no \\
+Oracle & true $g$ & $(1/g-1)(r_k-q_k)$ & yes \\
+Estimated inverse & RLS point $\hat g$ & $(1/\hat g-1)(r_k-\hat q_k)$ & no \\
+Heuristic gate & RLS point + thresholds & inverse if evidence passes & no \\
+Identification-aware & set $\Gset_k^H$ + envelope & projection~\eqref{eq:proj} & no \\
+Robust PPO & none online & policy trained over $g\sim$ prior & no \\\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Approach}
+\subsection{Belief: a set-membership gain interval}
+Each valid, unsaturated packet gives $\phi_i = z_i - q_i^{\rm meas}$ and $y_i = \tau_i^{\rm
+meas}/K_p$, and the declared error bounds $b_q$, $b_\tau$ give
+\begin{equation}
+\mathcal S_i=\{g\in\Gset_0 : |y_i - g\,\phi_i|\le \epsilon_i\},\qquad
+\epsilon_i = b_\tau/K_p + g_{\max} b_q .
+\label{eq:sample}
+\end{equation}
+% How to read: the set of gains consistent with one measurement is an interval, because the
+% measured torque must lie within the error bound of g times the tracking error. Weak
+% excitation (small phi) makes the interval wide; it never divides by a small number.
+Packets are processed in source order; between consecutive captures the set is widened by the
+declared drift bound $L_g$ and intersected with the new sample,
+\begin{equation}
+\Gset_i = \big(\Gset_{i-1}\oplus[-L_g\Delta t_i, L_g\Delta t_i]\big)\cap \mathcal S_i ,
+\label{eq:update}
+\end{equation}
+% How to read: the belief update is "predict (widen for possible drift), then correct
+% (intersect with what the new packet allows)" -- the set-valued analogue of a Bayes filter.
+and at decision time propagated through the whole 20\,ms hold, $\Gset_k^H$. An empty
+intersection means the model is inconsistent with the data (sensor fault, abrupt jump,
+saturation); the belief is restarted from the prior rather than trusted.
+
+\subsection{Action: a correction that cannot make the force error worse}
+Let $\Eset_k^H$ be the interval of possible tracking errors during the hold (encoder bound plus
+a declared speed bound times packet age plus hold). The corrected force error relative to the
+nominal servo is $E(g,e,x)=K_p[(g-1)e + g\,d(x)]$. The rule permits an effective offset $d$
+only if $|E(g,e,x)|\le|E(g,e,0)|$ at all four corners of $\Gset_k^H\times\Eset_k^H$, together
+with force headroom and the control range; this yields a feasible interval $\Xset_k$ of
+requested offsets. The issued correction is the closed-form projection
+\begin{equation}
+x_k=\operatorname{clip}_{\Xset_k}\!\left(\frac{\delta_k^{\rm cand}+\lambda x_{k-1}}{1+\lambda}\right),
+\qquad
+\delta_k^{\rm cand}=(\hat g_k^{-1}-1)(r_k-\hat q_k).
+\label{eq:proj}
+\end{equation}
+% How to read: take the point-estimate inverse, smooth it toward last step's request, then
+% clip it into the interval of corrections that are safe for every gain the belief allows.
+% If the belief still contains g = 1 (healthy), that interval is {0}: no correction.
+If $\Gset_k^H\ni 1$, only $x_k=0$ is admissible: uncertainty about whether the actuator is
+healthy removes corrective authority, which is the mechanism under test. Stale packets and
+fast joint motion widen $\Eset_k^H$ and have the same effect.
+
+\subsection{Baselines}
+\paragraph{Estimated inverse and heuristic gate.} Both use a recursive least-squares point
+estimate $\hat g$ with forgetting on the same packets. The heuristic applies the inverse only
+when a minimum number of samples, a residual bound, an excitation floor, a dead band around
+$g=1$ and a maximum packet age all pass; its five thresholds and the RLS forgetting factor are
+tuned on the development split with a recorded budget \todo{tuning log}.
+\paragraph{Robust PPO.} A policy retrained with the gain randomized over the prior, including
+within-episode changes, with the same action envelope \todo{training budget}.
+
+\subsection{Why this approach}
+% Prasuna, rubric item "appropriateness": contrast with (i) retraining the policy (can't,
+% frozen; robust PPO is the test of that alternative), (ii) a Bayesian filter with a Gaussian
+% posterior (its covariance is not a guarantee; set membership gives a worst-case interval
+% that the force-error criterion can be checked against at corners), (iii) a tuned threshold
+% rule (the heuristic is exactly that, and it is the primary comparator).
+\todo{appropriateness paragraph}
+
+\section{Related work}
+% Prasuna: RMA (learned history adaptation for policies trained to use it), RL2AC (adaptive
+% torque compensation with learned locomotion), SAG (corrective-authority regulation around
+% frozen policies), TeAR (telemetry-conditioned action rectification), set-membership fault
+% compensation and robust inversion; POMDPs and belief-space decision making (Kochenderfer et
+% al.). The distinction: a position-target interface, finite holds, declared measurement
+% quality, and the harmful-intervention side of the tradeoff.
+\todo{related work}
+
+\section{Experiments}
+\subsection{Setup}
+Frozen walker \todo{checkpoint, seed}; task: walk 2\,s, turn 2\,s, stop 1.5\,s, resume 2.5\,s
+at 0.4 or 0.6\,m/s; horizon 400 control steps (8\,s); onset uniform in steps 75--125.
+Scenario families: gain steps (0.85/0.70/0.55 on all leg joints; 0.70 on hips only; 0.70
+on the left leg), unannounced return to healthy, and nuisance families with a healthy
+plant: effort-sensor scale 0.8, effort bias, tripled passive joint losses, stale telemetry
+(100--200\,ms). Sensor channels: exact, and ``declared'' (encoder noise 2\,mrad, effort noise
+0.5\,N\,m, 20--60\,ms latency, 2\% dropout, declared bounds 6\,mrad and 1.5\,N\,m). All methods
+of a family see identical initial states, commands, schedules and sensor noise draws, so
+every comparison is paired by scenario. Splits: development (tuning), validation (operating
+points frozen), test (registered before the run, executed once) \todo{episode counts}.
+
+\subsection{Compensability (Stage A gate)}
+% Figure 1: failure and post-fault loss vs gain for none / oracle; the gate's predeclared
+% thresholds and verdict. Source: results/<gate run>/summary.json.
+\todo{Table: healthy, identity, plain/oracle at 0.85/0.70/0.55 with n, failure rate, loss, paired CI (gate run)}
+
+\subsection{Information and authority (G1)}
+% Figure 2: gain-set width and permitted correction over time after a fault, per telemetry
+% channel; estimator error for RLS and the set; coverage of the declared bounds.
+\todo{Figure 2 + two sentences}
+
+\subsection{Recovery versus harmful intervention (G2)}
+% Figure 3 (hero): for each method, post-fault loss on gain families (x) against mean applied
+% offset on healthy-plant families (y); paired CIs; the oracle as the anchor.
+% Table 2: paired differences, candidate minus heuristic, with 95% intervals, on the
+% registered test split; noninferiority on healthy/nuisance families.
+\todo{Figure 3, Table 2}
+
+\subsection{Unannounced recovery and the sensor-scale confound}
+% Figure 4: time series of true gain, g_hat, gain set, requested and effective offset for one
+% return-to-healthy episode (withdrawal) and one sensor-scale episode (false adaptation by
+% the point estimators; the set-based rule's behaviour).
+\todo{Figure 4; withdrawal steps per method (Table 3)}
+
+\subsection{Learning comparisons (G3)}
+\todo{robust PPO result and training cost; GRU estimator through the same corrector, if run}
+
+\section{Discussion and limitations}
+% Prasuna: what the belief bought and what it cost (abstention), where the heuristic matched
+% it, the identifiability limit (scale), what the bounds assume (declared, coverage measured),
+% simulation only, one robot, gain-only fault family, frozen policy from one seed unless the
+% extra walkers ran.
+\todo{discussion}
+
+\section{Conclusion}
+\todo{conclusion}
+
+\paragraph{Reproducibility.} Code, scenario seeds, registration files and result files:
+\url{https://github.com/pchatla-arch/anticipatory-balance} \todo{tag}.
+
+\paragraph{AI tools.} \todo{Name each tool (Claude, ChatGPT) and its actual role: code,
+analyses, figure generation, review; method choices, evaluation and all text are the
+author's. Required by the course policy.}
+
+\bibliographystyle{plainnat}
+\begin{thebibliography}{20}\footnotesize
+\bibitem[Kumar et al.(2021)]{kumar2021rma} A.~Kumar, Z.~Fu, D.~Pathak, and J.~Malik. RMA: Rapid motor adaptation for legged robots. \emph{RSS}, 2021.
+\bibitem[Lyu et al.(2024)]{lyu2024rl2ac} S.~Lyu et al. RL2AC: Reinforcement learning-based rapid online adaptive control for legged robot robust locomotion. \emph{RSS}, 2024.
+\bibitem[Jayasinghe et al.(2026)]{jayasinghe2026sag} N.~Jayasinghe et al. Stability-aligned residual adaptation for rapid recovery from dynamics shifts. \emph{arXiv:2603.07775}, 2026.
+\bibitem[Sagar and Senanayake(2026)]{sagar2026tear} S.~Sagar and R.~Senanayake. Test-time adaptation of manipulation policies under actuator degradation. \emph{arXiv:2609.36182}, 2026.
+\bibitem[Lamouchi et al.(2017)]{lamouchi2017set} R.~Lamouchi, M.~Amairi, T.~Raissi, and M.~Aoun. Actuator fault compensation in a set-membership framework for linear parameter-varying systems. \emph{IFAC-PapersOnLine}, 50(1), 2017.
+\bibitem[Tanaskovic et al.(2019)]{tanaskovic2019adaptive} M.~Tanaskovic, L.~Fagiano, and V.~Gligorovski. Adaptive model predictive control for linear time varying MIMO systems. \emph{Automatica}, 105, 2019.
+\bibitem[Daniels et al.(2025)]{daniels2025active} A.~Daniels et al. Active fault identification and robust control for unknown bounded faults via volume-based costs. \emph{arXiv:2508.12010}, 2025.
+\bibitem[Kochenderfer et al.(2022)]{kochenderfer2022algorithms} M.~J. Kochenderfer, T.~A. Wheeler, and K.~H. Wray. \emph{Algorithms for Decision Making}. MIT Press, 2022.
+\bibitem[Kaelbling et al.(1998)]{kaelbling1998pomdp} L.~P. Kaelbling, M.~L. Littman, and A.~R. Cassandra. Planning and acting in partially observable stochastic domains. \emph{Artificial Intelligence}, 101, 1998.
+\bibitem[Zakka et al.(2025)]{zakka2025playground} K.~Zakka et al. MuJoCo Playground. \emph{arXiv:2502.08844}, 2025.
+\bibitem[Todorov et al.(2012)]{todorov2012mujoco} E.~Todorov, T.~Erez, and Y.~Tassa. MuJoCo: A physics engine for model-based control. \emph{IEEE/RSJ IROS}, 2012.
+\bibitem[Schulman et al.(2017)]{schulman2017ppo} J.~Schulman, F.~Wolski, P.~Dhariwal, A.~Radford, and O.~Klimov. Proximal policy optimization algorithms. \emph{arXiv:1707.06347}, 2017.
+\end{thebibliography}
+\end{document}
