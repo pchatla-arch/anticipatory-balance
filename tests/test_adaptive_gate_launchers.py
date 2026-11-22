@@ -143,7 +143,7 @@ class AdaptiveWorkerTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     worker.validate_outputs(output)
 
-    def run_fixture(self, *, timeout=False, scientific='fail', upload_ok=True):
+    def run_fixture(self, *, timeout=False, scientific='fail', upload_ok=True, determinism=None):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name)
@@ -177,6 +177,8 @@ class AdaptiveWorkerTests(unittest.TestCase):
         env = {'ADAPTIVE_STARTED_EPOCH': str(now - 1800),
                'ADAPTIVE_DEADLINE_EPOCH': str(now + 5400),
                'FORESIGHT_SETUP_ROOT': str(root)}
+        if determinism is not None:
+            env['ADAPTIVE_DETERMINISTIC'] = determinism
         with contextlib.ExitStack() as stack:
             stack.enter_context(mock.patch.dict(os.environ, env))
             stack.enter_context(mock.patch.object(worker, 'ROOT', root))
@@ -202,6 +204,18 @@ class AdaptiveWorkerTests(unittest.TestCase):
         evaluation = [entry for entry in calls if 'scripts/eval_adaptive_gate.py' in entry[0]]
         self.assertEqual(len(evaluation), 1)
         self.assertLessEqual(evaluation[0][1], 4800)
+        self.assertEqual(evaluation[0][0][-2:], ['--deterministic', 'auto'], 'pod runs request deterministic execution by default')
+
+    def test_determinism_escape_hatch_reaches_the_evaluator_and_rejects_typos(self):
+        with mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop('ADAPTIVE_DETERMINISTIC', None)
+            _, _, _, calls = self.run_fixture(determinism='off')
+        evaluation = [entry[0] for entry in calls if 'scripts/eval_adaptive_gate.py' in entry[0]]
+        self.assertEqual(evaluation[0][-2:], ['--deterministic', 'off'])
+        code, _, record, calls = self.run_fixture(determinism='maybe')
+        self.assertEqual(code, 1)
+        self.assertEqual(record['status'], 'failed')
+        self.assertFalse([entry for entry in calls if 'scripts/eval_adaptive_gate.py' in entry[0]], 'no GPU work on a bad setting')
 
     def test_timeout_still_publishes_partial_evidence(self):
         code, latest, record, _ = self.run_fixture(timeout=True)
