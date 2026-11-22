@@ -1,0 +1,28 @@
+{
+  "theta_s": 0.24,
+  "belief_mean_s": 0.586875,
+  "ttc_minus_belief_s_by_theta": {
+    "0.06": -0.17125,
+    "0.1": -0.11812500000000004,
+    "0.12": -0.12375000000000003,
+    "0.14": -0.09000000000000002,
+    "0.16": -0.07437500000000008,
+    "0.18": -0.06625000000000003,
+    "0.2": -0.05312499999999998,
+    "0.24": 0.010624999999999996,
+    "0.3": 0.12937500000000002
+  },
+  "matched_on_calibration": true,
+  "nonfinite_or_missing_progress_by_arm": {
+    "ttc_threshold_0.06": 0,
+    "ttc_threshold_0.1": 0,
+    "ttc_threshold_0.12": 0,
+    "ttc_threshold_0.14": 0,
+    "ttc_threshold_0.16": 0,
+    "ttc_threshold_0.18": 0,
+    "ttc_threshold_0.2": 0,
+    "ttc_threshold_0.24": 0,
+    "ttc_threshold_0.3": 0,
+    "belief_lead_0.05": 0
+  }
+}
