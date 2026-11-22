@@ -77,3 +77,26 @@ on the declared channel in the replay; requested/oracle ≥ 0.5 on hips and knee
 **What this does not show.** Closed-loop recovery (the replay never applies the request);
 the heuristic comparison; behaviour under the scale confound (the set is as blind as the
 point estimate there, AE-003); GPU timing.
+
+## Addendum, November 22 (after ChatGPT's velocity-envelope study, PR #40 / `results/velocity_envelope_dev_wp13`)
+
+The recommendation above is superseded in one respect: the binding variable is the **age of the
+sample**, not the speed bound. Knee acceleration at ground contact reaches 284 rad/s² (99th
+percentile) and 384 rad/s² (maximum) on the development walks, so any position envelope that
+covers the knees needs A ≥ 400 rad/s². At the declared 20–60 ms transport the envelope radius
+½·A·(age+H)² is then 0.7–0.9 rad, wider than any useful correction, for every formula tried
+(symmetric or signed velocity, seven acceleration bounds). The modified envelope meets the
+acceptance criteria only when the packet captured at the end of transition t is usable at
+decision t+1 (hips 57%, knees 72% of the same-state oracle; coverage ≥ 99.6%).
+
+**Revised recommendation (Modify, redefined).** Keep the declared 20–60 ms arm as the primary
+result. Register a second information assumption, `DECLARED_FAST` (same noise, bounds and 2%
+dropout, zero latency; `sensing.py`, commit a5d6719), as a named arm beside it. Freeze the
+candidate's operating point at the symmetric 400 rad/s² envelope with the declared ±0.5 rad/s
+velocity bound (now part of `TelemetryConfig`). The research claim becomes the recovery/harm
+trade-off as a function of sensor latency — a value-of-timely-information result — rather than a
+claim that the identification-aware rule wins under the original transport. Same-state oracle
+ratios stay in the development record; the paper's metrics are closed-loop (paired post-fault
+loss, falls, healthy-plant offset, withdrawal steps). ChatGPT's proposed CPU pilot
+(`results/velocity_envelope_dev_wp13/next_experiment.md`) is the next step, run against the
+frozen tuned heuristic.
