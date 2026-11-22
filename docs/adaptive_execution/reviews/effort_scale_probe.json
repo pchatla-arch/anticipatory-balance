@@ -1,0 +1,159 @@
+{
+  "experiment": "matched-state effort-scale ambiguity, v1.1",
+  "backend": "native MuJoCo",
+  "mujoco_version": "3.16.0",
+  "joint": "left_knee_joint",
+  "kp_nm_rad": 75.0,
+  "control_period_s": 0.02,
+  "position_bound_rad": 0.2,
+  "rate_bound_rad_s": 2.0,
+  "gain_loss": 0.7,
+  "sensor_scale_on_healthy_plant": 0.7,
+  "cases": [
+    {
+      "error_rad": -0.1,
+      "delta_rad": -0.04,
+      "balanced_delta_rad": -0.017647058823529415,
+      "healthy_reference_nm": -7.5,
+      "worlds": {
+        "weak_motor": {
+          "leave_target": {
+            "physical_effort_nm": -5.25,
+            "observed_effort_nm": -5.25
+          },
+          "apply_correction": {
+            "physical_effort_nm": -7.350000000000001,
+            "observed_effort_nm": -7.350000000000001
+          },
+          "balanced_correction": {
+            "physical_effort_nm": -6.176470588235297,
+            "observed_effort_nm": -6.176470588235297
+          }
+        },
+        "scaled_sensor": {
+          "leave_target": {
+            "physical_effort_nm": -7.5,
+            "observed_effort_nm": -5.25
+          },
+          "apply_correction": {
+            "physical_effort_nm": -10.5,
+            "observed_effort_nm": -7.35
+          },
+          "balanced_correction": {
+            "physical_effort_nm": -8.82352941176471,
+            "observed_effort_nm": -6.176470588235297
+          }
+        }
+      }
+    },
+    {
+      "error_rad": -0.05,
+      "delta_rad": -0.021428571428571432,
+      "balanced_delta_rad": -0.008823529411764707,
+      "healthy_reference_nm": -3.75,
+      "worlds": {
+        "weak_motor": {
+          "leave_target": {
+            "physical_effort_nm": -2.625,
+            "observed_effort_nm": -2.625
+          },
+          "apply_correction": {
+            "physical_effort_nm": -3.7500000000000036,
+            "observed_effort_nm": -3.7500000000000036
+          },
+          "balanced_correction": {
+            "physical_effort_nm": -3.088235294117645,
+            "observed_effort_nm": -3.088235294117645
+          }
+        },
+        "scaled_sensor": {
+          "leave_target": {
+            "physical_effort_nm": -3.750000000000007,
+            "observed_effort_nm": -2.625000000000005
+          },
+          "apply_correction": {
+            "physical_effort_nm": -5.357142857142861,
+            "observed_effort_nm": -3.7500000000000027
+          },
+          "balanced_correction": {
+            "physical_effort_nm": -4.411764705882355,
+            "observed_effort_nm": -3.0882352941176485
+          }
+        }
+      }
+    },
+    {
+      "error_rad": 0.05,
+      "delta_rad": 0.021428571428571432,
+      "balanced_delta_rad": 0.008823529411764707,
+      "healthy_reference_nm": 3.75,
+      "worlds": {
+        "weak_motor": {
+          "leave_target": {
+            "physical_effort_nm": 2.625,
+            "observed_effort_nm": 2.625
+          },
+          "apply_correction": {
+            "physical_effort_nm": 3.750000000000007,
+            "observed_effort_nm": 3.750000000000007
+          },
+          "balanced_correction": {
+            "physical_effort_nm": 3.088235294117645,
+            "observed_effort_nm": 3.088235294117645
+          }
+        },
+        "scaled_sensor": {
+          "leave_target": {
+            "physical_effort_nm": 3.75,
+            "observed_effort_nm": 2.625
+          },
+          "apply_correction": {
+            "physical_effort_nm": 5.357142857142861,
+            "observed_effort_nm": 3.7500000000000027
+          },
+          "balanced_correction": {
+            "physical_effort_nm": 4.411764705882355,
+            "observed_effort_nm": 3.0882352941176485
+          }
+        }
+      }
+    },
+    {
+      "error_rad": 0.1,
+      "delta_rad": 0.04,
+      "balanced_delta_rad": 0.017647058823529415,
+      "healthy_reference_nm": 7.5,
+      "worlds": {
+        "weak_motor": {
+          "leave_target": {
+            "physical_effort_nm": 5.25,
+            "observed_effort_nm": 5.25
+          },
+          "apply_correction": {
+            "physical_effort_nm": 7.350000000000001,
+            "observed_effort_nm": 7.350000000000001
+          },
+          "balanced_correction": {
+            "physical_effort_nm": 6.176470588235297,
+            "observed_effort_nm": 6.176470588235297
+          }
+        },
+        "scaled_sensor": {
+          "leave_target": {
+            "physical_effort_nm": 7.5,
+            "observed_effort_nm": 5.25
+          },
+          "apply_correction": {
+            "physical_effort_nm": 10.5,
+            "observed_effort_nm": 7.35
+          },
+          "balanced_correction": {
+            "physical_effort_nm": 8.823529411764703,
+            "observed_effort_nm": 6.176470588235292
+          }
+        }
+      }
+    }
+  ],
+  "closed_loop_episodes": 0
+}

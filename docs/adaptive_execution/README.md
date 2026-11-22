@@ -1,5 +1,8 @@
 # Online Actuator Adaptation: proposals and design reviews
 
+[Can the walker tell a weak motor from a weak sensor reading?](reviews/weak_motor_or_weak_sensor.md) A native G1 experiment reproduces two identical torque readings that require different interventions. The experiment note contains the figure, four signed trials, and the proposed walking comparison.
+
+
 The selected [proposal 0.3, revision 0.3.1](research_candidate/README.md) strengthens
 **Online Actuator Adaptation for Reliable Humanoid Locomotion** with an explicit
 uncertainty/command-hold correction rule, analytical reference, matched

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#143d3d">
+  <title>A weak motor or a low reading? · Online Actuator Adaptation</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172e31;
+      --muted: #455b5b;
+      --line: #cbd7cf;
+      --teal: #0a625b;
+      --ochre: #a24c19;
+      --paper: #fbfcf8;
+      --serif: "STIX Two Text", Georgia, serif;
+      --sans: "DM Sans", Inter, system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 var(--sans); }
+    main { margin: auto; max-width: 1050px; padding: 0 34px 28px; }
+    .mast, footer { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; align-items: baseline; }
+    .mast { padding: 21px 0; border-bottom: 1px solid var(--line); color: var(--teal); }
+    .mast strong { font: 600 20px var(--serif); }
+    .mast span, footer { font-size: 13px; }
+    h1, h2, p, fieldset { margin: 0; }
+    .intro { margin: 30px 0 24px; }
+    h1 { font: 500 50px/1.04 var(--serif); font-size: clamp(38px, 6vw, 64px); letter-spacing: -.045em; margin-bottom: 12px; }
+    .intro p { max-width: 770px; color: var(--muted); font-size: 18px; }
+    .controls { background: #f0f2e8; border: 1px solid #d7dbcd; border-radius: 8px; padding: 13px 20px 16px; display: flex; flex-wrap: wrap; gap: 15px 40px; align-items: end; }
+    fieldset { padding: 0; border: 0; min-width: 0; }
+    legend { padding: 0; margin-bottom: 7px; font-size: 13px; font-weight: 650; }
+    .options { display: flex; flex-wrap: wrap; gap: 5px; }
+    .options label { position: relative; display: inline-flex; cursor: pointer; }
+    .options input { position: absolute; opacity: 0; }
+    .options span { padding: 7px 11px; font: 600 13px var(--sans); color: #2a4947; background: #fafbf5; border: 1px solid #b3bfb4; border-radius: 5px; }
+    .options input:checked + span { color: #fff; background: #185d55; border-color: #185d55; }
+    .options input:focus + span, a:focus, summary:focus { outline: 3px solid #327dac; outline-offset: 2px; }
+    .panel { margin-top: 20px; border: 1px solid var(--line); border-radius: 8px; background: #fff; overflow: hidden; }
+    .reading { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 17px 22px; background: #e7f1ed; }
+    h2 { font: 500 26px/1.18 var(--serif); letter-spacing: -.02em; }
+    .reading p, .context { margin-top: 5px; color: var(--muted); font-size: 14px; }
+    .value { font: 600 30px/1.15 var(--sans); white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--teal); }
+    .value small { font-size: 15px; font-weight: 500; }
+    .physical { padding: 20px 22px 18px; }
+    .context { margin: 6px 0 16px; }
+    .row { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(190px, 1.4fr) 95px; gap: 18px; align-items: center; margin-top: 13px; }
+    .row strong, .row small { display: block; }
+    .row strong { font-size: 15px; font-weight: 650; }
+    .row small { margin-top: 2px; font-size: 12px; color: var(--muted); }
+    .amount { text-align: right; font: 650 19px var(--sans); font-variant-numeric: tabular-nums; }
+    .amount span { font-size: 12px; font-weight: 450; }
+    .track { position: relative; height: 27px; background: #f0f3ee; border-radius: 3px; }
+    .track::before { content: ""; position: absolute; left: 50%; width: 1px; top: 0; bottom: 0; background: #788d85; }
+    .bar { position: absolute; height: 9px; top: 9px; border-radius: 2px; background: var(--teal); }
+    .sensor .bar { background: var(--ochre); }
+    .target { position: absolute; height: 32px; top: -2px; border-left: 2px dashed #263d38; }
+    .key { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; color: var(--muted); font-size: 12px; margin-top: 17px; }
+    .key i { border-left: 2px dashed #263d38; height: 14px; display: inline-block; vertical-align: middle; margin-right: 5px; }
+    .interpret { padding: 12px 0 0; margin-top: 14px; border-top: 1px solid var(--line); font-size: 15px; }
+    .notes { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 24px 0 18px; }
+    .notes h2 { font-size: 22px; }
+    .notes p, details { color: var(--muted); font-size: 14px; margin-top: 6px; }
+    details { padding-top: 8px; }
+    summary { width: fit-content; color: var(--teal); cursor: pointer; }
+    footer { border-top: 1px solid var(--line); padding-top: 12px; }
+    a { color: var(--teal); text-underline-offset: 3px; }
+    .sr { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); }
+    @media (max-width: 680px) {
+      main { padding: 0 17px 20px; }
+      .mast { padding: 14px 0; }
+      .intro { margin: 22px 0 17px; }
+      .intro p { font-size: 16px; }
+      .controls { gap: 10px 24px; padding: 12px 14px 14px; }
+      .reading, .physical { padding: 14px; }
+      .reading h2, .physical h2 { font-size: 23px; }
+      .value { font-size: 24px; }
+      .row { grid-template-columns: 1fr auto; gap: 4px 8px; }
+      .row .track { grid-column: 1 / -1; grid-row: 2; }
+      .amount { grid-column: 2; grid-row: 1; }
+      .notes { grid-template-columns: 1fr; gap: 17px; }
+    }
+    @media (max-width: 400px) {
+      .reading { display: block; }
+      .value { display: block; margin-top: 7px; }
+      .options span { padding: 7px 9px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header class="mast"><strong>Online Actuator Adaptation</strong><span>Prasuna Chatla · Simulation experiment</span></header>
+  <section class="intro">
+    <h1>A weak motor or a low reading?</h1>
+    <p>A humanoid’s knee reports less torque than expected. Increasing its position target could restore the missing torque or drive a healthy joint too hard. Compare two simulated faults that give the controller the same reading.</p>
+  </section>
+  <form class="controls" id="controls" aria-label="Choose a recorded trial">
+    <fieldset><legend>Knee position error (rad)</legend><div class="options" id="errors"></div></fieldset>
+    <fieldset><legend>Command</legend><div class="options">
+      <label><input type="radio" name="command" value="leave_target"><span>Original target</span></label>
+      <label><input type="radio" name="command" value="apply_correction" checked><span>Motor-loss correction</span></label>
+      <label><input type="radio" name="command" value="balanced_correction"><span>Minimax correction</span></label>
+    </div></fieldset>
+  </form>
+  <noscript><p>With a +0.10 rad error, the corrected sensor reading was +7.35 N·m in both trials. Physical torque was +7.35 N·m with the weak motor and +10.50 N·m with the miscalibrated sensor.</p></noscript>
+  <section class="panel" aria-labelledby="physical-title">
+    <div class="reading">
+      <div><h2>What the controller reads</h2><p>Reported effort in both conditions</p></div>
+      <strong class="value"><span id="reading">+7.35</span> <small>N·m</small></strong>
+    </div>
+    <div class="physical">
+      <h2 id="physical-title">What the knee actually delivers</h2>
+      <p id="context" class="context"></p>
+      <div class="row">
+        <div><strong>Weak motor</strong><small>70% motor gain · calibrated sensor</small></div>
+        <div class="track" aria-hidden="true"><i class="bar" id="motor-bar"></i><i class="target"></i></div>
+        <div class="amount"><output id="motor">+7.35</output> <span>N·m</span></div>
+      </div>
+      <div class="row sensor">
+        <div><strong>Healthy motor</strong><small>100% motor gain · sensor reads 70%</small></div>
+        <div class="track" aria-hidden="true"><i class="bar" id="sensor-bar"></i><i class="target"></i></div>
+        <div class="amount"><output id="sensor">+10.50</output> <span>N·m</span></div>
+      </div>
+      <div class="key"><span><i></i>Healthy reference torque</span><span>Center line is zero. The scale runs from −12 to +12 N·m.</span></div>
+      <p class="interpret" id="interpret" aria-live="polite" aria-atomic="true"></p>
+      <p class="context" id="worst"></p>
+    </div>
+  </section>
+  <div class="notes">
+    <section><h2>Why both readings agree</h2>
+      <p>In these stationary, unclipped trials, reported effort depends on motor gain multiplied by sensor scale. A factor of 0.70 in either produces the same observation. If a healthy joint must keep its exact torque, the controller must abstain at this state. The minimax correction allows some healthy-joint error and chooses the command that minimizes the larger torque error across these two explanations.</p>
+      <details><summary>Measurement details</summary><p>Native MuJoCo 3.16.0, Unitree G1 left knee, nominal stiffness 75 N·m/rad. The first 20 ms command is limited to 2 rad/s and 0.20 rad total displacement. The torque sampler is synchronized with the joint state and reads after joint limits. The experiment used zero walking episodes.</p></details>
+    </section>
+    <section><h2>What walking must establish</h2>
+      <p>First verify that repeated healthy runs agree. Then test whether joint motion lets an online controller distinguish true gain loss from a sensor error during walking. Compare falls, tracking error and unnecessary correction with the same command limits.</p>
+    </section>
+  </div>
+  <footer><span>Fixed-state G1 torque replay · Four recorded trials</span><a href="https://github.com/pchatla-arch/anticipatory-balance/pull/28">Experiment record and source code</a></footer>
+</main>
+<script type="application/json" id="probe">{"experiment":"matched-state effort-scale ambiguity, v1.1","backend":"native MuJoCo","mujoco_version":"3.16.0","joint":"left_knee_joint","kp_nm_rad":75.0,"control_period_s":0.02,"position_bound_rad":0.2,"rate_bound_rad_s":2.0,"gain_loss":0.7,"sensor_scale_on_healthy_plant":0.7,"cases":[{"error_rad":-0.1,"delta_rad":-0.04,"balanced_delta_rad":-0.017647058823529415,"healthy_reference_nm":-7.5,"worlds":{"weak_motor":{"leave_target":{"physical_effort_nm":-5.25,"observed_effort_nm":-5.25},"apply_correction":{"physical_effort_nm":-7.350000000000001,"observed_effort_nm":-7.350000000000001},"balanced_correction":{"physical_effort_nm":-6.176470588235297,"observed_effort_nm":-6.176470588235297}},"scaled_sensor":{"leave_target":{"physical_effort_nm":-7.5,"observed_effort_nm":-5.25},"apply_correction":{"physical_effort_nm":-10.5,"observed_effort_nm":-7.35},"balanced_correction":{"physical_effort_nm":-8.82352941176471,"observed_effort_nm":-6.176470588235297}}}},{"error_rad":-0.05,"delta_rad":-0.021428571428571432,"balanced_delta_rad":-0.008823529411764707,"healthy_reference_nm":-3.75,"worlds":{"weak_motor":{"leave_target":{"physical_effort_nm":-2.625,"observed_effort_nm":-2.625},"apply_correction":{"physical_effort_nm":-3.7500000000000036,"observed_effort_nm":-3.7500000000000036},"balanced_correction":{"physical_effort_nm":-3.088235294117645,"observed_effort_nm":-3.088235294117645}},"scaled_sensor":{"leave_target":{"physical_effort_nm":-3.750000000000007,"observed_effort_nm":-2.625000000000005},"apply_correction":{"physical_effort_nm":-5.357142857142861,"observed_effort_nm":-3.7500000000000027},"balanced_correction":{"physical_effort_nm":-4.411764705882355,"observed_effort_nm":-3.0882352941176485}}}},{"error_rad":0.05,"delta_rad":0.021428571428571432,"balanced_delta_rad":0.008823529411764707,"healthy_reference_nm":3.75,"worlds":{"weak_motor":{"leave_target":{"physical_effort_nm":2.625,"observed_effort_nm":2.625},"apply_correction":{"physical_effort_nm":3.750000000000007,"observed_effort_nm":3.750000000000007},"balanced_correction":{"physical_effort_nm":3.088235294117645,"observed_effort_nm":3.088235294117645}},"scaled_sensor":{"leave_target":{"physical_effort_nm":3.75,"observed_effort_nm":2.625},"apply_correction":{"physical_effort_nm":5.357142857142861,"observed_effort_nm":3.7500000000000027},"balanced_correction":{"physical_effort_nm":4.411764705882355,"observed_effort_nm":3.0882352941176485}}}},{"error_rad":0.1,"delta_rad":0.04,"balanced_delta_rad":0.017647058823529415,"healthy_reference_nm":7.5,"worlds":{"weak_motor":{"leave_target":{"physical_effort_nm":5.25,"observed_effort_nm":5.25},"apply_correction":{"physical_effort_nm":7.350000000000001,"observed_effort_nm":7.350000000000001},"balanced_correction":{"physical_effort_nm":6.176470588235297,"observed_effort_nm":6.176470588235297}},"scaled_sensor":{"leave_target":{"physical_effort_nm":7.5,"observed_effort_nm":5.25},"apply_correction":{"physical_effort_nm":10.5,"observed_effort_nm":7.35},"balanced_correction":{"physical_effort_nm":8.823529411764703,"observed_effort_nm":6.176470588235292}}}}],"closed_loop_episodes":0}</script>
+<script>
+  'use strict';
+  const probe = JSON.parse(document.getElementById('probe').textContent);
+  const controls = document.getElementById('controls');
+  const signed = (value, digits = 2) =>
+    (value < -1e-9 ? '−' : '+') + Math.abs(value).toFixed(digits);
+  const text = (id, value) => { document.getElementById(id).textContent = value; };
+  const position = torque => 50 + torque * 100 / 24;
+
+  for (const [index, trial] of probe.cases.entries()) {
+    const label = document.createElement('label');
+    const input = document.createElement('input');
+    const caption = document.createElement('span');
+    input.type = 'radio';
+    input.name = 'trial';
+    input.value = String(index);
+    input.checked = index === probe.cases.length - 1;
+    caption.textContent = signed(trial.error_rad);
+    label.append(input, caption);
+    document.getElementById('errors').appendChild(label);
+  }
+
+  function drawTorque(id, torque) {
+    text(id, signed(torque));
+    const bar = document.getElementById(id + '-bar');
+    bar.style.left = Math.min(50, position(torque)) + '%';
+    bar.style.width = Math.abs(position(torque) - 50) + '%';
+  }
+
+  function render() {
+    const trial = probe.cases[Number(controls.elements.trial.value)];
+    const command = controls.elements.command.value;
+    const motorLoss = command === 'apply_correction';
+    const minimax = command === 'balanced_correction';
+    const motor = trial.worlds.weak_motor[command];
+    const sensor = trial.worlds.scaled_sensor[command];
+    const reference = trial.healthy_reference_nm;
+    const correction = motorLoss ? trial.delta_rad : minimax ? trial.balanced_delta_rad : 0;
+    text('reading', signed(motor.observed_effort_nm));
+    text('context', 'Healthy torque reference ' + signed(reference) +
+         ' N·m. Target adjustment ' + signed(correction, 3) + ' rad.');
+    drawTorque('motor', motor.physical_effort_nm);
+    drawTorque('sensor', sensor.physical_effort_nm);
+    for (const target of document.querySelectorAll('.target')) {
+      target.style.left = position(reference) + '%';
+    }
+    const motorError = Math.abs(reference - motor.physical_effort_nm).toFixed(2);
+    const sensorError = Math.abs(reference - sensor.physical_effort_nm).toFixed(2);
+    text('interpret', motorLoss || minimax
+      ? 'After correction, the weak motor is ' + motorError +
+        ' N·m from its healthy reference. The healthy motor overshoots by ' + sensorError + ' N·m.'
+      : 'At the original target, the weak motor falls short by ' + motorError +
+        ' N·m. The healthy motor already delivers the reference torque.');
+    function worstError(action) {
+      const errors = Object.values(trial.worlds).map(world =>
+        Math.abs(reference - world[action].physical_effort_nm));
+      return Math.max(...errors).toFixed(2);
+    }
+    text('worst', 'Across the two faults, the largest absolute torque error is ' +
+         worstError('leave_target') + ' N·m at the original target, ' +
+         worstError('apply_correction') + ' N·m with motor-loss correction and ' +
+         worstError('balanced_correction') + ' N·m with minimax correction.');
+  }
+  controls.addEventListener('change', render);
+  render();
+</script>
+</body>
+</html>
