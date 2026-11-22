@@ -1,0 +1,61 @@
+{
+  "work_package": "1.2",
+  "scope": "CPU algebra and scalar-reference parity. Closed-loop walking and CUDA behavior require separate evaluation.",
+  "integration_base": "f5970231bed0e1be1eadc951137c2515a14efeb0",
+  "files_sha256": {
+    "foresight/adaptive/projection.py": "d38a00fc5ed3349d7333380cb2e54bfde617d4b6ac509a4aa28931aba1dff479",
+    "tests/test_adaptive_projection.py": "3f74b93c7cdb554d6f2d054a2e4b7ed8b540f1c3e5651392e7bdbdeda5cbee97",
+    "docs/adaptive_execution/research_candidate/analytical_check.json": "b6bfd867bcbc96ef9e5e2f3032fffe7f56ee440bf66c75798ad3c3cb171229e0"
+  },
+  "reference_cases": 10,
+  "reference_invalid_cases": 2,
+  "reference_sweep_points": 71,
+  "runs": [
+    {
+      "command": "JAX_PLATFORMS=cpu JAX_ENABLE_X64=0 python -m unittest discover -s tests -p test_adaptive_projection.py -v",
+      "passed": 7,
+      "result": "OK",
+      "tests": [
+        "test_hold_expands_with_age_and_rejects_negative_elapsed",
+        "test_jump_rejected_and_explicit_restart_from_prior",
+        "test_signed_measurement_weak_excitation_saturation_and_contradiction",
+        "test_all_published_cases_as_environment_joint_batch",
+        "test_invalid_inputs_and_separate_causal_point",
+        "test_point_gain_uses_decision_time_interval",
+        "test_published_interval_sweep"
+      ]
+    },
+    {
+      "command": "JAX_PLATFORMS=cpu JAX_ENABLE_X64=1 python -m unittest discover -s tests -p test_adaptive_projection.py -v",
+      "passed": 7,
+      "result": "OK",
+      "tests": [
+        "test_hold_expands_with_age_and_rejects_negative_elapsed",
+        "test_jump_rejected_and_explicit_restart_from_prior",
+        "test_signed_measurement_weak_excitation_saturation_and_contradiction",
+        "test_all_published_cases_as_environment_joint_batch",
+        "test_invalid_inputs_and_separate_causal_point",
+        "test_point_gain_uses_decision_time_interval",
+        "test_published_interval_sweep"
+      ]
+    }
+  ],
+  "runtime": {
+    "python": "3.12.14",
+    "watched_packages_matching_pod_lock": {
+      "mujoco": "3.16.0",
+      "mujoco-mjx": "3.16.0",
+      "warp-lang": "1.18.0",
+      "jax": "0.12.0.1",
+      "jaxlib": "0.12.0.1",
+      "brax": "0.14.2",
+      "flax": "0.12.10",
+      "optax": "0.2.8",
+      "orbax-checkpoint": "0.12.8",
+      "numpy": "2.5.4",
+      "ml-collections": "1.1.0",
+      "etils": "1.14.0"
+    },
+    "playground_lock_sha256": "fb6ce33c1401df37e9f49b2df6a6796691c44c0259f7faff93624ac028a5c089"
+  }
+}
