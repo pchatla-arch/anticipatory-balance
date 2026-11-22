@@ -194,6 +194,8 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
     requested and effective offsets, reason codes, per-step loss and the alive mask, for
     estimator-convergence and correction-timeline figures.
     """
+    if trace_authority_packets and not trace:
+        raise ValueError("authority packet capture requires trace=True")
     from foresight.eval import rollout as R
 
     nu = env.action_size
@@ -233,7 +235,7 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
             rls = jax.vmap(lambda s, p, m: E.rls_update(s, p, m, kp, method.rls))(rls, pkt_j, mask[:, j])
             if method.candidate is not None:
                 cand = method.candidate.update(cand, pkt_j, mask[:, j])
-        return mstate._replace(rls=rls, queue=queue, candidate=cand), due, mask
+        return mstate._replace(rls=rls, queue=queue, candidate=cand), packets, due, mask
 
     def method_correction(mstate, reference, t, simulated):
         if method.name == "oracle_external":
@@ -275,7 +277,7 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
             "loss_sum": jp.zeros(n), "progress": jp.zeros(n), "exposed": jp.zeros(n, jp.int32),
             "bound_sum": jp.zeros(n), "control_clip_sum": jp.zeros(n),
             "max_correction": jp.zeros(n), "max_slew": jp.zeros(n), "max_force": jp.zeros(n),
-            "healthy_steps": jp.zeros(n, jp.int32), "harmful_sum": jp.zeros(n),
+            "healthy_steps": jp.zeros(n, jp.int32), "observed_steps": jp.zeros(n, jp.int32), "harmful_sum": jp.zeros(n),
             "applied_sum": jp.zeros(n), "withdrawal_step": jp.full(n, -1, jp.int32),
             "gain_err_sum": jp.zeros(n), "gain_err_steps": jp.zeros(n, jp.int32),
             "reason_apply": jp.zeros(n, jp.int32), "lost_packets": jp.zeros(n, jp.int32),
@@ -307,8 +309,8 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
                 # Pre-command RLS and issued interface state. Truth channels are
                 # observer-only and never passed to any practical control method.
                 decision_rls = mstate.rls
-            if uses_estimator or method.candidate is not None or trace_authority_packets:
-                mstate, due, release_mask = method_update(mstate, next_state.info, t, sensor_keys)
+            if uses_estimator or method.candidate is not None or trace:
+                mstate, measured, due, release_mask = method_update(mstate, next_state.info, t, sensor_keys)
             finite = (finite_rows(next_state.data.qpos) & finite_rows(next_state.data.qvel)
                       & finite_rows(next_state.data.xpos) & finite_rows(next_state.data.sensordata)
                       & finite_rows(next_state.obs["state"]) & action_finite)
@@ -317,7 +319,11 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
             observed = active & ~invalid
             first_term = terminal & (acc["term_step"] < 0)
             after_onset = t >= onset
-            plant_healthy = (t < onset) | (t >= ret)
+            # The plant is healthy outside the scheduled window, and at every step when the
+            # family changes no actuator at all (healthy, sensor and damping confounds keep
+            # every gain at 1): harmful intervention must then count the whole episode (AE-011).
+            no_actuator_change = jp.all(gain_true == 1.0, axis=-1)
+            plant_healthy = (t < onset) | (t >= ret) | no_actuator_change
             exposed = observed & after_onset
             error = velocity(next_state.data) - cmd[:, :2]
             loss = jp.minimum(jp.sum(jp.square(error), axis=-1), LOSS_CAP)
@@ -351,6 +357,7 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
                 "max_slew": jp.maximum(acc["max_slew"], jp.where(observed, slew, 0.0)),
                 "max_force": jp.maximum(acc["max_force"], jp.where(observed, force, 0.0)),
                 "healthy_steps": acc["healthy_steps"] + (observed & plant_healthy).astype(jp.int32),
+                "observed_steps": acc["observed_steps"] + observed.astype(jp.int32),
                 "harmful_sum": acc["harmful_sum"] + jp.where(observed & plant_healthy, eff_mag, 0.0),
                 "applied_sum": acc["applied_sum"] + jp.where(observed, eff_mag, 0.0),
                 "withdrawal_step": jp.where(withdrawn, t, acc["withdrawal_step"]),
@@ -366,7 +373,12 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
                 ys = {"g_hat": g_hat, "requested": next_state.info["adaptive_step_delta"],
                       "effective": effective, "reason": mstate.reason, "loss": loss,
                       "alive": observed, "gain_true_active": ~plant_healthy,
-                      "command": cmd, "velocity": velocity(next_state.data)}
+                      "command": cmd, "velocity": velocity(next_state.data),
+                      # The measured packet captured at the end of this step (WP 1.3 replay input).
+                      "pkt_arrival": measured.arrival_step, "pkt_target": measured.target_rad,
+                      "pkt_position": measured.position_rad, "pkt_velocity": measured.velocity_rad_s,
+                      "pkt_torque": measured.torque_nm, "pkt_valid": measured.valid,
+                      "reference": reference, "q_true": jax.vmap(env.measured_joint_positions)(simulated.data)}
             if trace_authority_packets:
                 ys.update(authority_reference=reference,
                           authority_previous_request=prev_delta,
@@ -414,7 +426,7 @@ def episode_rows(result, scenario, family, method, telemetry_name, split, phase=
             "max_slew_rad_s": float(result["max_slew"][i]),
             "max_abs_actuator_force_nm": float(result["max_force"][i]),
             "harmful_offset_rad": float(result["harmful_offset_rad"][i]),
-            "mean_applied_offset_rad": float(result["applied_sum"][i]) / max(int(result["exposed"][i]) + int(result["healthy_steps"][i]), 1),
+            "mean_applied_offset_rad": float(result["applied_sum"][i]) / max(int(result["observed_steps"][i]), 1),
             "withdrawal_steps": int(result["withdrawal_steps"][i]),
             "gain_abs_error": float(result["gain_abs_error"][i]),
             "apply_steps": int(result["reason_apply"][i]),

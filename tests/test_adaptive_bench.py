@@ -139,6 +139,17 @@ class ClosedLoopTests(unittest.TestCase):
         self.assertTrue(np.all(est["released_packets"] >= 55), "nearly every capture is released with zero latency")
         self.assertTrue(np.all(est["lost_packets"] == 0))
         gate = self.run_method("heuristic_gate", telemetry=S.DECLARED)
+        # AE-011: with no actuator change the plant is healthy at every step, so the harmful
+        # offset must be averaged over all observed steps, not just outside the schedule window.
+        healthy_family = B.ScenarioFamily("test_healthy", gain=1.0, onset_range=(20, 21))
+        hs = B.draw_scenarios(healthy_family, 501, 2, self.env)
+        hsub = {k: jp.asarray(v) for k, v in hs.items() if k != "ids"}
+        execute = B.build_bench_rollout(self.env, self.policy, B.METHODS["estimated_inverse"], S.DECLARED,
+                                        B.WALK_TURN_STOP_RESUME, 60)
+        import jax
+        res = jax.device_get(execute(self.initial, hsub))
+        alive_steps = np.where(res["term_step"] >= 0, res["term_step"] + 1, 60)
+        np.testing.assert_array_equal(res["healthy_steps"], alive_steps)
         self.assertTrue(np.all(np.isfinite(gate["postfault_loss"])))
         self.assertTrue(np.all(gate["max_correction"] <= 0.2 + 1e-5))
         self.assertTrue(np.all(gate["max_slew"] <= 2.0 + 1e-3))

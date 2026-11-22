@@ -1,0 +1,28 @@
+{
+  "split": "dev",
+  "families": [
+    "gain_085",
+    "gain_070",
+    "gain_055"
+  ],
+  "methods": [
+    "none"
+  ],
+  "telemetry": [
+    "declared",
+    "exact"
+  ],
+  "episodes": 8,
+  "steps": 300,
+  "schedule": "walk_turn_stop_resume",
+  "reference_method": "heuristic_gate",
+  "paired_metrics": [
+    "postfault_loss",
+    "harmful_offset_rad",
+    "progress_m"
+  ],
+  "noninferiority_margins_loss": {},
+  "primary": "paired mean difference in postfault_loss, candidate minus heuristic_gate, on gain families",
+  "secondary": "harmful_offset_rad on healthy and nuisance families; fall_rate; withdrawal_steps on return families",
+  "registered_at": "2026-11-22T08:15:45Z"
+}
