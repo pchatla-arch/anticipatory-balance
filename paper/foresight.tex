@@ -10,38 +10,38 @@
 \setlength{\parskip}{1pt}
 \setlength{\columnsep}{18pt}
 
-\title{Foresight: Latency-Aware Anticipatory Bracing for Humanoids\\from Depth Perception}
+\title{Foresight: Selective Anticipatory Bracing\\for a Walking Humanoid under Perception Latency}
 \author{Prasuna Chatla\\ Stanford University, AA228/CS238 (Autumn 2026) \\ \texttt{pchatla@stanford.edu}}
-\date{Manuscript for author review}
+\date{Revised manuscript for author review}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-A walking humanoid sees an object approaching. Bracing early can prevent a fall, but every false alarm interrupts walking and every extra camera frame costs time. Foresight formulates this choice as a partially observable Markov decision process over two frozen skills on a simulated Unitree G1. A belief estimates the object's trajectory from delayed, intermittent detections and retains uncertainty about its mass. Controllers using this belief and a time-to-contact threshold see the same replayed disturbances. On two trained skill pairs, an oracle that braces 0.5\,s before scheduled impact reduced failure on intended hits from 68.6\% to 35.6\% and from 67.6\% to 46.9\%. On held-out scenarios with 100\,ms added delay, a time-to-contact threshold had fewer failures than the lead-conditioned belief rule (41.4\% versus 46.6\%) and spent longer braced (0.624 versus 0.480\,s per episode). In a retrospective comparison at roughly 0.48\,s braced per episode, the belief rule had 46.6\% failures and a randomized threshold baseline had 47.5\%. The paired interval included equal failure risk, while near-miss bracing fell from 46.3\% to 26.7\%. In a separate rendered-depth comparison, the threshold braced on fewer near-misses but failed on more intended hits than with the parametric detector.
+When does a walking humanoid benefit from interrupting its gait to brace for a possible impact? We study the decision on a simulated Unitree G1 using two frozen PPO skills and paired, replayed projectile encounters. A privileged rule bracing 0.5\,s before scheduled hits reduced failure from 68.6\% to 35.6\% on one skill pair and from 67.6\% to 46.9\% on a second. The main sensor-driven experiments use intermittent, delayed position detections from a parametric model. At 100\,ms added delay on held-out scenarios, a fixed time-to-contact threshold had fewer failures than a lead-conditioned belief rule (582 versus 655 of 1,407 intended hits). It spent longer braced (0.624 versus 0.480\,s per encounter) and interrupted more intended near-misses (387 versus 171 of 641). Comparing deterministic settings with similar recorded durations on development data revealed a trade-off between failure and unnecessary preparation. A prospective nine-threshold CPU sweep selected 0.24\,s. On 32 independent encounters both rules failed on 6 of 19 intended hits, but their mean applied durations differed by 52.5\,ms (paired 95\% interval $[-86.4,+191.4]$\,ms). Duration equivalence within $\pm20$\,ms was unresolved. An auxiliary simulated depth-camera experiment demonstrates that the switching loop can consume geometric detections. The evidence supports timed bracing as a useful skill and quantifies its cost. A general advantage for belief-based timing at equal preparation duration remains unestablished.
 \end{abstract}
 
 \section{Introduction}
-Legged robots recover from pushes reactively: a learned or model-based balance controller responds once the disturbance is felt. A robot that can see the disturbance coming has an option the reactive controller does not: to prepare. Preparation is not free. A braced posture does not walk, it needs time to form, and if the object misses the cost was paid for nothing. The decision of \emph{whether and when} to prepare is therefore sequential and made under uncertainty about the object's path, timing and mass, from observations that arrive late and only sometimes.
+A walking humanoid sees an object moving across its path. The object might strike it or pass on either side. A brace can stabilize the robot during impact, but starting too early interrupts locomotion, and starting too late leaves little time for the new posture to form. We study the decision to interrupt a frozen walking policy. The experimental question is whether an estimate of impact risk helps the robot allocate a given amount of preparation.
 
-Two controllers can prevent different numbers of falls simply because one spends longer braced. The decision question is whether estimating impact risk helps allocate a limited amount of preparation. We first measure what a privileged timing rule achieves with fixed walking and bracing policies. We then compare rules that use the same delayed observations and ask how much of their difference remains at comparable preparation time.
+There are three comparisons. First, a controller with advance knowledge of scheduled hits tests whether timed bracing has any value with the available skills. Second, a threshold and belief-based rules receive observations from the same sensor model on paired, replayed disturbances. Their actions can change subsequent detections. We report failure, contact, unnecessary preparation, brace duration and forward progress together. Third, we compare preparation budgets. Historical curves and a randomized sensitivity analysis use archived counters. A separate deterministic sweep selects by duration alone and measures the action actually applied through termination. Rendered depth supplies an additional test of the sensor interface. The principal policy comparisons use the parametric detector.
 
 \section{Related work}
-Push recovery for humanoids is classically analysed with the linear inverted pendulum and the capture point \citep{pratt2006capture,koolen2012capturability}: the zero-step capturable region gives the impulse a fixed support can absorb, and stepping extends it. We use the zero-step budget as an analytical reference, not as a controller. Learned locomotion policies trained with domain randomization and random pushes \citep{zakka2025playground} recover from moderate disturbances reactively; our walker is Playground's G1 joystick policy trained in our impact environment. Sequential decision making under partial observability is the POMDP framework \citep{kaelbling1998pomdp,kochenderfer2022algorithms}; QMDP \citep{littman1995qmdp} and myopic value-of-information rules are the standard approximations when the belief is tractable but the full problem is not. Falling-motion control uses posture to reduce damage during a fall \citep{fujiwara2002ukemi}. Maffei et al. studied how a cue preceding a disturbance can drive anticipatory postural control in an inverted pendulum \citep{maffei2017anticipatory}. Our decision involves a walking humanoid receiving delayed observations of objects that can miss. The controller pays for preparation even when no contact occurs.
+The capture-point model describes impulses that a fixed support can absorb and how stepping expands that region \citep{pratt2006capture,koolen2012capturability}. Deep reinforcement learning supplies reactive walking policies \citep{zakka2025playground}; anticipatory postural control has also been studied with advance cues in an inverted pendulum \citep{maffei2017anticipatory}. We use a POMDP \citep{kaelbling1998pomdp,kochenderfer2022algorithms} to study a decision these skills leave open: whether to interrupt walking when an approaching object may miss. This differs from selecting a damage-reducing posture once a fall is underway \citep{fujiwara2002ukemi}.
 
 \section{Problem}
 \paragraph{Setting.} A Unitree G1 walks at a commanded forward velocity (0.5\,m/s). A rigid sphere (radius 0.15\,m, mass $m\in[4,16]$\,kg, speed $v\in[3,8]$\,m/s) is launched from 3--5\,m, from an azimuth within $\pm60^\circ$ of the heading, on a straight gravity-compensated path aimed at the pelvis led by the base velocity, arriving 1.5--3.5\,s into the episode. With probability 0.3 the path is offset laterally by 0.6\,m in the decision-frontier evaluation (an intended near-miss). Contact is detected by sensors on the torso, pelvis and thighs; failure is the walker's termination condition or sustained tilt.
 
 \paragraph{Actions and skills.} At 50\,Hz the decision layer chooses CONTINUE or BRACE. CONTINUE runs the frozen walker. BRACE zeroes the velocity command and runs a second frozen policy trained to stand low and wide with both feet planted; once started it is held for a minimum commitment $\tau_{\text{commit}}=0.3$\,s. The myopic rule uses a nominal time to form the posture, $\tau_{\text{brace}}$.
 
-\paragraph{POMDP.} The state includes the robot's balance state and the object's position, velocity and mass. The controller tracks its active skill and remaining commitment. Observations: detections of the object's position with capture timestamps, delivered every $T_{\text{det}}$ with latency $\ell$, range-dependent noise, a field of view and random misses, or nothing. Reward per interval: $-c_{\text{track}}$ for lost tracking and $-c_{\text{prep}}$ while braced; a one-time $-c_{\text{fall}}$ on failure. The main outcomes are failure on intended hits and mean recorded time in BRACE over all episodes. False preparation counts an intended near-miss episode if the controller ever committed. Forward progress measures the locomotion cost. We report these quantities separately because the relative cost of a fall and an interrupted walk depends on the application.
+\paragraph{POMDP and endpoints.} The hidden state includes robot balance and object position, velocity and mass. Observations are delayed position detections or misses. The policy carries its active skill and elapsed commitment. Its costs include loss of tracking, time spent braced and a terminal failure penalty. For rule comparisons we retain the \emph{scheduled} hit or near-miss label assigned before execution. Contact can change when the robot changes posture. Failure among all scheduled hits therefore measures the whole intervention; failure given contact describes a policy-dependent subset. In the decision frontier, progress sums horizontal pelvis displacement along the instantaneous heading through first failure or horizon. The separate depth evaluator projects displacement onto the initial heading. Unnecessary preparation means at least one brace in a scheduled near-miss, including encounters where contact happened despite the offset.
 
 \section{Method}
 \paragraph{Skills.} The walker uses the G1 joystick task in MuJoCo Playground \citep{todorov2012mujoco,zakka2025playground} and proximal policy optimization (PPO) \citep{schulman2017ppo}. Training used the \href{https://github.com/google/brax}{Brax} implementation with projectiles present (200M steps, 4096 environments, about 20\,min on an RTX~6000~Ada; three seeds, evaluation reward 7.32--7.62). BRACE~v1 was trained from standing resets. BRACE~v2 was trained with the frozen walker in control for the first 0--2\,s of every episode and impacts present afterwards, so that it learns to take over from walking states; its reward is Playground's stand-still tracking with a lower base-height target (0.65\,m), a wider stance target (0.35\,m) and a both-feet-down term.
 
 \paragraph{Paired evaluation.} Within a frozen skill pair, decision rules share reset keys and replay the same world-space projectile trajectory (launch position and velocity recorded from a CONTINUE reference rollout), so that the intended disturbance is fixed while the resulting contact may change. Without this, a policy that stops walking also leaves the aim point, and ``dodging by stopping'' masquerades as recovery. No-projectile controls isolate the cost of switching; a zero-command walker isolates stopping from the posture. The actor's command observation is made consistent with its mode in the step it is chosen.
 
-\paragraph{Perception.} A parametric detector delivers the object's world position every $T_{\text{det}}$ steps, captured $\ell$ steps earlier, with noise $\sigma_0+\sigma_1 r$, a 120$^\circ$ field of view and a 5\% miss probability; the rendered-depth measurement provides a separate calibration (Section~\ref{sec:e8}).
+\paragraph{Perception.} In the primary experiment, a parametric detector delivers the object's world position every $T_{\text{det}}$ steps, captured $\ell$ steps earlier, with noise $\sigma_0+\sigma_1 r$, a 120$^\circ$ field of view and a 5\% miss probability. We characterize a separate head-mounted rendered-depth detector in Section~\ref{sec:e8}.
 
 \paragraph{Belief.} The filter models free flight with a constant velocity and a Gaussian position--velocity belief. A detection captured $\ell$ steps ago is a \emph{linear} measurement of the current state, $z = p_t - \ell\,\Delta t\, v_t + \epsilon$, so the filter assimilates a late detection under this model without storing past beliefs. The mass is unobservable from position tracks and is carried as samples from the prior. Belief statistics (hit probability $p$, expected time to contact $\E_b[t_{\text{hit}}]$, expected momentum) are Monte-Carlo over the Gaussian and the mass samples, in the robot's frame of commanded motion, with a decision radius $r_c=0.45$\,m about the pelvis axis.
 
@@ -53,24 +53,44 @@ p\,\E_b[\Delta P(J)]\,c_{\text{fall}} &> c_{\text{prep}}\,(\E_b[t_{\text{hit}}]+
 \end{aligned}
 \label{eq:rule}
 \end{equation}
-where $\Delta P(J)=P(\text{fall}\mid\text{CONTINUE},J)-P(\text{fall}\mid\text{BRACE},J)$ is a logistic response model in $\log J$ fitted on the oracle data (Section~\ref{sec:gate}) and averaged over the mass mixture through $J=m|v|$. Read: brace when the expected failure risk removed outweighs the cost of being braced until the impact (plus a hold $h$), and only if the posture still has time to form. The \emph{oracle} switches at a fixed lead before the true arrival. The oracle uses a timed release. The sensor-driven rules depend on the estimated passage time or loss of observations.
+where $\Delta P(J)=P(\text{fall}\mid\text{CONTINUE},J)-P(\text{fall}\mid\text{BRACE},J)$ is a logistic response model in $\log J$ fitted on the oracle data (Section~\ref{sec:gate}) and averaged over the mass mixture through $J=m|v|$. Here $h=0.50$\,s is the cost model's assumed hold. The lead-conditioned rule instead evaluates a lead-specific response and permits late commitments. The privileged reference braces on scheduled hits from 0.50\,s before nominal arrival through 0.50\,s after it.
 
-\paragraph{Analytical reference.} For standing contacts, the zero-step capture-point budget $J_{\max}=m_r\,\omega\,(x_{\text{edge}}-x_{\text{cp}})$ with $\omega=\sqrt{g/z}$ and $x_{\text{cp}}=x+\dot x/\omega$ from the measured CoM and feet is compared with the incoming momentum.
+\paragraph{Commitment and release.} Let $w_k$ be the current sensor-driven start request, $B_{k-1}$ the preceding BRACE indicator, $n_{k-1}$ its consecutive active intervals and $d_k$ the most recent valid delivery index including the current step. In the final rule, let $P_k$ indicate an initialized, finite signed time to closest approach $u_k<-0.30$\,s and $S_k$ indicate $k-d_k>50$. The applied action at step $k$ is
+\[
+\begin{aligned}
+ B_k={}&(\neg B_{k-1}\land w_k)\ \lor\\[-2pt]
+       &\big[B_{k-1}\land (n_{k-1}<15\ \lor\ (\neg P_k\land\neg S_k))\big].
+\end{aligned}
+\]
+A start sets $n_k=1$; continuing increments the counter, and walking resets it to zero. At 50\,Hz the earliest release follows 15 applied intervals. Staleness first triggers 51 steps after the last valid delivery. For horizontal object position $p$, pelvis position $x$ and relative velocity $v$ (filtered object velocity minus the robot's current commanded forward velocity along its heading), $u_k=(x-p)^\top v/(v^\top v+10^{-6})$. The sign distinguishes an approaching object from one already past. Leaving the start condition does not by itself terminate a brace. Earlier release versions are identified with their results below.
+
+\paragraph{Lead conditioning and one-step lookahead.}\label{sec:voi}
+The lead-conditioned response model is $P(\text{fall}\mid\text{contact},\text{BRACE},J,\ell)=\sigma(a+b\log J+c\min(\ell,0.5))$. Its fit used oracle leads of 0.1, 0.2, 0.3 and 0.5\,s and yielded $c=-4.3$ per second. The rule scores a brace at its estimated lead and permits a commitment closer to impact than the posture-formation time. The Session G one-step rule compares bracing now with waiting until the next scheduled delivery and then choosing again. It samples sixteen hypothetical observations with the configured capture delay and includes a no-detection branch using the assumed miss probability. The blind-wait comparator predicts forward without the hypothetical measurement.
+
 
 \section{Experiments}
+\begin{table*}[t]\centering\small\setlength{\tabcolsep}{5pt}
+\caption{E18h. Frozen policy settings, 10\,Hz parametric detector, 100\,ms added delay. Counts use the scheduled strata in the header. The reactive walker is sensor-independent and evaluated once on the shared scenarios. The three belief-based gates use cost 0.05. BRACE time and progress are means over all 2,048 episodes. Contact is the archive's latched episode indicator; contact can include post-failure steps.}\label{tab:heldout}
+\begin{tabular}{lrrrrrrr}\toprule
+& \multicolumn{2}{c}{1,407 scheduled hits} & \multicolumn{3}{c}{641 scheduled near-misses} & \multicolumn{2}{c}{All encounters}\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-8}
+Controller & Contacts & Failures & Contacts & Failures & Prepared & BRACE (s) & Progress (m) \\ \midrule
+Reactive walker & 1,379 & 952 & 2 & 0 & 0 & 0.000 & 1.454 \\
+Threshold, 0.30 s & 1,323 & 582 & 2 & 0 & 387 & 0.624 & 1.491 \\
+Lead-conditioned belief & 1,323 & 655 & 2 & 0 & 171 & 0.480 & 1.502 \\
+Blind wait & 1,332 & 667 & 3 & 0 & 147 & 0.453 & 1.504 \\
+Observation lookahead & 1,337 & 677 & 3 & 0 & 146 & 0.451 & 1.499 \\ \bottomrule
+\end{tabular}
+\end{table*}
+
+
 \subsection{Disturbance regime and the capture-point reference}
-On the originally proposed range (1--8\,kg, 1--4\,m/s) the walker failed in 0.46\% of 4,096 scheduled hits, and only 31\% made contact, so that range does not test anticipation. Extending to 4--32\,kg and 2--8\,m/s gives a graded failure surface (Fig.~\ref{fig:surfaces}). Equal incoming momentum is not equal severity: at 32\,N\,s, 4\,kg at 8\,m/s fails 92\% of standing trials, 8\,kg at 4\,m/s 48\%, 16\,kg at 2\,m/s 9\%. The zero-step budget (median 13.1\,N\,s at a 0.671\,m CoM) agrees with the recorded outcome on 73.6\% of 2,041 standing contacts (always-fail baseline 64.9\%), catching 1,320 of 1,325 failures but flagging 534 of 716 survivors: a screening feature with high sensitivity, not a bound (Fig.~\ref{fig:lip}). During walking the capture point can lie outside the stance support polygon and the fixed-support calculation does not apply (accuracy 53\%). The decision experiments use the regime where the walker, walking, fails 70\% of the time given contact: 4--16\,kg at 3--8\,m/s with the led aim, contact 98--100\%.
+On the originally proposed range (1--8\,kg, 1--4\,m/s) the walker failed in 0.46\% of 4,096 scheduled hits, and only 31\% made contact, so that range does not test anticipation. Extending to 4--32\,kg and 2--8\,m/s gives a graded failure surface. Equal incoming momentum is not equal severity: at 32\,N\,s, 4\,kg at 8\,m/s fails 92\% of standing trials, 8\,kg at 4\,m/s 48\%, 16\,kg at 2\,m/s 9\%. The zero-step budget (median 13.1\,N\,s at a 0.671\,m CoM) agrees with the recorded outcome on 73.6\% of 2,041 standing contacts (always-fail baseline 64.9\%), catching 1,320 of 1,325 failures but flagging 534 of 716 survivors: a screening feature with high sensitivity, not a bound. During walking the capture point can lie outside the stance support polygon and the fixed-support calculation does not apply (accuracy 53\%). The decision experiments use the regime where the walker, walking, fails 70\% of the time given contact: 4--16\,kg at 3--8\,m/s with the led aim, contact 98--100\%.
 
-\begin{figure}[t]\centering
-\includegraphics[width=0.92\linewidth]{fall_surfaces.png}
-\caption{Recorded failure rate of the frozen walker, standing (left) and walking (right), 128 scheduled hits per cell with the contact rate in each cell. Dotted lines: equal incoming momentum; dashed: the zero-step capture-point reference.}\label{fig:surfaces}
-\end{figure}
-\begin{figure}[t]\centering
-\includegraphics[width=0.7\linewidth]{lip_ratio_curve.png}
-\caption{Standing contacts binned by incoming momentum over the zero-step budget (Wilson 95\% intervals). Failure is 21\% just past the boundary and 50\% near twice the budget.}\label{fig:lip}
-\end{figure}
 
-\subsection{Is bracing worth anything? The evidence gate}\label{sec:gate}
+
+
+\subsection{Does timed bracing improve recovery?}\label{sec:gate}
 A privileged rule switched from the walker to BRACE at several leads before the nominal arrival, on 512 paired scenarios per condition. The first attempt, with BRACE~v1 and the uncorrected evaluator, raised the failure rate from 0.2\% to 38--74\%, rising with lead, and at 0.5\,s lead 270 of 337 failures occurred with no contact at all. After correcting the evaluator and retraining BRACE, no-projectile switching failures were 0--3\%. With BRACE~v2 (Table~\ref{tab:gate}), failure given contact fell from 0.70 to 0.42 at 0.5\,s lead, while a zero-command walker stayed at 0.69. At the same lead, bracing cost 0.49\,m of the 2.55\,m covered on the no-projectile control. Contact fell to 80\% and 40\% at leads of 0.75 and 1.0\,s. The fixed 0.5\,s oracle is a timing reference. The reported 0.22\,s readiness parameter is a retrospective estimate of when a sustained posture interval began.
 
 \begin{table}[t]\centering\small
@@ -84,45 +104,7 @@ Lead (s) & CONTINUE & zero-cmd & BRACE v2 \\\midrule
 \end{tabular}
 \end{table}
 
-\subsection{Observation model from rendered depth}\label{sec:e8}
-The MJX-Warp batch ray-tracer renders the 96$\times$96 head camera for 128 environments in 40\,ms per batch. A geometric detector back-projects depth pixels with the simulator camera pose, filters ground and body points, and adds the known sphere radius along the viewing ray. Over 12,800 frames, 3,451 of 3,653 with a visible in-range sphere centre yielded detections (94.5\%). Per-axis RMS error was 2--3\,cm from 1 to 6\,m. In 458 of 9,147 frames outside that eligibility definition (5.0\%), the detector also fired. These frames include the parked sphere and partial visibility. Figure~\ref{fig:e8} shows the dependence on range and viewing angle.
-
-\begin{figure}[t]\centering
-\includegraphics[width=0.82\linewidth]{E8_depth_detector/detector.png}
-\caption{Depth detector on rendered frames: noise against range with the assumed model (left), detection rate against range (centre), azimuth of launched objects and of detections with the camera's field of view (right).}\label{fig:e8}
-\end{figure}
-
-\subsection{Sensor cadence, delay and release}
-Reactive, always, the threshold rule ($\theta=0.2$--$0.8$\,s), the belief rule ($c_{\text{prep}}/c_{\text{fall}}=0.02$--$0.8$) and the oracle ran on the same 2,048 paired scenarios (70\% hits, 30\% near-misses) at latencies of 0, 100 and 300\,ms with detections at 10\,Hz. Reactive fails 0.69, the oracle 0.36.
-
-The initial rule continued to fail at 50\,Hz (Table~\ref{tab:rate}). At zero added delay, the estimated hit probability first exceeded 0.5 a median 0.46\,s before contact (interquartile range 0.36--0.62\,s). Calibration was weaker at low hit probabilities (Fig.~\ref{fig:calib}).
-
-The per-condition records show why. At low $c_{\text{prep}}$ the belief rule braces on 96--100\% of hits, as often as the threshold, and for longer (0.36\,s against 0.24\,s), yet fails more given contact (0.69 against 0.56). The rule re-evaluated its start condition, Eq.~\eqref{eq:rule}, to decide whether to \emph{stay} braced. The condition contains $\E_b[t_{\text{hit}}]>\tau_{\text{brace}}$; once the belief says contact is less than 0.22\,s away and the 0.3\,s commitment has expired, the rule released the brace and switched back to walking, a mode transition at the worst possible moment. Removing the start condition from the release decision reduced failure in the historical Session E sweep. Session G subsequently implemented release after the estimated time of closest approach, subject to the minimum commitment and staleness rule.
-
-\subsection{Earlier release and lead-time experiments}
-In Session E, at zero delay the best settings under a 50\% near-miss preparation budget reached 0.30--0.34 hit failure (Table~\ref{tab:rate}). Restoring the original release reproduced 0.53 and 0.63 for threshold and belief rules at 50\,Hz. Session E's staleness-based release retained BRACE longer than the later Session G controller. The two sweeps therefore measure different release implementations.
-
-\subsection{Valuing late braces and waiting: lead-conditioning and lookahead}\label{sec:voi}
-The lead-conditioned response model is $P(\text{fall}\mid\text{contact},\text{BRACE},J,\ell)=\sigma(a+b\log J+c\min(\ell,0.5))$. Its fit used oracle leads of 0.1, 0.2, 0.3 and 0.5\,s and yielded $c=-4.3$ per second. The rule scores a brace at its estimated lead and drops the hard time-to-form gate. The Session G one-step rule compares bracing now with waiting until the next scheduled delivery and then choosing again. It samples sixteen hypothetical observations with the configured capture delay and includes a no-detection branch using the assumed miss probability. The blind-wait comparator predicts forward without the hypothetical measurement.
-
-The earlier E16 developmental sweep at 10\,Hz and 100\,ms delay reported hit failures of 0.40 for the lookahead variant and 0.41 for the threshold, at near-miss preparation rates of 0.49 and 0.43. The final comparison below uses fixed parameters and fresh scenarios.
-
-\subsection{Closing the loop over rendered depth}
-Every 100\,ms the batched renderer produces a head-camera depth frame, the geometric detector supplies a world-frame observation or a miss, the belief updates, and the selected frozen skill advances the simulation. In E17b the threshold showed 131/367 intended-hit failures with depth and 113/367 with the parametric detector at zero delay (paired difference $+4.90$ percentage points, approximate 95\% interval $[2.02,7.79]$). Table~\ref{tab:depth} reports both failure and unnecessary preparation. The parked object was visible before launch in this scene. Approximately 21\% of prelaunch capture frames yielded a detection. A follow-up with the object parked out of range passed two small depth checks. Its full comparison was not run after the separate hold check failed.
-
-\begin{table}[t]\centering\footnotesize\setlength{\tabcolsep}{3pt}
-\caption{E17b, restricted launch directions and a simulated head camera. Failure on 367 intended hits (preparation on 145 intended misses), pooled within each cell.}\label{tab:depth}
-\begin{tabular}{lcccc}\toprule
- & \multicolumn{2}{c}{no added latency} & \multicolumn{2}{c}{100\,ms added} \\
-rule & parametric & depth & parametric & depth \\\midrule
-threshold 0.3\,s & .31 (.23) & .36 (.17) & .34 (.51) & .37 (.33) \\
-belief, lead & .36 (.42) & .40 (.35) & .37 (.36) & .40 (.30) \\
-blind wait & .35 (.39) & .40 (.32) & .37 (.36) & .40 (.26) \\
-lookahead & .35 (.35) & .41 (.30) & .38 (.32) & .41 (.23) \\\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Skill-pair and held-out decisions}
+\subsection{Replication with a second frozen skill pair}
 Table~\ref{tab:pairs} compares E18 and E19 at zero delay using 2,048 scenarios per pair and the revised release rule. The paired reductions in intended-hit failure from the fixed-lead oracle were 33.01 and 20.66 percentage points (approximate within-pair 95\% intervals $[30.44,35.58]$ and $[18.27,23.04]$). The second pair changes both policies and its walker-generated reference trajectory. Its response model was fitted on pair 1. The seed-1 BRACE checkpoint also predates a fix to the training mass distribution. These differences limit attribution to a particular policy or to the random seed.
 
 \begin{table}[t]\centering\small
@@ -138,65 +120,77 @@ Observation lookahead & 532 (37.1\%) & 721 (50.3\%) \\\bottomrule
 \end{tabular}
 \end{table}
 
-At 100\,ms delay, frozen parameters were tested on 2,048 fresh scenarios (E18h, Table~\ref{tab:heldout}). Observation lookahead minus blind-wait failure was $+0.71$ percentage points (approximate paired 95\% interval $[-0.05,1.47]$). These descriptive intervals cover scenario variation within a skill pair. They use evaluator ordering and common scenario keys since historical records lack explicit scenario IDs.
 
-\begin{table}[t]\centering\small
-\caption{E18h at 10\,Hz and 100\,ms added delay. Failure uses 1,407 intended hits. Mean recorded time in BRACE uses all 2,048 episodes. The belief rules use preparation cost 0.05.}\label{tab:heldout}
-\begin{tabular}{lrr}\toprule
-Controller & Failures (\%) & Brace time (s) \\\midrule
-Threshold, 0.3 s & 582 (41.36) & 0.624 \\
-Belief, lead & 655 (46.55) & 0.480 \\
-Blind wait & 667 (47.41) & 0.453 \\
-Observation lookahead & 677 (48.12) & 0.451 \\\bottomrule
+\subsection{Held-out comparison at unequal preparation durations}
+At 100\,ms added delay, the frozen rules were evaluated on 2,048 fresh parametric-detector scenarios (Table~\ref{tab:heldout}). The two main rules had the same total number of recorded contacts on scheduled hits. The threshold recorded fewer failures but spent more time braced and prepared on more near-misses. Among intended hits, 108 episodes failed only under belief and 35 only under the threshold. There were also 25 contacts unique to each rule. Belief minus threshold progress was $+0.011$\,m over all encounters (paired approximate 95\% interval $[-0.009,+0.030]$) and $+0.082$\,m on intended near-misses ($[+0.068,+0.097]$). A single mean combines distance gained by avoiding a fall with distance lost while braced. No comparison restricted to survivors is used.
 
+
+The trade-off varied with delay at the same fixed settings. With zero added delay, threshold and belief recorded 532 and 536 hit failures and prepared on 219 and 281 near-misses, respectively; the threshold then spent \emph{less} time braced (0.590 versus 0.721\,s). At 300\,ms the counts were 607 and 877 failures, and 558 and 69 prepared near-misses; the threshold spent \emph{more} time braced (0.671 versus 0.162\,s). All three delays used 1,407 scheduled hits and 641 near-misses.
+
+\subsection{Deterministic thresholds and preparation budgets}\label{sec:budget}
+Figure~\ref{fig:frontier} shows every archived threshold at 100\,ms on the first skill pair's development set. Mean recorded BRACE duration rose from 0.537 to 1.023\,s as the threshold increased from 0.20 to 0.80\,s. Even the shortest archived threshold exceeded the target belief rule's 0.484\,s (cost 0.05). At a second, retrospectively identified budget, the 0.30\,s threshold and a belief rule with cost 0.02 spent 0.632 and 0.629\,s. The threshold recorded 605 versus 631 failures on 1,433 intended hits and prepared on 377 versus 340 of 615 near-misses. Threshold minus belief was $-1.81$ percentage points in hit failure (paired 95\% interval $[-3.35,-0.21]$) and $+6.02$ points in near-miss preparation ($[1.46,10.57]$). These within-development intervals are descriptive, conditional on the selected settings. E18h contains neither the full threshold grid nor that belief setting. The historical counter can include requested preparation after failure.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{../analysis/deterministic_frontier/frontier.pdf}
+\caption{Development-set operating points at 100\,ms. Each marker is one deterministic rule setting. Connecting lines describe changes along a parameter grid. Different start thresholds and preparation prices change the distribution of preparation as well as its mean.}\label{fig:frontier}
+\end{figure}
+
+\paragraph{Retrospective randomized sensitivity analysis.} A separate baseline enables the 0.30\,s threshold with probability 0.767 per episode and otherwise walks. The probability was set by mean duration on E18; the analysis was designed after viewing E18h. On E18h the mixture averaged 0.478\,s and the target belief rule 0.480\,s. Belief minus mixture was $-0.95$ points in failure on intended hits (paired stratified bootstrap 95\% interval $[-2.41,+0.53]$) and $-19.61$ points in near-miss preparation ($[-23.44,-15.72]$). On the second skill pair, near-miss preparation decreased by 13.33 points and hit failure increased by 1.76 points ($[0.16,3.33]$). E19 reused the development scenario schedule. Even with the aggregate match, the mixture averaged 0.566\,s on intended hits and 0.287\,s on misses; belief averaged 0.610 and 0.192\,s. Randomly omitting entire encounters changes which signals the controller can act on. These comparisons cannot establish the value of belief against a duration-tuned deterministic threshold.
+
+\paragraph{Prospective deterministic CPU sweep.} Before collecting fresh MJX/JAX CPU runs at 100\,ms, we fixed the target belief rule (cost 0.05), nine TTC thresholds (0.06--0.30\,s), and separate seeds for 32 calibration and 32 possible confirmation scenarios. We count applied BRACE through first termination, including the terminal transition. On calibration data choose the threshold with smallest absolute mean-duration gap, breaking ties toward the lower setting. Proceed to confirmation only for a gap within $\pm0.020$\,s. An equal-budget failure comparison then requires the entire approximate 95\% paired interval for the confirmation duration difference to lie within that same margin.
+Calibration selected $\theta=0.24$\,s. Across 32 scenarios the threshold used 0.5975\,s and belief used 0.5869\,s (gap $+10.6$\,ms). On 32 fresh scenarios the applied means were 0.560 and 0.508 s. Threshold minus belief was +52.5 ms (paired 95\% interval [-86.4, +191.4] ms). The rules recorded 6 and 6 failures on 19 scheduled hits, and prepared on 11 and 3 of 13 near-misses. Contacts occurred on 18 and 17 of those hits, respectively. Neither rule contacted a scheduled near-miss. Mean progress over all 32 encounters was 1.644 versus 1.539\,m. The interval for the duration difference extended outside the equivalence margin. These counts are descriptive; the experiment cannot establish a risk difference at equal duration. The separate E20 Warp protocol scales this design to 512 calibration and 2,048 possible confirmation scenarios with different seeds. Its result is pending.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{../analysis/deterministic_cpu_pilot/calibration_sweep.pdf}
+\caption{Fresh 32-scenario CPU calibration. Each deterministic threshold and the lead-conditioned belief rule used the same scheduled encounters. The shaded band marks the calibration tolerance. The independent confirmation interval is reported in the text.}\label{fig:cpu}
+\end{figure}
+
+\paragraph{Workload sensitivity.} On E18h the pure threshold incurred 73 fewer failures on scheduled hits and 216 more preparations on scheduled near-misses than the belief rule. Both E18h arms recorded zero failures on scheduled near-misses. If one unnecessary preparation costs one tenth of a fall and only the scheduled-hit frequency changes, their estimated losses cross at 39.4\% hits (paired 95\% interval 32.2--49.2\%). The evaluation price is illustrative; it is distinct from each rule's internal setting.
+
+
+\subsection{Why the release implementation matters}
+The original myopic rule reapplied its start condition after the initial commitment expired. As estimated time to impact dropped below its 0.22\,s posture-formation threshold, it could switch back to walking just when the object arrived. At low preparation cost the belief rule braced on 96--100\% of hits, yet recorded more failures given contact than the threshold (0.69 versus 0.56 in the diagnostic comparison). A second version removed this dependence and could persist until detections went stale. The final passage-based release above limits that persistence. Comparing policies from different release versions would mix differences in \emph{starting} with differences in \emph{staying} braced. The matched comparisons below use the final version within each sensor experiment. The rendered-depth experiment and release history are identified separately.
+
+
+The E16 sweep at 10\,Hz and 100\,ms delay reported hit failures of 0.40 for the lookahead variant and 0.41 for the threshold, at near-miss preparation rates of 0.49 and 0.43. Table~\ref{tab:heldout} evaluates the revised Session G rules on fresh scenarios. Their release and observation-lookahead implementations differ from E16.
+
+
+\subsection{Auxiliary rendered-depth study}\label{sec:e8}\paragraph{Detector calibration.}
+The MJX-Warp batch ray-tracer renders the 96$\times$96 head camera for 128 environments in 40\,ms per batch. A geometric detector back-projects depth pixels with the simulator camera pose, filters ground and body points, and adds the known sphere radius along the viewing ray. Among 12,800 frames, 3,653 had a launched sphere with projected centre in frame and range below 6\,m. In 3,451 of those frames (94.5\%), the detected centre was within 0.5\,m of simulator truth. This eligibility test does not check occlusion. Among accepted detections at 1--6\,m, per-axis RMS error was 2--3\,cm. In 458 of 9,147 frames outside that eligibility definition (5.0\%), the detector also fired. These frames include the parked sphere and partial visibility.
+
+
+
+
+\paragraph{Closed-loop comparison.}
+Every 100\,ms a head-mounted simulated camera supplies a 96$\times$96 depth frame to a geometric detector. A switching controller uses its delayed detections; proprioception drives the selected frozen skill. E17b ran 512 paired scenarios at each of two added delays under restricted launch directions. At zero added delay the threshold failed on 131 of 367 intended hits with depth versus 113 with parametric detections (paired difference $+4.90$ percentage points, approximate 95\% interval $[2.02,7.79]$). It also braced on fewer intended misses (Table~\ref{tab:depth}). The comparator gates on a simulator launch flag and a pelvis-heading field of view. The image path uses camera visibility and can detect the parked object. Roughly 21\% of prelaunch depth capture frames yielded a detection. The detector uses the simulator camera pose and known sphere radius. Moving the parked object out of range passed two 16-scenario smoke checks at 0 and 100\,ms. Full reruns of those conditions never started after a separate release-duration check failed. These results establish an implemented pixel-to-decision path and quantify a scene-specific discrepancy. They do not isolate a causal effect of depth sensing or demonstrate a real-camera capability.
+
+\begin{table}[t]\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\caption{E17b, restricted launch directions and a simulated head camera. Failure on 367 intended hits (preparation on 145 intended misses), pooled within each cell.}\label{tab:depth}
+\begin{tabular}{lcccc}\toprule
+ & \multicolumn{2}{c}{no added latency} & \multicolumn{2}{c}{100\,ms added} \\
+rule & parametric & depth & parametric & depth \\\midrule
+threshold 0.3\,s & .31 (.23) & .36 (.17) & .34 (.51) & .37 (.33) \\
+belief, lead & .36 (.42) & .40 (.35) & .37 (.36) & .40 (.30) \\
+blind wait & .35 (.39) & .40 (.32) & .37 (.36) & .40 (.26) \\
+lookahead & .35 (.35) & .41 (.30) & .38 (.32) & .41 (.23) \\\bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{What does selective bracing buy at comparable cost?}
-The threshold and belief rows in Table~\ref{tab:heldout} spend different amounts of time braced. To compare them at similar mean duration, consider a baseline that draws once at episode start, independently of the scene. With probability $w$ it runs the 0.3\,s threshold for the entire episode, using the same detections as usual. Otherwise it keeps walking. For a mean recorded duration $T$, the development-set calibration is
-\[
-w=\frac{T_{\mathrm{belief}}-T_{\mathrm{reactive}}}
-        {T_{\mathrm{threshold}}-T_{\mathrm{reactive}}}=0.767 .
-\]
-We computed $w$ on E18 at 100\,ms delay and held it fixed for E18h. Within each replayed scenario we averaged the two saved baseline outcomes using these weights. This gives the exact expectation over the randomized assignment. The question arose after the original E18h results were known, making this a retrospective analysis.
 
-Figure~\ref{fig:allocation} shows the matched comparison. The baseline recorded 0.478\,s of preparation per episode and an expected failure rate of 47.50\% on intended hits. The belief rule recorded 0.480\,s and 46.55\%. The paired difference (belief minus baseline) was $-0.95$ percentage points (95\% interval $[-2.41,+0.53]$). The belief rule braced on 26.68\% of intended misses versus 46.28\% for the baseline (difference $-19.61$ points, $[-23.44,-15.72]$). Intervals use 10,000 paired bootstrap draws resampled within scheduled hit/miss strata, conditional on the fitted $w$, skill pair and scenario mix. The second skill pair (E19) also reduced near-miss preparation by 13.33 points, but hit failure rose by 1.76 points ($[0.16,3.33]$). E19 reused the development scenario schedule. At 100\,ms E18h retained only the 0.3\,s threshold, so these data leave open how a deterministic threshold adjusted to the same budget would perform.
+\subsection{Object-aware PPO baseline} This policy receives five extra observation inputs for the most recent detection in the heading frame and its age. Its critic also had privileged object state during training. It was trained for 202M steps in the heavy-impact regime. Evaluation yielded a 0.44 intended-hit failure rate and 1.90\,m progress at 10\,Hz/100\,ms, and 0.41 and 1.96\,m at 50\,Hz/zero delay. It follows its own walker reference trajectory. These distribution-level comparisons do not support a paired difference from a switching rule.
 
-An encounter's value also depends on how often the object is on a hit trajectory. Relative to the pure threshold, the belief rule incurred 73 more failures on 1,407 intended hits and avoided 216 preparations on 641 intended misses. Both recorded zero failures on intended misses. Suppose one unnecessary preparation costs one tenth of a fall. Holding the within-stratum outcomes fixed and varying the hit frequency, the lowest empirical loss changes from reactive walking at 5\% hits, to belief at 25\%, to the threshold at 75\%. At 100\,ms the belief and threshold losses cross at 39.4\% hits (paired stratified bootstrap 95\% interval 32.2--49.2\%). The assumed price is illustrative. This analysis counts one cost per prepared intended miss and includes falls in either stratum.
 
-\begin{figure}[t]\centering
-\includegraphics[width=\linewidth]{../analysis/decision_tradeoff/heldout_tradeoff.pdf}
-\caption{Development-calibrated allocation of preparation at 100\,ms observation delay. The line joins whole-episode mixtures of the reactive and threshold policies. Intervals summarize variation across paired scenarios for each fixed policy pair.}\label{fig:allocation}
-\end{figure}
 
-\paragraph{Object-aware PPO baseline.} This policy receives five extra observation inputs for the most recent detection in the heading frame and its age. Its critic also had privileged object state during training. It was trained for 202M steps in the heavy-impact regime. Evaluation yielded a 0.44 intended-hit failure rate and 1.90\,m progress at 10\,Hz/100\,ms, and 0.41 and 1.96\,m at 50\,Hz/zero delay. It follows its own walker reference trajectory. These distribution-level comparisons do not support a paired difference from a switching rule.
-
-\begin{table}[t]\centering\footnotesize\setlength{\tabcolsep}{4pt}
-\caption{Best failure rate on hits under a 50\% false-preparation budget, by detection rate and latency. Upper block: the rule as first implemented (Session D). Lower block: Session E release, before the Session G passage correction. A dash: no setting met the budget.}\label{tab:rate}
-\begin{tabular}{lcccccc}\toprule
- & \multicolumn{3}{c}{threshold} & \multicolumn{3}{c}{belief rule} \\
-latency (ms) & 0 & 100 & 300 & 0 & 100 & 300 \\\midrule
-10\,Hz & 0.55 & 0.60 & -- & 0.60 & 0.61 & 0.67 \\
-25\,Hz & 0.54 & 0.57 & 0.62 & 0.60 & 0.62 & 0.66 \\
-50\,Hz & 0.53 & 0.55 & 0.63 & 0.63 & 0.62 & 0.64 \\\midrule
-10\,Hz, corrected & 0.31 & 0.41 & -- & 0.34 & 0.46 & 0.64 \\
-50\,Hz, corrected & 0.30 & 0.36 & 0.49 & 0.30 & 0.42 & 0.54 \\\bottomrule
-\end{tabular}
-\end{table}
-\begin{figure}[t]\centering
-\includegraphics[width=0.8\linewidth]{E9_calibration/calibration.png}
-\caption{Belief calibration by detection rate and latency: reliability of the hit probability against the eventual contact (top; Wilson 95\% intervals) and error of the expected time to contact (bottom).}\label{fig:calib}
-\end{figure}
-
-\section{Discussion and limitations}\label{sec:disc}
-\paragraph{Scope.} Vision feeds the belief, and the two frozen skills receive proprioceptive observations. The depth result uses known sphere radius, simulator camera/robot pose and rendered depth. The E17b comparison also changes visibility and centre-estimation behavior across observation sources. Render wall time is separate from the added simulated latency. A stepping recovery skill would expand the action set.
-\paragraph{Interpretation.} In both trained pairs the privileged timing reference reduced failures. At a fixed threshold, the robot may brace on an intended near-miss. A more selective belief rule can preserve preparation time while allowing additional failures. The preparation cost therefore matters when comparing the rules. The mass remains unobservable from straight position tracks.
-
-The response fit predicts the recorded failure rate among contacting trajectories and uses scheduled arrival labels. The online rule uses estimated time to entry into a decision radius. Performance on intended hits also depends on how frequently contact occurs. The historical time-in-BRACE statistic is the recorded duration and may include steps after termination. Interpreting small differences requires the paired scenario uncertainty and the duration definition used for that experiment.
+\section{Discussion and limitations}
+\paragraph{What is identified?} The privileged result establishes that the trained skills can benefit from advance notice in this simulator. It exploits the scheduled class and arrival time, both unavailable to the practical rules. The fixed-threshold comparison measures a protection--interruption trade-off at different durations. Matching \emph{mean} brace time would still leave the timing and allocation across encounters free to vary; those are precisely the policy differences of interest. Duration is itself an outcome of the policy and time to failure. Matching the all-episode mean on independent scenarios avoids selecting individual episodes by their realized duration. It does not estimate a direct effect with brace timing held fixed.
+\paragraph{Generalization.} The impact response is fitted among contacting trajectories using scheduled arrival labels. The controller estimates time to entry into a decision radius and retains the fixed mass prior throughout the encounter. Two frozen skill pairs give different absolute risks. Scenario-bootstrap intervals condition on the chosen skills and simulator. Historical archives pair using evaluator order and common scenario keys, because explicit episode IDs were omitted. The prospective evaluator stores IDs and excludes actions after termination. Sensing assumptions include known sphere geometry and camera pose in the rendered-depth subset. We have no hardware recovery or real-camera evaluation.
 
 \section{Conclusion}
-The frozen walker benefited from timed preparation on replayed disturbances. On the held-out scenarios, the time-to-contact threshold had fewer failures and occupied BRACE longer than the lead-conditioned belief rule. At comparable preparation duration, the belief rule interrupted walking on fewer near-misses. Its failure advantage over randomized use of the threshold was uncertain on the held-out set and reversed on the second skill pair. The online rendered-depth experiment demonstrated perception-driven switching, with a measurable tradeoff between hit failures and preparation on near-misses.
-\paragraph{Evidence.} Frozen artifacts and the pooled-pair analysis are available in the \href{https://github.com/pchatla-arch/anticipatory-balance/blob/e4dacfacc1c2330d48fdfabcb3a0f2e933e3117f/docs/SESSION_G_REVIEW.md}{Session G evidence review}. The repository script \path{scripts/analyze_foresight_tradeoff.py} regenerates Fig.~\ref{fig:allocation} from the archived paired outcomes. The \href{https://github.com/pchatla-arch/anticipatory-balance/blob/df8d5ee99036b243d62653d1c025ea2898ade16f/results/session_h_20261115T211850Z_1f77c1/report.md}{Session H run record} lists the two depth checks and unfinished full stages.
+Timed preparation lowered failure on replayed disturbances for both trained skill pairs. Choosing when to pay for it remains a separate problem. At fixed settings, simpler thresholding protected more scheduled hits while bracing more near-misses. At similar recorded durations the trade-offs depended on the baseline and skill pair. The fresh pilot matched the target on calibration but could not confirm duration equivalence on independent scenarios. Current evidence warrants reporting these operating points and their uncertainty; it does not establish superior fall prevention from belief estimation at equal preparation time.
+
+\paragraph{Evidence and reproduction.} The project repository includes the \href{https://github.com/pchatla-arch/anticipatory-balance/tree/review/foresight-paper-20261121/analysis}{outcome tables and analysis scripts}, the \href{https://github.com/pchatla-arch/anticipatory-balance/blob/5a40555ca00f70cd22c2540437a4e2720dcc69d4/analysis/deterministic_cpu_pilot/protocol.json}{frozen pilot protocol}, and the \href{https://github.com/pchatla-arch/anticipatory-balance/blob/df8d5ee99036b243d62653d1c025ea2898ade16f/results/session_h_20261115T211850Z_1f77c1/report.md}{depth follow-up record}.
+
+\paragraph{AI assistance.} Claude and ChatGPT assisted with implementation, debugging and documentation. ChatGPT also assisted with analysis scripts, figures and revision of this author-review draft.
 \bibliographystyle{plainnat}
 \begin{thebibliography}{10}\footnotesize
 \bibitem[Pratt et al.(2006)]{pratt2006capture} J.~Pratt, J.~Carff, S.~Drakunov, and A.~Goswami. Capture point: a step toward humanoid push recovery. \emph{IEEE-RAS Humanoids}, 2006.
@@ -204,7 +198,6 @@ The frozen walker benefited from timed preparation on replayed disturbances. On 
 \bibitem[Zakka et al.(2025)]{zakka2025playground} K.~Zakka et al. MuJoCo Playground. \emph{arXiv:2502.08844}, 2025.
 \bibitem[Kaelbling et al.(1998)]{kaelbling1998pomdp} L.~P. Kaelbling, M.~L. Littman, and A.~R. Cassandra. Planning and acting in partially observable stochastic domains. \emph{Artificial Intelligence}, 101, 1998.
 \bibitem[Kochenderfer et al.(2022)]{kochenderfer2022algorithms} M.~J. Kochenderfer, T.~A. Wheeler, and K.~H. Wray. \emph{Algorithms for Decision Making}. MIT Press, 2022.
-\bibitem[Littman et al.(1995)]{littman1995qmdp} M.~L. Littman, A.~R. Cassandra, and L.~P. Kaelbling. Learning policies for partially observable environments: scaling up. \emph{ICML}, 1995.
 \bibitem[Fujiwara et al.(2002)]{fujiwara2002ukemi} K.~Fujiwara, F.~Kanehiro, S.~Kajita, K.~Kaneko, K.~Yokoi, and H.~Hirukawa. UKEMI: falling motion control to minimize damage to biped humanoid robot. \emph{IEEE/RSJ IROS}, 2002.
 \bibitem[Maffei et al.(2017)]{maffei2017anticipatory} G.~Maffei, I.~Herreros, M.~Sanchez-Fibla, K.~J.~Friston, and P.~F.~M.~J.~Verschure. \href{https://doi.org/10.1098/rspb.2017.1780}{The perceptual shaping of anticipatory actions}. \emph{Proceedings of the Royal Society B}, 284:20171780, 2017.
 \bibitem[Todorov et al.(2012)]{todorov2012mujoco} E.~Todorov, T.~Erez, and Y.~Tassa. \href{https://doi.org/10.1109/IROS.2012.6386109}{MuJoCo: A physics engine for model-based control}. \emph{IEEE/RSJ IROS}, 2012.

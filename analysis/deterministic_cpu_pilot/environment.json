@@ -1,0 +1,17 @@
+{
+  "platform": "CPU x86-64",
+  "python": "3.12.14",
+  "jax": "0.12.0.1",
+  "jaxlib": "0.12.0.1",
+  "mujoco": "3.16.0",
+  "mujoco-mjx": "3.16.0",
+  "brax": "0.14.2",
+  "orbax-checkpoint": "0.12.10",
+  "numpy": "2.3.5",
+  "scipy": "1.17.0",
+  "playground_source": "9de993826d1a486f18aec4e8d3179e93ff64ed41",
+  "menagerie_source": "1b86ece576591213e2b666ebf59508454200ca97",
+  "control_dtype": "JAX defaults with JAX_DEFAULT_MATMUL_PRECISION=highest",
+  "observation_source": "parametric delayed detector",
+  "scope": "Full 300-timestep simulated episodes, separate from the registered Warp experiment"
+}

@@ -1,5 +1,13 @@
 # Foresight course paper revision history
 
+## 2026-11-21 · Review 4 · Selective bracing and preparation duration
+
+Renamed the paper *Selective Anticipatory Bracing for a Walking Humanoid under Perception Latency*. Added the deterministic development frontier, a fresh prespecified CPU calibration/confirmation experiment, complete archived outcome tables, explicit release logic and sensor-specific limits. The earlier randomized baseline is a retrospective sensitivity analysis. E17b is a separate closed-loop simulated depth experiment. The full corrected depth comparison and the larger, independent Warp duration comparison are pending.
+
+The protocol was committed before simulation. Calibration selected the 0.24 s threshold with a +10.625 ms difference in mean applied preparation (TTC minus belief). On 32 independent confirmation encounters, the difference was +52.5 ms (paired 95% interval [-86.4, +191.4] ms). The threshold and belief rule had 6/19 and 6/19 scheduled-hit failures, respectively, and 11/13 and 3/13 preparations on scheduled misses. The interval extended outside the equivalence margin. These counts are descriptive; the experiment cannot establish a risk difference at equal duration. [Locked calibration choice](https://github.com/pchatla-arch/anticipatory-balance/blob/aff5b221d08f393d6e6f8b2d167ddae30c4a1bdb/analysis/deterministic_cpu_pilot/freeze.json) · [Fresh run and interval](../analysis/deterministic_cpu_pilot/)
+
+[Point-by-point response](RESPONSE_TO_REVIEW.md) · [Paper](foresight.pdf) · [All archived outcome tables](../analysis/controller_outcomes/) · [Release rule and depth evidence](../docs/foresight/release_and_depth_audit.md)
+
 ## 2026-11-21 · Review 3 · What changes when impacts are rare?
 
 Added an exploratory population reweighting with five archived latency/skill-pair comparisons, paired uncertainty and the offline Decision Lab. At the illustrative price of 0.10 falls per unnecessary preparation, the two sensor-driven rules cross at 39.4% scheduled hits on held-out E18h at 100 ms. Figure 4's matched-duration comparison remains a separate question. The manuscript reports the assumed price and uncertainty in the crossover. [Analysis](../analysis/operating_conditions/) · [Decision Lab](../docs/foresight/decision-lab.html)

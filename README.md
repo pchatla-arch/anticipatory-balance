@@ -1,4 +1,4 @@
-# Foresight: latency-aware anticipatory bracing for a humanoid
+# Foresight: selective anticipatory bracing for a walking humanoid under perception latency
 
 **When should a walking humanoid interrupt locomotion to brace for an impact it can see only
 late, noisily, and without knowing how heavy the object is?**
@@ -6,6 +6,12 @@ late, noisily, and without knowing how heavy the object is?**
 AA228/CS238 (Decision Making under Uncertainty) final project, Stanford, Autumn 2026.
 Simulation only: Unitree G1 in MuJoCo Playground (rss2025, MJX + MuJoCo-Warp), frozen PPO
 skills, a POMDP decision layer on top. Author: Prasuna Chatla.
+
+## Main result
+
+At 100 ms of added delay, a frozen time-to-contact (TTC) threshold protected more scheduled hits and interrupted more near-misses than the lead-conditioned belief rule. The threshold also used more preparation time. In the held-out set, both policies contacted the object on 1,323 of 1,407 scheduled hits. The threshold recorded 582 failures and the belief rule 655. They prepared on 387 and 171 of 641 near-misses, respectively. These operating points compare entire policies, including the duration and timing of each intervention. The primary experiments use delayed parametric detections. A separate simulated camera study evaluates rendered depth.
+
+[Revised paper](paper/foresight.pdf) · [Contact, failure and progress by condition](analysis/controller_outcomes/) · [Deterministic budget sweep](analysis/deterministic_cpu_pilot/) · [Release and depth evidence](docs/foresight/release_and_depth_audit.md)
 
 ## Try the decision on a different workload
 
@@ -15,15 +21,13 @@ A warehouse aisle with many passing objects poses a different decision from one 
 
 [Watch the 12-second simulated replay](docs/foresight/replay/paired-encounters.mp4) · [Read the event times and how the two encounters were chosen](docs/foresight/replay/)
 
-## When is an interruption worth it?
+## Does the result depend on the preparation budget?
 
-A robot can prevent falls by bracing more often, but every brace interrupts its walk. We compared two ways to spend the same average preparation time. A belief rule uses each object's uncertain path and expected impact to decide when to brace. The baseline tosses a coin once per encounter. If enabled, an ordinary time-to-contact (TTC) rule still uses the detections to choose when to brace. The frequency of enabling TTC was set on a separate development set.
+![Archived development frontier showing hit failure and near-miss preparation against recorded BRACE duration](analysis/deterministic_frontier/frontier.png)
 
-![Held-out comparison of hit failures, preparations on scheduled near-misses, and average recorded time in BRACE](analysis/decision_tradeoff/heldout_tradeoff.png)
+The original development sweep used five deterministic TTC thresholds. Even the shortest one used more preparation than the target belief rule. At another pair of development settings, both rules used about 0.63 seconds: the threshold had 26 fewer hit failures and interrupted 37 more near-misses. This is an exploratory comparison. The revised study includes a separately registered CPU sweep of nine thresholds with fresh scenarios and termination-aware measurement. Calibration selected 0.24 s. In 32 independent encounters the TTC-minus-belief duration difference was +52.5 ms (paired 95% interval -86.4 to +191.4 ms). The interval extended outside the predeclared ±20 ms equivalence margin, leaving the equal-budget risk comparison unresolved. The larger Warp comparison uses separate seeds. [Operating points and intervals](analysis/deterministic_frontier/) · [CPU protocol and outcomes](analysis/deterministic_cpu_pilot/) · [Larger prospective protocol](analysis/decision_tradeoff/README.md#prospective-comparison-with-a-deterministic-threshold)
 
-At 10 Hz with 100 ms added delay, the belief rule spent **0.480 s** braced per encounter, against **0.478 s** for the baseline in expectation. It braced on **26.68%** of scheduled near-misses, compared with **46.28%** for the baseline. On intended hits, **46.55%** failed with the belief rule and **47.50%** with the baseline. The paired 95% interval for the difference in hit failures spans zero. On a second trained skill pair, the belief rule also prepared on fewer near-misses, but more intended hits ended in failure. These are simulations. The archive counts recorded brace time, which can include steps after termination.
-
-[Read the six-page paper](paper/foresight.pdf) · [Reproduce these results on CPU](analysis/decision_tradeoff/) · [Inspect the archived episode evidence](docs/SESSION_G_REVIEW.md)
+A retrospective sensitivity analysis also randomly enabled the threshold on some whole encounters to match mean recorded preparation. It describes that policy's trade-off; it cannot establish how a tuned deterministic threshold performs. [Randomized analysis](analysis/decision_tradeoff/)
 
 **Engineering resources.** [Controller inventory](docs/technical_notes/controllers_and_freezing.md) · [Numerical precision in closed-loop evaluation](docs/technical_notes/numerical_precision.md) · [Technical notes](docs/technical_notes/README.md).
 
@@ -33,7 +37,7 @@ At 10 Hz with 100 ms added delay, the belief rule spent **0.480 s** braced per e
 
 A humanoid walking at a commanded velocity sees an object approaching through delayed, noisy and
 intermittent detections. It does not know whether the object will hit, when, from which direction,
-or how hard, and the object's **mass is not observable** from images at all. The robot has two
+or how hard, and the object's **mass is unobserved** in these position detections; the controller retains its mass prior. The robot has two
 options at every decision step:
 
 | Action | What it buys | What it costs |
@@ -173,9 +177,9 @@ false-preparation rate on near-misses, one panel per latency; lower-left is bett
 | --- | --- |
 | Does preparation help? | On 1,433 intended hits per trained skill pair, a fixed 0.5 s privileged lead reduced failures from 68.60% to 35.59% for pair 1 and from 67.55% to 46.89% for pair 2. |
 | Why did the first rules underperform? | The initial rule reused its start condition when deciding whether to stay braced. The release ablation and subsequent fixes are documented in the paper. |
-| How much does selectivity cost? | On 2,048 held-out encounters the always-enabled 0.3 s TTC controller had 73 fewer falls than the lead-conditioned belief rule and braced on 216 more scheduled near-misses. The CPU analysis above compares both with an episode-randomized baseline at similar average preparation time. |
+| How much does selectivity cost? | On 2,048 held-out encounters the always-enabled 0.3 s TTC controller had 73 fewer falls than the lead-conditioned belief rule and braced on 216 more scheduled near-misses. The deterministic sweep and retrospective episode-randomized analysis address distinct preparation-budget comparisons. |
 | Does the perception chain run online? | In the E17b simulated depth scene, TTC failed on 131/367 intended hits versus 113/367 under parametric sensing. The parked object was visible before launch. Session H passed both small depth checks, then stopped during the hold check. |
-| What experiment could change the conclusion? | Compare belief with a single deterministic TTC threshold tuned on separate calibration episodes for equal *pre-termination* brace time. Evaluate the frozen threshold on fresh seeds and report risk together with the achieved budget match. |
+| What experiment could change the conclusion? | The registered nine-threshold CPU pilot uses applied preparation through termination and fresh scenarios; the larger 512/2,048 Warp comparison remains pending. See the [pilot and verdict](analysis/deterministic_cpu_pilot/). |
 
 [Course manuscript](paper/foresight.pdf) · [Run-by-run audit](docs/SESSION_G_REVIEW.md) · [Session H stage report](https://github.com/pchatla-arch/anticipatory-balance/blob/1d9ee6d3493f58db22954bd0d5c5fe7944826405/results/session_h_20261115T211850Z_1f77c1/report.md)
 
