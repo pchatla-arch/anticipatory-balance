@@ -1,0 +1,202 @@
+{
+  "protocol": "adaptive-servo-gain-gate-v1",
+  "profile": "smoke",
+  "screen": {
+    "protocol_version": "adaptive-servo-gain-gate-v1",
+    "phase": "screen",
+    "thresholds": {
+      "healthy_survival_min": 0.9,
+      "fault_survival_min": 0.2,
+      "absolute_loss_gap_min": 0.03,
+      "relative_loss_gap_min": 0.25,
+      "fall_increase_min": 0.15,
+      "recovery_fraction_min": 0.5,
+      "identity_tolerance": 1e-06,
+      "bootstrap_draws": 2000,
+      "bootstrap_seed": 228,
+      "bootstrap_confidence": 0.95,
+      "correction_bound_rad": 0.2,
+      "slew_bound_rad_s": 2.0,
+      "bound_tolerance": 1e-05
+    },
+    "candidate_order": [
+      "gain_085",
+      "gain_070",
+      "gain_055"
+    ],
+    "arms": {
+      "healthy": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.012611050624400377,
+        "mean_progress_m": 3.0346613824367523,
+        "mean_bound_fraction": 0.0
+      },
+      "identity": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.012616560095921159,
+        "mean_progress_m": 3.0341255962848663,
+        "mean_bound_fraction": 0.0
+      },
+      "gain_085_plain": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.013560807332396507,
+        "mean_progress_m": 3.2971739172935486,
+        "mean_bound_fraction": 0.0
+      },
+      "gain_085_oracle": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.01254672568757087,
+        "mean_progress_m": 3.0368340611457825,
+        "mean_bound_fraction": 0.03180278843481989
+      },
+      "gain_070_plain": {
+        "n": 8,
+        "fall_rate": 0.25,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 2,
+        "mean_loss": 0.41097588650882244,
+        "mean_progress_m": 5.329969048500061,
+        "mean_bound_fraction": 0.0
+      },
+      "gain_070_oracle": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.013655744027346373,
+        "mean_progress_m": 3.05191969871521,
+        "mean_bound_fraction": 0.1496513790340149
+      },
+      "gain_055_plain": {
+        "n": 8,
+        "fall_rate": 1.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 8,
+        "mean_loss": 3.148683339357376,
+        "mean_progress_m": 1.9094633758068085,
+        "mean_bound_fraction": 0.0
+      },
+      "gain_055_oracle": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.022264250786975026,
+        "mean_progress_m": 3.2220870554447174,
+        "mean_bound_fraction": 0.29380604474607896
+      }
+    },
+    "numerical_ok": true,
+    "controls": {
+      "healthy": true,
+      "identity": false,
+      "prefault_pairing": true,
+      "bounds": true,
+      "torque_limits_checked": false,
+      "torque_limits": null,
+      "identity_max_difference": 0.06475067138671875
+    },
+    "candidates": {
+      "gain_085": {
+        "passed": false,
+        "checks": {
+          "degradation": false,
+          "recoverable": true,
+          "recovered_half_gap": true,
+          "no_fall_regression": true,
+          "positive_paired_ci": true
+        },
+        "loss_gap": 0.00094975670799613,
+        "loss_reduction": 0.0010140816448256373,
+        "recovery_fraction": 1.0677278046977157,
+        "paired_loss_reduction_ci95": [
+          8.51658289320767e-05,
+          0.0019235061859944832
+        ],
+        "near_healthy_fall_rate": true
+      },
+      "gain_070": {
+        "passed": false,
+        "checks": {
+          "degradation": true,
+          "recoverable": true,
+          "recovered_half_gap": true,
+          "no_fall_regression": true,
+          "positive_paired_ci": true
+        },
+        "loss_gap": 0.39836483588442206,
+        "loss_reduction": 0.39732014248147607,
+        "recovery_fraction": 0.9973775461365041,
+        "paired_loss_reduction_ci95": [
+          0.11728475978015922,
+          0.8415054084849544
+        ],
+        "near_healthy_fall_rate": true
+      },
+      "gain_055": {
+        "passed": false,
+        "checks": {
+          "degradation": true,
+          "recoverable": false,
+          "recovered_half_gap": true,
+          "no_fall_regression": true,
+          "positive_paired_ci": true
+        },
+        "loss_gap": 3.1360722887329757,
+        "loss_reduction": 3.126419088570401,
+        "recovery_fraction": 0.9969218821271257,
+        "paired_loss_reduction_ci95": [
+          3.0546386464789976,
+          3.18807370167342
+        ],
+        "near_healthy_fall_rate": true
+      }
+    },
+    "reasons": [
+      "Healthy-model adapter did not reproduce the healthy control."
+    ],
+    "selected_candidate": null,
+    "status": "fail"
+  },
+  "confirmation": null,
+  "scientific_gate_status": "inconclusive",
+  "interpretation": "Engineering smoke only; run the GPU gate profile for independent confirmation.",
+  "selected_candidate": null,
+  "elapsed_seconds": 129.942
+}

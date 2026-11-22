@@ -1,8 +1,8 @@
 {
-  "publisher_source_commit": "f5970231bed0e1be1eadc951137c2515a14efeb0",
-  "results_path": "results/adaptive_gate_20261116T070551Z_220613",
-  "run_exit_code": 1,
-  "run_id": "adaptive_gate_20261116T070551Z_220613",
-  "source_commit": "f5970231bed0e1be1eadc951137c2515a14efeb0",
-  "timestamp_utc": "2026-11-16T07:09:09Z"
+  "publisher_source_commit": "8440b5068d918c28928c8a2326472f6606da28e8",
+  "results_path": "results/adaptive_gate_20261122T053041Z_391fd6",
+  "run_exit_code": 0,
+  "run_id": "adaptive_gate_20261122T053041Z_391fd6",
+  "source_commit": "8440b5068d918c28928c8a2326472f6606da28e8",
+  "timestamp_utc": "2026-11-22T05:33:56Z"
 }

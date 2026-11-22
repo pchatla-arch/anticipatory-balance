@@ -1,0 +1,107 @@
+{
+  "devices": [
+    "cuda:0"
+  ],
+  "versions": {
+    "jax": "0.12.0.1",
+    "jaxlib": "0.12.0.1",
+    "brax": "0.14.2",
+    "mujoco": "3.16.0",
+    "mujoco-mjx": "3.16.0",
+    "warp-lang": "1.18.0",
+    "orbax-checkpoint": "0.12.8"
+  },
+  "source_commit": "8440b5068d918c28928c8a2326472f6606da28e8",
+  "protocol": "adaptive-servo-gain-gate-v1",
+  "policy_checkpoint": {
+    "step": "000202342400",
+    "tree_sha256": "14bd6650f06c4e3171b6e2d2403ef0da5d9dd3604709f0c22b488329dd0223de",
+    "files": [
+      {
+        "path": "_CHECKPOINT_METADATA",
+        "bytes": 258,
+        "sha256": "ae0e2d8da0f701662666b218adbed0b34d8b1cd48468ad7f87c4295ab8d0f427"
+      },
+      {
+        "path": "_METADATA",
+        "bytes": 6948,
+        "sha256": "804abe596189323a9700c1e70afbd2b1c176d676b5ee5c0bf298e04531024dc9"
+      },
+      {
+        "path": "_sharding",
+        "bytes": 5483,
+        "sha256": "8a688a5186a0fe6186b1fa973c3a3ec38b2c29d17a8c5ceebf8e0f52a00a3ccc"
+      },
+      {
+        "path": "array_metadatas/process_0",
+        "bytes": 3243,
+        "sha256": "5364713e55d60759132b4f304aa90d64865cb1d785a05b43ffc92c84a47afdb6"
+      },
+      {
+        "path": "commit_success.txt",
+        "bytes": 133,
+        "sha256": "b81eb0cded92ddf9d0238423204dcedec73437e13c1af5c18129192057d02d3c"
+      },
+      {
+        "path": "d/c893abf196148b9add3c930f4f0d5c69",
+        "bytes": 7875,
+        "sha256": "50c544c4704c77c50a7837c52dadc2731d3a18fd7d9a81740a7d46b02a9d0f9c"
+      },
+      {
+        "path": "manifest.ocdbt",
+        "bytes": 115,
+        "sha256": "84a47385db409fd266839230c0ddf036eef3f07754ea3fa0e552364b4f9b8222"
+      },
+      {
+        "path": "ocdbt.process_0/d/07e5272195025ade1bb81609468a039b",
+        "bytes": 7859,
+        "sha256": "138e46580c486789739746be5f2fe3b0bdb2d60c4c2f3d096f7d79411b9210d6"
+      },
+      {
+        "path": "ocdbt.process_0/d/2716bcdbadf625551da5702d7a33cbfb",
+        "bytes": 32339,
+        "sha256": "d622360ab9afdf3d5ba4d450091d097a64cd1fe552f93e58ec1c326f7eea01ea"
+      },
+      {
+        "path": "ocdbt.process_0/d/45ca0951812b38fb929ad40d459b109d",
+        "bytes": 414930,
+        "sha256": "6c16a2bf6e7fc2beba4d628784364c744f9a249a0e6e6d4894020b40a58c1f0a"
+      },
+      {
+        "path": "ocdbt.process_0/d/8e951e1b48148d0236fdd5a434a93c5c",
+        "bytes": 610042,
+        "sha256": "69812aece9c004a30c6419a448b8b6e779421b84142a15dc369edf91b58e0d6e"
+      },
+      {
+        "path": "ocdbt.process_0/d/96b7c24c419379254dba22e4220a06be",
+        "bytes": 488,
+        "sha256": "a7fbfd4342f44cf4c3f86498f2ab9710a4d253ae8cc9a4d028f6e7b61e24467d"
+      },
+      {
+        "path": "ocdbt.process_0/d/ed21f05246d3a39b99867c9e895660ea",
+        "bytes": 175,
+        "sha256": "b40d392391adf7b563d076fd6fdd2ecced58782348d7b68320d3a27516217c7d"
+      },
+      {
+        "path": "ocdbt.process_0/d/f0e91b2cbe45d7660c9a43929dfa8f10",
+        "bytes": 810171,
+        "sha256": "ad9db9ab403715251006b52f2c89074cd68af80bbc41928a213f9b7f59292a95"
+      },
+      {
+        "path": "ocdbt.process_0/d/fe6dbc4c0c61e0219bcb6ffde841badd",
+        "bytes": 516,
+        "sha256": "d5c77e79d7fc0b7e274883c784a095ea6069763b031ebbf8b951a346354d22da"
+      },
+      {
+        "path": "ocdbt.process_0/manifest.ocdbt",
+        "bytes": 414,
+        "sha256": "e47396b5a49aafb915fcae2ff4502e495767576024707a0aa6829f307afaada7"
+      },
+      {
+        "path": "ppo_network_config.json",
+        "bytes": 874,
+        "sha256": "65bb111937d827d19869076926c8c088e9ad24fec2ac3d2b61ba1fbd8dae8bf4"
+      }
+    ]
+  }
+}

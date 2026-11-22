@@ -1,0 +1,73 @@
+{
+  "protocol": "adaptive-servo-gain-gate-v1",
+  "profile": "smoke",
+  "horizon_steps": 400,
+  "ctrl_dt_s": 0.02,
+  "screen_episodes": 8,
+  "confirmation_episodes": 0,
+  "screen_seed": 73011,
+  "confirm_seed": 83011,
+  "gain_conditions": [
+    [
+      "healthy",
+      1.0,
+      false
+    ],
+    [
+      "identity",
+      1.0,
+      true
+    ],
+    [
+      "gain_085_plain",
+      0.85,
+      false
+    ],
+    [
+      "gain_085_oracle",
+      0.85,
+      true
+    ],
+    [
+      "gain_070_plain",
+      0.7,
+      false
+    ],
+    [
+      "gain_070_oracle",
+      0.7,
+      true
+    ],
+    [
+      "gain_055_plain",
+      0.55,
+      false
+    ],
+    [
+      "gain_055_oracle",
+      0.55,
+      true
+    ]
+  ],
+  "onset_steps_inclusive": [
+    75,
+    125
+  ],
+  "forward_commands_mps": [
+    0.4,
+    0.6
+  ],
+  "correction_bound_rad": 0.2,
+  "correction_rate_bound_rad_s": 2.0,
+  "fault": "Scale proportional servo gain and position feedback bias together; damping and torque caps unchanged.",
+  "oracle": "Known gain; measured joint position; 50 Hz bounded position-target correction.",
+  "hypothesis": "Some moderate gain loss degrades walking and a bounded known-gain correction recovers at least half the loss.",
+  "not_tested": [
+    "online identification",
+    "lag",
+    "maximum torque loss",
+    "vision",
+    "learned residual",
+    "hardware"
+  ]
+}
