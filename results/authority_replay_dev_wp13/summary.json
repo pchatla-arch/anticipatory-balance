@@ -1,0 +1,444 @@
+{
+  "capture_sha256": {
+    "trace_gain_085_exact_none.npz": "9f84a921154cb18fefb5408abe1b594cac0b51b0a09ff196ffd6d530bf7f973c",
+    "trace_gain_085_declared_none.npz": "70a4bddcdbea2528f78461779f0e0880a885d58ad1e7bc620798705912b7fb5a",
+    "trace_gain_070_exact_none.npz": "1fb6a6937f86a4e3d61135e820e32a901be8b8548c73d207b648abbba543e688",
+    "trace_gain_070_declared_none.npz": "9f9bcd402f75d8a1966cdb27b5caaed20a22f57d63ec4d07232f3d2264aabed0",
+    "trace_gain_055_exact_none.npz": "0c273f72fedbc07f8f31759281822af3423a214fde9d6365728f3bc6f1e7f332",
+    "trace_gain_055_declared_none.npz": "4e5f6195e43c219a25a6551d30414552953be8430aa41a61f7ca6dff1190ebf8"
+  },
+  "results": [
+    {
+      "family": "gain_085",
+      "channel": "exact",
+      "group": "hips",
+      "first_second": {
+        "joint_steps": 2448,
+        "mean_width": 0.02550046145915985,
+        "fraction_excluding_one": 0.9607843137254902,
+        "mean_directional_authority_rad": 0.00948035903275013,
+        "mean_oracle_demand_rad": 0.02352161519229412,
+        "oracle_fraction": 0.40304883254300583
+      },
+      "all_post_onset": {
+        "joint_steps": 9738,
+        "mean_width": 0.0064153168350458145,
+        "fraction_excluding_one": 0.9901417128773875,
+        "mean_directional_authority_rad": 0.006814435124397278,
+        "mean_oracle_demand_rad": 0.021230235695838928,
+        "oracle_fraction": 0.3209778297954772
+      },
+      "empirical_measurements": {
+        "released_joint_measurements": 14400,
+        "regression_valid_measurements": 14400,
+        "position_rad_violations": 0,
+        "torque_nm_violations": 0
+      },
+      "observed_first_exclusions": 48,
+      "no_observed_exclusion": 0,
+      "never_exposed_joint_episodes": 0,
+      "median_first_exclusion_s_conditional": 0.04,
+      "first_50pct_crossing_s": 0.14,
+      "ticks_reaching_50pct_first_second": 12,
+      "inconsistent_all_observed": 48,
+      "inconsistent_post_onset": 48,
+      "invalid_all_observed": 0
+    },
+    {
+      "family": "gain_085",
+      "channel": "exact",
+      "group": "knees",
+      "first_second": {
+        "joint_steps": 816,
+        "mean_width": 0.02549697458744049,
+        "fraction_excluding_one": 0.9607843137254902,
+        "mean_directional_authority_rad": 0.02113012783229351,
+        "mean_oracle_demand_rad": 0.029364384710788727,
+        "oracle_fraction": 0.719583487818009
+      },
+      "all_post_onset": {
+        "joint_steps": 3246,
+        "mean_width": 0.00641315383836627,
+        "fraction_excluding_one": 0.9901417128773875,
+        "mean_directional_authority_rad": 0.01885172352194786,
+        "mean_oracle_demand_rad": 0.029856417328119278,
+        "oracle_fraction": 0.6314127997680189
+      },
+      "empirical_measurements": {
+        "released_joint_measurements": 4800,
+        "regression_valid_measurements": 4800,
+        "position_rad_violations": 0,
+        "torque_nm_violations": 0
+      },
+      "observed_first_exclusions": 16,
+      "no_observed_exclusion": 0,
+      "never_exposed_joint_episodes": 0,
+      "median_first_exclusion_s_conditional": 0.04,
+      "first_50pct_crossing_s": 0.06,
+      "ticks_reaching_50pct_first_second": 48,
+      "inconsistent_all_observed": 16,
+      "inconsistent_post_onset": 16,
+      "invalid_all_observed": 0
+    },
+    {
+      "family": "gain_085",
+      "channel": "declared",
+      "group": "hips",
+      "first_second": {
+        "joint_steps": 2448,
+        "mean_width": 0.14289753139019012,
+        "fraction_excluding_one": 0.7937091503267973,
+        "mean_directional_authority_rad": 6.719790690112859e-05,
+        "mean_oracle_demand_rad": 0.02352161519229412,
+        "oracle_fraction": 0.002856857815959492
+      },
+      "all_post_onset": {
+        "joint_steps": 9738,
+        "mean_width": 0.10527525097131729,
+        "fraction_excluding_one": 0.9466009447525159,
+        "mean_directional_authority_rad": 3.0378892915905453e-05,
+        "mean_oracle_demand_rad": 0.021230235695838928,
+        "oracle_fraction": 0.0014309257644126612
+      },
+      "empirical_measurements": {
+        "released_joint_measurements": 14064,
+        "regression_valid_measurements": 14064,
+        "position_rad_violations": 30,
+        "torque_nm_violations": 41
+      },
+      "observed_first_exclusions": 48,
+      "no_observed_exclusion": 0,
+      "never_exposed_joint_episodes": 0,
+      "median_first_exclusion_s_conditional": 0.14,
+      "first_50pct_crossing_s": null,
+      "ticks_reaching_50pct_first_second": 0,
+      "inconsistent_all_observed": 48,
+      "inconsistent_post_onset": 48,
+      "invalid_all_observed": 0
+    },
+    {
+      "family": "gain_085",
+      "channel": "declared",
+      "group": "knees",
+      "first_second": {
+        "joint_steps": 816,
+        "mean_width": 0.11617808043956757,
+        "fraction_excluding_one": 0.8443627450980392,
+        "mean_directional_authority_rad": 0.0011609264183789492,
+        "mean_oracle_demand_rad": 0.029364384710788727,
+        "oracle_fraction": 0.03953518552823226
+      },
+      "all_post_onset": {
+        "joint_steps": 3246,
+        "mean_width": 0.07561612874269485,
+        "fraction_excluding_one": 0.9608749229821318,
+        "mean_directional_authority_rad": 0.0009169821860268712,
+        "mean_oracle_demand_rad": 0.029856417328119278,
+        "oracle_fraction": 0.030713066225035907
+      },
+      "empirical_measurements": {
+        "released_joint_measurements": 4688,
+        "regression_valid_measurements": 4688,
+        "position_rad_violations": 16,
+        "torque_nm_violations": 20
+      },
+      "observed_first_exclusions": 16,
+      "no_observed_exclusion": 0,
+      "never_exposed_joint_episodes": 0,
+      "median_first_exclusion_s_conditional": 0.1,
+      "first_50pct_crossing_s": null,
+      "ticks_reaching_50pct_first_second": 0,
+      "inconsistent_all_observed": 16,
+      "inconsistent_post_onset": 16,
+      "invalid_all_observed": 0
+    },
+    {
+      "family": "gain_070",
+      "channel": "exact",
+      "group": "hips",
+      "first_second": {
+        "joint_steps": 2448,
+        "mean_width": 0.025499628856778145,
+        "fraction_excluding_one": 0.9607843137254902,
+        "mean_directional_authority_rad": 0.015550201758742332,
+        "mean_oracle_demand_rad": 0.032698433846235275,
+        "oracle_fraction": 0.4755640774867929
+      },
+      "all_post_onset": {
+        "joint_steps": 9666,
+        "mean_width": 0.006462195888161659,
+        "fraction_excluding_one": 0.9900682805710739,
+        "mean_directional_authority_rad": 0.016633301973342896,
+        "mean_oracle_demand_rad": 0.032790523022413254,
+        "oracle_fraction": 0.5072594669143926
+      },
+      "empirical_measurements": {
+        "released_joint_measurements": 14400,
+        "regression_valid_measurements": 14400,
+        "position_rad_violations": 0,
+        "torque_nm_violations": 0
+      },
+      "observed_first_exclusions": 48,
+      "no_observed_exclusion": 0,
+      "never_exposed_joint_episodes": 0,
+      "median_first_exclusion_s_conditional": 0.04,
+      "first_50pct_crossing_s": 0.06,
+      "ticks_reaching_50pct_first_second": 23,
+      "inconsistent_all_observed": 48,
+      "inconsistent_post_onset": 48,
+      "invalid_all_observed": 0
+    },
+    {
+      "family": "gain_070",
+      "channel": "exact",
+      "group": "knees",
+      "first_second": {
+        "joint_steps": 816,
+        "mean_width": 0.025498878210783005,
+        "fraction_excluding_one": 0.9607843137254902,
+        "mean_directional_authority_rad": 0.02361043356359005,
+        "mean_oracle_demand_rad": 0.033848199993371964,
+        "oracle_fraction": 0.6975387764309495
+      },
+      "all_post_onset": {
+        "joint_steps": 3222,
+        "mean_width": 0.006460659671574831,
+        "fraction_excluding_one": 0.9900682805710739,
+        "mean_directional_authority_rad": 0.023851780220866203,
+        "mean_oracle_demand_rad": 0.0345943458378315,
+        "oracle_fraction": 0.6894704639280148
+      },
+      "empirical_measurements": {
+        "released_joint_measurements": 4800,
+        "regression_valid_measurements": 4800,
+        "position_rad_violations": 0,
+        "torque_nm_violations": 0
+      },
+      "observed_first_exclusions": 16,
+      "no_observed_exclusion": 0,
+      "never_exposed_joint_episodes": 0,
+      "median_first_exclusion_s_conditional": 0.04,
+      "first_50pct_crossing_s": 0.06,
+      "ticks_reaching_50pct_first_second": 48,
+      "inconsistent_all_observed": 16,
+      "inconsistent_post_onset": 16,
+      "invalid_all_observed": 0
+    },
+    {
+      "family": "gain_070",
+      "channel": "declared",
+      "group": "hips",
+      "first_second": {
+        "joint_steps": 2448,
+        "mean_width": 0.16300061345100403,
+        "fraction_excluding_one": 0.8688725490196079,
+        "mean_directional_authority_rad": 0.00041728682117536664,
+        "mean_oracle_demand_rad": 0.032698433846235275,
+        "oracle_fraction": 0.012761675790512322
+      },
+      "all_post_onset": {
+        "joint_steps": 9666,
+        "mean_width": 0.09884446859359741,
+        "fraction_excluding_one": 0.9667908131595282,
+        "mean_directional_authority_rad": 0.0004398530873004347,
+        "mean_oracle_demand_rad": 0.032790523022413254,
+        "oracle_fraction": 0.013414032469772637
+      },
+      "empirical_measurements": {
+        "released_joint_measurements": 14076,
+        "regression_valid_measurements": 14076,
+        "position_rad_violations": 30,
+        "torque_nm_violations": 39
+      },
+      "observed_first_exclusions": 48,
+      "no_observed_exclusion": 0,
+      "never_exposed_joint_episodes": 0,
+      "median_first_exclusion_s_conditional": 0.1,
+      "first_50pct_crossing_s": null,
+      "ticks_reaching_50pct_first_second": 0,
+      "inconsistent_all_observed": 48,
+      "inconsistent_post_onset": 48,
+      "invalid_all_observed": 0
+    },
+    {
+      "family": "gain_070",
+      "channel": "declared",
+      "group": "knees",
+      "first_second": {
+        "joint_steps": 816,
+        "mean_width": 0.11792682856321335,
+        "fraction_excluding_one": 0.866421568627451,
+        "mean_directional_authority_rad": 0.006491413805633783,
+        "mean_oracle_demand_rad": 0.033848199993371964,
+        "oracle_fraction": 0.1917801817782968
+      },
+      "all_post_onset": {
+        "joint_steps": 3222,
+        "mean_width": 0.06577792018651962,
+        "fraction_excluding_one": 0.9661700806952204,
+        "mean_directional_authority_rad": 0.004683020059019327,
+        "mean_oracle_demand_rad": 0.0345943458378315,
+        "oracle_fraction": 0.13536951958975862
+      },
+      "empirical_measurements": {
+        "released_joint_measurements": 4692,
+        "regression_valid_measurements": 4692,
+        "position_rad_violations": 12,
+        "torque_nm_violations": 7
+      },
+      "observed_first_exclusions": 16,
+      "no_observed_exclusion": 0,
+      "never_exposed_joint_episodes": 0,
+      "median_first_exclusion_s_conditional": 0.1,
+      "first_50pct_crossing_s": null,
+      "ticks_reaching_50pct_first_second": 0,
+      "inconsistent_all_observed": 16,
+      "inconsistent_post_onset": 16,
+      "invalid_all_observed": 0
+    },
+    {
+      "family": "gain_055",
+      "channel": "exact",
+      "group": "hips",
+      "first_second": {
+        "joint_steps": 2448,
+        "mean_width": 0.025499597191810608,
+        "fraction_excluding_one": 0.9607843137254902,
+        "mean_directional_authority_rad": 0.020686382427811623,
+        "mean_oracle_demand_rad": 0.03687750920653343,
+        "oracle_fraction": 0.5609485048688477
+      },
+      "all_post_onset": {
+        "joint_steps": 4980,
+        "mean_width": 0.012537089176476002,
+        "fraction_excluding_one": 0.980722891566265,
+        "mean_directional_authority_rad": 0.020751168951392174,
+        "mean_oracle_demand_rad": 0.03721315786242485,
+        "oracle_fraction": 0.5576298549325773
+      },
+      "empirical_measurements": {
+        "released_joint_measurements": 9732,
+        "regression_valid_measurements": 9732,
+        "position_rad_violations": 0,
+        "torque_nm_violations": 0
+      },
+      "observed_first_exclusions": 48,
+      "no_observed_exclusion": 0,
+      "never_exposed_joint_episodes": 0,
+      "median_first_exclusion_s_conditional": 0.04,
+      "first_50pct_crossing_s": 0.2,
+      "ticks_reaching_50pct_first_second": 37,
+      "inconsistent_all_observed": 48,
+      "inconsistent_post_onset": 48,
+      "invalid_all_observed": 0
+    },
+    {
+      "family": "gain_055",
+      "channel": "exact",
+      "group": "knees",
+      "first_second": {
+        "joint_steps": 816,
+        "mean_width": 0.02549474686384201,
+        "fraction_excluding_one": 0.9607843137254902,
+        "mean_directional_authority_rad": 0.024249225854873657,
+        "mean_oracle_demand_rad": 0.03751867264509201,
+        "oracle_fraction": 0.6463242395215876
+      },
+      "all_post_onset": {
+        "joint_steps": 1660,
+        "mean_width": 0.012533633969724178,
+        "fraction_excluding_one": 0.980722891566265,
+        "mean_directional_authority_rad": 0.023032935336232185,
+        "mean_oracle_demand_rad": 0.03770168870687485,
+        "oracle_fraction": 0.6109258891391086
+      },
+      "empirical_measurements": {
+        "released_joint_measurements": 3244,
+        "regression_valid_measurements": 3244,
+        "position_rad_violations": 0,
+        "torque_nm_violations": 0
+      },
+      "observed_first_exclusions": 16,
+      "no_observed_exclusion": 0,
+      "never_exposed_joint_episodes": 0,
+      "median_first_exclusion_s_conditional": 0.04,
+      "first_50pct_crossing_s": 0.06,
+      "ticks_reaching_50pct_first_second": 48,
+      "inconsistent_all_observed": 16,
+      "inconsistent_post_onset": 16,
+      "invalid_all_observed": 0
+    },
+    {
+      "family": "gain_055",
+      "channel": "declared",
+      "group": "hips",
+      "first_second": {
+        "joint_steps": 2448,
+        "mean_width": 0.17194817960262299,
+        "fraction_excluding_one": 0.8999183006535948,
+        "mean_directional_authority_rad": 0.0022885578218847513,
+        "mean_oracle_demand_rad": 0.03687750920653343,
+        "oracle_fraction": 0.06205835556327742
+      },
+      "all_post_onset": {
+        "joint_steps": 4980,
+        "mean_width": 0.11771905422210693,
+        "fraction_excluding_one": 0.9508032128514057,
+        "mean_directional_authority_rad": 0.002288483316078782,
+        "mean_oracle_demand_rad": 0.03721315786242485,
+        "oracle_fraction": 0.06149661503233015
+      },
+      "empirical_measurements": {
+        "released_joint_measurements": 9450,
+        "regression_valid_measurements": 9450,
+        "position_rad_violations": 21,
+        "torque_nm_violations": 25
+      },
+      "observed_first_exclusions": 48,
+      "no_observed_exclusion": 0,
+      "never_exposed_joint_episodes": 0,
+      "median_first_exclusion_s_conditional": 0.1,
+      "first_50pct_crossing_s": null,
+      "ticks_reaching_50pct_first_second": 0,
+      "inconsistent_all_observed": 48,
+      "inconsistent_post_onset": 48,
+      "invalid_all_observed": 0
+    },
+    {
+      "family": "gain_055",
+      "channel": "declared",
+      "group": "knees",
+      "first_second": {
+        "joint_steps": 816,
+        "mean_width": 0.09428641200065613,
+        "fraction_excluding_one": 0.9080882352941176,
+        "mean_directional_authority_rad": 0.01479062158614397,
+        "mean_oracle_demand_rad": 0.03751867264509201,
+        "oracle_fraction": 0.39422027853810615
+      },
+      "all_post_onset": {
+        "joint_steps": 1660,
+        "mean_width": 0.06382132321596146,
+        "fraction_excluding_one": 0.9548192771084337,
+        "mean_directional_authority_rad": 0.012788140214979649,
+        "mean_oracle_demand_rad": 0.03770168870687485,
+        "oracle_fraction": 0.33919279167234867
+      },
+      "empirical_measurements": {
+        "released_joint_measurements": 3150,
+        "regression_valid_measurements": 3150,
+        "position_rad_violations": 9,
+        "torque_nm_violations": 11
+      },
+      "observed_first_exclusions": 16,
+      "no_observed_exclusion": 0,
+      "never_exposed_joint_episodes": 0,
+      "median_first_exclusion_s_conditional": 0.08,
+      "first_50pct_crossing_s": 0.32,
+      "ticks_reaching_50pct_first_second": 17,
+      "inconsistent_all_observed": 16,
+      "inconsistent_post_onset": 16,
+      "invalid_all_observed": 0
+    }
+  ]
+}

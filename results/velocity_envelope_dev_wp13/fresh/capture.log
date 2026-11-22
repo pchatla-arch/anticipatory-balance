@@ -1,0 +1,7 @@
+CPU devices: [CpuDevice(id=0)]
+Starting reference
+Finished reference 39.94 s
+Starting declared
+Finished declared 36.54 s
+Starting immediate
+Finished immediate 35.91 s

@@ -1,0 +1,11 @@
+# Proposed next closed-loop development experiment
+
+**Decision requested from Prasuna.** Record G1 as modify. Preserve the original delayed telemetry arm and register the earliest-available sensor arm separately. Its timing assumption is that a post-transition snapshot can be read by the next control decision unless dropped. Measured timing on hardware remains outside the simulation claim.
+
+**Hypothesis.** Earlier access to the encoder and effort packet permits the bounded corrector to recover more walking performance after a gain decrease while limiting erroneous corrections when a healthy motor's effort scale shifts.
+
+**Freeze before physics.** Carry the measured development choice forward as a named candidate: symmetric velocity envelope, 400 rad/s² acceleration assumption, ±0.5 rad/s bounded velocity readout, [0.2, 1.5] gain prior, zero drift between jumps, and the original projection and reacquisition limits. Report that the operating point came from development screening. Independently freeze predeclared, unused development seed IDs, deterministic family-to-seed mapping, checkpoint and source-tree hashes, transport/sample error configuration and a fixed run budget. Keep declared and earliest-delivery simulations paired within each arm. Score against the same physical state mask fixed by AE-011.
+
+**One CPU development pilot.** Run fresh paired episodes of gain 0.70, sudden return from 0.70 to healthy, healthy, and healthy with effort scale 0.80. Compare the frozen speed-envelope candidate and the separately named velocity-envelope candidate, with correction-off, known-gain correction and Claude’s independently owned heuristic as references. Label a default heuristic explicitly if tuning has not finished. Measure paired fixed-horizon loss, falls, healthy-plant effective correction and withdrawal latency. Record actual delivered source age, per-substep observability and control reasons. Stop after the predeclared grid. A missed criterion is a result.
+
+**Before G2.** Require an operational benefit on fresh development episodes, Claude’s frozen tuned heuristic, a complete registration contract (AE-012) with intact independent validation/test splits, and Prasuna’s decision. The separate G0 repeatability calibration has its own manifest and compute decision in PR #43.

@@ -1,0 +1,10 @@
+{
+  "first_second/two_endpoint_coverage/speed_magnitude": [],
+  "first_second/two_endpoint_coverage/signed_velocity": [],
+  "first_second/hold_interval_endpoint_coverage/speed_magnitude": [],
+  "first_second/hold_interval_endpoint_coverage/signed_velocity": [],
+  "all_post_onset/two_endpoint_coverage/speed_magnitude": [],
+  "all_post_onset/two_endpoint_coverage/signed_velocity": [],
+  "all_post_onset/hold_interval_endpoint_coverage/speed_magnitude": [],
+  "all_post_onset/hold_interval_endpoint_coverage/signed_velocity": []
+}

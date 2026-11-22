@@ -1,0 +1,102 @@
+{
+  "falls": 0,
+  "onset": [
+    124,
+    115
+  ],
+  "seed": 17623,
+  "episodes": 2,
+  "steps": 300,
+  "physics_steps_per_hold": 10,
+  "physics_dt": 0.002,
+  "control_dt": 0.02,
+  "joint_names": [
+    "left_hip_pitch_joint",
+    "left_hip_roll_joint",
+    "left_hip_yaw_joint",
+    "left_knee_joint",
+    "left_ankle_pitch_joint",
+    "left_ankle_roll_joint",
+    "right_hip_pitch_joint",
+    "right_hip_roll_joint",
+    "right_hip_yaw_joint",
+    "right_knee_joint",
+    "right_ankle_pitch_joint",
+    "right_ankle_roll_joint",
+    "waist_yaw_joint",
+    "waist_roll_joint",
+    "waist_pitch_joint",
+    "left_shoulder_pitch_joint",
+    "left_shoulder_roll_joint",
+    "left_shoulder_yaw_joint",
+    "left_elbow_joint",
+    "left_wrist_roll_joint",
+    "left_wrist_pitch_joint",
+    "left_wrist_yaw_joint",
+    "right_shoulder_pitch_joint",
+    "right_shoulder_roll_joint",
+    "right_shoulder_yaw_joint",
+    "right_elbow_joint",
+    "right_wrist_roll_joint",
+    "right_wrist_pitch_joint",
+    "right_wrist_yaw_joint"
+  ],
+  "sensor_config": {
+    "position_noise_rad": 0.002,
+    "torque_noise_nm": 0.5,
+    "position_bias_rad": 0.0,
+    "torque_bias_nm": 0.0,
+    "torque_scale": 1.0,
+    "latency_min": 1,
+    "latency_max": 1,
+    "dropout": 0.02,
+    "bound_position_rad": 0.006,
+    "bound_torque_nm": 1.5
+  },
+  "sensor_keys": [
+    1676981596,
+    1302160372
+  ],
+  "source_commit": "b814702456011974e59d9afe2568096208794b1e",
+  "shared_physical_fields": [
+    "audit_substep_q",
+    "authority_source_q_truth",
+    "authority_source_torque_truth",
+    "authority_decision_q_truth",
+    "authority_previous_request",
+    "authority_reference",
+    "command",
+    "velocity",
+    "alive",
+    "effective",
+    "loss",
+    "onset",
+    "ret"
+  ],
+  "pairing": {
+    "declared": {
+      "shared_source_packets": 585,
+      "tail_sources_available_in_only_one_arm": [
+        [
+          0,
+          298
+        ]
+      ]
+    },
+    "immediate": {
+      "shared_source_packets": 586,
+      "tail_sources_available_in_only_one_arm": [
+        [
+          0,
+          299
+        ],
+        [
+          1,
+          299
+        ]
+      ]
+    }
+  },
+  "archive_sha256": "dafff121f07a2c5f4ad560cde4a16c0c2a0bd67570b6b1c9fbdd182c3daec62c",
+  "wall_seconds": 38.41
+}
