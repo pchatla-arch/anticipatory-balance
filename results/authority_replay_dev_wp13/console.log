@@ -1,0 +1,7 @@
+gain_085 declared none: falls=0.000 loss=0.0292 harmful=0.0000 gain_err=0.150 time=43s
+gain_085 exact none: falls=0.000 loss=0.0292 harmful=0.0000 gain_err=0.150 time=32s
+gain_070 declared none: falls=0.000 loss=0.0740 harmful=0.0000 gain_err=0.300 time=29s
+gain_070 exact none: falls=0.000 loss=0.0740 harmful=0.0000 gain_err=0.300 time=29s
+gain_055 declared none: falls=1.000 loss=2.5267 harmful=0.0000 gain_err=0.450 time=29s
+gain_055 exact none: falls=1.000 loss=2.5267 harmful=0.0000 gain_err=0.450 time=30s
+Bench completed: 48 episode rows; see /workspace/scratch/a92174288b11/oaa-authority-evidence/dev/report.md

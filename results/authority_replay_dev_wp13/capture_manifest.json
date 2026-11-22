@@ -1,0 +1,212 @@
+{
+  "study": "WP 1.3 uncorrected authority replay input (development only)",
+  "bench_base": "c5397f89d91c1885c9d97263d024dcbc55b1cd1c",
+  "observer_commit": "5584a40871e7e1b30a980ffa049f9b2f83debb65",
+  "observer_tree": "037bd1d85b3780e3c0761a02cee73cb66d574a68",
+  "playground_commit": "9de993826d1a486f18aec4e8d3179e93ff64ed41",
+  "menagerie_commit": "1b86ece576591213e2b666ebf59508454200ca97",
+  "playground_lock_git_blob": "01c0761262ca13a0ba0abc8b863f3e494189e05e",
+  "versions": {
+    "mujoco": "3.16.0",
+    "mujoco-mjx": "3.16.0",
+    "warp-lang": "1.18.0",
+    "jax": "0.12.0.1",
+    "jaxlib": "0.12.0.1",
+    "brax": "0.14.2",
+    "flax": "0.12.10",
+    "optax": "0.2.8",
+    "orbax-checkpoint": "0.12.8",
+    "numpy": "2.5.4",
+    "ml-collections": "1.1.0",
+    "etils": "1.14.0"
+  },
+  "nominal_checkpoint_tree_sha256": "14bd6650f06c4e3171b6e2d2403ef0da5d9dd3604709f0c22b488329dd0223de",
+  "dev_config_file": "docs/adaptive_execution/research_candidate/wp22_dev_config.json",
+  "dev_config_sha256": "e0f0586a0db57a37b022bfab97f0a695dc85c181118780c3d656cd8d73932d81",
+  "cpu_only": true,
+  "backend": "jax",
+  "scenario_families": {
+    "gain_085": 11000,
+    "gain_070": 11037,
+    "gain_055": 11074
+  },
+  "seed_pairing": "Within gain family across exact and declared channels",
+  "method": "none",
+  "env": {
+    "JAX_PLATFORMS": "cpu",
+    "JAX_DEFAULT_MATMUL_PRECISION": "highest",
+    "XLA_PYTHON_CLIENT_PREALLOCATE": "false"
+  },
+  "argv": [
+    "scripts/eval_adaptive_bench.py",
+    "--out",
+    "/workspace/scratch/a92174288b11/oaa-authority-evidence/dev",
+    "--methods",
+    "none",
+    "--families",
+    "gain_085,gain_070,gain_055",
+    "--split",
+    "dev",
+    "--allow-cpu",
+    "--impl",
+    "jax",
+    "--trace",
+    "--trace-authority-packets",
+    "--candidate-config",
+    "docs/adaptive_execution/research_candidate/wp22_dev_config.json",
+    "--episodes",
+    "8",
+    "--batch",
+    "8",
+    "--steps",
+    "300",
+    "--schedule",
+    "walk_turn_stop_resume",
+    "--telemetry",
+    "exact,declared"
+  ],
+  "numeric_scope": "Uncorrected raw and released packets from dev simulation. No closed-loop scientific result.",
+  "published_identical_tree_commit": "e51d2d7bdbc2e1dccd377c4d752c8b944af72477",
+  "elapsed_seconds": 196.4,
+  "capture_verification": {
+    "gain_085_exact_none": {
+      "sha256": "9f84a921154cb18fefb5408abe1b594cac0b51b0a09ff196ffd6d530bf7f973c",
+      "raw_packet_shape": [
+        300,
+        8,
+        3,
+        29
+      ],
+      "episodes": 8,
+      "finite": true,
+      "exposed_live_ticks": 1623,
+      "zero_requested_and_effective": true,
+      "packet_counts": {
+        "generated": 2400,
+        "sampled_dropped": 0,
+        "released": 2400,
+        "released_at_live_tick": 2400,
+        "lost_by_timeout": 0,
+        "pending_at_horizon": 0,
+        "undelivered_non_dropped_at_horizon": 0
+      }
+    },
+    "gain_085_declared_none": {
+      "sha256": "70a4bddcdbea2528f78461779f0e0880a885d58ad1e7bc620798705912b7fb5a",
+      "raw_packet_shape": [
+        300,
+        8,
+        3,
+        29
+      ],
+      "episodes": 8,
+      "finite": true,
+      "exposed_live_ticks": 1623,
+      "zero_requested_and_effective": true,
+      "packet_counts": {
+        "generated": 2400,
+        "sampled_dropped": 39,
+        "released": 2344,
+        "released_at_live_tick": 2344,
+        "lost_by_timeout": 39,
+        "pending_at_horizon": 17,
+        "undelivered_non_dropped_at_horizon": 17
+      }
+    },
+    "gain_070_exact_none": {
+      "sha256": "1fb6a6937f86a4e3d61135e820e32a901be8b8548c73d207b648abbba543e688",
+      "raw_packet_shape": [
+        300,
+        8,
+        3,
+        29
+      ],
+      "episodes": 8,
+      "finite": true,
+      "exposed_live_ticks": 1611,
+      "zero_requested_and_effective": true,
+      "packet_counts": {
+        "generated": 2400,
+        "sampled_dropped": 0,
+        "released": 2400,
+        "released_at_live_tick": 2400,
+        "lost_by_timeout": 0,
+        "pending_at_horizon": 0,
+        "undelivered_non_dropped_at_horizon": 0
+      }
+    },
+    "gain_070_declared_none": {
+      "sha256": "9f9bcd402f75d8a1966cdb27b5caaed20a22f57d63ec4d07232f3d2264aabed0",
+      "raw_packet_shape": [
+        300,
+        8,
+        3,
+        29
+      ],
+      "episodes": 8,
+      "finite": true,
+      "exposed_live_ticks": 1611,
+      "zero_requested_and_effective": true,
+      "packet_counts": {
+        "generated": 2400,
+        "sampled_dropped": 40,
+        "released": 2346,
+        "released_at_live_tick": 2346,
+        "lost_by_timeout": 40,
+        "pending_at_horizon": 14,
+        "undelivered_non_dropped_at_horizon": 14
+      }
+    },
+    "gain_055_exact_none": {
+      "sha256": "0c273f72fedbc07f8f31759281822af3423a214fde9d6365728f3bc6f1e7f332",
+      "raw_packet_shape": [
+        300,
+        8,
+        3,
+        29
+      ],
+      "episodes": 8,
+      "finite": true,
+      "exposed_live_ticks": 830,
+      "zero_requested_and_effective": true,
+      "packet_counts": {
+        "generated": 2400,
+        "sampled_dropped": 0,
+        "released": 2400,
+        "released_at_live_tick": 1622,
+        "lost_by_timeout": 0,
+        "pending_at_horizon": 0,
+        "undelivered_non_dropped_at_horizon": 0
+      }
+    },
+    "gain_055_declared_none": {
+      "sha256": "4e5f6195e43c219a25a6551d30414552953be8430aa41a61f7ca6dff1190ebf8",
+      "raw_packet_shape": [
+        300,
+        8,
+        3,
+        29
+      ],
+      "episodes": 8,
+      "finite": true,
+      "exposed_live_ticks": 830,
+      "zero_requested_and_effective": true,
+      "packet_counts": {
+        "generated": 2400,
+        "sampled_dropped": 51,
+        "released": 2334,
+        "released_at_live_tick": 1575,
+        "lost_by_timeout": 50,
+        "pending_at_horizon": 16,
+        "undelivered_non_dropped_at_horizon": 15
+      }
+    }
+  },
+  "pairing_verification": "Within each gain all eight scenario IDs, commands, onsets, speed and every recorded physical field match between channels. All requested and effective offsets are identically zero.",
+  "channel_verification": "Independent seeded S.measure draws plus FIFO timeout replay match every release mask, delivered source index, and arrival index. Counts include all 300 scheduled ticks per lane; live releases and fault-exposed live ticks are tabulated separately.",
+  "limitations": [
+    "The none method's CSV released/lost counters remain zero by design. Use the observer mask and this replay for packet counts.",
+    "The observer stores combined finite/unsaturated regression validity. Separate joint-torque, actuator-force, and control-limit cause flags are unavailable in these traces.",
+    "This development-only open-loop replay captures one frozen walker on JAX CPU. Report authority at surviving exposures separately from numbers at or after termination."
+  ]
+}
