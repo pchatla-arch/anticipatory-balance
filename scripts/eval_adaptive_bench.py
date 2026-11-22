@@ -36,7 +36,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 SPLIT_SEED = {"dev": 11000, "val": 12000, "test": 13000}
-TELEMETRY_PRESETS = {"exact": "EXACT", "declared": "DECLARED"}
+TELEMETRY_PRESETS = {"exact": "EXACT", "declared": "DECLARED", "declared_fast": "DECLARED_FAST"}
 REFERENCE_METHOD = "heuristic_gate"
 PAIRED_METRICS = ("postfault_loss", "harmful_offset_rad", "progress_m")
 
