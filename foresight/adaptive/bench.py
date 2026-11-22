@@ -138,7 +138,7 @@ class MethodSpec(NamedTuple):
     oracle: bool            # env applies the privileged true-gain inverse
     rls: E.RLSConfig = E.RLSConfig()
     heuristic: E.HeuristicConfig = E.HeuristicConfig()
-    candidate: object = None   # ChatGPT's module exposing init/update/correction (WP 2.2)
+    candidate: object = None   # bound method or None (WP 2.2)
 
 
 METHODS = {
@@ -187,7 +187,7 @@ def finite_rows(value):
 # -------------------------------------------------------------------------------- rollout
 
 def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryConfig,
-                        schedule: CommandSchedule, steps, trace=False):
+                        schedule: CommandSchedule, steps, trace=False, trace_authority_packets=False):
     """Return execute(initial, scenario) -> per-episode metrics for one method and sensor model.
 
     With trace=True the result also carries per-step arrays (step axis first): g_hat,
@@ -232,8 +232,8 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
             pkt_j = jax.tree_util.tree_map(lambda x: x[:, j], due)
             rls = jax.vmap(lambda s, p, m: E.rls_update(s, p, m, kp, method.rls))(rls, pkt_j, mask[:, j])
             if method.candidate is not None:
-                cand = method.candidate.update(cand, pkt_j, mask[:, j], rls, t)
-        return mstate._replace(rls=rls, queue=queue, candidate=cand)
+                cand = method.candidate.update(cand, pkt_j, mask[:, j])
+        return mstate._replace(rls=rls, queue=queue, candidate=cand), due, mask
 
     def method_correction(mstate, reference, t, simulated):
         if method.name == "oracle_external":
@@ -249,7 +249,8 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
             x, reason = jax.vmap(lambda s, r: E.heuristic_gate(s, r, t, DT, method.heuristic))(mstate.rls, reference)
             return x, reason
         if method.candidate is not None:
-            return method.candidate.correction(mstate.candidate, mstate.rls, reference, t)
+            return method.candidate.correction(mstate.candidate, mstate.rls, reference, t,
+                                               simulated.info["adaptive_prev_delta"])
         return jp.zeros_like(reference), mstate.reason
 
     @jax.jit
@@ -302,8 +303,12 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
                 mstate = mstate._replace(reason=reason)
             simulated = simulated.replace(info=info, obs=obs)
             next_state = advance(simulated, safe_action)
-            if uses_estimator or method.candidate is not None:
-                mstate = method_update(mstate, next_state.info, t, sensor_keys)
+            if trace_authority_packets:
+                # Pre-command RLS and issued interface state. Truth channels are
+                # observer-only and never passed to any practical control method.
+                decision_rls = mstate.rls
+            if uses_estimator or method.candidate is not None or trace_authority_packets:
+                mstate, due, release_mask = method_update(mstate, next_state.info, t, sensor_keys)
             finite = (finite_rows(next_state.data.qpos) & finite_rows(next_state.data.qvel)
                       & finite_rows(next_state.data.xpos) & finite_rows(next_state.data.sensordata)
                       & finite_rows(next_state.obs["state"]) & action_finite)
@@ -362,6 +367,17 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
                       "effective": effective, "reason": mstate.reason, "loss": loss,
                       "alive": observed, "gain_true_active": ~plant_healthy,
                       "command": cmd, "velocity": velocity(next_state.data)}
+            if trace_authority_packets:
+                ys.update(authority_reference=reference,
+                          authority_previous_request=prev_delta,
+                          authority_decision_q_truth=jax.vmap(env.measured_joint_positions)(simulated.data),
+                          authority_source_q_truth=next_state.info["telemetry_joint_position_rad"],
+                          authority_source_torque_truth=next_state.info["telemetry_applied_joint_torque_nm"],
+                          authority_release_mask=release_mask)
+                for field in ("g_hat", "last_source_step", "last_position", "last_velocity"):
+                    ys["authority_rls_" + field] = getattr(decision_rls, field)
+                for field in due._fields:
+                    ys["authority_packet_" + field] = getattr(due, field)
             return (state, mstate, out), ys
 
         mstate0 = method_init(n)

@@ -176,6 +176,9 @@ def main(argv=None):
     parser.add_argument("--registration", type=Path, help="required for --split test; must predate the run")
     parser.add_argument("--heuristic", type=Path, help="JSON with tuned HeuristicConfig/RLSConfig fields (frozen on val)")
     parser.add_argument("--margin", type=float, default=0.005, help="noninferiority loss margin on healthy/nuisance families")
+    parser.add_argument("--candidate-config", type=Path, help="explicit WP 2.2 assumption/authority JSON")
+    parser.add_argument("--trace-authority-packets", action="store_true",
+                        help="dev-only observer: record decision state, released packets and evaluation truth")
     parser.add_argument("--trace", action="store_true", help="save per-step traces of the first batch of every cell (npz)")
     args = parser.parse_args(argv)
     args.out.mkdir(parents=True, exist_ok=True)
@@ -210,6 +213,14 @@ def main(argv=None):
     rls_cfg = E.RLSConfig(**tuned.get("rls", {}))
     heur_cfg = E.HeuristicConfig(**tuned.get("heuristic", {}))
     candidate = B.load_candidate()
+    candidate_cfg = None
+    needs_candidate = "candidate" in methods or args.trace_authority_packets
+    if args.trace_authority_packets and (not args.trace or args.split != "dev"):
+        parser.error("--trace-authority-packets requires --trace and --split dev")
+    if needs_candidate:
+        if candidate is None or not args.candidate_config:
+            parser.error("candidate/authority runs require the candidate module and --candidate-config")
+        candidate_cfg = candidate.Config(**json.loads(args.candidate_config.read_text()))
     specs = {}
     for m in methods:
         if m in B.METHODS:
@@ -217,17 +228,22 @@ def main(argv=None):
         elif m == "candidate":
             if candidate is None:
                 parser.error("method 'candidate' requested but foresight.adaptive.candidate is not available")
-            specs[m] = B.MethodSpec("candidate", external=True, oracle=False, rls=rls_cfg, candidate=candidate)
+            specs[m] = B.MethodSpec("candidate", external=True, oracle=False, rls=rls_cfg)
         else:
             parser.error(f"unknown method {m}")
     # Healthy and nuisance families carry a noninferiority margin; gain families are superiority tests.
     margins = {f: args.margin for f in families if B.FAMILIES[f].gain == 1.0}
     registration = registration_record(args, families, methods, sorted(telemetry), margins)
+    if needs_candidate:
+        registration["candidate_config_sha256"] = hashlib.sha256(args.candidate_config.read_bytes()).hexdigest()
     if args.split == "test":
         if not args.registration or not args.registration.exists():
             parser.error("--split test requires an existing --registration file written before this run")
         recorded = json.loads(args.registration.read_text())
-        for key in ("families", "methods", "telemetry", "episodes", "steps", "schedule"):
+        checked_keys = ("families", "methods", "telemetry", "episodes", "steps", "schedule")
+        if needs_candidate:
+            checked_keys += ("candidate_config_sha256",)
+        for key in checked_keys:
             if recorded.get(key) != registration[key]:
                 parser.error(f"registration mismatch on {key}: {recorded.get(key)!r} vs {registration[key]!r}")
         registration["registered_at"] = recorded.get("registered_at")
@@ -262,6 +278,11 @@ def main(argv=None):
         "families": {f: {**B.FAMILIES[f]._asdict(), "telemetry": S.summarize(B.FAMILIES[f].telemetry)} for f in families},
         "candidate_available": candidate is not None,
     }
+    if needs_candidate:
+        from dataclasses import asdict
+        meta["candidate_config"] = asdict(candidate_cfg)
+        meta["candidate_model"] = candidate.model_record(env, next(iter(telemetry.values())), rls_cfg, candidate_cfg)
+        meta["trace_authority_packets"] = args.trace_authority_packets
     write_json(args.out / "config.json", meta)
     reset = jax.jit(jax.vmap(env.reset))
     rows = []
@@ -279,7 +300,11 @@ def main(argv=None):
                 latency_max=max(family.telemetry.latency_max, tele_cfg.latency_max),
             ).validate()
             for mname, spec in specs.items():
-                execute = B.build_bench_rollout(env, policy, spec, combined, schedule, args.steps, trace=args.trace)
+                if mname == "candidate":
+                    # Only public error bounds are consumed from the measurement channel.
+                    spec = spec._replace(candidate=candidate.Candidate.bind(env, combined, rls_cfg, candidate_cfg))
+                execute = B.build_bench_rollout(env, policy, spec, combined, schedule, args.steps,
+                                                trace=args.trace, trace_authority_packets=args.trace_authority_packets)
                 arm_started = time.monotonic()
                 for start in range(0, args.episodes, args.batch):
                     stop = min(start + args.batch, args.episodes)
