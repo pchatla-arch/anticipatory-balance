@@ -221,7 +221,12 @@ def main(argv=None, *, velocity_pilot=None):
             telemetry[Path(name).stem] = S.config_from_dict(json.loads(Path(name).read_text()))
         else:
             parser.error(f"unknown telemetry preset {name}")
-    tuned = json.loads(args.heuristic.read_text()) if args.heuristic else {}
+    if velocity_pilot:
+        tuned = velocity_pilot["baseline"]
+        if velocity_pilot["mode"] == "development" and tuned["status"] != "frozen_wp21":
+            raise ValueError("a scientific velocity pilot requires the frozen WP 2.1 heuristic")
+    else:
+        tuned = json.loads(args.heuristic.read_text()) if args.heuristic else {}
     rls_cfg = E.RLSConfig(**tuned.get("rls", {}))
     heur_cfg = E.HeuristicConfig(**tuned.get("heuristic", {}))
     candidate = B.load_candidate()
@@ -244,7 +249,7 @@ def main(argv=None, *, velocity_pilot=None):
         elif m in configs:
             if candidate is None:
                 parser.error("method 'candidate' requested but foresight.adaptive.candidate is not available")
-            specs[m] = B.MethodSpec("candidate", external=True, oracle=False, rls=rls_cfg)
+            specs[m] = B.MethodSpec("candidate", external=True, oracle=False, rls=rls_cfg, heuristic=heur_cfg)
         else:
             parser.error(f"unknown method {m}")
     # Healthy and nuisance families carry a noninferiority margin; gain families are superiority tests.
@@ -252,6 +257,8 @@ def main(argv=None, *, velocity_pilot=None):
     registration = registration_record(args, families, methods, sorted(telemetry), margins)
     if needs_candidate:
         registration["candidate_config_sha256"] = hashlib.sha256(args.candidate_config.read_bytes()).hexdigest()
+    if velocity_pilot:
+        registration["baseline"] = velocity_pilot["baseline"]
     if args.split == "test":
         if not args.registration or not args.registration.exists():
             parser.error("--split test requires an existing --registration file written before this run")
@@ -301,7 +308,7 @@ def main(argv=None, *, velocity_pilot=None):
     }
     if velocity_pilot:
         meta.update(seed=velocity_pilot["seed_base"], family_seeds=velocity_pilot["family_seeds"],
-                    heuristic_status="untuned development reference")
+                    baseline=velocity_pilot["baseline"])
     if needs_candidate:
         from dataclasses import asdict
         if velocity_pilot:

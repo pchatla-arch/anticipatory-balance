@@ -66,7 +66,7 @@ class Candidate:
     encoder_error_rad: float
     effort_error_nm: float
     min_excitation_rad: float
-    velocity_error_rad_s: float = 0.0
+    bound_velocity_rad_s: float = 0.0
 
     @classmethod
     def bind(cls, env, telemetry, rls, config):
@@ -86,7 +86,7 @@ class Candidate:
                    jp.asarray(layout.ctrl_limited & layout.control_clipping_enabled),
                    jp.asarray(ceiling, jp.float32), env.max_correction_rad,
                    env.max_correction_rate_rad_s, env.dt, telemetry.bound_position_rad,
-                   telemetry.bound_torque_nm, rls.min_excitation_rad, telemetry.velocity_error_rad_s)
+                   telemetry.bound_torque_nm, rls.min_excitation_rad, telemetry.bound_velocity_rad_s)
 
     def init(self, n, nu):
         shape = n, nu
@@ -137,7 +137,7 @@ class Candidate:
         if self.config.hold_accel_rad_s2 is not None:
             # Source velocity and position come from the same released measurement.
             # For every t <= age + hold, displacement is bounded by (|v|+b_v)t + A*t²/2.
-            speed = (jp.abs(rls.last_velocity) + self.velocity_error_rad_s
+            speed = (jp.abs(rls.last_velocity) + self.bound_velocity_rad_s
                      + 0.5 * self.config.hold_accel_rad_s2 * (position_age + self.dt))
         errors = P.hold_error(reference, rls.last_position, position_error_bound=self.encoder_error_rad,
                               max_speed=speed, age=position_age, hold=self.dt)

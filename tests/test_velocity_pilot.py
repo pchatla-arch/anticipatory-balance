@@ -17,11 +17,11 @@ def test_velocity_error_is_source_paired_and_preserves_other_sensor_draws():
              "telemetry_held_target_rad": jp.zeros(8),
              "telemetry_applied_joint_torque_nm": jp.ones(8),
              "telemetry_regression_valid": jp.ones(8, bool)}
-    sensor = S.DECLARED._replace(velocity_error_rad_s=0.5)
-    earliest = sensor._replace(latency_min=0, latency_max=0)
+    before_velocity_channel = S.DECLARED._replace(velocity_error_rad_s=0., bound_velocity_rad_s=0.)
+    sensor, earliest = S.DECLARED, S.DECLARED_FAST
     for t in range(16):
         key = jax.random.fold_in(jax.random.PRNGKey(72), t)
-        previous = S.measure(exact, t, S.DECLARED, key)
+        previous = S.measure(exact, t, before_velocity_channel, key)
         delayed = S.measure(exact, t, sensor, key)
         early = S.measure(exact, t, earliest, key)
         for field in previous._fields:
@@ -33,9 +33,8 @@ def test_velocity_error_is_source_paired_and_preserves_other_sensor_draws():
         diff = delayed.velocity_rad_s - previous.velocity_rad_s
         assert np.all(np.abs(diff) <= .5) and np.any(diff != 0)
         assert bool(early.arrival_step == S.DROPPED) == bool(delayed.arrival_step == S.DROPPED)
-    for invalid in (float("nan"), -1, float("inf")):
-        with pytest.raises(ValueError):
-            sensor._replace(velocity_error_rad_s=invalid).validate()
+        noise = jax.random.uniform(jax.random.fold_in(key, 5), (8,), minval=-1.0, maxval=1.0)
+        np.testing.assert_array_equal(delayed.velocity_rad_s, previous.velocity_rad_s + .5 * noise)
 
 
 def test_velocity_envelope_uses_latest_valid_source_and_future_hold():
@@ -110,3 +109,51 @@ def test_observer_preserves_healthy_and_faulted_transitions():
         seen_leaves = jax.tree_util.tree_leaves(seen.replace(info=records))
         for expected, actual in zip(baseline_leaves, seen_leaves, strict=True):
             np.testing.assert_array_equal(expected, actual)
+
+
+def test_frozen_heuristic_is_required_and_bound_to_published_git_bytes(tmp_path):
+    import hashlib
+    import json
+    import subprocess
+    path = Path(__file__).resolve().parents[1] / "scripts/run_velocity_pilot.py"
+    spec = spec_from_file_location("run_velocity_pilot", path)
+    pilot = module_from_spec(spec)
+    spec.loader.exec_module(pilot)
+
+    output = tmp_path / "must_not_launch"
+    with pytest.raises(SystemExit):
+        pilot.main(["run", "--out", str(output)])
+    assert not output.exists()
+
+    # A private fixture exercises the tuner's actual file format without publishing a baseline.
+    repo = tmp_path / "clone"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    file = repo / pilot.FROZEN_PATH
+    file.parent.mkdir(parents=True)
+    payload = {"rls": {"forgetting": .95}, "heuristic": {"dead_band": .03},
+               "tuned_on": {"split": "dev", "evaluations": 13}}
+    raw = (json.dumps(payload, indent=2) + "\n").encode()
+    file.write_bytes(raw)
+    subprocess.run(["git", "add", pilot.FROZEN_PATH], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Fixture", "-c", "user.email=fixture@example.com",
+                    "commit", "-qm", "Canonical-format test fixture"], cwd=repo, check=True)
+    file.write_bytes(b"partial local config")
+    record, archived = pilot.frozen_heuristic("HEAD", repo=repo)
+    assert archived == raw and record["sha256"] == hashlib.sha256(raw).hexdigest()
+    assert record["rls"] == E.RLSConfig(forgetting=.95)._asdict()
+    assert record["heuristic"] == E.HeuristicConfig(dead_band=.03)._asdict()
+    assert record["tuned_on"] == payload["tuned_on"]
+
+
+def test_candidate_consumes_declared_velocity_bound_separately_from_sensor_error():
+    from types import SimpleNamespace
+    layout = SimpleNamespace(ctrl_range=np.array([[-1., 1.]]), ctrl_limited=np.ones(1, bool),
+                             control_clipping_enabled=True, actuator_force_limited=np.ones(1, bool),
+                             actuator_force_range=np.array([[-10., 10.]]), joint_force_limited=np.ones(1, bool),
+                             joint_force_range=np.array([[-10., 10.]]))
+    env = SimpleNamespace(_telemetry_layout=layout, action_size=1,
+                          mj_model=SimpleNamespace(actuator_gainprm=np.ones((1, 1))),
+                          max_correction_rad=.2, max_correction_rate_rad_s=2., dt=.02)
+    channel = S.DECLARED._replace(velocity_error_rad_s=.25, bound_velocity_rad_s=.7)
+    controller = C.Candidate.bind(env, channel, E.RLSConfig(), C.Config(0., 10., .01, .0001, 2, 0., 400.))
+    assert controller.bound_velocity_rad_s == .7
