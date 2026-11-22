@@ -64,21 +64,52 @@ def configure_determinism(enabled):
     return True
 
 
-def deterministic_model(model, impl):
-    """Return the MJX model with MuJoCo-Warp's full determinism mask, or unchanged for JAX.
+def warp_determinism_capability(model):
+    """Inspect the installed vendor enum and the actual MJX model option."""
+    from mujoco.mjx.third_party.mujoco_warp._src import types
+    mask = getattr(getattr(types, 'DeterminismType', None), 'ALL', None)
+    current = getattr(model.opt._impl, 'deterministic', None)
+    missing = [name for name, value in [('DeterminismType.ALL', mask),
+                                         ('opt._impl.deterministic', current)] if value is None]
+    return {'supported': not missing, 'missing': missing,
+            'all_mask': None if mask is None else int(mask),
+            'model_option': None if current is None else int(current)}
 
-    MuJoCo-Warp accumulates constraint and passive forces with floating-point atomics,
-    whose order is not fixed on CUDA, so two executions of one batch differ at the last
-    bit and a walking episode amplifies that over 400 steps. The pod smoke run of
-    2026-11-22 showed the healthy and identity arms differing by up to 0.065 N.m in peak
-    force for that reason. DeterminismType.ALL requests stable contact ordering,
-    canonical constraint rows and order-invariant atomic reductions.
-    """
+
+def deterministic_model(model, impl):
+    """Apply the installed MuJoCo-Warp full mask and read it back."""
     if impl != 'warp':
         return model, None
-    from mujoco.mjx.third_party.mujoco_warp._src.types import DeterminismType
-    mask = int(DeterminismType.ALL)
-    return model.tree_replace({'opt._impl.deterministic': mask}), mask
+    api = warp_determinism_capability(model)
+    if not api['supported']:
+        raise ValueError('Installed MuJoCo-Warp lacks ' + ', '.join(api['missing']))
+    mask = api['all_mask']
+    model = model.tree_replace({'opt._impl.deterministic': mask})
+    if int(model.opt._impl.deterministic) != mask:
+        raise ValueError('MuJoCo-Warp full determinism mask did not read back.')
+    return model, mask
+
+
+def physics_execution(model, impl, mode, profile, requested):
+    """Select observable execution semantics before loading a checkpoint or compiling."""
+    record = {'mode': mode, 'requested': requested, 'xla_flags': os.environ.get('XLA_FLAGS', ''),
+              'mujoco_warp_opt_deterministic': None, 'model_opt_deterministic': None}
+    if impl != 'warp':
+        return model, dict(record, physics_mode='jax')
+    api = warp_determinism_capability(model)
+    record.update(warp_api=api, model_opt_deterministic=api['model_option'])
+    if not api['supported']:
+        reason = 'Installed MuJoCo-Warp lacks ' + ', '.join(api['missing'])
+        if mode == 'on' or (requested and profile == 'gate'):
+            physics_mode = 'unsupported'
+        else:
+            physics_mode = 'default_warp_diagnostic' if profile == 'smoke' else 'default_warp'
+        return model, dict(record, physics_mode=physics_mode, reason=reason)
+    if not requested:
+        return model, dict(record, physics_mode='default_warp')
+    model, mask = deterministic_model(model, impl)
+    return model, dict(record, physics_mode='warp_full_mask', mujoco_warp_opt_deterministic=mask,
+                       model_opt_deterministic=int(model.opt._impl.deterministic))
 
 
 def scenarios(seed, count):
@@ -240,6 +271,7 @@ def build_rollout(env, policy, steps=HORIZON):
 def render_report(summary, rows):
     lines = ['# Adaptive execution: known-gain feasibility gate', '',
              f"Scientific gate: **{summary['scientific_gate_status']}**.", '',
+             summary.get('interpretation', ''), '',
              'This tests a bounded, privileged correction for proportional-servo gain loss. '
              'It does not estimate faults online and is not evidence of learned adaptation.', '',
              '| Phase | Condition | Episodes | Failure rate | Mean fixed-horizon loss | Mean post-fault progress (m) |',
@@ -277,7 +309,7 @@ def main(argv=None):
     parser.add_argument('--impl', choices=('warp', 'jax'), default='warp')
     parser.add_argument('--allow-cpu', action='store_true', help='Local engineering checks only; no scientific gate claim.')
     parser.add_argument('--deterministic', choices=('auto', 'on', 'off'), default='auto',
-                        help='Bit-exact run-to-run physics and XLA ops. auto: on for every pod run (GPU), off for --allow-cpu.')
+                        help='auto requests deterministic ops on the GPU. If Warp lacks the API, auto smoke uses default physics for diagnostics and auto GPU gate is blocked. off explicitly requests default physics.')
     parser.add_argument('--no-repeat-probe', dest='repeat_probe', action='store_false',
                         help='Skip the healthy_repeat reproducibility arm (kept by default; it costs one arm per batch).')
     args = parser.parse_args(argv)
@@ -321,9 +353,16 @@ def main(argv=None):
     cfg.push_config.enable = False
     cfg.episode_length = HORIZON
     env = AdaptiveJoystick(config=cfg, config_overrides={'impl': args.impl})
-    physics_determinism_mask = None
-    if deterministic:
-        env._mjx_model, physics_determinism_mask = deterministic_model(env.mjx_model, args.impl)
+    env._mjx_model, physics = physics_execution(env.mjx_model, args.impl, args.deterministic,
+                                                 args.profile, deterministic)
+    if physics['physics_mode'] == 'unsupported':
+        write_json(args.out / 'preflight.json', {'physics_impl': args.impl, 'deterministic_execution': physics,
+                                                 'status': 'blocked_before_rollout'})
+        raise RuntimeError(physics['reason'] + '. Requested execution unavailable. See preflight.json.')
+    if physics['physics_mode'] == 'default_warp_diagnostic':
+        print(physics['reason'] + '. Running default Warp smoke for diagnostics only.', flush=True)
+    elif physics['physics_mode'] == 'default_warp' and 'reason' in physics:
+        print(physics['reason'] + '. Determinism was not requested; using default Warp physics.', flush=True)
     if not np.isclose(env.dt, DT) or env.mjx_model.nu != 29:
         raise RuntimeError('Unexpected control period or actor action interface.')
     if int(np.sum(env.leg_actuator_mask)) != 12:
@@ -350,12 +389,7 @@ def main(argv=None):
         'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
         'protocol': PROTOCOL, 'policy_checkpoint': config['checkpoint'],
         'physics_impl': args.impl,
-        'deterministic_execution': {
-            'requested': deterministic,
-            'xla_flags': os.environ.get('XLA_FLAGS', ''),
-            'mujoco_warp_opt_deterministic': physics_determinism_mask,
-            'model_opt_deterministic': int(env.mjx_model.opt._impl.deterministic) if args.impl == 'warp' else None,
-        },
+        'deterministic_execution': physics,
         'repeat_probe': args.repeat_probe,
     }
     write_json(args.out / 'preflight.json', preflight)
@@ -423,6 +457,7 @@ def main(argv=None):
 
     screen = evaluate_phase('screen', SCREEN_SEED, plan['screen_episodes'])
     summary = {'protocol': PROTOCOL, 'profile': args.profile, 'screen': screen,
+               'physics_mode': physics['physics_mode'],
                'confirmation': None, 'scientific_gate_status': 'inconclusive',
                'interpretation': 'Known-gain bounded compensation only; online adaptation has not been tested.'}
     selected = choose_candidate(screen)
@@ -438,6 +473,8 @@ def main(argv=None):
     if args.profile == 'smoke' or args.allow_cpu:
         summary['scientific_gate_status'] = 'inconclusive'
         summary['interpretation'] = 'Engineering smoke only; run the GPU gate profile for independent confirmation.'
+    if physics['physics_mode'] == 'default_warp_diagnostic':
+        summary['interpretation'] = physics['reason'] + '. Default-backend engineering smoke only.'
     summary['elapsed_seconds'] = round(time.monotonic()-started, 3)
     write_json(args.out / 'summary.json', summary)
     (args.out / 'report.md').write_text(render_report(summary, rows))

@@ -176,13 +176,41 @@ class AdaptiveEvaluatorTests(unittest.TestCase):
         sentinel = object()
         self.assertEqual(evaluator.deterministic_model(sentinel, 'jax'), (sentinel, None))
 
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from mujoco.mjx.third_party.mujoco_warp._src import types
+
         class FakeModel:
+            def __init__(self):
+                self.opt = SimpleNamespace(_impl=SimpleNamespace(deterministic=0))
+
             def tree_replace(self, updates):
-                self.updates = updates
+                self.opt._impl.deterministic = updates['opt._impl.deterministic']
                 return self
-        model, mask = evaluator.deterministic_model(FakeModel(), 'warp')
-        self.assertEqual(mask, 7, 'CONTACTS | CONSTRAINT | ATOMICS')
-        self.assertEqual(model.updates, {'opt._impl.deterministic': 7})
+
+        with patch.object(types, 'DeterminismType', SimpleNamespace(ALL=7), create=True):
+            model, mask = evaluator.deterministic_model(FakeModel(), 'warp')
+            self.assertEqual(mask, 7)
+            self.assertEqual(model.opt._impl.deterministic, mask)
+
+    def test_unsupported_warp_never_claims_requested_mask(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        from mujoco.mjx.third_party.mujoco_warp._src import types
+        model = SimpleNamespace(opt=SimpleNamespace(_impl=SimpleNamespace()))
+        for enum in (None, SimpleNamespace(ALL=7)):
+            with patch.object(types, 'DeterminismType', enum, create=True):
+                for mode, profile, expected in (
+                        ('auto', 'smoke', 'default_warp_diagnostic'),
+                        ('off', 'smoke', 'default_warp_diagnostic'),
+                        ('on', 'smoke', 'unsupported'),
+                        ('auto', 'gate', 'unsupported'), ('off', 'gate', 'default_warp')):
+                    original, state = evaluator.physics_execution(model, 'warp', mode, profile, mode != 'off')
+                    self.assertIs(original, model)
+                    self.assertEqual(state['physics_mode'], expected)
+                    self.assertIn('opt._impl.deterministic', state['warp_api']['missing'])
+                    self.assertIsNone(state['model_opt_deterministic'])
+                    self.assertIsNone(state['mujoco_warp_opt_deterministic'])
 
 
 if __name__ == '__main__':

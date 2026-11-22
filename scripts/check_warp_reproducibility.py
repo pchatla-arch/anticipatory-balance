@@ -143,6 +143,9 @@ def main(argv=None):
     parser.add_argument('--metrics', dest='metrics', action='store_true', default=True)
     parser.add_argument('--no-metrics', dest='metrics', action='store_false', help='Skip the gate-metric arms.')
     args = parser.parse_args(argv)
+    modes = args.modes.split(',')
+    if any(mode not in ('default', 'deterministic') for mode in modes) or len(set(modes)) != len(modes):
+        parser.error('--modes expects unique entries from default,deterministic')
     args.out.mkdir(parents=True, exist_ok=True)
     import eval_adaptive_gate as G
     import jax
@@ -163,13 +166,20 @@ def main(argv=None):
                                               capture_output=True).stdout.strip(),
               'versions': {name: G.metadata.version(name) for name in ('jax', 'mujoco', 'mujoco-mjx', 'warp-lang')}}
     results = {}
-    for mode in args.modes.split(','):
+    for mode in modes:
         env = AdaptiveJoystick(config=cfg, config_overrides={'impl': 'warp'})
-        mask = None
+        api = G.warp_determinism_capability(env.mjx_model)
+        block = {'warp_api': api, 'mujoco_warp_opt_deterministic': api['model_option']}
         if mode == 'deterministic':
+            if not api['supported']:
+                block.update(status='unsupported', reason='Installed MuJoCo-Warp lacks ' + ', '.join(api['missing']))
+                report['modes'][mode] = block
+                print(f"Skipping deterministic mode: {block['reason']}", flush=True)
+                continue
             env._mjx_model, mask = G.deterministic_model(env.mjx_model, 'warp')
-        print(f'--- mode {mode}: opt._impl.deterministic={int(env.mjx_model.opt._impl.deterministic)}', flush=True)
-        block = {'mujoco_warp_opt_deterministic': int(env.mjx_model.opt._impl.deterministic)}
+            block['mujoco_warp_opt_deterministic'] = mask
+        print(f"--- mode {mode}: opt._impl.deterministic={block['mujoco_warp_opt_deterministic']}", flush=True)
+        block['status'] = 'available'
         if args.metrics:
             arms = run_arms(G, env, policy, args.steps, args.envs, G.SCREEN_SEED, f'warp/{mode}')
             results[mode] = arms
@@ -193,10 +203,10 @@ def main(argv=None):
                                 **{f'{arm}_{k}': v for arm, tr in traces.items() for k, v in tr.items()})
         report['modes'][mode] = block
         (args.out / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
-    if len(results) == 2:
-        a, b = results.values()
+    if 'default' in results and 'deterministic' in results:
+        a, b = results['default'], results['deterministic']
         report['deterministic_vs_default_healthy'] = compare(a['healthy'], b['healthy'])
-        (args.out / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
+    (args.out / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
     for mode, block in report['modes'].items():
         if 'identity_vs_healthy' in block:
             print(f"{mode}: identity bitwise={block['identity_vs_healthy']['bitwise_equal']} "
@@ -213,6 +223,9 @@ def main(argv=None):
     if 'deterministic_vs_default_healthy' in report:
         print('deterministic vs default (healthy): bitwise', report['deterministic_vs_default_healthy']['bitwise_equal'],
               'max |diff|', {k: f'{v:.3g}' for k, v in report['deterministic_vs_default_healthy']['max_abs_difference'].items() if v})
+    if all(block.get('status') == 'unsupported' for block in report['modes'].values()):
+        print('No requested physics mode was available. See report.json.', flush=True)
+        return 2
     return 0
 
 
