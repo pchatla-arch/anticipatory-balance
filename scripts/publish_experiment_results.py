@@ -36,6 +36,7 @@ STRUCTURED_FILES = frozenset({
     "tests.json", "plan.json", "response_model.json", "report.md", "analysis.json",
     "audit.json", "paired.json", "calibration.json", "table.csv", "lead_curve.csv",
     "hold_comparisons.csv", "batch_summaries.json",
+    "protocol.json", "frozen.json", "verdict.json", "invalid.json",
 })
 BINARY_FILES = frozenset({"episodes.npz", "fixed_controller_comparison.png",
                           "depth_comparison.png", "readiness.png", "closed_loop.png", "frontier.png"})

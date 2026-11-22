@@ -1,5 +1,13 @@
 # Foresight course paper revision history
 
+## 2026-11-21 · Review 3 · What changes when impacts are rare?
+
+Added an exploratory population reweighting with five archived latency/skill-pair comparisons, paired uncertainty and the offline Decision Lab. At the illustrative price of 0.10 falls per unnecessary preparation, the two sensor-driven rules cross at 39.4% scheduled hits on held-out E18h at 100 ms. Figure 4's matched-duration comparison remains a separate question. The manuscript reports the assumed price and uncertainty in the crossover. [Analysis](../analysis/operating_conditions/) · [Decision Lab](../docs/foresight/decision-lab.html)
+
+Recorded and rendered two preselected encounters (seed 73132) on the CPU with a parametric detector and fixed world trajectories. Both policies fell on the scheduled hit. Both stayed upright and walked through the scheduled near-miss. The clip illustrates timing and the limits of a brace. Its four trajectories serve as examples. [Replay and event record](../docs/foresight/replay/)
+
+Added an empty-pod E20 launcher and local tests for the publish-and-verify path. The prospective 512-scenario calibration and up to 2,048 fresh confirmation scenarios still require an authorized GPU run. [Fresh-pod entry](../scripts/start_foresight_e20.sh)
+
 ## 2026-11-21 · Review 2: what does the belief buy at the same preparation time?
 
 The first review established the individual controllers' operating points. This revision adds an exploratory experiment using three archived episode sets, a figure with paired uncertainty, and a prospective comparison that would address the strongest alternative explanation.

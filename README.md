@@ -7,6 +7,14 @@ AA228/CS238 (Decision Making under Uncertainty) final project, Stanford, Autumn 
 Simulation only: Unitree G1 in MuJoCo Playground (rss2025, MJX + MuJoCo-Warp), frozen PPO
 skills, a POMDP decision layer on top. Author: Prasuna Chatla.
 
+## Try the decision on a different workload
+
+A warehouse aisle with many passing objects poses a different decision from one with frequent incoming impacts. In the [Decision Lab](docs/foresight/decision-lab.html), change the fraction of scheduled hits, the delay, and the price of unnecessary preparation. The page works offline after downloading the HTML. Every displayed rate comes from the saved paired episodes. At 100 ms on the first skill pair, assigning one near-miss preparation one tenth of the cost of a fall gives three different best point estimates. At 5% hits it is reactive walking, at 25% it is the belief rule, and at 75% it is the time-to-contact rule. [Counts, paired intervals and reproduction](analysis/operating_conditions/)
+
+[![Two synchronized G1 controllers approaching the same scheduled impact](docs/foresight/replay/paired-encounters.jpg)](docs/foresight/replay/paired-encounters.mp4)
+
+[Watch the 12-second simulated replay](docs/foresight/replay/paired-encounters.mp4) · [Read the event times and how the two encounters were chosen](docs/foresight/replay/)
+
 ## When is an interruption worth it?
 
 A robot can prevent falls by bracing more often, but every brace interrupts its walk. We compared two ways to spend the same average preparation time. A belief rule uses each object's uncertain path and expected impact to decide when to brace. The baseline tosses a coin once per encounter. If enabled, an ordinary time-to-contact (TTC) rule still uses the detections to choose when to brace. The frequency of enabling TTC was set on a separate development set.

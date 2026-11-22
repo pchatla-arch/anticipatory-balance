@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#183f3d">
+<title>When should a humanoid brace? · Foresight</title>
+<style>
+:root {
+  color-scheme:light;
+  --ink:#142d31;
+  --teal:#006765;
+  --navy:#245e91;
+  --amber:#9b4c1b;
+  --gray:#667171;
+  --line:#d1dcd6;
+  --paper:#fbfcf8;
+  --warm:#f4f2e8;
+  --sans:'DM Sans',Inter,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --serif:'STIX Two Text',Georgia,serif;
+}
+
+* {
+  box-sizing:border-box;
+}
+
+body {
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font:15px/1.5 var(--sans);
+  font-variant-numeric:tabular-nums;
+}
+
+.wrap {
+  max-width:1152px;
+  margin:auto;
+  padding:0 36px;
+}
+
+.top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+  padding:22px 0;
+}
+
+.brand {
+  font:600 21px var(--serif);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.brand i {
+  display:inline-block;
+  width:13px;
+  height:18px;
+  background:var(--teal);
+  border-radius:1px;
+  transform:skew(-18deg);
+  box-shadow:5px 0 0 -2px var(--paper),8px 0 0 -2px var(--teal);
+  margin-right:5px;
+}
+
+.byline {
+  font-size:13px;
+  color:#44595a;
+}
+
+.intro {
+  padding:34px 0 30px;
+  max-width:910px;
+}
+
+h1,h2,h3,p {
+  margin:0;
+}
+
+h1 {
+  font:500 clamp(36px,5.1vw,66px)/1.04 var(--serif);
+  letter-spacing:-.045em;
+  margin:0 0 13px;
+}
+
+.intro p {
+  font-size:clamp(16px,1.5vw,19px);
+  line-height:1.5;
+  max-width:770px;
+  color:#3b5354;
+}
+
+.layout {
+  display:grid;
+  grid-template-columns:minmax(270px,.75fr) minmax(0,1.65fr);
+  gap:22px;
+  align-items:stretch;
+}
+
+.panel {
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:#fff;
+  min-width:0;
+}
+
+.conditions {
+  padding:23px 23px 21px;
+  background:var(--warm);
+  border-color:#d9d9ca;
+}
+
+.conditions h2,.results h2,.assumptions h2 {
+  font:500 26px/1.14 var(--serif);
+  letter-spacing:-.025em;
+}
+
+.control {
+  margin-top:22px;
+}
+
+.field {
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:8px;
+}
+
+.field label,.selects label {
+  font-size:13.5px;
+  font-weight:650;
+}
+
+.field output {
+  font-size:19px;
+  font-weight:650;
+}
+
+.help {
+  font-size:12px;
+  line-height:1.4;
+  color:#4a5d59;
+}
+
+.range {
+  accent-color:var(--teal);
+  width:100%;
+  height:27px;
+  margin:5px 0 1px;
+  cursor:pointer;
+}
+
+.selects {
+  display:grid;
+  gap:13px;
+  margin-top:21px;
+}
+
+.selects label {
+  display:grid;
+  gap:5px;
+}
+
+select {
+  width:100%;
+  min-height:36px;
+  background:#fff;
+  border:1px solid #8a9a90;
+  border-radius:5px;
+  color:var(--ink);
+  font:14px var(--sans);
+  padding:6px;
+}
+
+.reset {
+  background:transparent;
+  border:0;
+  color:#075d58;
+  padding:4px 0;
+  cursor:pointer;
+  font:600 12px var(--sans);
+  border-bottom:1px solid #7c9c8f;
+  margin-top:14px;
+}
+
+.reset:hover {
+  color:#003f32;
+}
+
+a {
+  color:#095e60;
+  text-underline-offset:3px;
+}
+
+button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visible,a:focus-visible {
+  outline:3px solid #0e7383;
+  outline-offset:3px;
+}
+
+.chart-panel {
+  padding:22px 23px 16px;
+  display:flex;
+  flex-direction:column;
+}
+
+.chart-top {
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:flex-start;
+}
+
+.chart-title {
+  font:500 clamp(22px,2.5vw,30px)/1.15 var(--serif);
+  letter-spacing:-.025em;
+}
+
+.units {
+  margin-top:5px;
+  font-size:13px;
+  color:#4a5d59;
+}
+
+.chart {
+  width:100%;
+  height:260px;
+  display:block;
+  margin:8px 0 2px;
+}
+
+.chart text {
+  font:11px var(--sans);
+  fill:#4a605e;
+}
+
+.legend {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px 18px;
+  font-size:12px;
+  color:#304e50;
+  align-items:center;
+}
+
+.swatch {
+  display:inline-block;
+  width:20px;
+  height:0;
+  border-top:3px solid var(--c);
+  vertical-align:middle;
+  margin-right:5px;
+}
+
+.reactive {
+  border-top:2px dashed var(--gray);
+}
+
+.belief {
+  border-top:3px dotted var(--amber);
+}
+
+.chart-note {
+  margin-top:auto;
+  padding-top:13px;
+  font-size:13px;
+  color:#3c5756;
+}
+
+.chart-note strong {
+  color:#173b3a;
+}
+
+.results {
+  margin:25px 0;
+}
+
+.results h2 {
+  margin-bottom:9px;
+}
+
+.outcome {
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  width:100%;
+  border-collapse:collapse;
+}
+
+.outcome th,.outcome td {
+  padding:10px 16px;
+  text-align:right;
+  border-bottom:1px solid #dde4df;
+}
+
+.outcome thead th {
+  font-size:12px;
+  color:#495c5b;
+  font-weight:600;
+  line-height:1.34;
+}
+
+.outcome tbody th {
+  text-align:left;
+  font-weight:600;
+}
+
+.outcome tr>:first-child {
+  text-align:left;
+}
+
+.outcome tbody td {
+  font:500 20px var(--sans);
+}
+
+.outcome .best {
+  background:#edf4ef;
+}
+
+.sub {
+  font-size:12px;
+  color:#4c635d;
+  margin-top:7px;
+}
+
+.sources {
+  display:grid;
+  grid-template-columns:1.25fr 1fr;
+  gap:22px;
+  margin-top:20px;
+  margin-bottom:30px;
+}
+
+.insight,.assumptions {
+  padding:14px 0;
+  border-top:1px solid var(--line);
+  font-size:14px;
+}
+
+.insight h2,.assumptions summary {
+  font-size:15px;
+  font-weight:650;
+}
+
+.insight p {
+  margin-top:6px;
+}
+
+.assumptions summary {
+  cursor:pointer;
+}
+
+.assumptions p {
+  margin-top:9px;
+}
+
+.assumptions .formula {
+  font-family:ui-monospace,monospace;
+  font-size:13px;
+}
+
+.raw {
+  margin-top:10px;
+}
+
+.raw th,.raw td {
+  padding:3px 8px;
+  text-align:right;
+  font-size:12px;
+}
+
+.raw th:first-child {
+  text-align:left;
+}
+
+.foot {
+  padding:14px 0 24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:15px;
+  border-top:1px solid var(--line);
+  font-size:12px;
+  color:#485f5b;
+}
+
+.foot .links {
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
+}
+
+.warn {
+  padding:10px;
+  background:#f4ece1;
+}
+
+.chart .current {
+  stroke:#819189;
+  stroke-width:1.2;
+  stroke-dasharray:4 3;
+}
+
+.chart .grid {
+  stroke:#dce6df;
+  stroke-width:1;
+}
+
+.chart .axis {
+  stroke:#899d92;
+  stroke-width:1;
+}
+
+.tablewrap {
+  overflow-x:auto;
+}
+
+@media(max-width:760px) {
+  .wrap {
+    padding:0 19px;
+  }
+  .top {
+    padding:15px 0;
+  }
+  .intro {
+    padding:24px 0 20px;
+  }
+  .layout {
+    grid-template-columns:1fr;
+    gap:15px;
+  }
+  .conditions {
+    padding:17px 18px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0 18px;
+  }
+  .conditions h2,.conditions .selects {
+    grid-column:1/-1;
+  }
+  .control {
+    margin-top:14px;
+  }
+  .selects {
+    grid-template-columns:1.4fr .8fr;
+    margin-top:12px;
+    gap:12px;
+  }
+  .reset {
+    width:max-content;
+    margin-top:10px;
+  }
+  .chart-panel {
+    padding:17px 17px 14px;
+  }
+  .chart {
+    height:220px;
+  }
+  .sources {
+    grid-template-columns:1fr;
+    gap:0;
+  }
+  .results {
+    margin:21px 0;
+  }
+  .outcome th,.outcome td {
+    padding:8px 7px;
+  }
+  .outcome tbody td {
+    font-size:17px;
+  }
+  .foot {
+    flex-wrap:wrap;
+  }
+}
+
+@media(max-width:440px) {
+  .conditions {
+    grid-template-columns:1fr;
+  }
+  .conditions h2,.conditions .selects {
+    grid-column:auto;
+  }
+  .selects {
+    grid-template-columns:1fr 85px;
+  }
+  .byline {
+    font-size:11px;
+  }
+  .brand {
+    font-size:19px;
+  }
+  .outcome {
+    line-height:1.25;
+  }
+  .outcome th,.outcome td {
+    padding:8px 4px;
+  }
+  .outcome tbody th {
+    font-size:12px;
+  }
+  .outcome th:first-child {
+    width:29%;
+  }
+  .outcome thead th {
+    font-size:10px;
+  }
+  .legend {
+    gap:5px 12px;
+    font-size:11px;
+  }
+  .swatch {
+    width:15px;
+  }
+  .chart-panel {
+    padding:14px;
+  }
+  .sources {
+    margin-top:10px;
+    margin-bottom:12px;
+  }
+}
+
+@media(prefers-reduced-motion:no-preference) {
+  .outcome tbody tr {
+    transition:background-color .12s;
+  }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="top">
+<span class="brand"><i aria-hidden="true">
+</i>Foresight</span>
+<span class="byline">Prasuna Chatla &nbsp;·&nbsp; AA228 / CS238</span>
+</header>
+<section class="intro">
+<h1>When should a humanoid brace?</h1>
+<p>A walking robot can brace early and prevent a fall, or keep moving when an object will miss. Explore how three controllers trade falls against unnecessary preparation in the simulated Unitree G1.</p>
+</section>
+<noscript>
+<p class="warn">Enable JavaScript to use the controls. The reference paper and episode analysis are linked below.</p>
+</noscript>
+<div class="layout">
+<section class="conditions panel" aria-labelledby="conditions-title">
+<h2 id="conditions-title">Operating conditions</h2>
+<div class="control">
+<div class="field">
+<label for="hit-rate">Scheduled hits</label>
+<output for="hit-rate" id="hit-label">—</output>
+</div>
+<input class="range" id="hit-rate" type="range" min="0" max="100" step="0.1" aria-describedby="hit-hint">
+<div class="help" id="hit-hint">Share of incoming objects scheduled to hit in the workload.</div>
+</div>
+<div class="control">
+<div class="field">
+<label for="penalty">Near-miss brace penalty</label>
+<output for="penalty" id="price-label">—</output>
+</div>
+<input class="range" type="range" id="penalty" min="0" max="2" step="0.01" value="0.1" aria-describedby="cost-hint">
+<div class="help" id="cost-hint">Relative to the cost of one fall. At 0.10, ten unnecessary braces cost as much as one fall.</div>
+</div>
+<div class="selects">
+<label>Skill pair<select id="split">
+<option value="heldout">Pair 1 · held-out encounters</option>
+<option value="transfer">Pair 2 · transfer check</option>
+</select>
+</label>
+<label>Detection delay<select id="latency">
+</select>
+</label>
+</div>
+<button class="reset" type="button" id="reset">Restore observed mix</button>
+</section>
+<section class="chart-panel panel" aria-labelledby="plot-title">
+<div class="chart-top">
+<div>
+<h2 id="plot-title" class="chart-title">Expected cost per 100 encounters</h2>
+<p class="units">One fall costs 1. An unnecessary brace costs the penalty shown.</p>
+</div>
+</div>
+<svg class="chart" id="chart" role="img" aria-labelledby="svg-title svg-desc">
+</svg>
+<div class="legend" aria-label="Chart legend">
+<span><i class="swatch" style="--c:var(--navy)">
+</i>TTC threshold</span>
+<span><i class="swatch belief">
+</i>Belief rule</span>
+<span><i class="swatch reactive">
+</i>Reactive walker</span>
+</div>
+<p class="chart-note" id="crossover">
+</p>
+</section>
+</div>
+<section class="results" aria-labelledby="rates-title">
+<h2 id="rates-title">At your chosen operating point</h2>
+<div class="tablewrap">
+<table class="outcome">
+<caption style="text-align:left;font-size:13px;padding-bottom:7px;color:#4a5d59">Estimated outcomes per 100 encounters</caption>
+<thead>
+<tr>
+<th scope="col">Controller</th>
+<th scope="col">Falls</th>
+<th scope="col">Near-miss<br>preparations</th>
+<th scope="col">Total cost</th>
+</tr>
+</thead>
+<tbody id="rows">
+</tbody>
+</table>
+</div>
+<p id="ranking" class="sub" aria-live="polite" aria-atomic="true">
+</p>
+</section>
+<div class="sources">
+<section class="insight" aria-labelledby="observed-title">
+<h2 id="observed-title">What the simulator recorded</h2>
+<p id="observed">
+</p>
+<p id="paired">
+</p>
+</section>
+<details class="assumptions">
+<summary>Calculation, assumptions and counts</summary>
+<p>The time-to-contact rule (TTC) uses a 0.3 s threshold. The lead-conditioned belief rule uses preparation cost 0.05 internally. The reactive walker never activates BRACE. Both active rules switch between frozen skills. The price slider scores these fixed policies after the experiment.</p>
+<p>Cost per encounter = probability of a fall + penalty × probability of bracing on a scheduled near-miss. A preparation is an episode with any recorded bracing. A scheduled near-miss may still make physical contact. Duration and walking progress have no additional cost in this calculation.</p>
+<p>Changing the mix reweights the hit and near-miss strata. It assumes unchanged within-stratum behavior, including the mix of object masses, paths and speeds. The experiment used simulated detections at 10 Hz. The transfer check uses different trained skills and the development scenario schedule.</p>
+<table class="raw">
+<caption>Observed episodes and number of events</caption>
+<thead>
+<tr>
+<th scope="col">Controller</th>
+<th scope="col">Fall / hits</th>
+<th scope="col">Fall / misses</th>
+<th scope="col">Brace / misses</th>
+</tr>
+</thead>
+<tbody id="raw">
+</tbody>
+</table>
+</details>
+</div>
+<footer class="foot">
+<span>Foresight · Simulation evidence</span>
+<nav class="links" aria-label="Study materials">
+<a href="https://github.com/pchatla-arch/anticipatory-balance/blob/4463be27e3f24fca8139aa8573e558892736f2d0/paper/foresight.pdf">Course paper</a>
+<a href="https://github.com/pchatla-arch/anticipatory-balance/tree/e4dacfacc1c2330d48fdfabcb3a0f2e933e3117f/results/E18h_heldout_p5">Held-out data</a>
+<a href="https://github.com/pchatla-arch/anticipatory-balance/tree/e4dacfacc1c2330d48fdfabcb3a0f2e933e3117f/results/E19_seed2_p5">Transfer data</a>
+</nav>
+</footer>
+</main>
+<script type="application/json" id="study-data">{"splits":{"heldout":{"cells":{"0":{"arms":{"belief":{"hits":{"falls":536,"n":1407,"preparations":1392},"misses":{"falls":0,"n":641,"preparations":281}},"reactive":{"hits":{"falls":952,"n":1407,"preparations":0},"misses":{"falls":0,"n":641,"preparations":0}},"ttc":{"hits":{"falls":532,"n":1407,"preparations":1404},"misses":{"falls":0,"n":641,"preparations":219}}},"paired_differences":{"hits":[{"fall":-1,"n":56,"preparation":0},{"fall":-1,"n":3,"preparation":1},{"fall":0,"n":1284,"preparation":0},{"fall":0,"n":9,"preparation":1},{"fall":1,"n":55,"preparation":0}],"misses":[{"fall":0,"n":113,"preparation":-1},{"fall":0,"n":477,"preparation":0},{"fall":0,"n":51,"preparation":1}]}},"100":{"arms":{"belief":{"hits":{"falls":655,"n":1407,"preparations":1096},"misses":{"falls":0,"n":641,"preparations":171}},"reactive":{"hits":{"falls":952,"n":1407,"preparations":0},"misses":{"falls":0,"n":641,"preparations":0}},"ttc":{"hits":{"falls":582,"n":1407,"preparations":1403},"misses":{"falls":0,"n":641,"preparations":387}}},"paired_differences":{"hits":[{"fall":-1,"n":68,"preparation":0},{"fall":-1,"n":40,"preparation":1},{"fall":0,"n":1001,"preparation":0},{"fall":0,"n":263,"preparation":1},{"fall":1,"n":31,"preparation":0},{"fall":1,"n":4,"preparation":1}],"misses":[{"fall":0,"n":33,"preparation":-1},{"fall":0,"n":359,"preparation":0},{"fall":0,"n":249,"preparation":1}]}},"300":{"arms":{"belief":{"hits":{"falls":877,"n":1407,"preparations":377},"misses":{"falls":0,"n":641,"preparations":69}},"reactive":{"hits":{"falls":952,"n":1407,"preparations":0},"misses":{"falls":0,"n":641,"preparations":0}},"ttc":{"hits":{"falls":607,"n":1407,"preparations":1384},"misses":{"falls":0,"n":641,"preparations":558}}},"paired_differences":{"hits":[{"fall":-1,"n":26,"preparation":0},{"fall":-1,"n":257,"preparation":1},{"fall":0,"n":368,"preparation":0},{"fall":0,"n":743,"preparation":1},{"fall":1,"n":6,"preparation":0},{"fall":1,"n":7,"preparation":1}],"misses":[{"fall":0,"n":3,"preparation":-1},{"fall":0,"n":146,"preparation":0},{"fall":0,"n":492,"preparation":1}]}}}},"transfer":{"cells":{"0":{"arms":{"belief":{"hits":{"falls":715,"n":1433,"preparations":1425},"misses":{"falls":0,"n":615,"preparations":282}},"reactive":{"hits":{"falls":968,"n":1433,"preparations":0},"misses":{"falls":0,"n":615,"preparations":0}},"ttc":{"hits":{"falls":703,"n":1433,"preparations":1430},"misses":{"falls":0,"n":615,"preparations":224}}},"paired_differences":{"hits":[{"fall":-1,"n":95,"preparation":0},{"fall":-1,"n":3,"preparation":1},{"fall":0,"n":1247,"preparation":0},{"fall":0,"n":2,"preparation":1},{"fall":1,"n":86,"preparation":0}],"misses":[{"fall":0,"n":109,"preparation":-1},{"fall":0,"n":455,"preparation":0},{"fall":0,"n":51,"preparation":1}]}},"100":{"arms":{"belief":{"hits":{"falls":813,"n":1433,"preparations":1103},"misses":{"falls":0,"n":615,"preparations":204}},"reactive":{"hits":{"falls":968,"n":1433,"preparations":0},"misses":{"falls":0,"n":615,"preparations":0}},"ttc":{"hits":{"falls":733,"n":1433,"preparations":1427},"misses":{"falls":0,"n":615,"preparations":373}}},"paired_differences":{"hits":[{"fall":-1,"n":93,"preparation":0},{"fall":-1,"n":36,"preparation":1},{"fall":0,"n":972,"preparation":0},{"fall":0,"n":283,"preparation":1},{"fall":1,"n":44,"preparation":0},{"fall":1,"n":5,"preparation":1}],"misses":[{"fall":0,"n":44,"preparation":-1},{"fall":0,"n":358,"preparation":0},{"fall":0,"n":213,"preparation":1}]}}}}}}</script>
+<script>
+'use strict';
+
+const data = JSON.parse(document.getElementById('study-data').textContent),
+  byId = id => document.getElementById(id);
+const methods = {
+  ttc: {
+    name: 'TTC threshold',
+    color: '#245e91',
+    dash: ''
+  },
+  belief: {
+    name: 'Belief rule',
+    color: '#9b4c1b',
+    dash: '3 4'
+  },
+  reactive: {
+    name: 'Reactive walker',
+    color: '#667171',
+    dash: '8 5'
+  }
+};
+const keys = Object.keys(methods),
+  state = {
+    split: 'heldout',
+    lag: '100',
+    p: 0,
+    c: .1
+  };
+const fmt = (v, places = 1) => v.toFixed(places),
+  signed = v => `${v >= 0 ? '+' : '−'}${fmt(Math.abs(v), 2)}`;
+const current = () => data.splits[state.split].cells[state.lag];
+function predicted(arm, p) {
+  return {
+    f: 100 * (p * arm.hits.falls / arm.hits.n + (1 - p) * arm.misses.falls / arm.misses.n),
+    m: 100 * (1 - p) * arm.misses.preparations / arm.misses.n
+  };
+}
+const cost = (point, c) => point.f + c * point.m;
+function setObserved() {
+  let a = current().arms.ttc;
+  state.p = a.hits.n / (a.hits.n + a.misses.n);
+  byId('hit-rate').value = state.p * 100;
+}
+function selectLag() {
+  const available = Object.keys(data.splits[state.split].cells).sort((a, b) => +a - +b);
+  const selector = byId('latency');
+  selector.textContent = '';
+  available.forEach(delay => selector.add(new Option(delay + ' ms', delay)));
+  if (!available.includes(state.lag)) state.lag = available[available.length - 1];
+  byId('latency').value = state.lag;
+}
+function moments(rows, miss) {
+  const n = rows.reduce((a, r) => a + r.n, 0);
+  const value = r => r.fall + (miss ? state.c * r.preparation : 0);
+  const mu = rows.reduce((a, r) => a + r.n * value(r), 0) / n;
+  const s2 = rows.reduce((a, r) => a + r.n * (value(r) - mu) ** 2, 0) / (n - 1);
+  return {
+    v: s2 / n,
+    mu
+  };
+}
+const ns = 'http://www.w3.org/2000/svg';
+function svgElement(tag, attrs, txt) {
+  const el = document.createElementNS(ns, tag);
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  if (txt !== undefined) el.textContent = txt;
+  return el;
+}
+function niceStep(v) {
+  const b = 10 ** Math.floor(Math.log10(v));
+  return b * ([1, 2, 2.5, 5, 10].find(x => x >= v / b) || 10);
+}
+function chart(points) {
+  const svg = byId('chart'),
+    w = Math.max(240, svg.clientWidth),
+    h = Math.max(180, svg.clientHeight),
+    l = 37,
+    r = 12,
+    t = 10,
+    b = 41;
+  const xmax = 2;
+  const hi = Math.max(5, ...keys.map(key => cost(points[key], xmax)));
+  const step = niceStep(hi / 4);
+  const ymax = Math.ceil(hi / step) * step;
+  const X = n => l + (w - l - r) * n / xmax,
+    Y = n => t + (h - t - b) * (1 - n / ymax);
+  const add = (tag, attrs, txt) => svg.appendChild(svgElement(tag, attrs, txt));
+  svg.textContent = '';
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  add('title', {
+    id: 'svg-title'
+  }, 'Expected cost for each controller as the near-miss preparation penalty changes');
+  add('desc', {
+    id: 'svg-desc'
+  }, `At the selected penalty of ${fmt(state.c, 2)}, the table below gives expected outcomes for ${fmt(100 * state.p)} percent scheduled hits.`);
+  for (let yy = 0; yy <= ymax + step / 10; yy += step) {
+    add('line', {
+      x1: X(0),
+      y1: Y(yy),
+      x2: X(2),
+      y2: Y(yy),
+      class: 'grid'
+    });
+    add('text', {
+      x: l - 5,
+      y: Y(yy) + 4,
+      'text-anchor': 'end'
+    }, Number(yy.toFixed(1)));
+  }
+  for (const xx of [0, .5, 1, 1.5, 2]) {
+    add('text', {
+      x: X(xx),
+      y: h - b + 17,
+      'text-anchor': 'middle'
+    }, xx.toFixed(1));
+  }
+  add('text', {
+    x: (l + w - r) / 2,
+    y: h - 3,
+    'text-anchor': 'middle'
+  }, 'Penalty per near-miss preparation');
+  add('line', {
+    x1: X(0),
+    y1: Y(0),
+    x2: X(2),
+    y2: Y(0),
+    class: 'axis'
+  });
+  add('line', {
+    x1: X(state.c),
+    y1: t,
+    x2: X(state.c),
+    y2: Y(0),
+    class: 'current'
+  });
+  for (const key of ['reactive', 'ttc', 'belief']) {
+    const p = points[key],
+      m = methods[key];
+    add('line', {
+      x1: X(0),
+      y1: Y(p.f),
+      x2: X(2),
+      y2: Y(cost(p, 2)),
+      stroke: m.color,
+      'stroke-width': 2.7,
+      'stroke-dasharray': m.dash || 'none',
+      'stroke-linecap': 'round'
+    });
+    const x = X(state.c),
+      y = Y(cost(p, state.c));
+    if (key === 'belief') add('path', {
+      d: `M${x},${y - 5}l5,5l-5,5l-5,-5Z`,
+      fill: m.color,
+      stroke: '#fff',
+      'stroke-width': 1
+    });else add('circle', {
+      cx: x,
+      cy: y,
+      r: key === 'reactive' ? 3.5 : 4.5,
+      fill: m.color,
+      stroke: '#fff',
+      'stroke-width': 1
+    });
+  }
+}
+function tableRow(tbody, values, highlight = false) {
+  const tr = tbody.insertRow();
+  if (highlight) tr.className = 'best';
+  values.forEach((v, index) => {
+    const el = document.createElement(index === 0 ? 'th' : 'td');
+    if (index === 0) el.scope = 'row';
+    el.textContent = v;
+    tr.appendChild(el);
+  });
+}
+function render() {
+  const cell = current(),
+    pts = Object.fromEntries(keys.map(k => [k, predicted(cell.arms[k], state.p)]));
+  byId('hit-label').textContent = fmt(state.p * 100) + '%';
+  byId('price-label').textContent = fmt(state.c, 2);
+  byId('hit-rate').setAttribute('aria-valuetext', fmt(state.p * 100) + ' percent scheduled hits');
+  byId('penalty').setAttribute('aria-valuetext', fmt(state.c, 2) + ' relative to one fall');
+  const min = Math.min(...keys.map(k => cost(pts[k], state.c)));
+  const best = keys.filter(k => Math.abs(cost(pts[k], state.c) - min) < 1e-9);
+  const rows = byId('rows'),
+    raw = byId('raw');
+  rows.textContent = '';
+  raw.textContent = '';
+  keys.forEach(k => {
+    const p = pts[k],
+      a = cell.arms[k];
+    tableRow(rows, [methods[k].name, fmt(p.f), fmt(p.m), fmt(cost(p, state.c), 2)], best.includes(k));
+    tableRow(raw, [methods[k].name, `${a.hits.falls}/${a.hits.n}`, `${a.misses.falls}/${a.misses.n}`, `${a.misses.preparations}/${a.misses.n}`]);
+  });
+  const label = best.map(k => methods[k].name).join(' and ');
+  byId('ranking').textContent = (best.length === 1 ? `${label} has the lowest estimated cost` : `${label} tie for lowest estimated cost`) + ` at ${fmt(min, 2)} per 100 encounters.`;
+  const df = pts.belief.f - pts.ttc.f,
+    dm = pts.ttc.m - pts.belief.m;
+  const price = df / dm;
+  byId('crossover').textContent = Math.abs(dm) > 1e-10 && price >= 0 ? `At this encounter mix, the TTC and belief rules have equal estimated cost when one near-miss preparation costs ${fmt(price, 2)} times as much as a fall.` : Math.abs(dm) < 1e-10 && Math.abs(df) < 1e-10 ? 'The TTC and belief rules have equal estimated cost for all penalties at this encounter mix.' : 'The TTC and belief rules have no nonnegative crossover penalty at this encounter mix.';
+  const a = cell.arms.ttc,
+    z = cell.arms.belief,
+    n = a.hits.n + a.misses.n;
+  byId('observed').textContent = `In ${n.toLocaleString('en-US')} encounters at ${state.lag} ms delay, the TTC threshold recorded ${a.hits.falls} failures on ${a.hits.n.toLocaleString('en-US')} scheduled hits and braced on ${a.misses.preparations} of ${a.misses.n} scheduled near-misses. The belief rule recorded ${z.hits.falls} hit failures and ${z.misses.preparations} near-miss preparations.`;
+  const pair = cell.paired_differences;
+  if (pair && Array.isArray(pair.hits) && Array.isArray(pair.misses)) {
+    const hit = moments(pair.hits, false),
+      miss = moments(pair.misses, true);
+    const mean = 100 * (state.p * hit.mu + (1 - state.p) * miss.mu),
+      se = 100 * Math.sqrt(state.p ** 2 * hit.v + (1 - state.p) ** 2 * miss.v);
+    byId('paired').textContent = `At your chosen mix and penalty, estimated TTC minus belief cost is ${signed(mean)} per 100 (approximate paired 95% interval ${signed(mean - 1.96 * se)} to ${signed(mean + 1.96 * se)}). The interval describes scenario sampling for this skill pair.`;
+  }
+  chart(pts);
+}
+byId('hit-rate').addEventListener('input', e => {
+  state.p = Number(e.target.value) / 100;
+  render();
+});
+byId('penalty').addEventListener('input', e => {
+  state.c = Number(e.target.value);
+  render();
+});
+byId('latency').addEventListener('change', e => {
+  state.lag = e.target.value;
+  render();
+});
+byId('split').addEventListener('change', e => {
+  state.split = e.target.value;
+  selectLag();
+  render();
+});
+byId('reset').addEventListener('click', () => {
+  setObserved();
+  render();
+});
+selectLag();
+setObserved();
+render();
+new ResizeObserver(() => chart(Object.fromEntries(keys.map(k => [k, predicted(current().arms[k], state.p)])))).observe(byId('chart'));
+</script>
+</body>
+</html>
