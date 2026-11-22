@@ -1,0 +1,217 @@
+{
+  "protocol": "adaptive-servo-gain-gate-v1",
+  "profile": "smoke",
+  "screen": {
+    "protocol_version": "adaptive-servo-gain-gate-v1",
+    "phase": "screen",
+    "thresholds": {
+      "healthy_survival_min": 0.9,
+      "fault_survival_min": 0.2,
+      "absolute_loss_gap_min": 0.03,
+      "relative_loss_gap_min": 0.25,
+      "fall_increase_min": 0.15,
+      "recovery_fraction_min": 0.5,
+      "identity_tolerance": 1e-06,
+      "bootstrap_draws": 2000,
+      "bootstrap_seed": 228,
+      "bootstrap_confidence": 0.95,
+      "correction_bound_rad": 0.2,
+      "slew_bound_rad_s": 2.0,
+      "bound_tolerance": 1e-05
+    },
+    "candidate_order": [
+      "gain_085",
+      "gain_070",
+      "gain_055"
+    ],
+    "arms": {
+      "healthy": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.012609365279786289,
+        "mean_progress_m": 3.0357289910316467,
+        "mean_bound_fraction": 0.0
+      },
+      "identity": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.012666806927882135,
+        "mean_progress_m": 3.034007281064987,
+        "mean_bound_fraction": 0.0
+      },
+      "healthy_repeat": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.01264399231877178,
+        "mean_progress_m": 3.031809151172638,
+        "mean_bound_fraction": 0.0
+      },
+      "gain_085_plain": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.013497091713361442,
+        "mean_progress_m": 3.297445982694626,
+        "mean_bound_fraction": 0.0
+      },
+      "gain_085_oracle": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.012569320853799582,
+        "mean_progress_m": 3.034521371126175,
+        "mean_bound_fraction": 0.032046531858700315
+      },
+      "gain_070_plain": {
+        "n": 8,
+        "fall_rate": 0.25,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 2,
+        "mean_loss": 0.4752120254561305,
+        "mean_progress_m": 5.2645513117313385,
+        "mean_bound_fraction": 0.0
+      },
+      "gain_070_oracle": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.013780799810774624,
+        "mean_progress_m": 3.0488555133342743,
+        "mean_bound_fraction": 0.14955082434214628
+      },
+      "gain_055_plain": {
+        "n": 8,
+        "fall_rate": 1.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 8,
+        "mean_loss": 3.147803544998169,
+        "mean_progress_m": 1.913559913635254,
+        "mean_bound_fraction": 0.0
+      },
+      "gain_055_oracle": {
+        "n": 8,
+        "fall_rate": 0.0,
+        "invalid_episodes": 0,
+        "control_bound_violations": 0,
+        "torque_limit_violations": 0,
+        "pre_fault_failures": 0,
+        "postfault_falls": 0,
+        "mean_loss": 0.02220981160644442,
+        "mean_progress_m": 3.2305741608142853,
+        "mean_bound_fraction": 0.2938198734560842
+      }
+    },
+    "numerical_ok": true,
+    "controls": {
+      "healthy": true,
+      "identity": false,
+      "prefault_pairing": true,
+      "bounds": true,
+      "torque_limits_checked": false,
+      "torque_limits": null,
+      "identity_max_difference": 3.0253257751464844,
+      "run_to_run_reproducible": false,
+      "repeat_max_difference": 3.024658203125
+    },
+    "candidates": {
+      "gain_085": {
+        "passed": false,
+        "checks": {
+          "degradation": false,
+          "recoverable": true,
+          "recovered_half_gap": true,
+          "no_fall_regression": true,
+          "positive_paired_ci": true
+        },
+        "loss_gap": 0.0008877264335751534,
+        "loss_reduction": 0.0009277708595618606,
+        "recovery_fraction": 1.0451089710435182,
+        "paired_loss_reduction_ci95": [
+          1.118210202548653e-05,
+          0.001752957049757242
+        ],
+        "near_healthy_fall_rate": true
+      },
+      "gain_070": {
+        "passed": false,
+        "checks": {
+          "degradation": true,
+          "recoverable": true,
+          "recovered_half_gap": true,
+          "no_fall_regression": true,
+          "positive_paired_ci": true
+        },
+        "loss_gap": 0.4626026601763442,
+        "loss_reduction": 0.4614312256453559,
+        "recovery_fraction": 0.9974677306642772,
+        "paired_loss_reduction_ci95": [
+          0.12687544487707783,
+          0.9245095160760681
+        ],
+        "near_healthy_fall_rate": true
+      },
+      "gain_055": {
+        "passed": false,
+        "checks": {
+          "degradation": true,
+          "recoverable": false,
+          "recovered_half_gap": true,
+          "no_fall_regression": true,
+          "positive_paired_ci": true
+        },
+        "loss_gap": 3.1351941797183827,
+        "loss_reduction": 3.1255937333917245,
+        "recovery_fraction": 0.996937846341779,
+        "paired_loss_reduction_ci95": [
+          3.0575348240323366,
+          3.1854314587078987
+        ],
+        "near_healthy_fall_rate": true
+      }
+    },
+    "reasons": [
+      "Healthy-model adapter did not reproduce the healthy control, and neither did a repeat of the healthy arm (largest difference 3.02): the backend is not run-to-run reproducible, so the bitwise identity control cannot be evaluated on this run."
+    ],
+    "selected_candidate": null,
+    "status": "fail"
+  },
+  "physics_mode": "default_warp_diagnostic",
+  "confirmation": null,
+  "scientific_gate_status": "inconclusive",
+  "interpretation": "Installed MuJoCo-Warp lacks DeterminismType.ALL, opt._impl.deterministic. Default-backend engineering smoke only.",
+  "selected_candidate": null,
+  "elapsed_seconds": 125.861
+}

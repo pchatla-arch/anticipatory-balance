@@ -1,0 +1,16 @@
+{
+  "run_id": "adaptive_gate_20261122T082123Z_1bfe6c",
+  "source_commit": "fdf5754be8e17071b324c0f49fd8ffaec0eeac15",
+  "mode": "smoke",
+  "protocol_version": "adaptive-servo-gain-gate-v1",
+  "status": "completed",
+  "started_utc": "20261122T082123Z",
+  "stage": "evaluation",
+  "launcher_started_epoch": 1795335680,
+  "launcher_deadline_epoch": 1795337480,
+  "cleanup_reserve_seconds": 600,
+  "interpretation": "Known-parameter gain compensation over a frozen G1 walker. An operational completion is not evidence that the scientific gate passed. No online estimator, lag compensation, or learned residual is tested.",
+  "scientific_gate_status": "inconclusive",
+  "exit_code": 0,
+  "elapsed_from_launcher_seconds": 200.907
+}
