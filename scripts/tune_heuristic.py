@@ -60,6 +60,13 @@ def evaluate(cfg, args, tag):
     out = args.out / f"eval_{tag}"
     cfg_path = args.out / f"cfg_{tag}.json"
     cfg_path.write_text(json.dumps(cfg, indent=2) + "\n")
+    started = time.monotonic()
+    done = out / "summary.json"
+    if done.exists() and (out / "episodes.csv").exists():
+        # Resume: a finished evaluation is reused (the container that runs this is ephemeral).
+        summary = json.loads(done.read_text())
+        value, parts = objective(summary, args.harm_weight, args.fall_weight)
+        return {"tag": tag, "config": cfg, "objective": value, **parts, "seconds": 0.0, "resumed": True}
     cmd = [sys.executable, str(ROOT / "scripts/eval_adaptive_bench.py"), "--split", "dev",
            "--families", ",".join(GAIN_FAMILIES + HEALTHY_FAMILIES), "--methods", "heuristic_gate",
            "--telemetry", args.telemetry, "--episodes", str(args.episodes), "--batch", str(args.episodes),
@@ -67,7 +74,6 @@ def evaluate(cfg, args, tag):
            "--heuristic", str(cfg_path), "--out", str(out)]
     if args.allow_cpu:
         cmd.append("--allow-cpu")
-    started = time.monotonic()
     subprocess.run(cmd, check=True, cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
     summary = json.loads((out / "summary.json").read_text())
     value, parts = objective(summary, args.harm_weight, args.fall_weight)

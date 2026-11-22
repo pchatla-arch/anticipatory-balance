@@ -29,7 +29,7 @@ is used: Claude. Spend decisions: Prasuna.
 | Session | Date (PT) | Profile / content | Ceiling | Pod minutes | Cumulative h | Status |
 | --- | --- | --- | ---: | ---: | ---: | --- |
 | S0 | Nov 22 00:21 | `smoke` at fdf5754 — 72 episodes, 9 arms (G0 diagnostic) | 30 min | ≈ 5 (run 200.9 s + setup) | 0.1 | done; G0 inconclusive, AE-008 noise quantified |
-| S1a | Nov 23–24 | `calibrate-identity` (PR #43): 64 batches × 32 lanes × 2 repeats | 45 min | — | — | awaiting Prasuna's G0 = Option B |
+| S1a | Nov 22 15:06 | `calibrate-identity` (PR #43) at 8a68a61: 64 batches × 32 lanes × 2 repeats, run `adaptive_gate_20261122T231133Z_c798d0` | 45 min | 17 (15:12 Ada $1.09/h + 1:48 mistaken A6000 $0.69/h) ≈ $0.30 | 0.4 | done; envelopes loss 0.0029 / progress 0.169 / force 21.7; reviewed by Claude on #32; G0 decision pending |
 | S1b | Nov 24 | `bench` dev: 11 families × exact/declared/declared_fast × all methods, 32 eps | 90 min | — | — | needs launcher `bench` mode; same pod start as S1a |
 | S2 | Nov 26 | `bench` val with frozen heuristic and candidate | 90 min | — | — | after G2 freeze |
 | S3 | Nov 28 | `bench` test (registered, `--registration` from an immutable ref) | 90 min | — | — | one attempt; registration committed first |
