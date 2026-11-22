@@ -1,0 +1,29 @@
+{
+  "archive_git_blob": "799a33bec5cc41f56f6f96d6a019b438d4887976",
+  "scope": "Retrospective development-set analysis, 10 Hz, 100 ms added delay",
+  "direction": "TTC 0.30 s minus belief 0.02",
+  "uncertainty": "10,000 paired bootstrap draws stratified by scheduled hit/miss, fixed original stratum sizes, conditional on these settings",
+  "paired_comparison": {
+    "duration_s": {
+      "estimate": 0.0029003906250000024,
+      "paired_95pct": [
+        -0.010849609375,
+        0.016728515625000002
+      ]
+    },
+    "hit_failure_difference": {
+      "estimate": -0.018143754361479414,
+      "paired_95pct": [
+        -0.03349616189811584,
+        -0.00209351011863224
+      ]
+    },
+    "near_miss_preparation_difference": {
+      "estimate": 0.06016260162601626,
+      "paired_95pct": [
+        0.014634146341463415,
+        0.10569105691056911
+      ]
+    }
+  }
+}

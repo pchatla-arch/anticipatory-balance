@@ -1,0 +1,210 @@
+{
+  "source_commit": "e4dacfacc1c2330d48fdfabcb3a0f2e933e3117f",
+  "input_git_blob_sha1": {
+    "E18_rule_family_p5": "799a33bec5cc41f56f6f96d6a019b438d4887976",
+    "E18h_heldout_p5": "249e92e0ae0c084aff631ed092c78a50f77270d8",
+    "E19_seed2_p5": "1b475315c11838a957263e8c3a06f48f1c5bdef7"
+  },
+  "development_fixed_ttc_probability": 0.766625967884024,
+  "detection_rate_hz": 10,
+  "added_delay_ms": 100,
+  "arm_keys": {
+    "reactive": "reactive__p0__lat0",
+    "ttc": "ttc_threshold__p0.3__lat5",
+    "belief": "belief_lead__p0.05__lat5"
+  },
+  "recorded_seconds_per_step": 0.02,
+  "interval": {
+    "method": "paired scenario bootstrap, stratified by scheduled hit/miss; percentile",
+    "replicates": 10000,
+    "rng_base_seed": 22821,
+    "split_seeds": {
+      "development": 22821,
+      "held_out_scenarios": 22822,
+      "second_skill_pair": 22823
+    },
+    "held_fixed": "estimated mixing probability, policy checkpoints and scenario mix"
+  },
+  "splits": {
+    "development": {
+      "episodes": 2048,
+      "scheduled_hits": 1433,
+      "scheduled_near_misses": 615,
+      "arms": {
+        "reactive": {
+          "hit_failure": 0.685973482205164,
+          "brace_seconds": 0.0,
+          "near_miss_preparation": 0.0,
+          "progress_m": 1.4276548361540335
+        },
+        "ttc": {
+          "hit_failure": 0.42219120725750175,
+          "brace_seconds": 0.631865234375,
+          "near_miss_preparation": 0.6130081300813008,
+          "progress_m": 1.4666383321871308
+        },
+        "belief": {
+          "hit_failure": 0.47871598046057223,
+          "brace_seconds": 0.48440429687500003,
+          "near_miss_preparation": 0.33495934959349594,
+          "progress_m": 1.475846110508428
+        },
+        "mixture": {
+          "hit_failure": 0.48375114036276273,
+          "brace_seconds": 0.48440429687500003,
+          "near_miss_preparation": 0.46994795104435305,
+          "progress_m": 1.4575405965319095
+        }
+      },
+      "realized_scheduled_hit_failures": {
+        "reactive": 983,
+        "ttc": 605,
+        "belief": 686
+      },
+      "belief_minus_mixture": {
+        "hit_failure": -0.005035159902190451,
+        "brace_seconds": -6.808789643208968e-17,
+        "near_miss_preparation": -0.134988601450857,
+        "progress_m": 0.018305513976518212
+      },
+      "conditional_paired_95pct": {
+        "hit_failure": [
+          -0.0196675004871417,
+          0.009688598175663353
+        ],
+        "brace_seconds": [
+          -0.015130099212187673,
+          0.014949172286193605
+        ],
+        "near_miss_preparation": [
+          -0.17433740082420424,
+          -0.09455645300622562
+        ],
+        "progress_m": [
+          0.0003323138285723277,
+          0.035542834042747426
+        ]
+      }
+    },
+    "held_out_scenarios": {
+      "episodes": 2048,
+      "scheduled_hits": 1407,
+      "scheduled_near_misses": 641,
+      "arms": {
+        "reactive": {
+          "hit_failure": 0.6766169154228856,
+          "brace_seconds": 0.0,
+          "near_miss_preparation": 0.0,
+          "progress_m": 1.4543599595070873
+        },
+        "ttc": {
+          "hit_failure": 0.4136460554371002,
+          "brace_seconds": 0.623994140625,
+          "near_miss_preparation": 0.6037441497659907,
+          "progress_m": 1.4914073339687093
+        },
+        "belief": {
+          "hit_failure": 0.46552949538024163,
+          "brace_seconds": 0.47952148437500003,
+          "near_miss_preparation": 0.2667706708268331,
+          "progress_m": 1.5019113009702778
+        },
+        "mixture": {
+          "hit_failure": 0.47501662536098876,
+          "brace_seconds": 0.4783701120106004,
+          "near_miss_preparation": 0.4628459431686697,
+          "progress_m": 1.4827614388112902
+        }
+      },
+      "realized_scheduled_hit_failures": {
+        "reactive": 952,
+        "ttc": 582,
+        "belief": 655
+      },
+      "belief_minus_mixture": {
+        "hit_failure": -0.009487129980747055,
+        "brace_seconds": 0.001151372364399573,
+        "near_miss_preparation": -0.19607527234183664,
+        "progress_m": 0.019149862158987677
+      },
+      "conditional_paired_95pct": {
+        "hit_failure": [
+          -0.02405815096019989,
+          0.005272376748381631
+        ],
+        "brace_seconds": [
+          -0.01358677338817621,
+          0.016120207402145353
+        ],
+        "near_miss_preparation": [
+          -0.234400919690095,
+          -0.15723028995344984
+        ],
+        "progress_m": [
+          0.0013846354059436298,
+          0.035998742484778995
+        ]
+      }
+    },
+    "second_skill_pair": {
+      "episodes": 2048,
+      "scheduled_hits": 1433,
+      "scheduled_near_misses": 615,
+      "arms": {
+        "reactive": {
+          "hit_failure": 0.6755059316120028,
+          "brace_seconds": 0.0,
+          "near_miss_preparation": 0.0,
+          "progress_m": 1.512356000452428
+        },
+        "ttc": {
+          "hit_failure": 0.5115143056524774,
+          "brace_seconds": 0.642802734375,
+          "near_miss_preparation": 0.6065040650406504,
+          "progress_m": 1.3959645484005705
+        },
+        "belief": {
+          "hit_failure": 0.567341242149337,
+          "brace_seconds": 0.501298828125,
+          "near_miss_preparation": 0.33170731707317075,
+          "progress_m": 1.4159256423754414
+        },
+        "mixture": {
+          "hit_failure": 0.5497856926359067,
+          "brace_seconds": 0.4927892683987316,
+          "near_miss_preparation": 0.4649617658873837,
+          "progress_m": 1.4231272908697457
+        }
+      },
+      "realized_scheduled_hit_failures": {
+        "reactive": 968,
+        "ttc": 733,
+        "belief": 813
+      },
+      "belief_minus_mixture": {
+        "hit_failure": 0.01755554951343032,
+        "brace_seconds": 0.008509559726268417,
+        "near_miss_preparation": -0.13325444881421294,
+        "progress_m": -0.007201648494304358
+      },
+      "conditional_paired_95pct": {
+        "hit_failure": [
+          0.0015989749890420052,
+          0.0333492883727602
+        ],
+        "brace_seconds": [
+          -0.006777070883619247,
+          0.024341398691424567
+        ],
+        "near_miss_preparation": [
+          -0.17352808875677017,
+          -0.09173563910345098
+        ],
+        "progress_m": [
+          -0.026641647543716607,
+          0.012707122750185578
+        ]
+      }
+    }
+  }
+}

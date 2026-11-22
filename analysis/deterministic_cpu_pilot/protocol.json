@@ -1,0 +1,18 @@
+{
+  "schema": "foresight.deterministic-cpu-pilot.v1",
+  "evaluator_source": "3b91140c606d474f66042e0b6b6bdc0859087cb2",
+  "backend": "MJX/JAX CPU, highest JAX matmul precision",
+  "checkpoint_pair": ["nominal_s1/000202342400", "brace2_s1/000202342400"],
+  "observation": "parametric 10 Hz, 100 ms delay",
+  "control_horizon": [300, 0.02],
+  "inherited_settings": "All scientific settings from scripts/run_foresight_matched_duration.py COMMON",
+  "calibration_seed": 83120,
+  "calibration_n": 32,
+  "confirmation_seed": 83121,
+  "confirmation_n": 32,
+  "ttc_threshold_grid_seconds": [0.06, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20, 0.24, 0.30],
+  "reference_rule": ["belief_lead", 0.05],
+  "calibration_rule": "Choose lowest absolute difference from belief mean applied BRACE through first terminal transition over ALL 32 episodes. Resolve equal differences in favor of the smaller threshold. Freeze once. Run independent confirmation only if calibration absolute gap <= 0.020 seconds. No retuning.",
+  "confirmation_rule": "Use the E20 score function unchanged. Declare duration equivalence only if the entire paired approximate 95% interval for TTC-minus-belief mean applied BRACE falls inside [-0.020,+0.020] s. Interpret a matched-risk comparison only after this gate. Report conditional secondary endpoints and counts descriptively. Record inconclusive if unmatched, precision inadequate or invalid. This one-pair CPU pilot cannot substitute for the separate 512/2048 Warp E20.",
+  "seeds_excluded": "E20 calibration 21400 and confirmation 21500..21503; historical archived experiments and replay 73132."
+}

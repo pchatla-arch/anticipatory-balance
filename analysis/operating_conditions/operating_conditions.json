@@ -1,0 +1,820 @@
+{
+  "schema_version": 1,
+  "source_commit": "e4dacfacc1c2330d48fdfabcb3a0f2e933e3117f",
+  "estimand": "Fall probability per encounter plus price times probability of any recorded brace on a scheduled near-miss.",
+  "assumption": "Scenario-type frequency may change. Conditional distributions and frozen controller behavior within each scenario type are held fixed.",
+  "units": "Price in fall-cost units per near-miss preparation. Reported loss scaled to 100 encounters.",
+  "bootstrap": {
+    "replicates": 10000,
+    "base_seed": 228350,
+    "method": "paired stratified percentile, conditional on the two observed strata, controller checkpoints and fixed parameter settings"
+  },
+  "splits": {
+    "heldout": {
+      "directory": "E18h_heldout_p5",
+      "git_blob": "249e92e0ae0c084aff631ed092c78a50f77270d8",
+      "cells": {
+        "0": {
+          "arms": {
+            "reactive": {
+              "hits": {
+                "n": 1407,
+                "falls": 952,
+                "preparations": 0
+              },
+              "misses": {
+                "n": 641,
+                "falls": 0,
+                "preparations": 0
+              }
+            },
+            "ttc": {
+              "hits": {
+                "n": 1407,
+                "falls": 532,
+                "preparations": 1404
+              },
+              "misses": {
+                "n": 641,
+                "falls": 0,
+                "preparations": 219
+              }
+            },
+            "belief": {
+              "hits": {
+                "n": 1407,
+                "falls": 536,
+                "preparations": 1392
+              },
+              "misses": {
+                "n": 641,
+                "falls": 0,
+                "preparations": 281
+              }
+            }
+          },
+          "paired_differences": {
+            "hits": [
+              {
+                "fall": -1,
+                "preparation": 0,
+                "n": 56
+              },
+              {
+                "fall": -1,
+                "preparation": 1,
+                "n": 3
+              },
+              {
+                "fall": 0,
+                "preparation": 0,
+                "n": 1284
+              },
+              {
+                "fall": 0,
+                "preparation": 1,
+                "n": 9
+              },
+              {
+                "fall": 1,
+                "preparation": 0,
+                "n": 55
+              }
+            ],
+            "misses": [
+              {
+                "fall": 0,
+                "preparation": -1,
+                "n": 113
+              },
+              {
+                "fall": 0,
+                "preparation": 0,
+                "n": 477
+              },
+              {
+                "fall": 0,
+                "preparation": 1,
+                "n": 51
+              }
+            ]
+          },
+          "crossing": {
+            "preparation_price": 0.1,
+            "hit_frequency": null,
+            "fraction_bootstrap_draws_with_interior_crossing": 0.3344,
+            "paired_95pct_hit_frequency": null
+          },
+          "illustrations": [
+            {
+              "hit_frequency": 0.05,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 3.383084577114428,
+                "ttc": 5.136257092074728,
+                "belief": 6.069348488225244
+              },
+              "ttc_minus_belief_loss_per_100": -0.9330913961505161,
+              "paired_95pct": [
+                -1.3101227343336803,
+                -0.5590098177487869
+              ],
+              "ttc_belief_break_even_positive_price": null
+            },
+            {
+              "hit_frequency": 0.25,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 16.91542288557214,
+                "ttc": 12.015138814507804,
+                "belief": 12.811641037070054
+              },
+              "ttc_minus_belief_loss_per_100": -0.7965022225622498,
+              "paired_95pct": [
+                -1.2684486110787714,
+                -0.32800221923589135
+              ],
+              "ttc_belief_break_even_positive_price": null
+            },
+            {
+              "hit_frequency": 0.75,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 50.74626865671642,
+                "ttc": 29.212343120590496,
+                "belief": 29.66737240918208
+              },
+              "ttc_minus_belief_loss_per_100": -0.4550292885915823,
+              "paired_95pct": [
+                -1.5679292416899235,
+                0.6747687764653444
+              ],
+              "ttc_belief_break_even_positive_price": null
+            },
+            {
+              "hit_frequency": 0.68701171875,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 46.484375,
+                "ttc": 27.0458984375,
+                "belief": 27.5439453125
+              },
+              "ttc_minus_belief_loss_per_100": -0.498046875,
+              "paired_95pct": [
+                -1.5185546875,
+                0.537109375
+              ],
+              "ttc_belief_break_even_positive_price": null
+            }
+          ]
+        },
+        "100": {
+          "arms": {
+            "reactive": {
+              "hits": {
+                "n": 1407,
+                "falls": 952,
+                "preparations": 0
+              },
+              "misses": {
+                "n": 641,
+                "falls": 0,
+                "preparations": 0
+              }
+            },
+            "ttc": {
+              "hits": {
+                "n": 1407,
+                "falls": 582,
+                "preparations": 1403
+              },
+              "misses": {
+                "n": 641,
+                "falls": 0,
+                "preparations": 387
+              }
+            },
+            "belief": {
+              "hits": {
+                "n": 1407,
+                "falls": 655,
+                "preparations": 1096
+              },
+              "misses": {
+                "n": 641,
+                "falls": 0,
+                "preparations": 171
+              }
+            }
+          },
+          "paired_differences": {
+            "hits": [
+              {
+                "fall": -1,
+                "preparation": 0,
+                "n": 68
+              },
+              {
+                "fall": -1,
+                "preparation": 1,
+                "n": 40
+              },
+              {
+                "fall": 0,
+                "preparation": 0,
+                "n": 1001
+              },
+              {
+                "fall": 0,
+                "preparation": 1,
+                "n": 263
+              },
+              {
+                "fall": 1,
+                "preparation": 0,
+                "n": 31
+              },
+              {
+                "fall": 1,
+                "preparation": 1,
+                "n": 4
+              }
+            ],
+            "misses": [
+              {
+                "fall": 0,
+                "preparation": -1,
+                "n": 33
+              },
+              {
+                "fall": 0,
+                "preparation": 0,
+                "n": 359
+              },
+              {
+                "fall": 0,
+                "preparation": 1,
+                "n": 249
+              }
+            ]
+          },
+          "crossing": {
+            "preparation_price": 0.1,
+            "hit_frequency": 0.3937489797134647,
+            "fraction_bootstrap_draws_with_interior_crossing": 1.0,
+            "paired_95pct_hit_frequency": [
+              0.32245575593604653,
+              0.4922517782777286
+            ]
+          },
+          "illustrations": [
+            {
+              "hit_frequency": 0.05,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 3.383084577114428,
+                "ttc": 7.803799699962412,
+                "belief": 4.861968849756122
+              },
+              "ttc_minus_belief_loss_per_100": 2.9418308502062898,
+              "paired_95pct": [
+                2.51495312051288,
+                3.366258577848444
+              ],
+              "ttc_belief_break_even_positive_price": 0.008103626950183641
+            },
+            {
+              "hit_frequency": 0.25,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 16.91542288557214,
+                "ttc": 14.869232509172436,
+                "belief": 13.639017415707288
+              },
+              "ttc_minus_belief_loss_per_100": 1.230215093465148,
+              "paired_95pct": [
+                0.7088665209721394,
+                1.7571931128844298
+              ],
+              "ttc_belief_break_even_positive_price": 0.05132297068449639
+            },
+            {
+              "hit_frequency": 0.75,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 50.74626865671642,
+                "ttc": 32.53281453219749,
+                "belief": 35.581638830585206
+              },
+              "ttc_minus_belief_loss_per_100": -3.0488242983877143,
+              "paired_95pct": [
+                -4.309938495620848,
+                -1.8006754172085864
+              ],
+              "ttc_belief_break_even_positive_price": 0.4619067361604675
+            },
+            {
+              "hit_frequency": 0.68701171875,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 46.484375,
+                "ttc": 30.307617187500004,
+                "belief": 32.8173828125
+              },
+              "ttc_minus_belief_loss_per_100": -2.5097656249999964,
+              "paired_95pct": [
+                -3.666992187499999,
+                -1.3670654296875018
+              ],
+              "ttc_belief_break_even_positive_price": 0.33796296296296297
+            }
+          ]
+        },
+        "300": {
+          "arms": {
+            "reactive": {
+              "hits": {
+                "n": 1407,
+                "falls": 952,
+                "preparations": 0
+              },
+              "misses": {
+                "n": 641,
+                "falls": 0,
+                "preparations": 0
+              }
+            },
+            "ttc": {
+              "hits": {
+                "n": 1407,
+                "falls": 607,
+                "preparations": 1384
+              },
+              "misses": {
+                "n": 641,
+                "falls": 0,
+                "preparations": 558
+              }
+            },
+            "belief": {
+              "hits": {
+                "n": 1407,
+                "falls": 877,
+                "preparations": 377
+              },
+              "misses": {
+                "n": 641,
+                "falls": 0,
+                "preparations": 69
+              }
+            }
+          },
+          "paired_differences": {
+            "hits": [
+              {
+                "fall": -1,
+                "preparation": 0,
+                "n": 26
+              },
+              {
+                "fall": -1,
+                "preparation": 1,
+                "n": 257
+              },
+              {
+                "fall": 0,
+                "preparation": 0,
+                "n": 368
+              },
+              {
+                "fall": 0,
+                "preparation": 1,
+                "n": 743
+              },
+              {
+                "fall": 1,
+                "preparation": 0,
+                "n": 6
+              },
+              {
+                "fall": 1,
+                "preparation": 1,
+                "n": 7
+              }
+            ],
+            "misses": [
+              {
+                "fall": 0,
+                "preparation": -1,
+                "n": 3
+              },
+              {
+                "fall": 0,
+                "preparation": 0,
+                "n": 146
+              },
+              {
+                "fall": 0,
+                "preparation": 1,
+                "n": 492
+              }
+            ]
+          },
+          "crossing": {
+            "preparation_price": 0.1,
+            "hit_frequency": 0.2844571288237636,
+            "fraction_bootstrap_draws_with_interior_crossing": 1.0,
+            "paired_95pct_hit_frequency": [
+              0.26133771694042285,
+              0.3106542898846286
+            ]
+          },
+          "illustrations": [
+            {
+              "hit_frequency": 0.05,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 3.383084577114428,
+                "ttc": 10.426962579569281,
+                "belief": 4.139180961694758
+              },
+              "ttc_minus_belief_loss_per_100": 6.287781617874523,
+              "paired_95pct": [
+                5.943865126673298,
+                6.6257206418320695
+              ],
+              "ttc_belief_break_even_positive_price": 0.01323930648891251
+            },
+            {
+              "hit_frequency": 0.25,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 16.91542288557214,
+                "ttc": 17.31422007413346,
+                "belief": 16.390132577584556
+              },
+              "ttc_minus_belief_loss_per_100": 0.9240874965489034,
+              "paired_95pct": [
+                0.32601132403505134,
+                1.5087224064655544
+              ],
+              "ttc_belief_break_even_positive_price": 0.0838489410964459
+            },
+            {
+              "hit_frequency": 0.75,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 50.74626865671642,
+                "ttc": 34.5323638105439,
+                "belief": 47.01751161730904
+              },
+              "ttc_minus_belief_loss_per_100": -12.485147806765141,
+              "paired_95pct": [
+                -14.111669200243488,
+                -10.881937953424323
+              ],
+              "ttc_belief_break_even_positive_price": 0.7546404698680131
+            },
+            {
+              "hit_frequency": 0.68701171875,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 46.484375,
+                "ttc": 32.36328125,
+                "belief": 43.1591796875
+              },
+              "ttc_minus_belief_loss_per_100": -10.7958984375,
+              "paired_95pct": [
+                -12.28515625,
+                -9.31640625
+              ],
+              "ttc_belief_break_even_positive_price": 0.5521472392638036
+            }
+          ]
+        }
+      }
+    },
+    "transfer": {
+      "directory": "E19_seed2_p5",
+      "git_blob": "1b475315c11838a957263e8c3a06f48f1c5bdef7",
+      "cells": {
+        "0": {
+          "arms": {
+            "reactive": {
+              "hits": {
+                "n": 1433,
+                "falls": 968,
+                "preparations": 0
+              },
+              "misses": {
+                "n": 615,
+                "falls": 0,
+                "preparations": 0
+              }
+            },
+            "ttc": {
+              "hits": {
+                "n": 1433,
+                "falls": 703,
+                "preparations": 1430
+              },
+              "misses": {
+                "n": 615,
+                "falls": 0,
+                "preparations": 224
+              }
+            },
+            "belief": {
+              "hits": {
+                "n": 1433,
+                "falls": 715,
+                "preparations": 1425
+              },
+              "misses": {
+                "n": 615,
+                "falls": 0,
+                "preparations": 282
+              }
+            }
+          },
+          "paired_differences": {
+            "hits": [
+              {
+                "fall": -1,
+                "preparation": 0,
+                "n": 95
+              },
+              {
+                "fall": -1,
+                "preparation": 1,
+                "n": 3
+              },
+              {
+                "fall": 0,
+                "preparation": 0,
+                "n": 1247
+              },
+              {
+                "fall": 0,
+                "preparation": 1,
+                "n": 2
+              },
+              {
+                "fall": 1,
+                "preparation": 0,
+                "n": 86
+              }
+            ],
+            "misses": [
+              {
+                "fall": 0,
+                "preparation": -1,
+                "n": 109
+              },
+              {
+                "fall": 0,
+                "preparation": 0,
+                "n": 455
+              },
+              {
+                "fall": 0,
+                "preparation": 1,
+                "n": 51
+              }
+            ]
+          },
+          "crossing": {
+            "preparation_price": 0.1,
+            "hit_frequency": null,
+            "fraction_bootstrap_draws_with_interior_crossing": 0.1737,
+            "paired_95pct_hit_frequency": null
+          },
+          "illustrations": [
+            {
+              "hit_frequency": 0.05,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 3.377529658060014,
+                "ttc": 5.913058623956792,
+                "belief": 6.850863785679029
+              },
+              "ttc_minus_belief_loss_per_100": -0.9378051617222365,
+              "paired_95pct": [
+                -1.323996732081766,
+                -0.5580836155884241
+              ],
+              "ttc_belief_break_even_positive_price": null
+            },
+            {
+              "hit_frequency": 0.25,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 16.88764829030007,
+                "ttc": 14.996187428727046,
+                "belief": 15.912855513760999
+              },
+              "ttc_minus_belief_loss_per_100": -0.9166680850339528,
+              "paired_95pct": [
+                -1.4676569707078788,
+                -0.36381971984409306
+              ],
+              "ttc_belief_break_even_positive_price": null
+            },
+            {
+              "hit_frequency": 0.75,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 50.662944870900205,
+                "ttc": 37.704009440652676,
+                "belief": 38.567834833965925
+              },
+              "ttc_minus_belief_loss_per_100": -0.8638253933132489,
+              "paired_95pct": [
+                -2.2455288807947396,
+                0.5691240589133034
+              ],
+              "ttc_belief_break_even_positive_price": null
+            },
+            {
+              "hit_frequency": 0.69970703125,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 47.265625,
+                "ttc": 35.419921875,
+                "belief": 36.2890625
+              },
+              "ttc_minus_belief_loss_per_100": -0.869140625,
+              "paired_95pct": [
+                -2.16796875,
+                0.4639892578124982
+              ],
+              "ttc_belief_break_even_positive_price": null
+            }
+          ]
+        },
+        "100": {
+          "arms": {
+            "reactive": {
+              "hits": {
+                "n": 1433,
+                "falls": 968,
+                "preparations": 0
+              },
+              "misses": {
+                "n": 615,
+                "falls": 0,
+                "preparations": 0
+              }
+            },
+            "ttc": {
+              "hits": {
+                "n": 1433,
+                "falls": 733,
+                "preparations": 1427
+              },
+              "misses": {
+                "n": 615,
+                "falls": 0,
+                "preparations": 373
+              }
+            },
+            "belief": {
+              "hits": {
+                "n": 1433,
+                "falls": 813,
+                "preparations": 1103
+              },
+              "misses": {
+                "n": 615,
+                "falls": 0,
+                "preparations": 204
+              }
+            }
+          },
+          "paired_differences": {
+            "hits": [
+              {
+                "fall": -1,
+                "preparation": 0,
+                "n": 93
+              },
+              {
+                "fall": -1,
+                "preparation": 1,
+                "n": 36
+              },
+              {
+                "fall": 0,
+                "preparation": 0,
+                "n": 972
+              },
+              {
+                "fall": 0,
+                "preparation": 1,
+                "n": 283
+              },
+              {
+                "fall": 1,
+                "preparation": 0,
+                "n": 44
+              },
+              {
+                "fall": 1,
+                "preparation": 1,
+                "n": 5
+              }
+            ],
+            "misses": [
+              {
+                "fall": 0,
+                "preparation": -1,
+                "n": 44
+              },
+              {
+                "fall": 0,
+                "preparation": 0,
+                "n": 358
+              },
+              {
+                "fall": 0,
+                "preparation": 1,
+                "n": 213
+              }
+            ]
+          },
+          "crossing": {
+            "preparation_price": 0.1,
+            "hit_frequency": 0.3298618725457213,
+            "fraction_bootstrap_draws_with_interior_crossing": 1.0,
+            "paired_95pct_hit_frequency": [
+              0.2601228315225148,
+              0.42867272333436474
+            ]
+          },
+          "illustrations": [
+            {
+              "hit_frequency": 0.05,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 3.377529658060014,
+                "ttc": 8.319360146148565,
+                "belief": 5.9879257229418075
+              },
+              "ttc_minus_belief_loss_per_100": 2.3314344232067574,
+              "paired_95pct": [
+                1.8809479941449798,
+                2.7779114825342255
+              ],
+              "ttc_belief_break_even_positive_price": 0.01069248394443125
+            },
+            {
+              "hit_frequency": 0.25,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 16.88764829030007,
+                "ttc": 17.33663812911681,
+                "belief": 16.671335931782206
+              },
+              "ttc_minus_belief_loss_per_100": 0.6653021973346043,
+              "paired_95pct": [
+                0.09534406753697694,
+                1.2372900107228566
+              ],
+              "ttc_belief_break_even_positive_price": 0.0677190649813979
+            },
+            {
+              "hit_frequency": 0.75,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 50.662944870900205,
+                "ttc": 39.879833086537424,
+                "belief": 43.37986145388321
+              },
+              "ttc_minus_belief_loss_per_100": -3.5000283673457844,
+              "paired_95pct": [
+                -4.877590576935079,
+                -2.1275340549986104
+              ],
+              "ttc_belief_break_even_positive_price": 0.6094715848325811
+            },
+            {
+              "hit_frequency": 0.69970703125,
+              "near_miss_preparation_price": 0.1,
+              "loss_per_100": {
+                "reactive": 47.265625,
+                "ttc": 37.6123046875,
+                "belief": 40.69335937499999
+              },
+              "ttc_minus_belief_loss_per_100": -3.081054687499993,
+              "paired_95pct": [
+                -4.3701171875,
+                -1.8017578125000002
+              ],
+              "ttc_belief_break_even_positive_price": 0.47337278106508873
+            }
+          ]
+        }
+      }
+    }
+  }
+}

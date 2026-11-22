@@ -1,0 +1,46 @@
+{
+  "seed": 73132,
+  "selection": "one scheduled hit (index 0) and one scheduled near-miss (index 1), chosen before simulation",
+  "steps": 300,
+  "dt_s": 0.02,
+  "backend": "MJX/JAX CPU",
+  "observation": "parametric detector, period 5 steps, latency 5 steps, 120-degree FOV",
+  "policies": [
+    "nominal_s1/000202342400",
+    "brace2_s1/000202342400"
+  ],
+  "arms": {
+    "ttc": [
+      {
+        "scheduled_miss": false,
+        "fell": true,
+        "term_step": 189,
+        "contact_step": 156,
+        "applied_brace_s": 0.62
+      },
+      {
+        "scheduled_miss": true,
+        "fell": false,
+        "term_step": -1,
+        "contact_step": -1,
+        "applied_brace_s": 0.0
+      }
+    ],
+    "belief": [
+      {
+        "scheduled_miss": false,
+        "fell": true,
+        "term_step": 174,
+        "contact_step": 155,
+        "applied_brace_s": 0.0
+      },
+      {
+        "scheduled_miss": true,
+        "fell": false,
+        "term_step": -1,
+        "contact_step": -1,
+        "applied_brace_s": 0.0
+      }
+    ]
+  }
+}
