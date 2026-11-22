@@ -63,6 +63,47 @@ class AdaptiveGateAnalysisTests(unittest.TestCase):
         self.assertEqual(result["status"], "fail")
         self.assertIsNone(choose_candidate(result))
 
+    def test_repeat_probe_separates_backend_noise_from_code_path_differences(self):
+        base = trials()
+        # Without the probe the controls report no reproducibility verdict.
+        plain = analyze_phase(base)
+        self.assertIsNone(plain["controls"]["run_to_run_reproducible"])
+        self.assertIsNone(plain["controls"]["repeat_max_difference"])
+
+        def with_repeat(rows, jitter=0.0):
+            rows = copy.deepcopy(rows)
+            for r in [r for r in rows if r["condition"] == "healthy"]:
+                probe = dict(r, condition="healthy_repeat")
+                probe["progress_m"] += jitter
+                rows.append(probe)
+            return rows
+
+        exact = analyze_phase(with_repeat(base))
+        self.assertEqual(exact["status"], "pass")
+        self.assertTrue(exact["controls"]["run_to_run_reproducible"])
+        self.assertEqual(exact["controls"]["repeat_max_difference"], 0.0)
+        self.assertNotIn("healthy_repeat", exact["candidates"])
+        self.assertEqual(exact["arms"]["healthy_repeat"]["n"], 32)
+
+        # Identity differs while the repeat is exact: the adapter changed the code path.
+        rows = with_repeat(base)
+        next(r for r in rows if r["condition"] == "identity")["progress_m"] += 0.01
+        result = analyze_phase(rows)
+        self.assertEqual(result["status"], "fail")
+        self.assertTrue(result["controls"]["run_to_run_reproducible"])
+        self.assertIn("changes the executed code path", " ".join(result["reasons"]))
+
+        # Identity and repeat both differ: the backend itself is not reproducible.
+        rows = with_repeat(base, jitter=0.004)
+        next(r for r in rows if r["condition"] == "identity")["progress_m"] += 0.005
+        result = analyze_phase(rows)
+        self.assertEqual(result["status"], "fail")
+        self.assertFalse(result["controls"]["run_to_run_reproducible"])
+        self.assertAlmostEqual(result["controls"]["repeat_max_difference"], 0.004)
+        self.assertIn("not run-to-run reproducible", " ".join(result["reasons"]))
+        self.assertIsNone(choose_candidate(result))
+        json.dumps(result, allow_nan=False)
+
     def test_control_bounds_are_hard_gate_even_with_strong_recovery(self):
         for field, limit in (("max_correction_rad", 0.2), ("max_slew_rad_s", 2.0)):
             with self.subTest(field=field):
