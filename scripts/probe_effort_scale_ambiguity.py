@@ -29,13 +29,18 @@ def run():
         # Illustrative point-estimate correction from rest with the gate's limits.
         delta = float(np.clip((1 / gain_loss - 1) * error_rad, -0.2, 0.2))
         delta = float(np.clip(delta, -2.0 * step_s, 2.0 * step_s))
+        # Minimize the worst instantaneous torque error across these two worlds.
+        # With symmetric absolute error, the two extreme signed errors balance.
+        balanced_delta = float(np.clip((1 - gain_loss) * error_rad / (1 + gain_loss),
+                                       -min(0.2, 2.0 * step_s), min(0.2, 2.0 * step_s)))
         rows = {}
         for label, gain, scale in (("weak_motor", gain_loss, 1.0),
                                    ("scaled_sensor", 1.0, gain_loss)):
             model.actuator_gainprm[actuator, 0] = kp * gain
             model.actuator_biasprm[actuator, 1] = -kp * gain
             rows[label] = {}
-            for action, correction in (("leave_target", 0.0), ("apply_correction", delta)):
+            for action, correction in (("leave_target", 0.0), ("apply_correction", delta),
+                                       ("balanced_correction", balanced_delta)):
                 data.ctrl[actuator] = q + error_rad + correction
                 sample = sample_native_actuators(model, data, layout)
                 if (not sample.regression_valid[actuator] or
@@ -43,7 +48,7 @@ def run():
                     raise ValueError("Clipping or invalid torque sample in the proposed comparison")
                 torque = float(sample.applied_joint_torque_nm[actuator])
                 rows[label][action] = {"physical_effort_nm": torque, "observed_effort_nm": scale * torque}
-        for action in ("leave_target", "apply_correction"):
+        for action in ("leave_target", "apply_correction", "balanced_correction"):
             np.testing.assert_allclose(rows["weak_motor"][action]["observed_effort_nm"],
                                        rows["scaled_sensor"][action]["observed_effort_nm"], atol=1e-12, rtol=0)
         target_torque = kp * error_rad
@@ -52,9 +57,13 @@ def run():
                         for a in ("leave_target", "apply_correction")]
             if (new < old) != should_improve or np.isclose(old, new):
                 raise AssertionError("Unexpected effect of the point-estimate correction")
-        cases.append({"error_rad": error_rad, "delta_rad": delta, "healthy_reference_nm": target_torque,
+        balanced_errors = [rows[label]["balanced_correction"]["physical_effort_nm"] - target_torque
+                           for label in ("weak_motor", "scaled_sensor")]
+        np.testing.assert_allclose(balanced_errors[0], -balanced_errors[1], rtol=0, atol=1e-12)
+        cases.append({"error_rad": error_rad, "delta_rad": delta, "balanced_delta_rad": balanced_delta,
+                      "healthy_reference_nm": target_torque,
                       "worlds": rows})
-    return {"experiment": "matched-state effort-scale ambiguity, v1", "backend": "native MuJoCo",
+    return {"experiment": "matched-state effort-scale ambiguity, v1.1", "backend": "native MuJoCo",
             "mujoco_version": version("mujoco"), "joint": "left_knee_joint", "kp_nm_rad": kp,
             "control_period_s": step_s, "position_bound_rad": 0.2, "rate_bound_rad_s": 2.0,
             "gain_loss": gain_loss, "sensor_scale_on_healthy_plant": gain_loss,

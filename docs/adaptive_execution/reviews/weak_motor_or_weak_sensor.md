@@ -1,6 +1,6 @@
 # Can the walker tell a weak motor from a weak sensor reading?
 
-**Online Actuator Adaptation · experiment note v1.0 · November 21, 2026 (Pacific)**
+**Online Actuator Adaptation · experiment note v1.1 · November 21, 2026 (Pacific)**
 
 A walker wants its left knee to deliver 7.50 N·m. Its effort sensor reads 5.25 N·m. Should the controller increase the position target? We reproduced two explanations for that reading in the project's simulated Unitree G1. The same adjustment helped in one and increased error in the other.
 
@@ -11,6 +11,8 @@ A walker wants its left knee to deliver 7.50 N·m. Its effort sensor reads 5.25 
 | Motor at 70% gain, calibrated sensor | 5.25 → 7.35 N·m | 5.25 → 7.35 N·m | −0.15 N·m |
 | Healthy motor, sensor reporting 70% of effort | 5.25 → 7.35 N·m | 7.50 → 10.50 N·m | +3.00 N·m |
 
+[Explore all four knee positions in the interactive exhibit](effort-scale.html). Download the HTML and open it locally, or serve it as a static page.
+
 ## What the experiment establishes
 
 The native MuJoCo model holds the G1 at the same knee position and velocity in both conditions. The nominal proportional gain is 75 N·m/rad. With 0.10 rad of position error, a point estimate that treats the reading as a 30% motor gain loss requests extra target motion. The 2 rad/s slew limit permits 0.04 rad in the first 20 ms. We evaluate the corrected command at the same state to isolate the torque consequence. Each reading uses the project's synchronized, post-joint-limit telemetry. The test excludes clipped or invalid samples.
@@ -18,6 +20,12 @@ The native MuJoCo model holds the G1 at the same knee position and velocity in b
 At an imposed state the observed effort is the product of sensor scale, motor gain, nominal stiffness and position error. Even a second reading after the adjustment gives the same apparent recovery in both conditions. A physically meaningful claim about adaptation must therefore specify sensor calibration, independent motion evidence, or the conditions under which the controller abstains. A moving robot can generate additional information through its joint acceleration, body motion and contacts. The replay does not determine whether that information suffices during walking.
 
 Four signed position errors (−0.10, −0.05, +0.05, +0.10 rad) produced the same ambiguity to numerical precision. These are four controlled state/command cases. There were zero closed-loop episodes in this experiment. [Measured values for every case](effort_scale_probe.json)
+
+## What should an uncertainty-aware controller do here?
+
+If the supervisor requires zero additional instantaneous torque error on a healthy motor, it must leave the target unchanged in this example. It then accepts the 2.25 N·m shortfall on the weak motor. If instead its objective is to minimize the largest absolute torque error over these two plausible motors, a partial correction is preferable. For nominal position error e and possible motor gain multipliers g and 1, equating the opposing endpoint errors gives Δr = e(1−g)/(1+g), subject to the same command bounds.
+
+We sent that third command through both simulated motors. At e = 0.10 rad and g = 0.70, Δr = 0.01765 rad. The weak motor produced **6.176 N·m** and the healthy motor **8.824 N·m**. The worst error was **1.324 N·m**, compared with 2.250 for abstention and 3.000 for the point-estimate correction. This supplies a concrete baseline for the proposed supervisor. Which behavior is desirable depends on the allowed healthy regression. Whole-body balance, accumulated loss and energy can change that ranking during walking.
 
 ## The next decision for the walking experiment
 
@@ -36,4 +44,4 @@ PYTHONPATH=. JAX_PLATFORMS=cpu python scripts/probe_effort_scale_ambiguity.py --
 python scripts/plot_effort_scale_probe.py /tmp/g1-effort-probe.json /tmp/g1-effort-probe.png
 ```
 
-The first command uses MuJoCo 3.16.0, the project G1 assets and the existing telemetry sampler. The figure reads only the recorded values and requires Matplotlib. v1.0 adds the fixed-state replay, machine-readable record and prospective walking comparison. Prasuna retains the experimental and publication decisions.
+The first command uses MuJoCo 3.16.0, the project G1 assets and the existing telemetry sampler. The figure reads only the recorded values and requires Matplotlib. v1.0 adds the fixed-state replay, machine-readable record and prospective walking comparison. v1.1 adds the measured bounded minimax comparison at each of the four signed positions. Prasuna retains the experimental and publication decisions.
