@@ -33,11 +33,11 @@ EOF
 }
 
 if [[ ${1:-} == --help || ${1:-} == -h ]]; then usage; exit 0; fi
-if (( $# > 1 )) || [[ $# == 1 && $1 != --worker ]]; then usage >&2; exit 2; fi
+if (( $# > 1 )) || [[ $# == 1 && $1 != --worker && $1 != --repair-access ]]; then usage >&2; exit 2; fi
 FORESIGHT_SETUP_ROOT="${FORESIGHT_SETUP_ROOT:-/workspace}"
 FORESIGHT_CODE_REF="${FORESIGHT_CODE_REF:-portfolio/adaptive-execution-gate}"
 ADAPTIVE_PROFILE="${ADAPTIVE_PROFILE:-gate}"
-[[ "$ADAPTIVE_PROFILE" == gate || "$ADAPTIVE_PROFILE" == smoke ]] || { echo 'Invalid ADAPTIVE_PROFILE'; exit 2; }
+[[ "$ADAPTIVE_PROFILE" == gate || "$ADAPTIVE_PROFILE" == smoke || ( "$ADAPTIVE_PROFILE" == repair-access && "${1:-}" == --repair-access ) ]] || { echo 'Invalid ADAPTIVE_PROFILE'; exit 2; }
 [[ ${ADAPTIVE_STARTED_EPOCH:-} =~ ^[0-9]+$ && ${ADAPTIVE_DEADLINE_EPOCH:-} =~ ^[0-9]+$ ]] || {
   echo 'Use start_adaptive_gate.sh to establish the original attempt deadline.'; exit 2;
 }
@@ -67,15 +67,18 @@ bounded() {
   timeout "${timeout_options[@]}" --signal=TERM --kill-after=15s "${cap}s" "$@"
 }
 
-# GitHub access uses plain Git over HTTPS with a personal access token; the
-# GitHub CLI is not used. The token lives only in a mode-600 credential file on
-# the pod volume, read by Git's store helper. It is never printed, logged,
-# committed, or put in a remote URL.
+# Git pushes use HTTPS. Reuse saved Git credentials or an existing CLI login.
+# A token entered at the prompt is saved in the private credential file.
 FORESIGHT_TOKEN_FILE="$FORESIGHT_SETUP_ROOT/.foresight-git-credentials"
 FORESIGHT_LEGACY_REPO="${FORESIGHT_LEGACY_REPO:-$FORESIGHT_SETUP_ROOT/anticipatory-balance}"
 
 use_credential_file() {
-  git -C "$FORESIGHT_REPO" config --local --replace-all credential.helper "store --file=$FORESIGHT_TOKEN_FILE"
+  local store_helper
+  printf -v store_helper 'store --file=%q' "$FORESIGHT_TOKEN_FILE"
+  # Git accumulates helpers across scopes. Clear the inherited list so an older
+  # global helper cannot return a stale password ahead of the selected file.
+  git -C "$FORESIGHT_REPO" config --local --replace-all credential.helper ''
+  git -C "$FORESIGHT_REPO" config --local --add credential.helper "$store_helper"
   git -C "$FORESIGHT_REPO" config --local credential.https://github.com.username pchatla-arch
 }
 
@@ -102,7 +105,7 @@ adopt_existing_git_helper() {
 git_push_works() {
   bounded 60 env GIT_TERMINAL_PROMPT=0 GCM_INTERACTIVE=never SSH_ASKPASS_REQUIRE=never \
     GIT_SSH_COMMAND='ssh -o BatchMode=yes -o ConnectTimeout=15 -o ConnectionAttempts=1' \
-    git -C "$FORESIGHT_REPO" -c credential.interactive=never \
+    git -C "$FORESIGHT_REPO" -c credential.interactive=never -c core.hooksPath=/dev/null \
     push --dry-run --quiet origin HEAD:refs/heads/foresight/credential-probe >/dev/null 2>&1
 }
 
@@ -110,9 +113,9 @@ git_push_works() {
 # gh's own Git credential helper. gh is never installed or asked to log in here.
 adopt_gh_login() {
   command -v gh >/dev/null || return 1
-  [[ -n "$(bounded 30 gh auth token --hostname github.com 2>/dev/null)" ]] || return 1
+  [[ -n "$(bounded 30 env -u GH_TOKEN -u GITHUB_TOKEN gh auth token --hostname github.com 2>/dev/null)" ]] || return 1
   git -C "$FORESIGHT_REPO" config --local --replace-all credential.helper ''
-  git -C "$FORESIGHT_REPO" config --local --add credential.helper '!gh auth git-credential'
+  git -C "$FORESIGHT_REPO" config --local --add credential.helper '!env -u GH_TOKEN -u GITHUB_TOKEN gh auth git-credential'
   if git_push_works; then return 0; fi
   git -C "$FORESIGHT_REPO" config --local --unset-all credential.helper || true
   return 1
@@ -138,6 +141,53 @@ install_access_token() {
   token=''
   use_credential_file
 }
+
+configure_github_access() {
+  adopt_existing_git_helper
+  if git_push_works; then
+    echo 'GitHub verified: saved Git credentials can push to pchatla-arch/anticipatory-balance.'
+  elif adopt_gh_login; then
+    echo 'GitHub verified: the existing GitHub CLI login can push to pchatla-arch/anticipatory-balance.'
+  else
+    install_access_token
+    if ! git_push_works; then
+      rm -f -- "$FORESIGHT_TOKEN_FILE"
+      die 'GitHub refused that token for pushing to pchatla-arch/anticipatory-balance; it was deleted from the pod. Use a token with Contents read and write on this repository (classic: repo scope), not expired. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
+    fi
+    echo 'GitHub verified: the access token can push to pchatla-arch/anticipatory-balance. Saved for later runs on this volume.'
+  fi
+}
+
+if [[ ${1:-} == --repair-access ]]; then
+  [[ -d "$FORESIGHT_SETUP_ROOT" && -f "$FORESIGHT_REPO/scripts/publish_experiment_results.py" ]] || die 'Set FORESIGHT_REPO to an existing checkout with the results publisher and FORESIGHT_SETUP_ROOT to an existing volume.'
+  # Validate the same effective push URL the publisher accepts, before offering
+  # any credential or changing the checkout's local credential configuration.
+  python3 -B - "$FORESIGHT_REPO" <<'PYORIGIN'
+from pathlib import Path
+import sys
+import tempfile
+from urllib.parse import urlsplit
+repo = Path(sys.argv[1])
+sys.path.insert(0, str(repo / 'scripts'))
+from publish_experiment_results import Git, PublicationError
+with tempfile.TemporaryDirectory() as scratch:
+    git = Git(repo, Path(scratch) / 'index')
+    try:
+        git.validate_origin()
+        for raw in git.resolved_urls(push=True):
+            url = urlsplit(raw.decode())
+            if url.scheme != 'https' or url.username is not None or url.password is not None:
+                sys.exit('For credential repair, set the push destination to the clean HTTPS project URL.')
+    except PublicationError as exc:
+        sys.exit(str(exc))
+PYORIGIN
+  if git_push_works; then
+    echo 'GitHub accepted the current checkout credentials.'
+  else
+    configure_github_access
+  fi
+  exit 0
+fi
 
 if [[ ${1:-} == --worker ]]; then
   cd "$FORESIGHT_REPO"
@@ -261,19 +311,7 @@ fi
 mkdir -p "$FORESIGHT_REPO/logs"
 
 if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]]; then
-  adopt_existing_git_helper
-  if git_push_works; then
-    echo 'GitHub verified: saved Git credentials can push to pchatla-arch/anticipatory-balance.'
-  elif adopt_gh_login; then
-    echo 'GitHub verified: the existing GitHub CLI login can push to pchatla-arch/anticipatory-balance.'
-  else
-    install_access_token
-    if ! git_push_works; then
-      rm -f -- "$FORESIGHT_TOKEN_FILE"
-      die 'GitHub refused that token for pushing to pchatla-arch/anticipatory-balance; it was deleted from the pod. Use a token with Contents read and write on this repository (classic: repo scope), not expired. No experiment has started. The pod is still running; stop it in the RunPod dashboard if leaving.'
-    fi
-    echo 'GitHub verified: the access token can push to pchatla-arch/anticipatory-balance. Saved for later runs on this volume.'
-  fi
+  configure_github_access
 fi
 ADAPTIVE_WORKER_ENV=(
   "FORESIGHT_SETUP_ROOT=$FORESIGHT_SETUP_ROOT" "FORESIGHT_CODE_REF=$FORESIGHT_CODE_REF"
