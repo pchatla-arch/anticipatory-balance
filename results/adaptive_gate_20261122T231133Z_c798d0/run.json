@@ -1,0 +1,16 @@
+{
+  "run_id": "adaptive_gate_20261122T231133Z_c798d0",
+  "source_commit": "8a68a61fee3d4d934e2f2b05ef57543d4c80fba6",
+  "mode": "calibrate-identity",
+  "protocol_version": "adaptive-identity-calibration-v1",
+  "status": "completed",
+  "started_utc": "20261122T231133Z",
+  "stage": "evaluation",
+  "launcher_started_epoch": 1795389093,
+  "launcher_deadline_epoch": 1795391313,
+  "cleanup_reserve_seconds": 600,
+  "interpretation": "Two repeats of the healthy walker on independent calibration seeds. G0 is undecided.",
+  "scientific_gate_status": "inconclusive",
+  "exit_code": 0,
+  "elapsed_from_launcher_seconds": 391.351
+}

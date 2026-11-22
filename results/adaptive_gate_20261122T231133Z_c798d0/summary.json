@@ -1,0 +1,16 @@
+{
+  "profile": "gpu_calibration",
+  "batches": 64,
+  "rows": 4096,
+  "terminal_disagreements": 0,
+  "max_score": 7.189464126035934,
+  "elapsed_seconds": 359.51432845398085,
+  "scientific_gate_status": "inconclusive",
+  "upper_envelope": {
+    "postfault_loss": 0.00290532223880291,
+    "progress_m": 0.1687996050690748,
+    "max_abs_actuator_force_nm": 21.745671644887494
+  },
+  "nominal_confidence_at_95pct_content": 0.962475860788884,
+  "resolves_registered_loss_gap": true
+}

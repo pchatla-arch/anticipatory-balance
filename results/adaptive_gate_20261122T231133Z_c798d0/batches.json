@@ -1,0 +1,386 @@
+[
+  {
+    "seed": 940101,
+    "score": 2.1398130479272104,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940102,
+    "score": 3.8081044829779587,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940103,
+    "score": 2.3053919263991447,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940104,
+    "score": 2.793601408593527,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940105,
+    "score": 1.86204218405745,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940106,
+    "score": 2.640799432137688,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940107,
+    "score": 3.0905491486674594,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940108,
+    "score": 2.1466578168644044,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940109,
+    "score": 4.417848944937637,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940110,
+    "score": 1.6926237819998708,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940111,
+    "score": 2.41083593757202,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940112,
+    "score": 1.6887174239700582,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940113,
+    "score": 1.8060003503046729,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940114,
+    "score": 2.22395300386257,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940115,
+    "score": 2.2910893553472165,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940116,
+    "score": 2.3687094960221984,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940117,
+    "score": 7.189464126035934,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940118,
+    "score": 2.9299943766881458,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940119,
+    "score": 3.3130340993943417,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940120,
+    "score": 1.6987057164191488,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940121,
+    "score": 2.435921900495036,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940122,
+    "score": 3.4448546696534748,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940123,
+    "score": 2.322960166671276,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940124,
+    "score": 2.5155539884030715,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940125,
+    "score": 1.8624869788065672,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940126,
+    "score": 2.717085188565318,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940127,
+    "score": 2.4298998866119086,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940128,
+    "score": 1.890898531485937,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940129,
+    "score": 2.834202181107516,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940130,
+    "score": 1.6128833761995631,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940131,
+    "score": 3.038577302100906,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940132,
+    "score": 1.5240488767204108,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940133,
+    "score": 1.534764462767956,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940134,
+    "score": 1.9721069904219328,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940135,
+    "score": 1.3934059754602357,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940136,
+    "score": 1.9603786977884712,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940137,
+    "score": 1.2736017773352877,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940138,
+    "score": 4.424873475483282,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940139,
+    "score": 2.2372991509720954,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940140,
+    "score": 3.0187827834471825,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940141,
+    "score": 2.369958608737336,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940142,
+    "score": 2.2603869944780923,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940143,
+    "score": 1.9402776625459774,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940144,
+    "score": 4.7493247416503035,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940145,
+    "score": 3.2706334061598312,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940146,
+    "score": 2.1676737926011964,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940147,
+    "score": 3.0599481917825897,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940148,
+    "score": 2.6050591369599085,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940149,
+    "score": 2.293709726485799,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940150,
+    "score": 1.6342312195211888,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940151,
+    "score": 0.7439872046608959,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940152,
+    "score": 4.792377646874453,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940153,
+    "score": 1.1686311950117039,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940154,
+    "score": 2.3414456520737117,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940155,
+    "score": 4.838963559095476,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940156,
+    "score": 5.099154659513077,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940157,
+    "score": 1.8092544963448474,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940158,
+    "score": 2.8450109239746673,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940159,
+    "score": 2.640548226813057,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940160,
+    "score": 4.112606819878868,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940161,
+    "score": 1.477704951279995,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940162,
+    "score": 2.7248610304488508,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940163,
+    "score": 1.3540013090332512,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  },
+  {
+    "seed": 940164,
+    "score": 2.084755293748905,
+    "terminal_disagreements": 0,
+    "exposure": "full horizon"
+  }
+]
