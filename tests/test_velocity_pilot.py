@@ -80,6 +80,15 @@ def test_audit_masks_unobserved_transitions_and_missing_sources():
     assert result["hip"]["whole_hold_coverage"] == 1.
     assert result["knee"]["whole_hold_coverage"] == 0.
 
+    # A hip measurement held for one extra decision averages 10 ms over two valid ticks.
+    trace["pilot_substep_q"][2] = 0.
+    trace["alive"][2] = True
+    trace["authority_rls_last_source_step"][2, 0, 0] = 0
+    trace["authority_rls_last_source_step"][:, 0, 1] = -1
+    ages = pilot.inspect_hold(trace, ["left_hip_pitch_joint", "left_knee_joint"], .02, None, S.DECLARED)
+    assert ages["hip"]["mean_source_age_ms"] == 10.
+    assert ages["knee"]["mean_source_age_ms"] is None
+
 @pytest.mark.skipif(os.environ.get("FORESIGHT_RUN_CPU_PHYSICS") != "1",
                     reason="set FORESIGHT_RUN_CPU_PHYSICS=1 for the MJX observer parity check")
 def test_observer_preserves_healthy_and_faulted_transitions():

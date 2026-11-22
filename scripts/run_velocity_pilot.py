@@ -98,6 +98,7 @@ def inspect_hold(trace, names, dt, cfg, sensor):
         result[group] = {
             "live_joint_ticks": int(live.sum() * joint.sum()),
             "source_available_joint_ticks": int(mask.sum()),
+            "mean_source_age_ms": float(ages.mean() * dt * 1000.) if ages.size else None,
             "source_age_ticks_histogram": dict(zip(map(str, age_bins), map(int, counts))),
         }
         if cfg is None:

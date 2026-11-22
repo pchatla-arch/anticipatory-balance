@@ -75,7 +75,7 @@ def paired_ci(a, b, draws=2000, seed=228):
     return [float(x) for x in np.quantile(means, [0.025, 0.975])]
 
 
-def summarize(rows, reference=REFERENCE_METHOD, margins=None):
+def summarize(rows, reference=REFERENCE_METHOD, margins=None, hold_audits=None):
     """Per (family, telemetry, method) summary plus paired differences against `reference`."""
     margins = margins or {}
     out = {"cells": {}, "paired_vs_reference": {}, "reference": reference}
@@ -101,7 +101,18 @@ def summarize(rows, reference=REFERENCE_METHOD, margins=None):
             "control_bound_violations": int(sum(r["max_correction_rad"] > 0.2 + 1e-5 or r["max_slew_rad_s"] > 2.0 + 1e-5 for r in rr)),
             "lost_packets_mean": float(np.mean([r["lost_packets"] for r in rr])),
         }
-        out["cells"][f"{family}|{tele}|{method}"] = cell
+        key = f"{family}|{tele}|{method}"
+        if hold_audits is not None:
+            cell["mean_source_age_ms"] = {joint: group["mean_source_age_ms"]
+                                          for joint, group in hold_audits[key].items()}
+            returns = [r for r in rr if r["return_step"] >= 0]
+            reached = [r for r in returns if not r["nonfinite"] and
+                       (r["termination_step"] < 0 or r["termination_step"] >= r["return_step"])]
+            cell["withdrawal_counts"] = {
+                "scheduled": len(returns), "reached": len(reached),
+                "withdrew": sum(r["withdrawal_steps"] >= 0 for r in reached),
+            }
+        out["cells"][key] = cell
     for (family, tele, method), rr in sorted(groups.items()):
         ref = groups.get((family, tele, reference))
         if ref is None or method == reference:
@@ -129,17 +140,33 @@ def summarize(rows, reference=REFERENCE_METHOD, margins=None):
 
 
 def render_report(summary, meta):
+    pilot = any("mean_source_age_ms" in c for c in summary["cells"].values())
+    header = "| Family | Telemetry | Method | n | Falls | Post-fault loss | Harmful offset (rad) | Gain error | Withdrawal (steps) |"
+    separators = "|---|---|---|---:|---:|---:|---:|---:|---:|"
+    if pilot:
+        header += " Mean source age, hip / knee (ms) | Withdrew / reached / scheduled |"
+        separators += "---:|---:|"
     lines = [f"# Adaptive execution bench: {meta['split']} split", "",
              f"Source {meta['source_commit']}, physics {meta['impl']}, {meta['steps']} control steps, "
-             f"schedule {meta['schedule']}, {meta['episodes']} episodes per cell.", "",
-             "| Family | Telemetry | Method | n | Falls | Post-fault loss | Harmful offset (rad) | Gain error | Withdrawal (steps) |",
-             "|---|---|---|---:|---:|---:|---:|---:|---:|"]
+             f"schedule {meta['schedule']}, {meta['episodes']} episodes per cell.", "", header, separators]
     fmt = lambda v, p=4: "—" if v is None else f"{v:.{p}f}"  # noqa: E731
     for key, c in summary["cells"].items():
         fam, tele, method = key.split("|")
         lines.append(f"| {fam} | {tele} | {method} | {c['n']} | {c['fall_rate']:.3f} | {fmt(c['mean_postfault_loss'])} | "
                      f"{fmt(c['mean_harmful_offset_rad'])} | {fmt(c['mean_gain_abs_error'], 3)} | "
-                     f"{'—' if c['withdrawal_steps_median'] is None else int(c['withdrawal_steps_median'])} |")
+                     f"{fmt(c['withdrawal_steps_median'], 1)} |")
+        if pilot:
+            age = c["mean_source_age_ms"]
+            counts = c["withdrawal_counts"]
+            withdrawal = (f"{counts['withdrew']} / {counts['reached']} / {counts['scheduled']}"
+                          if counts["scheduled"] else "—")
+            lines[-1] += f" {fmt(age['hip'], 2)} / {fmt(age['knee'], 2)} | {withdrawal} |"
+    if pilot:
+        lines.extend(["", "Source age is the elapsed time from the newest valid released measurement to the "
+                      "decision, averaged across live, source-available joint ticks separately for hips and knees. "
+                      "Each hold file gives available and total joint ticks. Withdrawal is the median among finite "
+                      "episodes that reached the threshold. Counts show withdrawals, finite episodes observed at "
+                      "the scheduled return, and all episodes scheduled to return."])
     lines += ["", f"Paired differences are method minus `{summary['reference']}` on identical scenarios and sensor draws "
               "(95% bootstrap intervals).", "",
               "| Family | Telemetry | Method | Δ loss [CI] | Δ harmful offset [CI] | Δ fall rate [CI] |", "|---|---|---|---|---|---|"]
@@ -326,6 +353,7 @@ def main(argv=None, *, velocity_pilot=None):
     })
     reset = jax.jit(jax.vmap(env.reset))
     rows = []
+    hold_audits = {} if velocity_pilot else None
     for fname in families:
         family = B.FAMILIES[fname]
         seed = velocity_pilot["family_seeds"][fname] if velocity_pilot else family_seed(args.split, fname)
@@ -358,6 +386,7 @@ def main(argv=None, *, velocity_pilot=None):
                             from run_velocity_pilot import inspect_hold
                             audit = inspect_hold(result["trace"], list(env.actuator_joint_names), env.dt,
                                                  configs.get(mname), combined)
+                            hold_audits[f"{fname}|{tele_name}|{mname}"] = audit
                             write_json(args.out / f"hold_{fname}_{tele_name}_{mname}.json", audit)
                         np.savez_compressed(args.out / f"trace_{fname}_{tele_name}_{mname}.npz",
                                             onset=scenario["onset"][start:stop], ret=scenario["return"][start:stop],
@@ -377,8 +406,8 @@ def main(argv=None, *, velocity_pilot=None):
         keys = {(r["scenario_id"], r["telemetry"], r["method"]) for r in rows}
         if len(rows) != expected or len(keys) != expected:
             raise RuntimeError("incomplete or duplicated pilot rows")
-        write_json(args.out / "paired_vs_speed.json", summarize(rows, reference="candidate", margins=margins))
-    summary = summarize(rows, margins=margins)
+        write_json(args.out / "paired_vs_speed.json", summarize(rows, reference="candidate", margins=margins, hold_audits=hold_audits))
+    summary = summarize(rows, margins=margins, hold_audits=hold_audits)
     summary["meta"] = meta
     summary["elapsed_seconds"] = round(time.monotonic() - started, 1)
     write_json(args.out / "summary.json", summary)
