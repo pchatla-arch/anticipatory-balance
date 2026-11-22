@@ -71,4 +71,11 @@ not available on the pod's stack; the identity-control question is reopened (opt
   mirror venv, with the `healthy_repeat` arm reported.
 
 ## Resolution
-(Open.)
+Partial, 2026-11-22. The pod-mirror venv (0 mismatches against the lock) ran the exact
+evaluator with the Warp backend on CPU (`results/gate_smoke_cpu_warp_316` on `oaa/claude-bench`,
+PR #29 code): nine arms complete, 0 invalid episodes, healthy = identity = healthy_repeat
+bitwise, screen status `pass`; the healthy/identity/0.85 arms reproduce the pod GPU run's
+mean losses to four digits (0.0126, 0.0126, 0.0136/0.0125). The fault arms near the fall
+boundary differ from the GPU run (0.70 plain: 1/8 vs 2/8 falls), as expected for a chaotic
+system under GPU scheduling noise. The pre-run manifest's CPU precondition for the next pod
+smoke is met. The identity-control decision (A/B/C) remains open in #32.
