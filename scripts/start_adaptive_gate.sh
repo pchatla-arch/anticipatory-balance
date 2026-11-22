@@ -4,11 +4,12 @@ set -Eeuo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: bash start_adaptive_gate.sh [gate|smoke|calibrate-identity]
+Usage: bash start_adaptive_gate.sh [gate|smoke|calibrate-identity|bench]
        bash start_adaptive_gate.sh retry-publish RUN_ID
 
 Run the gain-compensation feasibility gate using the published frozen G1 walker.
-No PPO training or online estimator is run. The gate asks whether a bounded,
+The separate bench profile runs the WP 2.4 S1 development comparison from its committed manifest.
+The gate asks whether a bounded,
 privileged correction can recover a deliberately degraded actuator response.
 
 Default: gate, with a 120-minute attempt budget measured from this launcher,
@@ -39,7 +40,7 @@ EOF
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 if [[ ${1:-} == --help || ${1:-} == -h || ${1:-} == help ]]; then usage; exit 0; fi
 ADAPTIVE_PROFILE=${1:-gate}
-case "$ADAPTIVE_PROFILE" in gate|smoke|calibrate-identity|retry-publish) ;; *) usage >&2; exit 2 ;; esac
+case "$ADAPTIVE_PROFILE" in gate|smoke|calibrate-identity|bench|retry-publish) ;; *) usage >&2; exit 2 ;; esac
 FORESIGHT_SETUP_ROOT=${FORESIGHT_SETUP_ROOT:-/workspace}
 FORESIGHT_REPO=${FORESIGHT_REPO:-$FORESIGHT_SETUP_ROOT/adaptive-execution-gate}
 FORESIGHT_VENV=${FORESIGHT_VENV:-$FORESIGHT_SETUP_ROOT/mujoco_playground/rss2025/.venv}

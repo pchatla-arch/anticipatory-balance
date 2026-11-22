@@ -37,7 +37,7 @@ if (( $# > 1 )) || [[ $# == 1 && $1 != --worker ]]; then usage >&2; exit 2; fi
 FORESIGHT_SETUP_ROOT="${FORESIGHT_SETUP_ROOT:-/workspace}"
 FORESIGHT_CODE_REF="${FORESIGHT_CODE_REF:-portfolio/adaptive-execution-gate}"
 ADAPTIVE_PROFILE="${ADAPTIVE_PROFILE:-gate}"
-[[ "$ADAPTIVE_PROFILE" == gate || "$ADAPTIVE_PROFILE" == smoke || "$ADAPTIVE_PROFILE" == calibrate-identity ]] || { echo 'Invalid ADAPTIVE_PROFILE'; exit 2; }
+[[ "$ADAPTIVE_PROFILE" == gate || "$ADAPTIVE_PROFILE" == smoke || "$ADAPTIVE_PROFILE" == calibrate-identity || "$ADAPTIVE_PROFILE" == bench ]] || { echo 'Invalid ADAPTIVE_PROFILE'; exit 2; }
 [[ ${ADAPTIVE_STARTED_EPOCH:-} =~ ^[0-9]+$ && ${ADAPTIVE_DEADLINE_EPOCH:-} =~ ^[0-9]+$ ]] || {
   echo 'Use start_adaptive_gate.sh to establish the original attempt deadline.'; exit 2;
 }
@@ -261,6 +261,12 @@ if [[ -n "$FORESIGHT_CLONE_STAGE" ]]; then
 fi
 [[ -f "$FORESIGHT_REPO/scripts/bootstrap_fresh_pod.sh" ]] || die 'Selected revision lacks the fresh-pod installer.'
 [[ -f "$FORESIGHT_REPO/scripts/adaptive_gate_pod.py" ]] || die 'Selected revision lacks the reviewed pod session worker.'
+if [[ "$ADAPTIVE_PROFILE" == bench ]]; then
+  [[ "$FORESIGHT_CODE_REF" =~ ^[0-9a-f]{40}$ ]] || die 'Use an immutable S1 source commit.'
+  [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]] || die 'S1 requires verified Git push access.'
+  [[ "$FORESIGHT_AUTO_STOP" == 1 && "${NO_STOP:-0}" == 0 ]] || die 'S1 requires the verified publication and stop finalizer.'
+  python3 "$FORESIGHT_REPO/scripts/s1_dev_bench.py" check
+fi
 mkdir -p "$FORESIGHT_REPO/logs"
 
 if [[ "$FORESIGHT_SKIP_GITHUB_LOGIN" == 0 ]]; then

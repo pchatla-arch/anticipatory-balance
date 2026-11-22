@@ -191,6 +191,8 @@ def allowed_tree_path(path: str) -> bool:
       or not all(RUN_ID.fullmatch(part) is not None for part in parts[1:])):
     return False
   relative = parts[2:]
+  if relative[-1] in {"registration.json", "actuators.json"}:
+    return len(relative) == 1 or (len(relative) == 2 and relative[0] == "cpu_smoke")
   if len(relative) == 1:
     return relative[0] in STRUCTURED_FILES | GENERATED_FILES | BINARY_FILES
   if len(relative) == 2 and (relative[-1] in STRUCTURED_FILES | BINARY_FILES

@@ -79,9 +79,10 @@ def validate_outputs(output):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--profile', choices=('smoke', 'gate', 'calibrate-identity'), default='gate')
+    parser.add_argument('--profile', choices=('smoke', 'gate', 'calibrate-identity', 'bench'), default='gate')
     args = parser.parse_args(argv)
     started_epoch, deadline_epoch, seconds_left = parse_deadline(os.environ)
+    bench = args.profile == 'bench'
     calibration = args.profile == 'calibrate-identity'
     if calibration and deadline_epoch - started_epoch > 45 * 60:
         raise ValueError('Identity calibration budget must not exceed 45 minutes.')
@@ -113,6 +114,9 @@ def main(argv=None):
               'interpretation': 'Known-parameter gain compensation over a frozen G1 walker. '
                   'An operational completion is not evidence that the scientific gate passed. '
                   'No online estimator, lag compensation, or learned residual is tested.'}
+    if bench:
+        record['protocol_version'] = 'oaa-s1-dev-v1'
+        record['interpretation'] = 'S1 exploratory paired development comparison. Gate decisions are reserved for Prasuna.'
     if calibration:
         record['interpretation'] = 'Two repeats of the healthy walker on independent calibration seeds. G0 is undecided.'
     latest = {'schema_version': 1, 'run_id': run_id, 'run_dir': str(output),
@@ -180,7 +184,12 @@ def main(argv=None):
             determinism = os.environ.get('ADAPTIVE_DETERMINISTIC', 'auto')
             if determinism not in ('auto', 'on', 'off'):
                 raise ValueError(f'ADAPTIVE_DETERMINISTIC must be auto, on or off, not {determinism!r}')
-            if calibration:
+            if bench:
+                entry = [python, '-u', 'scripts/s1_dev_bench.py']
+                run_child(entry + ['cpu-smoke', '--out', str(output)], env, log,
+                          remaining_timeout(deadline, 120 * 60, CLEANUP_RESERVE))
+                experiment = entry + ['gpu', '--out', str(output)]
+            elif calibration:
                 if determinism != 'auto':
                     raise ValueError('Identity calibration requires the pinned default Warp execution and auto XLA flags.')
                 experiment = [python, '-u', 'scripts/calibrate_gate_identity.py', '--gpu-calibration', '--out', str(output)]
@@ -188,7 +197,7 @@ def main(argv=None):
                 experiment = [python, '-u', 'scripts/eval_adaptive_gate.py', '--out', str(output), '--profile', args.profile,
                               '--deterministic', determinism]
             run_child(experiment, env, log, remaining_timeout(deadline, 120 * 60, CLEANUP_RESERVE))
-            scientific_status = validate_outputs(output)
+            scientific_status = 'development_only' if bench else validate_outputs(output)
             if calibration:
                 result = read_strict_json(output / 'summary.json')
                 if (result.get('profile') != 'gpu_calibration' or result.get('batches') != 64
