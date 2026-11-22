@@ -55,6 +55,8 @@ def replay_actuator(z, q, tau, valid, arrival, onset, g_true, kp, cfg, alive=Non
     oracle = np.zeros(steps)
     status_counts = {"updated": 0, "skipped": 0, "inconsistent": 0, "violations": 0}
     zero_auth = np.zeros(steps, bool)
+    requested = np.zeros(steps)
+    prev = 0.0   # the candidate's own request ramps under the slew limit; carry it across steps
     eps = cfg["bound_torque_nm"] / kp + cfg["prior_high"] * cfg["bound_position_rad"]
     # In-order release: packet s is processed at the first step t >= arrival(s) once all
     # earlier packets were processed or declared lost (arrival beyond t - latency_max - 1).
@@ -111,17 +113,21 @@ def replay_actuator(z, q, tau, valid, arrival, onset, g_true, kp, cfg, alive=Non
                                 current_error=jnp.float32(ref - q_meas), reference=jnp.float32(ref),
                                 target_range=P.Interval(jnp.float32(-10.0), jnp.float32(10.0)), kp=jnp.float32(kp),
                                 available_force=jnp.float32(cfg["available_force"]), max_offset=0.2, slew_rate=2.0,
-                                hold=HOLD, previous=jnp.float32(0.0), regularizer=0.0)
+                                hold=HOLD, previous=jnp.float32(prev), regularizer=0.0)
         if int(proj.status) == P.ProjectionStatus.FEASIBLE:
             lo_x, hi_x = float(proj.requested_interval.low), float(proj.requested_interval.high)
             permitted[t] = max(abs(lo_x), abs(hi_x)) if np.isfinite(lo_x) and np.isfinite(hi_x) else np.nan
             zero_auth[t] = (hi_x - lo_x) < 1e-6
+            prev = float(proj.requested)
         else:
+            # CONSTRAINT_CONFLICT or no effective offset: decay the request at the slew limit.
             permitted[t] = 0.0
             zero_auth[t] = True
+            prev = float(np.sign(prev) * max(abs(prev) - 2.0 * HOLD, 0.0))
+        requested[t] = prev
         oracle[t] = abs((1.0 / g_true[t] - 1.0) * (ref - q[t]))
     return dict(width=width, excludes_healthy=excludes_healthy, permitted=permitted, oracle=oracle,
-                zero_auth=zero_auth, counts=status_counts)
+                zero_auth=zero_auth, requested=requested, counts=status_counts)
 
 
 def main(argv=None):
@@ -173,6 +179,7 @@ def main(argv=None):
                                 steps_to_exclude_healthy=int(first_excl - onset[i]) if first_excl >= 0 else -1,
                                 mean_width_post=float(np.nanmean(r["width"][post])),
                                 permitted_over_oracle=float(np.nansum(r["permitted"][post]) / max(np.sum(r["oracle"][post]), 1e-9)),
+                                requested_over_oracle=float(np.sum(np.abs(r["requested"][post])) / max(np.sum(r["oracle"][post]), 1e-9)),
                                 zero_authority_fraction_post=float(np.mean(r["zero_auth"][post]))))
         excl = [p["steps_to_exclude_healthy"] for p in per if p["steps_to_exclude_healthy"] >= 0]
         results[f"{family}|{tele}"] = dict(
@@ -181,22 +188,24 @@ def main(argv=None):
             never_excluded_fraction=float(np.mean([p["steps_to_exclude_healthy"] < 0 for p in per])),
             mean_width_post=float(np.mean([p["mean_width_post"] for p in per])),
             permitted_over_oracle_mean=float(np.mean([p["permitted_over_oracle"] for p in per])),
+            requested_over_oracle_mean=float(np.mean([p["requested_over_oracle"] for p in per])),
             zero_authority_fraction_post=float(np.mean([p["zero_authority_fraction_post"] for p in per])),
             packet_status_counts=counts, per_actuator=per)
         r0 = results[f"{family}|{tele}"]
         print(f"{family} {tele}: exclude-healthy median {r0['steps_to_exclude_healthy_median']} steps, "
               f"never {r0['never_excluded_fraction']:.2f}, width {r0['mean_width_post']:.3f}, "
-              f"permitted/oracle {r0['permitted_over_oracle_mean']:.2f}, zero-authority {r0['zero_authority_fraction_post']:.2f}, "
+              f"permitted/oracle {r0['permitted_over_oracle_mean']:.2f}, requested/oracle {r0['requested_over_oracle_mean']:.2f}, "
+              f"zero-authority {r0['zero_authority_fraction_post']:.2f}, "
               f"inconsistent {counts['inconsistent']}, violations {counts['violations']}", flush=True)
     (args.out / "authority.json").write_text(json.dumps(results, indent=2) + "\n")
     lines = ["# Authority study (offline replay of recorded packets)", "",
              f"Traces: `{args.traces}`; drift bound {args.drift_rate}/s, speed bound {args.max_speed} rad/s, prior "
              f"[{args.prior}], available force {args.available_force} N.m, hold 20 ms. Inverse candidate = set midpoint.", "",
-             "| Family | Telemetry | Steps to exclude g=1 (median) | Never excluded | Mean set width | Permitted/oracle | Zero-authority steps | Inconsistent | Bound violations |",
-             "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
+             "| Family | Telemetry | Steps to exclude g=1 (median) | Never excluded | Mean set width | Permitted/oracle | Requested/oracle | Zero-authority steps | Inconsistent | Bound violations |",
+             "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
     for key, r in results.items():
         lines.append(f"| {r['family']} | {r['telemetry']} | {r['steps_to_exclude_healthy_median']} | {r['never_excluded_fraction']:.2f} | "
-                     f"{r['mean_width_post']:.3f} | {r['permitted_over_oracle_mean']:.2f} | {r['zero_authority_fraction_post']:.2f} | "
+                     f"{r['mean_width_post']:.3f} | {r['permitted_over_oracle_mean']:.2f} | {r['requested_over_oracle_mean']:.2f} | {r['zero_authority_fraction_post']:.2f} | "
                      f"{r['packet_status_counts']['inconsistent']} | {r['packet_status_counts']['violations']} |")
     (args.out / "report.md").write_text("\n".join(lines) + "\n")
     return 0
