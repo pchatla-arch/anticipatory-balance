@@ -23,6 +23,7 @@ the bound is a coverage statement; the harness reports the empirical coverage.
 """
 from __future__ import annotations
 
+import math
 from typing import NamedTuple
 
 import jax
@@ -51,7 +52,12 @@ class TelemetryConfig(NamedTuple):
     bound_position_rad: float = 0.0
     bound_torque_nm: float = 0.0
 
+    # Independent uniform error on source-time velocity. Zero preserves the historical channel.
+    velocity_error_rad_s: float = 0.0
+
     def validate(self):
+        if not math.isfinite(self.velocity_error_rad_s) or self.velocity_error_rad_s < 0:
+            raise ValueError("velocity_error_rad_s must be finite and nonnegative")
         if self.latency_min < 0 or self.latency_max < self.latency_min:
             raise ValueError("latency range must satisfy 0 <= min <= max")
         if not 0.0 <= self.dropout < 1.0:
@@ -104,12 +110,18 @@ def measure(exact, source_step, cfg: TelemetryConfig, key):
     latency = jax.random.randint(k_lat, (), cfg.latency_min, cfg.latency_max + 1)
     dropped = jax.random.uniform(k_drop) < cfg.dropout
     arrival = jp.where(dropped, DROPPED, source_step + latency).astype(jp.int32)
+    velocity = exact["telemetry_joint_velocity_rad_s"]
+    if cfg.velocity_error_rad_s:
+        # A separate tagged key leaves the historic position, effort and transport draws intact.
+        velocity_key = jax.random.fold_in(key, 0x56454C)
+        velocity = velocity + cfg.velocity_error_rad_s * jax.random.uniform(
+            velocity_key, velocity.shape, minval=-1.0, maxval=1.0)
     return MeasuredPacket(
         source_step=jp.asarray(source_step, jp.int32),
         arrival_step=arrival,
         target_rad=exact["telemetry_held_target_rad"],
         position_rad=q_meas.astype(jp.float32),
-        velocity_rad_s=exact["telemetry_joint_velocity_rad_s"],
+        velocity_rad_s=velocity,
         torque_nm=tau_meas.astype(jp.float32),
         valid=exact["telemetry_regression_valid"],
     )

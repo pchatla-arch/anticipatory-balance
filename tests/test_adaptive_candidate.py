@@ -69,11 +69,15 @@ class CandidateTests(unittest.TestCase):
     def test_padding_and_saturation_preserve_evidence_and_clock(self):
         self.packet(5,.7)
         self.packet(6,.7)
+        before = self.s.gains
+        self.assertLessEqual(float(before.low[0,0]), .7)
+        self.assertGreaterEqual(float(before.high[0,0]), .7)
         self.packet(100,1.,released=False)
+        np.testing.assert_array_equal(self.s.gains, before)
         self.assertEqual(int(self.s.last_source[0,0]),6)
         self.packet(7,1.,valid=False)
         self.assertEqual(int(self.s.last_source[0,0]),7)
-        self.assertAlmostEqual(float(self.s.gains.low[0,0]),.7,places=4)
+        np.testing.assert_array_equal(self.s.gains, before)
         self.assertEqual(int(self.s.informative_count[0,0]),2)
         np.testing.assert_allclose(self.c.config.hold_speed_rad_s,.1)
 

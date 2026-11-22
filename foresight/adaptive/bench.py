@@ -380,6 +380,8 @@ def build_bench_rollout(env, policy, method: MethodSpec, telemetry: S.TelemetryC
                       "pkt_torque": measured.torque_nm, "pkt_valid": measured.valid,
                       "reference": reference, "q_true": jax.vmap(env.measured_joint_positions)(simulated.data)}
             if trace_authority_packets:
+                if "pilot_substep_q" in next_state.info:
+                    ys["pilot_substep_q"] = next_state.info["pilot_substep_q"]
                 ys.update(authority_reference=reference,
                           authority_previous_request=prev_delta,
                           authority_decision_q_truth=jax.vmap(env.measured_joint_positions)(simulated.data),
