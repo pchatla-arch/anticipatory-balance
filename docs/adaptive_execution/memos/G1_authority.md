@@ -29,6 +29,19 @@ results `results/authority_dev_v1_speed{3.0,1.0}`.
 | 0.70 | 1 rad/s | 4 | 0.25 | 0.71 | 44% |
 | 0.55 | 1 rad/s | 4 | 0.25 | 0.39 | 44% |
 
+**Reconciliation with PR #40 (ChatGPT's replay, `hold_speed_rad_s = 10`, drift 0).** Rerunning this
+replay with the same settings (`results/authority_dev_v1_speed10.0`) gives requested/oracle 0.00 /
+0.02 / 0.03 at 0.85 / 0.70 / 0.55 with 92–99% zero-authority steps on the declared channel, which
+agrees with #40 (hips 1.3%, knees 19% at 0.70) and with the closed-loop dev result in PR #39
+(candidate at `none` level on declared telemetry). The two memos differ only in the declared
+speed bound; the mechanism is the same.
+
+| Speed bound (declared, 0.70) | Requested / oracle | Zero-authority steps |
+|---|---:|---:|
+| 10 rad/s (PR #39/#40 config) | 0.02 | 96% |
+| 3 rad/s | 0.44 | 61% |
+| 1 rad/s | 0.71 | 44% |
+
 Exact telemetry: g = 1 excluded one step after onset, width ≈ 0.01, requested/oracle
 0.51–0.95, zero-authority steps 13–33%. Bound violations against the true gain: 3–9 per
 family over 14,400 declared samples (coverage ≥ 99.9%); INCONSISTENT events are the onset
