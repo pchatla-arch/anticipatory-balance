@@ -27,5 +27,5 @@
   },
   "primary": "paired mean difference in postfault_loss, candidate minus heuristic_gate, on gain families",
   "secondary": "harmful_offset_rad on healthy and nuisance families; fall_rate; withdrawal_steps on return families",
-  "registered_at": "2026-11-22T09:33:21Z"
+  "registered_at": "2026-11-22T14:42:04Z"
 }

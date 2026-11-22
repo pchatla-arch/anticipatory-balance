@@ -16,7 +16,7 @@
     "brax": "0.14.2"
   },
   "checkpoint": "/home/claude/anticipatory-balance/checkpoints/nominal_s1/000202342400",
-  "source_commit": "1144514a66a22d240413a826a11f8259c248dcae",
+  "source_commit": "1f9ab5c07895640c5025502a05c02d2ea753eb04",
   "rls": {
     "forgetting": 0.98,
     "initial_cov": 1000.0,

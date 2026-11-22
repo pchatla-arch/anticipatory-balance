@@ -1,0 +1,105 @@
+{
+  "evaluations": 4,
+  "log": [
+    {
+      "tag": "start",
+      "config": {
+        "rls": {
+          "forgetting": 0.98
+        },
+        "heuristic": {
+          "dead_band": 0.05,
+          "max_residual_rms": 0.05,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.05175775804867347,
+      "loss": 0.030684998142533004,
+      "harm": 0.042145519812280936,
+      "falls": 0.0,
+      "seconds": 257.5
+    },
+    {
+      "tag": "s0_rls_forgetting_0.9",
+      "config": {
+        "rls": {
+          "forgetting": 0.9
+        },
+        "heuristic": {
+          "dead_band": 0.05,
+          "max_residual_rms": 0.05,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.05084482695286473,
+      "loss": 0.02831808617338538,
+      "harm": 0.045053481558958684,
+      "falls": 0.0,
+      "seconds": 294.5
+    },
+    {
+      "tag": "s0_rls_forgetting_0.95",
+      "config": {
+        "rls": {
+          "forgetting": 0.95
+        },
+        "heuristic": {
+          "dead_band": 0.05,
+          "max_residual_rms": 0.05,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.050056172308201585,
+      "loss": 0.02848796104080975,
+      "harm": 0.043136422534783676,
+      "falls": 0.0,
+      "seconds": 333.3
+    },
+    {
+      "tag": "s0_rls_forgetting_0.98",
+      "config": {
+        "rls": {
+          "forgetting": 0.98
+        },
+        "heuristic": {
+          "dead_band": 0.05,
+          "max_residual_rms": 0.05,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.05175775804867347,
+      "loss": 0.030684998142533004,
+      "harm": 0.042145519812280936,
+      "falls": 0.0,
+      "seconds": 270.3
+    }
+  ],
+  "best": {
+    "tag": "s0_rls_forgetting_0.95",
+    "config": {
+      "rls": {
+        "forgetting": 0.95
+      },
+      "heuristic": {
+        "dead_band": 0.05,
+        "max_residual_rms": 0.05,
+        "max_age_steps": 5,
+        "min_samples": 5,
+        "min_excitation_rad": 0.01
+      }
+    },
+    "objective": 0.050056172308201585,
+    "loss": 0.02848796104080975,
+    "harm": 0.043136422534783676,
+    "falls": 0.0,
+    "seconds": 333.3
+  }
+}
