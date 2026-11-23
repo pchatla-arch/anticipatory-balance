@@ -75,7 +75,7 @@ def paired_ci(a, b, draws=2000, seed=228):
     return [float(x) for x in np.quantile(means, [0.025, 0.975])]
 
 
-def summarize(rows, reference=REFERENCE_METHOD, margins=None):
+def summarize(rows, reference=REFERENCE_METHOD, margins=None, hold_audits=None):
     """Per (family, telemetry, method) summary plus paired differences against `reference`."""
     margins = margins or {}
     out = {"cells": {}, "paired_vs_reference": {}, "reference": reference}
@@ -101,7 +101,18 @@ def summarize(rows, reference=REFERENCE_METHOD, margins=None):
             "control_bound_violations": int(sum(r["max_correction_rad"] > 0.2 + 1e-5 or r["max_slew_rad_s"] > 2.0 + 1e-5 for r in rr)),
             "lost_packets_mean": float(np.mean([r["lost_packets"] for r in rr])),
         }
-        out["cells"][f"{family}|{tele}|{method}"] = cell
+        key = f"{family}|{tele}|{method}"
+        if hold_audits is not None:
+            cell["mean_source_age_ms"] = {joint: group["mean_source_age_ms"]
+                                          for joint, group in hold_audits[key].items()}
+            returns = [r for r in rr if r["return_step"] >= 0]
+            reached = [r for r in returns if not r["nonfinite"] and
+                       (r["termination_step"] < 0 or r["termination_step"] >= r["return_step"])]
+            cell["withdrawal_counts"] = {
+                "scheduled": len(returns), "reached": len(reached),
+                "withdrew": sum(r["withdrawal_steps"] >= 0 for r in reached),
+            }
+        out["cells"][key] = cell
     for (family, tele, method), rr in sorted(groups.items()):
         ref = groups.get((family, tele, reference))
         if ref is None or method == reference:
@@ -129,17 +140,33 @@ def summarize(rows, reference=REFERENCE_METHOD, margins=None):
 
 
 def render_report(summary, meta):
+    pilot = any("mean_source_age_ms" in c for c in summary["cells"].values())
+    header = "| Family | Telemetry | Method | n | Falls | Post-fault loss | Harmful offset (rad) | Gain error | Withdrawal (steps) |"
+    separators = "|---|---|---|---:|---:|---:|---:|---:|---:|"
+    if pilot:
+        header += " Mean source age, hip / knee (ms) | Withdrew / reached / scheduled |"
+        separators += "---:|---:|"
     lines = [f"# Adaptive execution bench: {meta['split']} split", "",
              f"Source {meta['source_commit']}, physics {meta['impl']}, {meta['steps']} control steps, "
-             f"schedule {meta['schedule']}, {meta['episodes']} episodes per cell.", "",
-             "| Family | Telemetry | Method | n | Falls | Post-fault loss | Harmful offset (rad) | Gain error | Withdrawal (steps) |",
-             "|---|---|---|---:|---:|---:|---:|---:|---:|"]
+             f"schedule {meta['schedule']}, {meta['episodes']} episodes per cell.", "", header, separators]
     fmt = lambda v, p=4: "—" if v is None else f"{v:.{p}f}"  # noqa: E731
     for key, c in summary["cells"].items():
         fam, tele, method = key.split("|")
         lines.append(f"| {fam} | {tele} | {method} | {c['n']} | {c['fall_rate']:.3f} | {fmt(c['mean_postfault_loss'])} | "
                      f"{fmt(c['mean_harmful_offset_rad'])} | {fmt(c['mean_gain_abs_error'], 3)} | "
-                     f"{'—' if c['withdrawal_steps_median'] is None else int(c['withdrawal_steps_median'])} |")
+                     f"{fmt(c['withdrawal_steps_median'], 1)} |")
+        if pilot:
+            age = c["mean_source_age_ms"]
+            counts = c["withdrawal_counts"]
+            withdrawal = (f"{counts['withdrew']} / {counts['reached']} / {counts['scheduled']}"
+                          if counts["scheduled"] else "—")
+            lines[-1] += f" {fmt(age['hip'], 2)} / {fmt(age['knee'], 2)} | {withdrawal} |"
+    if pilot:
+        lines.extend(["", "Source age is the elapsed time from the newest valid released measurement to the "
+                      "decision, averaged across live, source-available joint ticks separately for hips and knees. "
+                      "Each hold file gives available and total joint ticks. Withdrawal is the median among finite "
+                      "episodes that reached the threshold. Counts show withdrawals, finite episodes observed at "
+                      "the scheduled return, and all episodes scheduled to return."])
     lines += ["", f"Paired differences are method minus `{summary['reference']}` on identical scenarios and sensor draws "
               "(95% bootstrap intervals).", "",
               "| Family | Telemetry | Method | Δ loss [CI] | Δ harmful offset [CI] | Δ fall rate [CI] |", "|---|---|---|---|---|---|"]
@@ -167,7 +194,7 @@ def registration_record(args, families, methods, telemetry_names, margins):
     }
 
 
-def main(argv=None):
+def main(argv=None, *, velocity_pilot=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--split", choices=sorted(SPLIT_SEED), default="dev")
@@ -203,6 +230,9 @@ def main(argv=None):
     from foresight.eval import rollout as R
 
     devices = jax.devices()
+    if velocity_pilot and (args.split != "dev" or args.impl != "jax"
+                           or any(device.platform != "cpu" for device in devices)):
+        raise ValueError("velocity pilot requires dev split and CPU JAX physics")
     if not args.allow_cpu and not any(d.platform == "gpu" for d in devices):
         raise RuntimeError("GPU required; --allow-cpu is for local checks only.")
     for f in families:
@@ -210,13 +240,20 @@ def main(argv=None):
             parser.error(f"unknown family {f}; known: {sorted(B.FAMILIES)}")
     telemetry = {}
     for name in args.telemetry.split(","):
-        if name in TELEMETRY_PRESETS:
+        if velocity_pilot and name in velocity_pilot["channels"]:
+            telemetry[name] = S.config_from_dict(velocity_pilot["channels"][name])
+        elif name in TELEMETRY_PRESETS:
             telemetry[name] = getattr(S, TELEMETRY_PRESETS[name])
         elif Path(name).exists():
             telemetry[Path(name).stem] = S.config_from_dict(json.loads(Path(name).read_text()))
         else:
             parser.error(f"unknown telemetry preset {name}")
-    tuned = json.loads(args.heuristic.read_text()) if args.heuristic else {}
+    if velocity_pilot:
+        tuned = velocity_pilot["baseline"]
+        if velocity_pilot["mode"] == "development" and tuned["status"] != "frozen_wp21":
+            raise ValueError("a scientific velocity pilot requires the frozen WP 2.1 heuristic")
+    else:
+        tuned = json.loads(args.heuristic.read_text()) if args.heuristic else {}
     rls_cfg = E.RLSConfig(**tuned.get("rls", {}))
     heur_cfg = E.HeuristicConfig(**tuned.get("heuristic", {}))
     candidate = B.load_candidate()
@@ -228,14 +265,18 @@ def main(argv=None):
         if candidate is None or not args.candidate_config:
             parser.error("candidate/authority runs require the candidate module and --candidate-config")
         candidate_cfg = candidate.Config(**json.loads(args.candidate_config.read_text()))
+    configs = {"candidate": candidate_cfg}
+    if velocity_pilot:
+        from dataclasses import replace
+        configs["candidate_velocity"] = replace(candidate_cfg, hold_accel_rad_s2=velocity_pilot["acceleration_rad_s2"])
     specs = {}
     for m in methods:
         if m in B.METHODS:
             specs[m] = B.METHODS[m]._replace(rls=rls_cfg, heuristic=heur_cfg)
-        elif m == "candidate":
+        elif m in configs:
             if candidate is None:
                 parser.error("method 'candidate' requested but foresight.adaptive.candidate is not available")
-            specs[m] = B.MethodSpec("candidate", external=True, oracle=False, rls=rls_cfg)
+            specs[m] = B.MethodSpec("candidate", external=True, oracle=False, rls=rls_cfg, heuristic=heur_cfg)
         else:
             parser.error(f"unknown method {m}")
     # Healthy and nuisance families carry a noninferiority margin; gain families are superiority tests.
@@ -243,6 +284,8 @@ def main(argv=None):
     registration = registration_record(args, families, methods, sorted(telemetry), margins)
     if needs_candidate:
         registration["candidate_config_sha256"] = hashlib.sha256(args.candidate_config.read_bytes()).hexdigest()
+    if velocity_pilot:
+        registration["baseline"] = velocity_pilot["baseline"]
     if args.split == "test":
         if not args.registration or not args.registration.exists():
             parser.error("--split test requires an existing --registration file written before this run")
@@ -265,8 +308,13 @@ def main(argv=None):
     cfg.impact.reset_perturb = 1.0
     cfg.push_config.enable = False
     cfg.episode_length = args.steps
+    if velocity_pilot:
+        from foresight.adaptive.pilot_observer import ObservedJoystick
+        AdaptiveJoystick = ObservedJoystick
     env = AdaptiveJoystick(config=cfg, config_overrides={"impl": args.impl}, telemetry=True)
     checkpoint = R.latest_checkpoint(ROOT / "checkpoints/nominal_s1")
+    if velocity_pilot and checkpoint.resolve() != Path(velocity_pilot["checkpoint"]).resolve():
+        raise ValueError("benchmark checkpoint differs from pilot manifest")
     policy = R.load_policy(checkpoint, deterministic=True)
     schedule = B.WALK_ONLY if args.schedule == "walk" else B.WALK_TURN_STOP_RESUME
     versions = {}
@@ -285,8 +333,13 @@ def main(argv=None):
         "families": {f: {**B.FAMILIES[f]._asdict(), "telemetry": S.summarize(B.FAMILIES[f].telemetry)} for f in families},
         "candidate_available": candidate is not None,
     }
+    if velocity_pilot:
+        meta.update(seed=velocity_pilot["seed_base"], family_seeds=velocity_pilot["family_seeds"],
+                    baseline=velocity_pilot["baseline"])
     if needs_candidate:
         from dataclasses import asdict
+        if velocity_pilot:
+            meta["candidate_configs"] = {key: asdict(value) for key, value in configs.items()}
         meta["candidate_config"] = asdict(candidate_cfg)
         meta["candidate_model"] = candidate.model_record(env, next(iter(telemetry.values())), rls_cfg, candidate_cfg)
         meta["trace_authority_packets"] = args.trace_authority_packets
@@ -300,9 +353,10 @@ def main(argv=None):
     })
     reset = jax.jit(jax.vmap(env.reset))
     rows = []
+    hold_audits = {} if velocity_pilot else None
     for fname in families:
         family = B.FAMILIES[fname]
-        seed = family_seed(args.split, fname)
+        seed = velocity_pilot["family_seeds"][fname] if velocity_pilot else family_seed(args.split, fname)
         scenario = B.draw_scenarios(family, seed, args.episodes, env)
         for tele_name, tele_cfg in sorted(telemetry.items()):
             # A family's own sensor confound composes with the channel model: the confound
@@ -314,9 +368,9 @@ def main(argv=None):
                 latency_max=max(family.telemetry.latency_max, tele_cfg.latency_max),
             ).validate()
             for mname, spec in specs.items():
-                if mname == "candidate":
+                if mname in configs:
                     # Only public error bounds are consumed from the measurement channel.
-                    spec = spec._replace(candidate=candidate.Candidate.bind(env, combined, rls_cfg, candidate_cfg))
+                    spec = spec._replace(candidate=candidate.Candidate.bind(env, combined, rls_cfg, configs[mname]))
                 execute = B.build_bench_rollout(env, policy, spec, combined, schedule, args.steps,
                                                 trace=args.trace, trace_authority_packets=args.trace_authority_packets)
                 arm_started = time.monotonic()
@@ -328,6 +382,12 @@ def main(argv=None):
                     sub = {k: jp.asarray(v[start:stop]) for k, v in scenario.items() if k != "ids"}
                     result = jax.device_get(execute(initial, sub))
                     if args.trace and start == 0:
+                        if velocity_pilot:
+                            from run_velocity_pilot import inspect_hold
+                            audit = inspect_hold(result["trace"], list(env.actuator_joint_names), env.dt,
+                                                 configs.get(mname), combined)
+                            hold_audits[f"{fname}|{tele_name}|{mname}"] = audit
+                            write_json(args.out / f"hold_{fname}_{tele_name}_{mname}.json", audit)
                         np.savez_compressed(args.out / f"trace_{fname}_{tele_name}_{mname}.npz",
                                             onset=scenario["onset"][start:stop], ret=scenario["return"][start:stop],
                                             **{k: np.asarray(v) for k, v in result["trace"].items()})
@@ -341,7 +401,13 @@ def main(argv=None):
                       f"harmful={np.mean([r['harmful_offset_rad'] for r in cell]):.4f} "
                       f"gain_err={np.mean([r['gain_abs_error'] for r in cell]):.3f} "
                       f"time={time.monotonic() - arm_started:.0f}s", flush=True)
-    summary = summarize(rows, margins=margins)
+    if velocity_pilot:
+        expected = velocity_pilot["expected_episode_rows"]
+        keys = {(r["scenario_id"], r["telemetry"], r["method"]) for r in rows}
+        if len(rows) != expected or len(keys) != expected:
+            raise RuntimeError("incomplete or duplicated pilot rows")
+        write_json(args.out / "paired_vs_speed.json", summarize(rows, reference="candidate", margins=margins, hold_audits=hold_audits))
+    summary = summarize(rows, margins=margins, hold_audits=hold_audits)
     summary["meta"] = meta
     summary["elapsed_seconds"] = round(time.monotonic() - started, 1)
     write_json(args.out / "summary.json", summary)

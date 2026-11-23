@@ -1,0 +1,49 @@
+{
+  "status": "verified",
+  "mode": "wiring",
+  "source": "aa51278507b4354cf6cb3a164ffb44b3f9642aa4",
+  "cells": 1,
+  "episode_rows": 1,
+  "paired_scenarios": 1,
+  "nominal_control_transitions": 8,
+  "hold_and_withdrawal": {
+    "healthy|declared|candidate_velocity": {
+      "hip": {
+        "live": 48,
+        "available": 24,
+        "mean_age_ms": 50.0,
+        "covered": 24,
+        "coverage": 1.0
+      },
+      "knee": {
+        "live": 16,
+        "available": 8,
+        "mean_age_ms": 50.0,
+        "covered": 8,
+        "coverage": 1.0
+      },
+      "withdrawal_counts": {
+        "scheduled": 0,
+        "reached": 0,
+        "withdrew": 0
+      },
+      "withdrawal_median_steps": null
+    }
+  },
+  "whole_horizon_joint_ticks_pooled_across_families": {
+    "declared|candidate_velocity|hip": {
+      "available": 24,
+      "live": 48,
+      "mean_age_ms": 50.0,
+      "covered": 24,
+      "coverage": 1.0
+    },
+    "declared|candidate_velocity|knee": {
+      "available": 8,
+      "live": 16,
+      "mean_age_ms": 50.0,
+      "covered": 8,
+      "coverage": 1.0
+    }
+  }
+}

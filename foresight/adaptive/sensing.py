@@ -38,6 +38,8 @@ class TelemetryConfig(NamedTuple):
     latency_min/max: capture-to-arrival delay in control steps, uniform integer.
     dropout: probability a packet never arrives.
     bound_position_rad / bound_torque_nm: the error bounds declared to the estimator.
+    velocity_error_rad_s: half-width of a uniform readout error on the reported joint
+        velocity; bound_velocity_rad_s is the bound declared for it (equal by default).
     """
 
     position_noise_rad: float = 0.0
@@ -50,6 +52,8 @@ class TelemetryConfig(NamedTuple):
     dropout: float = 0.0
     bound_position_rad: float = 0.0
     bound_torque_nm: float = 0.0
+    velocity_error_rad_s: float = 0.0
+    bound_velocity_rad_s: float = 0.0
 
     def validate(self):
         if self.latency_min < 0 or self.latency_max < self.latency_min:
@@ -58,7 +62,8 @@ class TelemetryConfig(NamedTuple):
             raise ValueError("dropout must be in [0, 1)")
         if self.torque_scale <= 0:
             raise ValueError("torque_scale must be positive")
-        for name in ("position_noise_rad", "torque_noise_nm", "bound_position_rad", "bound_torque_nm"):
+        for name in ("position_noise_rad", "torque_noise_nm", "bound_position_rad", "bound_torque_nm",
+                     "velocity_error_rad_s", "bound_velocity_rad_s"):
             if getattr(self, name) < 0:
                 raise ValueError(f"{name} must be nonnegative")
         return self
@@ -69,7 +74,12 @@ class TelemetryConfig(NamedTuple):
 EXACT = TelemetryConfig(bound_position_rad=1e-5, bound_torque_nm=1e-3)
 DECLARED = TelemetryConfig(position_noise_rad=2e-3, torque_noise_nm=0.5,
                            latency_min=1, latency_max=3, dropout=0.02,
-                           bound_position_rad=6e-3, bound_torque_nm=1.5)
+                           bound_position_rad=6e-3, bound_torque_nm=1.5,
+                           velocity_error_rad_s=0.5, bound_velocity_rad_s=0.5)
+# Same sensor, zero transport latency: a packet captured at the end of transition t is usable
+# at decision t+1 (WP 1.3 timing study). A second registered information assumption, never a
+# replacement for DECLARED.
+DECLARED_FAST = DECLARED._replace(latency_min=0, latency_max=0)
 
 
 class MeasuredPacket(NamedTuple):
@@ -95,6 +105,7 @@ def measure(exact, source_step, cfg: TelemetryConfig, key):
     same config yields the same measurement, so paired comparisons share sensor noise.
     """
     k_q, k_tau, k_lat, k_drop = jax.random.split(key, 4)
+    k_vel = jax.random.fold_in(key, 5)   # derived separately so the position/effort/latency/dropout draws are unchanged
     q = exact["telemetry_joint_position_rad"]
     nu = q.shape[0]
     q_meas = q + cfg.position_bias_rad + cfg.position_noise_rad * jax.random.normal(k_q, (nu,))
@@ -109,7 +120,9 @@ def measure(exact, source_step, cfg: TelemetryConfig, key):
         arrival_step=arrival,
         target_rad=exact["telemetry_held_target_rad"],
         position_rad=q_meas.astype(jp.float32),
-        velocity_rad_s=exact["telemetry_joint_velocity_rad_s"],
+        velocity_rad_s=(exact["telemetry_joint_velocity_rad_s"]
+                        + cfg.velocity_error_rad_s * jax.random.uniform(k_vel, (nu,), minval=-1.0, maxval=1.0)
+                        ).astype(jp.float32),
         torque_nm=tau_meas.astype(jp.float32),
         valid=exact["telemetry_regression_valid"],
     )
@@ -220,6 +233,6 @@ def config_from_dict(values):
                               for k, v in values.items()}).validate()
 
 
-__all__ = ["TelemetryConfig", "EXACT", "DECLARED", "MeasuredPacket", "DROPPED", "measure",
+__all__ = ["TelemetryConfig", "EXACT", "DECLARED", "DECLARED_FAST", "MeasuredPacket", "DROPPED", "measure",
            "DeliveryQueue", "queue_init", "queue_slots", "queue_push", "queue_release",
            "declared_bounds", "summarize", "config_from_dict"]

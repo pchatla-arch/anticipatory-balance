@@ -1,0 +1,24 @@
+{
+  "hip": {
+    "live_joint_ticks": 48,
+    "source_available_joint_ticks": 24,
+    "mean_source_age_ms": 50.0,
+    "source_age_ticks_histogram": {
+      "2": 12,
+      "3": 12
+    },
+    "whole_hold_covered_joint_ticks": 24,
+    "whole_hold_coverage": 1.0
+  },
+  "knee": {
+    "live_joint_ticks": 16,
+    "source_available_joint_ticks": 8,
+    "mean_source_age_ms": 50.0,
+    "source_age_ticks_histogram": {
+      "2": 4,
+      "3": 4
+    },
+    "whole_hold_covered_joint_ticks": 8,
+    "whole_hold_coverage": 1.0
+  }
+}

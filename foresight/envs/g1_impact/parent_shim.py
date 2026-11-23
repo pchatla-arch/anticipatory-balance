@@ -19,6 +19,13 @@ NQ_ROBOT = 7 + 29   # base (7) + 29 actuated joints
 NV_ROBOT = 6 + 29
 
 SUBSTITUTIONS = [
+    # The dev pilot may observe each post-integration joint position. All ordinary
+    # environments retain Playground's original physics call.
+    ("data = mjx_env.step(",
+     'if "pilot_substep_q" in state.info:\n'
+     '      data, state.info["pilot_substep_q"] = self.observe_substeps(state.data, motor_targets)\n'
+     '    else:\n'
+     '      data = mjx_env.step('),
     ("qpos[7:]", f"qpos[7:{NQ_ROBOT}]"),
     ("qvel[6:]", f"qvel[6:{NV_ROBOT}]"),
     # reset(): joint randomization uses an explicit (29,) sample and .at[7:]; make the

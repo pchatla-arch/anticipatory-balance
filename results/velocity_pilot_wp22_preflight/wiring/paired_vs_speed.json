@@ -1,0 +1,30 @@
+{
+  "cells": {
+    "healthy|declared|candidate_velocity": {
+      "n": 1,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.0,
+      "mean_progress_m": 0.0,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0,
+      "mean_source_age_ms": {
+        "hip": 50.0,
+        "knee": 50.0
+      },
+      "withdrawal_counts": {
+        "scheduled": 0,
+        "reached": 0,
+        "withdrew": 0
+      }
+    }
+  },
+  "paired_vs_reference": {},
+  "reference": "candidate"
+}

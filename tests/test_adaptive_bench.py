@@ -78,6 +78,26 @@ class HarnessTests(unittest.TestCase):
         report = H.render_report(summary, dict(split="dev", source_commit="abc", impl="jax", steps=10, schedule="walk", episodes=6))
         self.assertIn("candidate", report)
 
+    def test_pilot_summary_preserves_age_withdrawal_median_and_return_denominators(self):
+        rows = self.rows("candidate", 0.031, family="gain_070_return", n=5)
+        for row in rows:
+            row["return_step"] = 10
+        rows[0]["withdrawal_steps"] = 2
+        rows[1]["withdrawal_steps"] = 3
+        rows[2]["termination_step"] = 10  # Finite terminal transition at the return.
+        rows[3]["termination_step"] = 9   # No observation of the return.
+        rows[4]["nonfinite"] = True
+        key = "gain_070_return|exact|candidate"
+        audits = {key: {"hip": {"mean_source_age_ms": 37.5}, "knee": {"mean_source_age_ms": None}}}
+        summary = H.summarize(rows, hold_audits=audits)
+        cell = summary["cells"][key]
+        self.assertEqual(cell["withdrawal_counts"], dict(scheduled=5, reached=3, withdrew=2))
+        self.assertEqual(cell["withdrawal_steps_median"], 2.5)
+        self.assertEqual(cell["mean_source_age_ms"], {"hip": 37.5, "knee": None})
+        report = H.render_report(summary, dict(split="dev", source_commit="abc", impl="jax",
+                                              steps=40, schedule="walk", episodes=5))
+        self.assertIn("2.5 | 37.50 / — | 2 / 3 / 5 |", report)
+
     def test_test_split_requires_a_matching_prior_registration(self):
         with tempfile.TemporaryDirectory() as tmp:
             reg = Path(tmp) / "registration.json"

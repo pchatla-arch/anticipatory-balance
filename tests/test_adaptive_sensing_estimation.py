@@ -161,5 +161,30 @@ class EstimationTests(unittest.TestCase):
         self.assertTrue(bool(jp.all(reason == E.REASON_DEAD_BAND)))
 
 
+
+class VelocityChannelTests(unittest.TestCase):
+    def test_declared_velocity_error_is_bounded_and_exact_is_untouched(self):
+        import jax
+        import jax.numpy as jp
+        from foresight.adaptive import sensing as S
+        nu = 12
+        exact = {"telemetry_joint_position_rad": jp.zeros(nu), "telemetry_applied_joint_torque_nm": jp.zeros(nu),
+                 "telemetry_held_target_rad": jp.zeros(nu), "telemetry_joint_velocity_rad_s": jp.ones(nu),
+                 "telemetry_regression_valid": jp.ones(nu, bool)}
+        for cfg in (S.DECLARED, S.DECLARED_FAST):
+            errs = []
+            for i in range(200):
+                pkt = S.measure(exact, 5, cfg, jax.random.PRNGKey(i))
+                errs.append(pkt.velocity_rad_s - 1.0)
+            errs = jp.stack(errs)
+            self.assertLessEqual(float(jp.abs(errs).max()), cfg.bound_velocity_rad_s)
+            self.assertGreater(float(jp.abs(errs).max()), 0.4 * cfg.bound_velocity_rad_s)
+        pkt = S.measure(exact, 5, S.EXACT, jax.random.PRNGKey(0))
+        self.assertTrue(bool(jp.all(pkt.velocity_rad_s == 1.0)))
+        self.assertEqual((S.DECLARED_FAST.latency_min, S.DECLARED_FAST.latency_max), (0, 0))
+        self.assertEqual(S.DECLARED_FAST.dropout, S.DECLARED.dropout)
+        self.assertEqual(S.config_from_dict(S.summarize(S.DECLARED_FAST)), S.DECLARED_FAST)
+
+
 if __name__ == "__main__":
     unittest.main()
