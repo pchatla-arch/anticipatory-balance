@@ -56,6 +56,34 @@ def bounded_gain_correction(
             nominal_target,
         )
     desired = (1.0 / gain - 1.0) * (reference - joint_position)
+    return bounded_offset(desired, reference, previous_delta, dt, max_correction_rad,
+                          max_correction_rate_rad_s, ctrl_range, ctrl_limited)
+
+
+def bounded_offset(
+    desired,
+    reference,
+    previous_delta,
+    dt,
+    max_correction_rad=0.20,
+    max_correction_rate_rad_s=2.0,
+    ctrl_range=None,
+    ctrl_limited=None,
+):
+    """Apply the common correction limits to a requested offset.
+
+    These limits are shared by every method (oracle, estimated inverse, heuristic gate,
+    identification-aware candidate): amplitude, requested slew against the previous
+    requested offset, and the simulator's control-range clipping of the final target.
+    `reference` is the nominal target after that same clipping. Returns the clipped
+    target, the requested (rate-limited) offset, the fraction of actuators whose
+    applied offset differs from the request, and the fraction clipped by control range.
+    """
+    desired = jp.asarray(desired)
+    reference = jp.asarray(reference)
+    previous_delta = jp.asarray(previous_delta)
+    if ctrl_range is not None:
+        limited = jp.asarray(ctrl_limited, dtype=bool)
     amplitude_limited = jp.clip(desired, -max_correction_rad, max_correction_rad)
     max_change = max_correction_rate_rad_s * dt
     delta = jp.clip(
@@ -102,6 +130,7 @@ class AdaptiveJoystick(ImpactJoystick):
         scene_dir=None,
         max_correction_rad=0.20,
         max_correction_rate_rad_s=2.0,
+        telemetry=False,
     ):
         if not np.isfinite(max_correction_rad) or max_correction_rad <= 0:
             raise ValueError("max_correction_rad must be positive and finite")
@@ -133,10 +162,19 @@ class AdaptiveJoystick(ImpactJoystick):
         if int(self.leg_actuator_mask.sum()) != 12:
             raise ValueError("Expected twelve leg position actuators")
         self._adaptive_joint_qpos = jp.asarray(model.jnt_qposadr[joint_ids])
+        self._adaptive_joint_dof = jp.asarray(model.jnt_dofadr[joint_ids])
         self._adaptive_ctrl_range = jp.asarray(model.actuator_ctrlrange)
         self._adaptive_ctrl_limited = jp.asarray(model.actuator_ctrllimited, dtype=bool)
         self.max_correction_rad = float(max_correction_rad)
         self.max_correction_rate_rad_s = float(max_correction_rate_rad_s)
+        # Opt-in exact source-aligned telemetry (AE-001/AE-002 sampler). The packet is
+        # produced from the same plant model that generated the step and is written to
+        # info["telemetry_*"]; it carries no gain or onset label.
+        self.telemetry = bool(telemetry)
+        self._telemetry_layout = None
+        if self.telemetry:
+            from foresight.adaptive.telemetry import ActuatorTelemetryLayout
+            self._telemetry_layout = ActuatorTelemetryLayout.from_model(model)
 
     def measured_joint_positions(self, data):
         return data.qpos[self._adaptive_joint_qpos]
@@ -155,19 +193,65 @@ class AdaptiveJoystick(ImpactJoystick):
             adaptive_bound_hit=jp.float32(0),
             adaptive_control_clip_fraction=jp.float32(0),
             adaptive_active=jp.array(False),
+            # Gain schedule: the fault holds on [onset, return); a large return step means
+            # "never recovers". An unannounced return to healthy gain is a test scenario.
+            adaptive_return_step=jp.int32(2**30),
+            # External methods write their requested offset here before calling step;
+            # it passes through the same common limits as the oracle's request.
+            adaptive_external=jp.array(False),
+            adaptive_requested_offset=jp.zeros(nu, jp.float32),
+            # Passive-loss confound (AE-003): scales joint damping and dry friction of the
+            # actuated joints on the same schedule as the gain. It changes motion, not the
+            # aligned actuator-effort relation, so a correct estimator must not react to it.
+            adaptive_damping_scale=jp.float32(1.0),
         )
+        if getattr(self, "telemetry", False):
+            info.update(self._empty_telemetry(nu))
         return state.replace(info=info)
+
+    @staticmethod
+    def _empty_telemetry(nu):
+        return dict(
+            telemetry_source_time_s=jp.float32(-1.0),
+            telemetry_held_target_rad=jp.zeros(nu, jp.float32),
+            telemetry_joint_position_rad=jp.zeros(nu, jp.float32),
+            telemetry_joint_velocity_rad_s=jp.zeros(nu, jp.float32),
+            telemetry_applied_joint_torque_nm=jp.zeros(nu, jp.float32),
+            telemetry_raw_actuator_force_nm=jp.zeros(nu, jp.float32),
+            telemetry_actuator_saturated=jp.zeros(nu, bool),
+            telemetry_joint_saturated=jp.zeros(nu, bool),
+            telemetry_regression_valid=jp.zeros(nu, bool),
+        )
 
     def step(self, state, action):
         info = dict(state.info)
-        active = info["ep_step"] >= info["adaptive_onset_step"]
+        nu = self.action_size
+        # Older evaluators and tests build info without the schedule/external fields.
+        return_step = info.get("adaptive_return_step", jp.int32(2**30))
+        external = info.get("adaptive_external", jp.array(False))
+        requested = info.get("adaptive_requested_offset", jp.zeros(nu, jp.float32))
+        active = ((info["ep_step"] >= info["adaptive_onset_step"])
+                  & (info["ep_step"] < return_step))
         gain = jp.where(active, info["adaptive_gain"], 1.0)
-        enabled = active & info["adaptive_oracle"]
+        # The oracle is enabled whenever requested: with a healthy plant its desired offset is
+        # exactly zero, so before onset nothing changes, and after an unannounced return to
+        # healthy gain its withdrawal obeys the same slew limit as every other method instead
+        # of vanishing in one step.
+        enabled = info["adaptive_oracle"] | external
         nominal_target = self._default_pose + action * self._config.action_scale
-        target, delta, bound_hit, control_clip = bounded_gain_correction(
+        reference = jp.where(
+            self._adaptive_ctrl_limited,
+            jp.clip(nominal_target, self._adaptive_ctrl_range[:, 0], self._adaptive_ctrl_range[:, 1]),
             nominal_target,
-            self.measured_joint_positions(state.data),
-            gain,
+        )
+        # The oracle's request is the true-gain inverse at the measured position; an
+        # external method's request is whatever it computed from its own telemetry.
+        # Both pass through the same common limits.
+        oracle_desired = (1.0 / gain - 1.0) * (reference - self.measured_joint_positions(state.data))
+        desired = jp.where(external, requested, oracle_desired)
+        target, delta, bound_hit, control_clip = bounded_offset(
+            desired,
+            reference,
             info["adaptive_prev_delta"],
             self.dt,
             self.max_correction_rad,
@@ -183,11 +267,6 @@ class AdaptiveJoystick(ImpactJoystick):
             (target - self._default_pose) / self._config.action_scale,
             action,
         )
-        reference = jp.where(
-            self._adaptive_ctrl_limited,
-            jp.clip(nominal_target, self._adaptive_ctrl_range[:, 0], self._adaptive_ctrl_range[:, 1]),
-            nominal_target,
-        )
         effective_delta = jp.where(enabled, target-reference, jp.zeros_like(delta))
         delta = jp.where(enabled, delta, jp.zeros_like(delta))
         info.update(
@@ -200,9 +279,13 @@ class AdaptiveJoystick(ImpactJoystick):
         )
         state = state.replace(info=info)
         original_model = self._mjx_model
+        damping_scale = jp.where(active, info.get("adaptive_damping_scale", jp.float32(1.0)), 1.0)
+        dof = self._adaptive_joint_dof
         faulty_model = original_model.tree_replace({
             "actuator_gainprm": original_model.actuator_gainprm.at[:, 0].multiply(gain),
             "actuator_biasprm": original_model.actuator_biasprm.at[:, 1].multiply(gain),
+            "dof_damping": original_model.dof_damping.at[dof].multiply(damping_scale),
+            "dof_frictionloss": original_model.dof_frictionloss.at[dof].multiply(damping_scale),
         })
         # This mirrors Playground's model-binding wrapper. Restore on trace or
         # runtime errors, so another condition cannot inherit the fault model.
@@ -215,4 +298,18 @@ class AdaptiveJoystick(ImpactJoystick):
         # Parent makes observations before this assignment, using the preceding
         # nominal history. Do not re-observe or consume another noise RNG key.
         result_info["last_act"] = action
+        if getattr(self, "telemetry", False):
+            from foresight.adaptive.telemetry import sample_mjx_actuators
+            packet = sample_mjx_actuators(faulty_model, result.data, self._telemetry_layout)
+            result_info.update(
+                telemetry_source_time_s=jp.asarray(packet.source_time_s, jp.float32),
+                telemetry_held_target_rad=jp.asarray(packet.held_target_rad, jp.float32),
+                telemetry_joint_position_rad=jp.asarray(packet.joint_position_rad, jp.float32),
+                telemetry_joint_velocity_rad_s=jp.asarray(packet.joint_velocity_rad_s, jp.float32),
+                telemetry_applied_joint_torque_nm=jp.asarray(packet.applied_joint_torque_nm, jp.float32),
+                telemetry_raw_actuator_force_nm=jp.asarray(packet.raw_actuator_force_nm, jp.float32),
+                telemetry_actuator_saturated=jp.asarray(packet.actuator_saturated, bool),
+                telemetry_joint_saturated=jp.asarray(packet.joint_saturated, bool),
+                telemetry_regression_valid=jp.asarray(packet.regression_valid, bool),
+            )
         return result.replace(info=result_info)

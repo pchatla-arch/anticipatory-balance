@@ -1,0 +1,110 @@
+{
+  "evaluations": 4,
+  "log": [
+    {
+      "tag": "start",
+      "config": {
+        "rls": {
+          "forgetting": 0.98
+        },
+        "heuristic": {
+          "dead_band": 0.05,
+          "max_residual_rms": 0.05,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.0518674595374614,
+      "loss": 0.03053082898259163,
+      "harm": 0.04267326110973954,
+      "falls": 0.0,
+      "seconds": 0.0,
+      "resumed": true
+    },
+    {
+      "tag": "s0_rls_forgetting_0.9",
+      "config": {
+        "rls": {
+          "forgetting": 0.9
+        },
+        "heuristic": {
+          "dead_band": 0.05,
+          "max_residual_rms": 0.05,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.05009953521812956,
+      "loss": 0.027697596233338118,
+      "harm": 0.04480387796958288,
+      "falls": 0.0,
+      "seconds": 0.0,
+      "resumed": true
+    },
+    {
+      "tag": "s0_rls_forgetting_0.95",
+      "config": {
+        "rls": {
+          "forgetting": 0.95
+        },
+        "heuristic": {
+          "dead_band": 0.05,
+          "max_residual_rms": 0.05,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.05050885826194038,
+      "loss": 0.028938365750946105,
+      "harm": 0.04314098502198856,
+      "falls": 0.0,
+      "seconds": 0.0,
+      "resumed": true
+    },
+    {
+      "tag": "s0_rls_forgetting_0.98",
+      "config": {
+        "rls": {
+          "forgetting": 0.98
+        },
+        "heuristic": {
+          "dead_band": 0.05,
+          "max_residual_rms": 0.05,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.0518674595374614,
+      "loss": 0.03053082898259163,
+      "harm": 0.04267326110973954,
+      "falls": 0.0,
+      "seconds": 0.0,
+      "resumed": true
+    }
+  ],
+  "best": {
+    "tag": "s0_rls_forgetting_0.9",
+    "config": {
+      "rls": {
+        "forgetting": 0.9
+      },
+      "heuristic": {
+        "dead_band": 0.05,
+        "max_residual_rms": 0.05,
+        "max_age_steps": 5,
+        "min_samples": 5,
+        "min_excitation_rad": 0.01
+      }
+    },
+    "objective": 0.05009953521812956,
+    "loss": 0.027697596233338118,
+    "harm": 0.04480387796958288,
+    "falls": 0.0,
+    "seconds": 0.0,
+    "resumed": true
+  }
+}

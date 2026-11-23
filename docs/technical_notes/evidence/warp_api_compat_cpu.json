@@ -1,0 +1,128 @@
+{
+  "base_revision": "b215b9c4b5d173a83cfb8df695e5a0f7c1636c5d",
+  "patched_files_sha256": {
+    "scripts/eval_adaptive_gate.py": "359840611fb89315c8703de3788f466eac134998a182ded9f031b4368c253d21",
+    "scripts/check_warp_reproducibility.py": "458540b35a2e4353f4b5deabf1a3f2edbfd8662b7c510ffa490676eab49f0f3d",
+    "tests/test_adaptive_gate_evaluator.py": "b320820d1bcdb6062bb07bbb43e8724bf18c9c884e28910abccce931f0a7382e"
+  },
+  "environment": {
+    "devices": [
+      "cpu:0"
+    ],
+    "versions": {
+      "jax": "0.12.0.1",
+      "mujoco": "3.16.0",
+      "mujoco-mjx": "3.16.0",
+      "warp-lang": "1.18.0"
+    }
+  },
+  "adaptive_suite": {
+    "command": "FORESIGHT_RUN_CPU_PHYSICS=1 JAX_PLATFORMS=cpu python -m unittest discover -s tests -p 'test_adaptive*.py'",
+    "tests_run": 65,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0
+  },
+  "normal_entry_preflight_only": {
+    "method": "Invoke evaluator main with --allow-cpu and installed frozen policy; intercept build_rollout right after actual preflight and restore.",
+    "auto_smoke": {
+      "mode": "auto",
+      "requested": false,
+      "xla_flags": "",
+      "mujoco_warp_opt_deterministic": null,
+      "model_opt_deterministic": null,
+      "warp_api": {
+        "supported": false,
+        "missing": [
+          "DeterminismType.ALL",
+          "opt._impl.deterministic"
+        ],
+        "all_mask": null,
+        "model_option": null
+      },
+      "physics_mode": "default_warp_diagnostic",
+      "reason": "Installed MuJoCo-Warp lacks DeterminismType.ALL, opt._impl.deterministic"
+    },
+    "off_full_gate": {
+      "mode": "off",
+      "requested": false,
+      "xla_flags": "",
+      "mujoco_warp_opt_deterministic": null,
+      "model_opt_deterministic": null,
+      "warp_api": {
+        "supported": false,
+        "missing": [
+          "DeterminismType.ALL",
+          "opt._impl.deterministic"
+        ],
+        "all_mask": null,
+        "model_option": null
+      },
+      "physics_mode": "default_warp",
+      "reason": "Installed MuJoCo-Warp lacks DeterminismType.ALL, opt._impl.deterministic"
+    },
+    "explicit_on_smoke": {
+      "physics_impl": "warp",
+      "deterministic_execution": {
+        "mode": "on",
+        "requested": true,
+        "xla_flags": "--xla_gpu_deterministic_ops=true",
+        "mujoco_warp_opt_deterministic": null,
+        "model_opt_deterministic": null,
+        "warp_api": {
+          "supported": false,
+          "missing": [
+            "DeterminismType.ALL",
+            "opt._impl.deterministic"
+          ],
+          "all_mask": null,
+          "model_option": null
+        },
+        "physics_mode": "unsupported",
+        "reason": "Installed MuJoCo-Warp lacks DeterminismType.ALL, opt._impl.deterministic"
+      },
+      "status": "blocked_before_rollout"
+    }
+  },
+  "checker": {
+    "one_step_two_walkers": {
+      "all_finite": true,
+      "identity_bitwise": true,
+      "healthy_repeat_bitwise": true
+    },
+    "two_steps_two_walkers": {
+      "healthy_vs_healthy_repeat": {
+        "ctrl": true,
+        "qpos": true,
+        "actuator_force": true
+      },
+      "identity_vs_identity_repeat": {
+        "ctrl": true,
+        "qpos": true,
+        "actuator_force": true
+      },
+      "healthy_vs_identity": {
+        "ctrl": true,
+        "qpos": true,
+        "actuator_force": true
+      }
+    },
+    "unavailable_mode": {
+      "warp_api": {
+        "supported": false,
+        "missing": [
+          "DeterminismType.ALL",
+          "opt._impl.deterministic"
+        ],
+        "all_mask": null,
+        "model_option": null
+      },
+      "mujoco_warp_opt_deterministic": null,
+      "status": "unsupported",
+      "reason": "Installed MuJoCo-Warp lacks DeterminismType.ALL, opt._impl.deterministic"
+    },
+    "deterministic_only_exit_code": 2,
+    "cross_mode_comparison_present": false
+  },
+  "scope": "CPU interface regression plus a short diagnostic before fault onset. The full GPU protocol has not been run with this change."
+}

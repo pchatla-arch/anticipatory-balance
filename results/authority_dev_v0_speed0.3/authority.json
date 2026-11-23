@@ -1,0 +1,2486 @@
+{
+  "gain_055|declared": {
+    "family": "gain_055",
+    "telemetry": "declared",
+    "gain": 0.55,
+    "episodes": 4,
+    "actuators": 12,
+    "config": {
+      "bound_position_rad": 0.006,
+      "bound_torque_nm": 1.5,
+      "latency_max": 3,
+      "drift_rate": 0.05,
+      "max_speed": 0.3,
+      "available_force": 80.0,
+      "prior_low": 0.3,
+      "prior_high": 1.2
+    },
+    "steps_to_exclude_healthy_median": 4.0,
+    "never_excluded_fraction": 0.125,
+    "mean_width_post": 0.2515782934525354,
+    "permitted_over_oracle_mean": 0.13117785925438116,
+    "zero_authority_fraction_post": 0.22490890678978648,
+    "packet_status_counts": {
+      "updated": 8539,
+      "skipped": 0,
+      "inconsistent": 41,
+      "violations": 3
+    },
+    "per_actuator": [
+      {
+        "episode": 0,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.1025833343885031,
+        "permitted_over_oracle": 0.13036755862814287,
+        "zero_authority_fraction_post": 0.04819277108433735
+      },
+      {
+        "episode": 0,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.12958933071917797,
+        "permitted_over_oracle": 0.14695525733337278,
+        "zero_authority_fraction_post": 0.04819277108433735
+      },
+      {
+        "episode": 0,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.15133327999746943,
+        "permitted_over_oracle": 0.1867264727619827,
+        "zero_authority_fraction_post": 0.0963855421686747
+      },
+      {
+        "episode": 0,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.08958770998989243,
+        "permitted_over_oracle": 0.10445509453009516,
+        "zero_authority_fraction_post": 0.12048192771084337
+      },
+      {
+        "episode": 0,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.15417258818465543,
+        "permitted_over_oracle": 0.09109508523058964,
+        "zero_authority_fraction_post": 0.08433734939759036
+      },
+      {
+        "episode": 0,
+        "actuator": 5,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 0,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.13375976753522115,
+        "permitted_over_oracle": 0.1545874453348258,
+        "zero_authority_fraction_post": 0.060240963855421686
+      },
+      {
+        "episode": 0,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.13517659363976445,
+        "permitted_over_oracle": 0.1842383585560714,
+        "zero_authority_fraction_post": 0.0963855421686747
+      },
+      {
+        "episode": 0,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.2044252929199173,
+        "permitted_over_oracle": 0.23879072109865349,
+        "zero_authority_fraction_post": 0.1566265060240964
+      },
+      {
+        "episode": 0,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.08508358123790787,
+        "permitted_over_oracle": 0.11499957502247535,
+        "zero_authority_fraction_post": 0.1566265060240964
+      },
+      {
+        "episode": 0,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.14084724489464817,
+        "permitted_over_oracle": 0.10596781953780597,
+        "zero_authority_fraction_post": 0.04819277108433735
+      },
+      {
+        "episode": 0,
+        "actuator": 11,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 1,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.09232808371384939,
+        "permitted_over_oracle": 0.11631849749787726,
+        "zero_authority_fraction_post": 0.09333333333333334
+      },
+      {
+        "episode": 1,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.12334109187126159,
+        "permitted_over_oracle": 0.1438826184466664,
+        "zero_authority_fraction_post": 0.12
+      },
+      {
+        "episode": 1,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.12551071027914684,
+        "permitted_over_oracle": 0.20043833926944601,
+        "zero_authority_fraction_post": 0.12666666666666668
+      },
+      {
+        "episode": 1,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.07940746585528057,
+        "permitted_over_oracle": 0.11333250096736903,
+        "zero_authority_fraction_post": 0.09333333333333334
+      },
+      {
+        "episode": 1,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.19139987289905547,
+        "permitted_over_oracle": 0.1194298319932075,
+        "zero_authority_fraction_post": 0.06666666666666667
+      },
+      {
+        "episode": 1,
+        "actuator": 5,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.88431008040905,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 1,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.11736823995908101,
+        "permitted_over_oracle": 0.12100512005129613,
+        "zero_authority_fraction_post": 0.13333333333333333
+      },
+      {
+        "episode": 1,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.1278433980544408,
+        "permitted_over_oracle": 0.17330086639277614,
+        "zero_authority_fraction_post": 0.10666666666666667
+      },
+      {
+        "episode": 1,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.18269421478112538,
+        "permitted_over_oracle": 0.22973522882095387,
+        "zero_authority_fraction_post": 0.16
+      },
+      {
+        "episode": 1,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.08380751589934031,
+        "permitted_over_oracle": 0.08632261899792679,
+        "zero_authority_fraction_post": 0.18
+      },
+      {
+        "episode": 1,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.14633229037125906,
+        "permitted_over_oracle": 0.08904590924155609,
+        "zero_authority_fraction_post": 0.05333333333333334
+      },
+      {
+        "episode": 1,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 0,
+        "mean_width_post": 0.4644752315680186,
+        "permitted_over_oracle": 0.23032729326230467,
+        "zero_authority_fraction_post": 0.11333333333333333
+      },
+      {
+        "episode": 2,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 5,
+        "mean_width_post": 0.11045213158314045,
+        "permitted_over_oracle": 0.12169885810421192,
+        "zero_authority_fraction_post": 0.10989010989010989
+      },
+      {
+        "episode": 2,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 5,
+        "mean_width_post": 0.1536663918049781,
+        "permitted_over_oracle": 0.1821393743368326,
+        "zero_authority_fraction_post": 0.12087912087912088
+      },
+      {
+        "episode": 2,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 5,
+        "mean_width_post": 0.21000361278816893,
+        "permitted_over_oracle": 0.20741942273894803,
+        "zero_authority_fraction_post": 0.18681318681318682
+      },
+      {
+        "episode": 2,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 5,
+        "mean_width_post": 0.08656255425987663,
+        "permitted_over_oracle": 0.10926090560683144,
+        "zero_authority_fraction_post": 0.06593406593406594
+      },
+      {
+        "episode": 2,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 5,
+        "mean_width_post": 0.1048020730306814,
+        "permitted_over_oracle": 0.08804399304935455,
+        "zero_authority_fraction_post": 0.10989010989010989
+      },
+      {
+        "episode": 2,
+        "actuator": 5,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 2,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 5,
+        "mean_width_post": 0.10821358712164911,
+        "permitted_over_oracle": 0.1323058219584141,
+        "zero_authority_fraction_post": 0.054945054945054944
+      },
+      {
+        "episode": 2,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 5,
+        "mean_width_post": 0.11063526161424406,
+        "permitted_over_oracle": 0.16528949974958193,
+        "zero_authority_fraction_post": 0.0989010989010989
+      },
+      {
+        "episode": 2,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 5,
+        "mean_width_post": 0.15317872559631263,
+        "permitted_over_oracle": 0.2341144980758988,
+        "zero_authority_fraction_post": 0.16483516483516483
+      },
+      {
+        "episode": 2,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.0875497342465998,
+        "permitted_over_oracle": 0.10690583653813063,
+        "zero_authority_fraction_post": 0.17582417582417584
+      },
+      {
+        "episode": 2,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.1905422338417598,
+        "permitted_over_oracle": 0.10735169417769311,
+        "zero_authority_fraction_post": 0.06593406593406594
+      },
+      {
+        "episode": 2,
+        "actuator": 11,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 3,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 2,
+        "mean_width_post": 0.11501810281244043,
+        "permitted_over_oracle": 0.1472213520405179,
+        "zero_authority_fraction_post": 0.0410958904109589
+      },
+      {
+        "episode": 3,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 2,
+        "mean_width_post": 0.13993770006584794,
+        "permitted_over_oracle": 0.16748579951459436,
+        "zero_authority_fraction_post": 0.0547945205479452
+      },
+      {
+        "episode": 3,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 2,
+        "mean_width_post": 0.12760150636712167,
+        "permitted_over_oracle": 0.17721292335541183,
+        "zero_authority_fraction_post": 0.1232876712328767
+      },
+      {
+        "episode": 3,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 2,
+        "mean_width_post": 0.07962336972968219,
+        "permitted_over_oracle": 0.07444723728632086,
+        "zero_authority_fraction_post": 0.1780821917808219
+      },
+      {
+        "episode": 3,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.18489757057738632,
+        "permitted_over_oracle": 0.07805999194991843,
+        "zero_authority_fraction_post": 0.1232876712328767
+      },
+      {
+        "episode": 3,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 30,
+        "mean_width_post": 0.6251603332284379,
+        "permitted_over_oracle": 0.1324811071424503,
+        "zero_authority_fraction_post": 0.4246575342465753
+      },
+      {
+        "episode": 3,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 2,
+        "mean_width_post": 0.11423323579030494,
+        "permitted_over_oracle": 0.16460188809739879,
+        "zero_authority_fraction_post": 0.0273972602739726
+      },
+      {
+        "episode": 3,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.25992129028659977,
+        "permitted_over_oracle": 0.258967987060892,
+        "zero_authority_fraction_post": 0.1506849315068493
+      },
+      {
+        "episode": 3,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 2,
+        "mean_width_post": 0.29462551499066286,
+        "permitted_over_oracle": 0.3036584215825203,
+        "zero_authority_fraction_post": 0.136986301369863
+      },
+      {
+        "episode": 3,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 2,
+        "mean_width_post": 0.10501505414100543,
+        "permitted_over_oracle": 0.13910554356202928,
+        "zero_authority_fraction_post": 0.0821917808219178
+      },
+      {
+        "episode": 3,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 2,
+        "mean_width_post": 0.26874100386279903,
+        "permitted_over_oracle": 0.11744287530695001,
+        "zero_authority_fraction_post": 0.136986301369863
+      },
+      {
+        "episode": 3,
+        "actuator": 11,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      }
+    ]
+  },
+  "gain_055|exact": {
+    "family": "gain_055",
+    "telemetry": "exact",
+    "gain": 0.55,
+    "episodes": 4,
+    "actuators": 12,
+    "config": {
+      "bound_position_rad": 1e-05,
+      "bound_torque_nm": 0.001,
+      "latency_max": 0,
+      "drift_rate": 0.05,
+      "max_speed": 0.3,
+      "available_force": 80.0,
+      "prior_low": 0.3,
+      "prior_high": 1.2
+    },
+    "steps_to_exclude_healthy_median": 1.0,
+    "never_excluded_fraction": 0.0,
+    "mean_width_post": 0.013765564608341307,
+    "permitted_over_oracle_mean": 0.19036091667418578,
+    "zero_authority_fraction_post": 0.03062163703234837,
+    "packet_status_counts": {
+      "updated": 8892,
+      "skipped": 0,
+      "inconsistent": 48,
+      "violations": 0
+    },
+    "per_actuator": [
+      {
+        "episode": 0,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.013156271842588862,
+        "permitted_over_oracle": 0.13618661071096358,
+        "zero_authority_fraction_post": 0.012048192771084338
+      },
+      {
+        "episode": 0,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.013160144708242762,
+        "permitted_over_oracle": 0.15370741024713283,
+        "zero_authority_fraction_post": 0.012048192771084338
+      },
+      {
+        "episode": 0,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.013376504541879677,
+        "permitted_over_oracle": 0.21428025206933246,
+        "zero_authority_fraction_post": 0.03614457831325301
+      },
+      {
+        "episode": 0,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.01320892285151654,
+        "permitted_over_oracle": 0.11914020062983796,
+        "zero_authority_fraction_post": 0.012048192771084338
+      },
+      {
+        "episode": 0,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.013578435742711446,
+        "permitted_over_oracle": 0.10123664272240886,
+        "zero_authority_fraction_post": 0.024096385542168676
+      },
+      {
+        "episode": 0,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.021475682775658297,
+        "permitted_over_oracle": 0.26774575717679777,
+        "zero_authority_fraction_post": 0.03614457831325301
+      },
+      {
+        "episode": 0,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.013117668858493668,
+        "permitted_over_oracle": 0.1599481061420936,
+        "zero_authority_fraction_post": 0.012048192771084338
+      },
+      {
+        "episode": 0,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.013382963387362928,
+        "permitted_over_oracle": 0.20265182190133868,
+        "zero_authority_fraction_post": 0.04819277108433735
+      },
+      {
+        "episode": 0,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.013789361499878297,
+        "permitted_over_oracle": 0.27968952376218603,
+        "zero_authority_fraction_post": 0.060240963855421686
+      },
+      {
+        "episode": 0,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.013358840023178652,
+        "permitted_over_oracle": 0.12790813194327624,
+        "zero_authority_fraction_post": 0.07228915662650602
+      },
+      {
+        "episode": 0,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.013574815658201655,
+        "permitted_over_oracle": 0.11069881618476327,
+        "zero_authority_fraction_post": 0.012048192771084338
+      },
+      {
+        "episode": 0,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.020077382943716394,
+        "permitted_over_oracle": 0.27978299298324316,
+        "zero_authority_fraction_post": 0.024096385542168676
+      },
+      {
+        "episode": 1,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008368569612503051,
+        "permitted_over_oracle": 0.12538074374844885,
+        "zero_authority_fraction_post": 0.013333333333333334
+      },
+      {
+        "episode": 1,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008574652671813964,
+        "permitted_over_oracle": 0.16253659554783664,
+        "zero_authority_fraction_post": 0.013333333333333334
+      },
+      {
+        "episode": 1,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008730536699295044,
+        "permitted_over_oracle": 0.22105961840905072,
+        "zero_authority_fraction_post": 0.03333333333333333
+      },
+      {
+        "episode": 1,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008527333736419678,
+        "permitted_over_oracle": 0.1228140043316094,
+        "zero_authority_fraction_post": 0.02
+      },
+      {
+        "episode": 1,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008891628980636597,
+        "permitted_over_oracle": 0.12938560745756977,
+        "zero_authority_fraction_post": 0.006666666666666667
+      },
+      {
+        "episode": 1,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.017160532474517824,
+        "permitted_over_oracle": 0.35325166020293053,
+        "zero_authority_fraction_post": 0.02
+      },
+      {
+        "episode": 1,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008428328037261963,
+        "permitted_over_oracle": 0.13493957598427506,
+        "zero_authority_fraction_post": 0.04
+      },
+      {
+        "episode": 1,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008608848253885904,
+        "permitted_over_oracle": 0.19334459859421343,
+        "zero_authority_fraction_post": 0.02
+      },
+      {
+        "episode": 1,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008843228816986085,
+        "permitted_over_oracle": 0.2663277397507955,
+        "zero_authority_fraction_post": 0.03333333333333333
+      },
+      {
+        "episode": 1,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008518133958180745,
+        "permitted_over_oracle": 0.09145680586282011,
+        "zero_authority_fraction_post": 0.12666666666666668
+      },
+      {
+        "episode": 1,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008754069407780965,
+        "permitted_over_oracle": 0.09380302779308146,
+        "zero_authority_fraction_post": 0.006666666666666667
+      },
+      {
+        "episode": 1,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.015632129907608032,
+        "permitted_over_oracle": 0.27838265540466056,
+        "zero_authority_fraction_post": 0.04
+      },
+      {
+        "episode": 2,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.012211062095977448,
+        "permitted_over_oracle": 0.13597886004291443,
+        "zero_authority_fraction_post": 0.01098901098901099
+      },
+      {
+        "episode": 2,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.012494156648824504,
+        "permitted_over_oracle": 0.2152752754851701,
+        "zero_authority_fraction_post": 0.01098901098901099
+      },
+      {
+        "episode": 2,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.012762638238760142,
+        "permitted_over_oracle": 0.2741513972902916,
+        "zero_authority_fraction_post": 0.03296703296703297
+      },
+      {
+        "episode": 2,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.012267050507304433,
+        "permitted_over_oracle": 0.11740840681392535,
+        "zero_authority_fraction_post": 0.01098901098901099
+      },
+      {
+        "episode": 2,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.01281260134099604,
+        "permitted_over_oracle": 0.0946632460841061,
+        "zero_authority_fraction_post": 0.04395604395604396
+      },
+      {
+        "episode": 2,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.023450316963615,
+        "permitted_over_oracle": 0.2387556181248836,
+        "zero_authority_fraction_post": 0.03296703296703297
+      },
+      {
+        "episode": 2,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.012174080361376752,
+        "permitted_over_oracle": 0.135775978811529,
+        "zero_authority_fraction_post": 0.01098901098901099
+      },
+      {
+        "episode": 2,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.012359381377041996,
+        "permitted_over_oracle": 0.1755562010120054,
+        "zero_authority_fraction_post": 0.03296703296703297
+      },
+      {
+        "episode": 2,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.01251166338448996,
+        "permitted_over_oracle": 0.26661059268179804,
+        "zero_authority_fraction_post": 0.01098901098901099
+      },
+      {
+        "episode": 2,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.012335801517570412,
+        "permitted_over_oracle": 0.1232345486311675,
+        "zero_authority_fraction_post": 0.054945054945054944
+      },
+      {
+        "episode": 2,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.012532039658053891,
+        "permitted_over_oracle": 0.1138413353277399,
+        "zero_authority_fraction_post": 0.01098901098901099
+      },
+      {
+        "episode": 2,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.021421680738637736,
+        "permitted_over_oracle": 0.32955181800781813,
+        "zero_authority_fraction_post": 0.03296703296703297
+      },
+      {
+        "episode": 3,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.014626796114934634,
+        "permitted_over_oracle": 0.15291491207704835,
+        "zero_authority_fraction_post": 0.0136986301369863
+      },
+      {
+        "episode": 3,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.014674550049925504,
+        "permitted_over_oracle": 0.1734830355503035,
+        "zero_authority_fraction_post": 0.0410958904109589
+      },
+      {
+        "episode": 3,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.014915050709084289,
+        "permitted_over_oracle": 0.20299475734731426,
+        "zero_authority_fraction_post": 0.0136986301369863
+      },
+      {
+        "episode": 3,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.014840717185033511,
+        "permitted_over_oracle": 0.08081910959385759,
+        "zero_authority_fraction_post": 0.1095890410958904
+      },
+      {
+        "episode": 3,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.015019906710271966,
+        "permitted_over_oracle": 0.0879167051573854,
+        "zero_authority_fraction_post": 0.0136986301369863
+      },
+      {
+        "episode": 3,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.020998368524525263,
+        "permitted_over_oracle": 0.25970645088293925,
+        "zero_authority_fraction_post": 0.0273972602739726
+      },
+      {
+        "episode": 3,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.014704631615991462,
+        "permitted_over_oracle": 0.16789462242325678,
+        "zero_authority_fraction_post": 0.0136986301369863
+      },
+      {
+        "episode": 3,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.015136792235178491,
+        "permitted_over_oracle": 0.3029487214182138,
+        "zero_authority_fraction_post": 0.0410958904109589
+      },
+      {
+        "episode": 3,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.01537587381389043,
+        "permitted_over_oracle": 0.39872167169333694,
+        "zero_authority_fraction_post": 0.0684931506849315
+      },
+      {
+        "episode": 3,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.014851176575438618,
+        "permitted_over_oracle": 0.14861526025687793,
+        "zero_authority_fraction_post": 0.0136986301369863
+      },
+      {
+        "episode": 3,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.015732339800220645,
+        "permitted_over_oracle": 0.14582034621621764,
+        "zero_authority_fraction_post": 0.0410958904109589
+      },
+      {
+        "episode": 3,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.026243437642920506,
+        "permitted_over_oracle": 0.4690262298701504,
+        "zero_authority_fraction_post": 0.0410958904109589
+      }
+    ]
+  },
+  "gain_070|declared": {
+    "family": "gain_070",
+    "telemetry": "declared",
+    "gain": 0.7,
+    "episodes": 4,
+    "actuators": 12,
+    "config": {
+      "bound_position_rad": 0.006,
+      "bound_torque_nm": 1.5,
+      "latency_max": 3,
+      "drift_rate": 0.05,
+      "max_speed": 0.3,
+      "available_force": 80.0,
+      "prior_low": 0.3,
+      "prior_high": 1.2
+    },
+    "steps_to_exclude_healthy_median": 4.0,
+    "never_excluded_fraction": 0.10416666666666667,
+    "mean_width_post": 0.2459017444029491,
+    "permitted_over_oracle_mean": 0.28517971008007326,
+    "zero_authority_fraction_post": 0.24412883118592257,
+    "packet_status_counts": {
+      "updated": 14044,
+      "skipped": 0,
+      "inconsistent": 44,
+      "violations": 9
+    },
+    "per_actuator": [
+      {
+        "episode": 0,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 5,
+        "mean_width_post": 0.12787911751000164,
+        "permitted_over_oracle": 0.37531125208582006,
+        "zero_authority_fraction_post": 0.059113300492610835
+      },
+      {
+        "episode": 0,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.1406462731326155,
+        "permitted_over_oracle": 0.33636644536582616,
+        "zero_authority_fraction_post": 0.14285714285714285
+      },
+      {
+        "episode": 0,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 11,
+        "mean_width_post": 0.1340373076241592,
+        "permitted_over_oracle": 0.35712474682241907,
+        "zero_authority_fraction_post": 0.23645320197044334
+      },
+      {
+        "episode": 0,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.10195707188451232,
+        "permitted_over_oracle": 0.270884778571649,
+        "zero_authority_fraction_post": 0.08866995073891626
+      },
+      {
+        "episode": 0,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 19,
+        "mean_width_post": 0.19996027758556045,
+        "permitted_over_oracle": 0.2730532200036225,
+        "zero_authority_fraction_post": 0.15270935960591134
+      },
+      {
+        "episode": 0,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 83,
+        "mean_width_post": 0.4644103624256961,
+        "permitted_over_oracle": 0.4714817697051526,
+        "zero_authority_fraction_post": 0.5369458128078818
+      },
+      {
+        "episode": 0,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.11001433057738055,
+        "permitted_over_oracle": 0.3724504687564918,
+        "zero_authority_fraction_post": 0.07389162561576355
+      },
+      {
+        "episode": 0,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.11928469999670395,
+        "permitted_over_oracle": 0.320422789472154,
+        "zero_authority_fraction_post": 0.08866995073891626
+      },
+      {
+        "episode": 0,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.1613127448288678,
+        "permitted_over_oracle": 0.4003771830542311,
+        "zero_authority_fraction_post": 0.18226600985221675
+      },
+      {
+        "episode": 0,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.10072606449643967,
+        "permitted_over_oracle": 0.27191162618697573,
+        "zero_authority_fraction_post": 0.07389162561576355
+      },
+      {
+        "episode": 0,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.23015023334860216,
+        "permitted_over_oracle": 0.26221415482344423,
+        "zero_authority_fraction_post": 0.07881773399014778
+      },
+      {
+        "episode": 0,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 124,
+        "mean_width_post": 0.6068207354381167,
+        "permitted_over_oracle": 0.04519869998248094,
+        "zero_authority_fraction_post": 0.7241379310344828
+      },
+      {
+        "episode": 1,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.11893831585582934,
+        "permitted_over_oracle": 0.36908759246265654,
+        "zero_authority_fraction_post": 0.06315789473684211
+      },
+      {
+        "episode": 1,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.11768802153436761,
+        "permitted_over_oracle": 0.330768264139695,
+        "zero_authority_fraction_post": 0.07894736842105263
+      },
+      {
+        "episode": 1,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.1436829720672808,
+        "permitted_over_oracle": 0.360470225273719,
+        "zero_authority_fraction_post": 0.1736842105263158
+      },
+      {
+        "episode": 1,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.0863988386957269,
+        "permitted_over_oracle": 0.21959240653525308,
+        "zero_authority_fraction_post": 0.05263157894736842
+      },
+      {
+        "episode": 1,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.17018988854006717,
+        "permitted_over_oracle": 0.23743112519657583,
+        "zero_authority_fraction_post": 0.1
+      },
+      {
+        "episode": 1,
+        "actuator": 5,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.8057316833420803,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 1,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.12953926418956957,
+        "permitted_over_oracle": 0.37458411460519175,
+        "zero_authority_fraction_post": 0.042105263157894736
+      },
+      {
+        "episode": 1,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.1312591690766184,
+        "permitted_over_oracle": 0.3585285126444845,
+        "zero_authority_fraction_post": 0.12105263157894737
+      },
+      {
+        "episode": 1,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 12,
+        "mean_width_post": 0.14129096489203605,
+        "permitted_over_oracle": 0.3934131472429296,
+        "zero_authority_fraction_post": 0.22105263157894736
+      },
+      {
+        "episode": 1,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.10390208300791288,
+        "permitted_over_oracle": 0.2926660581424703,
+        "zero_authority_fraction_post": 0.11052631578947368
+      },
+      {
+        "episode": 1,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.1832179772226434,
+        "permitted_over_oracle": 0.2718629261093977,
+        "zero_authority_fraction_post": 0.1
+      },
+      {
+        "episode": 1,
+        "actuator": 11,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 2,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.13401329918292607,
+        "permitted_over_oracle": 0.3835586270171839,
+        "zero_authority_fraction_post": 0.09417040358744394
+      },
+      {
+        "episode": 2,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.11987936804112832,
+        "permitted_over_oracle": 0.332646646005774,
+        "zero_authority_fraction_post": 0.12556053811659193
+      },
+      {
+        "episode": 2,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 8,
+        "mean_width_post": 0.14611061806101436,
+        "permitted_over_oracle": 0.36167917288969037,
+        "zero_authority_fraction_post": 0.25112107623318386
+      },
+      {
+        "episode": 2,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 8,
+        "mean_width_post": 0.10425811364511738,
+        "permitted_over_oracle": 0.24417687277864386,
+        "zero_authority_fraction_post": 0.13452914798206278
+      },
+      {
+        "episode": 2,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.17575557242594492,
+        "permitted_over_oracle": 0.2490381653088347,
+        "zero_authority_fraction_post": 0.08968609865470852
+      },
+      {
+        "episode": 2,
+        "actuator": 5,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 2,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.12046050049798905,
+        "permitted_over_oracle": 0.37425277099917376,
+        "zero_authority_fraction_post": 0.04484304932735426
+      },
+      {
+        "episode": 2,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.13482879857311333,
+        "permitted_over_oracle": 0.34718010711968916,
+        "zero_authority_fraction_post": 0.08968609865470852
+      },
+      {
+        "episode": 2,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.1709482228809408,
+        "permitted_over_oracle": 0.3995656557821178,
+        "zero_authority_fraction_post": 0.20179372197309417
+      },
+      {
+        "episode": 2,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.10459458854700952,
+        "permitted_over_oracle": 0.287243734702588,
+        "zero_authority_fraction_post": 0.11210762331838565
+      },
+      {
+        "episode": 2,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.2511228619669585,
+        "permitted_over_oracle": 0.25939451670947233,
+        "zero_authority_fraction_post": 0.16143497757847533
+      },
+      {
+        "episode": 2,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 29,
+        "mean_width_post": 0.7117133913018778,
+        "permitted_over_oracle": 0.24669282593579062,
+        "zero_authority_fraction_post": 0.7488789237668162
+      },
+      {
+        "episode": 3,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.12068802367809207,
+        "permitted_over_oracle": 0.3766567118171847,
+        "zero_authority_fraction_post": 0.03255813953488372
+      },
+      {
+        "episode": 3,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.12733330199884813,
+        "permitted_over_oracle": 0.3409461357297774,
+        "zero_authority_fraction_post": 0.12558139534883722
+      },
+      {
+        "episode": 3,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.14765409342078276,
+        "permitted_over_oracle": 0.3710927914563527,
+        "zero_authority_fraction_post": 0.2186046511627907
+      },
+      {
+        "episode": 3,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.11329137641330098,
+        "permitted_over_oracle": 0.28527384890515217,
+        "zero_authority_fraction_post": 0.09302325581395349
+      },
+      {
+        "episode": 3,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.18011888321055922,
+        "permitted_over_oracle": 0.2771574509142898,
+        "zero_authority_fraction_post": 0.05581395348837209
+      },
+      {
+        "episode": 3,
+        "actuator": 5,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 3,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.12447620768879736,
+        "permitted_over_oracle": 0.3788727659971573,
+        "zero_authority_fraction_post": 0.06046511627906977
+      },
+      {
+        "episode": 3,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 9,
+        "mean_width_post": 0.14350308041239893,
+        "permitted_over_oracle": 0.3305761500549248,
+        "zero_authority_fraction_post": 0.10232558139534884
+      },
+      {
+        "episode": 3,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 17,
+        "mean_width_post": 0.14366043251614238,
+        "permitted_over_oracle": 0.38290800506749534,
+        "zero_authority_fraction_post": 0.24186046511627907
+      },
+      {
+        "episode": 3,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 14,
+        "mean_width_post": 0.10715370261391928,
+        "permitted_over_oracle": 0.25897605951849734,
+        "zero_authority_fraction_post": 0.11162790697674418
+      },
+      {
+        "episode": 3,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 17,
+        "mean_width_post": 0.1926807539407597,
+        "permitted_over_oracle": 0.23553556195108472,
+        "zero_authority_fraction_post": 0.12093023255813953
+      },
+      {
+        "episode": 3,
+        "actuator": 11,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      }
+    ]
+  },
+  "gain_070|exact": {
+    "family": "gain_070",
+    "telemetry": "exact",
+    "gain": 0.7,
+    "episodes": 4,
+    "actuators": 12,
+    "config": {
+      "bound_position_rad": 1e-05,
+      "bound_torque_nm": 0.001,
+      "latency_max": 0,
+      "drift_rate": 0.05,
+      "max_speed": 0.3,
+      "available_force": 80.0,
+      "prior_low": 0.3,
+      "prior_high": 1.2
+    },
+    "steps_to_exclude_healthy_median": 1.0,
+    "never_excluded_fraction": 0.0,
+    "mean_width_post": 0.00887786086449407,
+    "permitted_over_oracle_mean": 0.4472364129860238,
+    "zero_authority_fraction_post": 0.03452159521162939,
+    "packet_status_counts": {
+      "updated": 14352,
+      "skipped": 0,
+      "inconsistent": 48,
+      "violations": 0
+    },
+    "per_actuator": [
+      {
+        "episode": 0,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006875835616013099,
+        "permitted_over_oracle": 0.394273082670239,
+        "zero_authority_fraction_post": 0.009852216748768473
+      },
+      {
+        "episode": 0,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007162775312151227,
+        "permitted_over_oracle": 0.3967518307193222,
+        "zero_authority_fraction_post": 0.019704433497536946
+      },
+      {
+        "episode": 0,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007614192117023938,
+        "permitted_over_oracle": 0.4594901065498781,
+        "zero_authority_fraction_post": 0.06896551724137931
+      },
+      {
+        "episode": 0,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007228493690490723,
+        "permitted_over_oracle": 0.2759956915638184,
+        "zero_authority_fraction_post": 0.04433497536945813
+      },
+      {
+        "episode": 0,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.0075816318319348866,
+        "permitted_over_oracle": 0.33493589256440276,
+        "zero_authority_fraction_post": 0.014778325123152709
+      },
+      {
+        "episode": 0,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.01789361561460448,
+        "permitted_over_oracle": 0.9144627741562777,
+        "zero_authority_fraction_post": 0.03940886699507389
+      },
+      {
+        "episode": 0,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006891892754972862,
+        "permitted_over_oracle": 0.3951055951058278,
+        "zero_authority_fraction_post": 0.029556650246305417
+      },
+      {
+        "episode": 0,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006971665203864938,
+        "permitted_over_oracle": 0.36199527421793903,
+        "zero_authority_fraction_post": 0.024630541871921183
+      },
+      {
+        "episode": 0,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.0073861949549519955,
+        "permitted_over_oracle": 0.49322230186504207,
+        "zero_authority_fraction_post": 0.059113300492610835
+      },
+      {
+        "episode": 0,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007188278759641601,
+        "permitted_over_oracle": 0.2717626932024748,
+        "zero_authority_fraction_post": 0.034482758620689655
+      },
+      {
+        "episode": 0,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007559458023221622,
+        "permitted_over_oracle": 0.28816816422907987,
+        "zero_authority_fraction_post": 0.034482758620689655
+      },
+      {
+        "episode": 0,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.019226825295997958,
+        "permitted_over_oracle": 0.955485236911552,
+        "zero_authority_fraction_post": 0.054187192118226604
+      },
+      {
+        "episode": 1,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007209119043852154,
+        "permitted_over_oracle": 0.3865822051745932,
+        "zero_authority_fraction_post": 0.015789473684210527
+      },
+      {
+        "episode": 1,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.00722671715836776,
+        "permitted_over_oracle": 0.3639374668701061,
+        "zero_authority_fraction_post": 0.02631578947368421
+      },
+      {
+        "episode": 1,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007550627934305292,
+        "permitted_over_oracle": 0.427654995111993,
+        "zero_authority_fraction_post": 0.031578947368421054
+      },
+      {
+        "episode": 1,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007209685915394833,
+        "permitted_over_oracle": 0.22448598733712616,
+        "zero_authority_fraction_post": 0.010526315789473684
+      },
+      {
+        "episode": 1,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007839197861520868,
+        "permitted_over_oracle": 0.2495265138729731,
+        "zero_authority_fraction_post": 0.021052631578947368
+      },
+      {
+        "episode": 1,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.015100043070943732,
+        "permitted_over_oracle": 0.6538027451095603,
+        "zero_authority_fraction_post": 0.021052631578947368
+      },
+      {
+        "episode": 1,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007142704725265503,
+        "permitted_over_oracle": 0.40727214334154893,
+        "zero_authority_fraction_post": 0.02631578947368421
+      },
+      {
+        "episode": 1,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007386691005606401,
+        "permitted_over_oracle": 0.4092563391118367,
+        "zero_authority_fraction_post": 0.031578947368421054
+      },
+      {
+        "episode": 1,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007821101577658402,
+        "permitted_over_oracle": 0.5221903369155415,
+        "zero_authority_fraction_post": 0.05263157894736842
+      },
+      {
+        "episode": 1,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.0076614229302657275,
+        "permitted_over_oracle": 0.296900190283771,
+        "zero_authority_fraction_post": 0.07368421052631578
+      },
+      {
+        "episode": 1,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007948154211044311,
+        "permitted_over_oracle": 0.33431809305388976,
+        "zero_authority_fraction_post": 0.02631578947368421
+      },
+      {
+        "episode": 1,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.017772559115761206,
+        "permitted_over_oracle": 0.7681602384536109,
+        "zero_authority_fraction_post": 0.010526315789473684
+      },
+      {
+        "episode": 2,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006593472219903373,
+        "permitted_over_oracle": 0.4051320271752919,
+        "zero_authority_fraction_post": 0.02242152466367713
+      },
+      {
+        "episode": 2,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006762392050482233,
+        "permitted_over_oracle": 0.38231121728369744,
+        "zero_authority_fraction_post": 0.03587443946188341
+      },
+      {
+        "episode": 2,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007226141578948016,
+        "permitted_over_oracle": 0.445635866122936,
+        "zero_authority_fraction_post": 0.04932735426008968
+      },
+      {
+        "episode": 2,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006799449567837565,
+        "permitted_over_oracle": 0.2558283829247708,
+        "zero_authority_fraction_post": 0.04484304932735426
+      },
+      {
+        "episode": 2,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007034278503982475,
+        "permitted_over_oracle": 0.269543463362535,
+        "zero_authority_fraction_post": 0.02242152466367713
+      },
+      {
+        "episode": 2,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.017604440049740232,
+        "permitted_over_oracle": 0.8660824737434593,
+        "zero_authority_fraction_post": 0.05829596412556054
+      },
+      {
+        "episode": 2,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006457237117493634,
+        "permitted_over_oracle": 0.4030416425715853,
+        "zero_authority_fraction_post": 0.008968609865470852
+      },
+      {
+        "episode": 2,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006663421344329424,
+        "permitted_over_oracle": 0.3892815973936777,
+        "zero_authority_fraction_post": 0.03139013452914798
+      },
+      {
+        "episode": 2,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007087029149179501,
+        "permitted_over_oracle": 0.49256536077699836,
+        "zero_authority_fraction_post": 0.04484304932735426
+      },
+      {
+        "episode": 2,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006834466628429601,
+        "permitted_over_oracle": 0.2899441680502348,
+        "zero_authority_fraction_post": 0.04484304932735426
+      },
+      {
+        "episode": 2,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007075544697286836,
+        "permitted_over_oracle": 0.3053733976965187,
+        "zero_authority_fraction_post": 0.017937219730941704
+      },
+      {
+        "episode": 2,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.017844215102259888,
+        "permitted_over_oracle": 0.9109525156122895,
+        "zero_authority_fraction_post": 0.07174887892376682
+      },
+      {
+        "episode": 3,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006622816241064737,
+        "permitted_over_oracle": 0.38530404255173123,
+        "zero_authority_fraction_post": 0.023255813953488372
+      },
+      {
+        "episode": 3,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006960081776907278,
+        "permitted_over_oracle": 0.41077742179704974,
+        "zero_authority_fraction_post": 0.027906976744186046
+      },
+      {
+        "episode": 3,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007455797528111658,
+        "permitted_over_oracle": 0.4753674314133616,
+        "zero_authority_fraction_post": 0.06511627906976744
+      },
+      {
+        "episode": 3,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006982086980065634,
+        "permitted_over_oracle": 0.29039719141848247,
+        "zero_authority_fraction_post": 0.04186046511627907
+      },
+      {
+        "episode": 3,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007253584473632103,
+        "permitted_over_oracle": 0.308433495745734,
+        "zero_authority_fraction_post": 0.018604651162790697
+      },
+      {
+        "episode": 3,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.017504076902256454,
+        "permitted_over_oracle": 0.8950309779179924,
+        "zero_authority_fraction_post": 0.05116279069767442
+      },
+      {
+        "episode": 3,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006666493970294332,
+        "permitted_over_oracle": 0.39929826043692457,
+        "zero_authority_fraction_post": 0.027906976744186046
+      },
+      {
+        "episode": 3,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.00675497055053711,
+        "permitted_over_oracle": 0.3761626442637372,
+        "zero_authority_fraction_post": 0.013953488372093023
+      },
+      {
+        "episode": 3,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007185940409815589,
+        "permitted_over_oracle": 0.47795301444091565,
+        "zero_authority_fraction_post": 0.037209302325581395
+      },
+      {
+        "episode": 3,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.0070144805797310765,
+        "permitted_over_oracle": 0.26400989946960546,
+        "zero_authority_fraction_post": 0.05581395348837209
+      },
+      {
+        "episode": 3,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007129960004673448,
+        "permitted_over_oracle": 0.26710912248217533,
+        "zero_authority_fraction_post": 0.018604651162790697
+      },
+      {
+        "episode": 3,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.01717606034389762,
+        "permitted_over_oracle": 0.9160763102850317,
+        "zero_authority_fraction_post": 0.04186046511627907
+      }
+    ]
+  },
+  "gain_085|declared": {
+    "family": "gain_085",
+    "telemetry": "declared",
+    "gain": 0.85,
+    "episodes": 4,
+    "actuators": 12,
+    "config": {
+      "bound_position_rad": 0.006,
+      "bound_torque_nm": 1.5,
+      "latency_max": 3,
+      "drift_rate": 0.05,
+      "max_speed": 0.3,
+      "available_force": 80.0,
+      "prior_low": 0.3,
+      "prior_high": 1.2
+    },
+    "steps_to_exclude_healthy_median": 6.0,
+    "never_excluded_fraction": 0.14583333333333334,
+    "mean_width_post": 0.26105682722630286,
+    "permitted_over_oracle_mean": 0.47577946266634513,
+    "zero_authority_fraction_post": 0.3225306883332178,
+    "packet_status_counts": {
+      "updated": 14048,
+      "skipped": 0,
+      "inconsistent": 28,
+      "violations": 5
+    },
+    "per_actuator": [
+      {
+        "episode": 0,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 5,
+        "mean_width_post": 0.17079774290323257,
+        "permitted_over_oracle": 0.6689043433763083,
+        "zero_authority_fraction_post": 0.14673913043478262
+      },
+      {
+        "episode": 0,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 2,
+        "mean_width_post": 0.1495754932579787,
+        "permitted_over_oracle": 0.6607056006737513,
+        "zero_authority_fraction_post": 0.16847826086956522
+      },
+      {
+        "episode": 0,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 2,
+        "mean_width_post": 0.18089612702960553,
+        "permitted_over_oracle": 0.5106678081372955,
+        "zero_authority_fraction_post": 0.2608695652173913
+      },
+      {
+        "episode": 0,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.12241966990025147,
+        "permitted_over_oracle": 0.6780909223163523,
+        "zero_authority_fraction_post": 0.07608695652173914
+      },
+      {
+        "episode": 0,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 85,
+        "mean_width_post": 0.16512521615494852,
+        "permitted_over_oracle": 0.2505617925875838,
+        "zero_authority_fraction_post": 0.5543478260869565
+      },
+      {
+        "episode": 0,
+        "actuator": 5,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 0,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 5,
+        "mean_width_post": 0.15750688832739126,
+        "permitted_over_oracle": 0.3846362604465378,
+        "zero_authority_fraction_post": 0.20108695652173914
+      },
+      {
+        "episode": 0,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 7,
+        "mean_width_post": 0.13754595427409463,
+        "permitted_over_oracle": 0.6398832400793925,
+        "zero_authority_fraction_post": 0.14130434782608695
+      },
+      {
+        "episode": 0,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 15,
+        "mean_width_post": 0.12623768526574838,
+        "permitted_over_oracle": 0.6350342454508126,
+        "zero_authority_fraction_post": 0.25
+      },
+      {
+        "episode": 0,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 7,
+        "mean_width_post": 0.0976141759234926,
+        "permitted_over_oracle": 0.6702753832365442,
+        "zero_authority_fraction_post": 0.09239130434782608
+      },
+      {
+        "episode": 0,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 38,
+        "mean_width_post": 0.13846080491076346,
+        "permitted_over_oracle": 0.28665258992290804,
+        "zero_authority_fraction_post": 0.3423913043478261
+      },
+      {
+        "episode": 0,
+        "actuator": 11,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.6270955639040988,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 1,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.0870071062722157,
+        "permitted_over_oracle": 0.7259342839028587,
+        "zero_authority_fraction_post": 0.07216494845360824
+      },
+      {
+        "episode": 1,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.13235120552102314,
+        "permitted_over_oracle": 0.5821374333483244,
+        "zero_authority_fraction_post": 0.12886597938144329
+      },
+      {
+        "episode": 1,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 9,
+        "mean_width_post": 0.17697234497856848,
+        "permitted_over_oracle": 0.6508170174486638,
+        "zero_authority_fraction_post": 0.25257731958762886
+      },
+      {
+        "episode": 1,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.11176209965932,
+        "permitted_over_oracle": 0.6379084931489916,
+        "zero_authority_fraction_post": 0.08762886597938144
+      },
+      {
+        "episode": 1,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 26,
+        "mean_width_post": 0.21361869174180573,
+        "permitted_over_oracle": 0.32709359663099474,
+        "zero_authority_fraction_post": 0.42783505154639173
+      },
+      {
+        "episode": 1,
+        "actuator": 5,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 1,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.1685629073799271,
+        "permitted_over_oracle": 0.6420476901879352,
+        "zero_authority_fraction_post": 0.0979381443298969
+      },
+      {
+        "episode": 1,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 6,
+        "mean_width_post": 0.18006210351727672,
+        "permitted_over_oracle": 0.6140955039931498,
+        "zero_authority_fraction_post": 0.15463917525773196
+      },
+      {
+        "episode": 1,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.14083790594769507,
+        "permitted_over_oracle": 0.44255588890378494,
+        "zero_authority_fraction_post": 0.16494845360824742
+      },
+      {
+        "episode": 1,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.15179818715016866,
+        "permitted_over_oracle": 0.6878595442789828,
+        "zero_authority_fraction_post": 0.11855670103092783
+      },
+      {
+        "episode": 1,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 34,
+        "mean_width_post": 0.144397626525348,
+        "permitted_over_oracle": 0.30210918186343355,
+        "zero_authority_fraction_post": 0.26288659793814434
+      },
+      {
+        "episode": 1,
+        "actuator": 11,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 2,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.1582899069904688,
+        "permitted_over_oracle": 0.7456793244528671,
+        "zero_authority_fraction_post": 0.04975124378109453
+      },
+      {
+        "episode": 2,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 7,
+        "mean_width_post": 0.16228332211129107,
+        "permitted_over_oracle": 0.6152594909803479,
+        "zero_authority_fraction_post": 0.19402985074626866
+      },
+      {
+        "episode": 2,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 19,
+        "mean_width_post": 0.1796950380600507,
+        "permitted_over_oracle": 0.5984397436073665,
+        "zero_authority_fraction_post": 0.23880597014925373
+      },
+      {
+        "episode": 2,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 15,
+        "mean_width_post": 0.09975663850556558,
+        "permitted_over_oracle": 0.6797253461810171,
+        "zero_authority_fraction_post": 0.13930348258706468
+      },
+      {
+        "episode": 2,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 19,
+        "mean_width_post": 0.19641672556673118,
+        "permitted_over_oracle": 0.2605926398052058,
+        "zero_authority_fraction_post": 0.5223880597014925
+      },
+      {
+        "episode": 2,
+        "actuator": 5,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.7993540324975009,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 2,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.09786881083872781,
+        "permitted_over_oracle": 0.7502549248994141,
+        "zero_authority_fraction_post": 0.07960199004975124
+      },
+      {
+        "episode": 2,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.124440360128583,
+        "permitted_over_oracle": 0.7197857765586733,
+        "zero_authority_fraction_post": 0.0945273631840796
+      },
+      {
+        "episode": 2,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.14323723256884524,
+        "permitted_over_oracle": 0.531543461238547,
+        "zero_authority_fraction_post": 0.20398009950248755
+      },
+      {
+        "episode": 2,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.12221571936536191,
+        "permitted_over_oracle": 0.7388269425222891,
+        "zero_authority_fraction_post": 0.06467661691542288
+      },
+      {
+        "episode": 2,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.15938746425049816,
+        "permitted_over_oracle": 0.35567524893486535,
+        "zero_authority_fraction_post": 0.12935323383084577
+      },
+      {
+        "episode": 2,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 75,
+        "mean_width_post": 0.7068286684911642,
+        "permitted_over_oracle": 0.33226218560174775,
+        "zero_authority_fraction_post": 0.527363184079602
+      },
+      {
+        "episode": 3,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.1702165791157926,
+        "permitted_over_oracle": 0.6948675065742277,
+        "zero_authority_fraction_post": 0.09550561797752809
+      },
+      {
+        "episode": 3,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.14138637432891332,
+        "permitted_over_oracle": 0.637869810345267,
+        "zero_authority_fraction_post": 0.15730337078651685
+      },
+      {
+        "episode": 3,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.13899454742335202,
+        "permitted_over_oracle": 0.5261988874344081,
+        "zero_authority_fraction_post": 0.3595505617977528
+      },
+      {
+        "episode": 3,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 3,
+        "mean_width_post": 0.108353566587641,
+        "permitted_over_oracle": 0.6580158101452339,
+        "zero_authority_fraction_post": 0.11797752808988764
+      },
+      {
+        "episode": 3,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 4,
+        "mean_width_post": 0.17092438829079104,
+        "permitted_over_oracle": 0.4717041696395106,
+        "zero_authority_fraction_post": 0.0898876404494382
+      },
+      {
+        "episode": 3,
+        "actuator": 5,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      },
+      {
+        "episode": 3,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 12,
+        "mean_width_post": 0.172388360071718,
+        "permitted_over_oracle": 0.5326633532006189,
+        "zero_authority_fraction_post": 0.19662921348314608
+      },
+      {
+        "episode": 3,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 20,
+        "mean_width_post": 0.13556554545177502,
+        "permitted_over_oracle": 0.6514346867061912,
+        "zero_authority_fraction_post": 0.21348314606741572
+      },
+      {
+        "episode": 3,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 29,
+        "mean_width_post": 0.14936485350801704,
+        "permitted_over_oracle": 0.5037631792070577,
+        "zero_authority_fraction_post": 0.2752808988764045
+      },
+      {
+        "episode": 3,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 20,
+        "mean_width_post": 0.13186481829439656,
+        "permitted_over_oracle": 0.6543078896055344,
+        "zero_authority_fraction_post": 0.15730337078651685
+      },
+      {
+        "episode": 3,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 100,
+        "mean_width_post": 0.18124907505646182,
+        "permitted_over_oracle": 0.1805730104095693,
+        "zero_authority_fraction_post": 0.5730337078651685
+      },
+      {
+        "episode": 3,
+        "actuator": 11,
+        "steps_to_exclude_healthy": -1,
+        "mean_width_post": 0.9000000357627869,
+        "permitted_over_oracle": 0.0,
+        "zero_authority_fraction_post": 1.0
+      }
+    ]
+  },
+  "gain_085|exact": {
+    "family": "gain_085",
+    "telemetry": "exact",
+    "gain": 0.85,
+    "episodes": 4,
+    "actuators": 12,
+    "config": {
+      "bound_position_rad": 1e-05,
+      "bound_torque_nm": 0.001,
+      "latency_max": 0,
+      "drift_rate": 0.05,
+      "max_speed": 0.3,
+      "available_force": 80.0,
+      "prior_low": 0.3,
+      "prior_high": 1.2
+    },
+    "steps_to_exclude_healthy_median": 1.0,
+    "never_excluded_fraction": 0.0,
+    "mean_width_post": 0.009668316016169685,
+    "permitted_over_oracle_mean": 1.1029674425715659,
+    "zero_authority_fraction_post": 0.03902956695142314,
+    "packet_status_counts": {
+      "updated": 14352,
+      "skipped": 0,
+      "inconsistent": 48,
+      "violations": 0
+    },
+    "per_actuator": [
+      {
+        "episode": 0,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.00777596494425898,
+        "permitted_over_oracle": 1.1490265592384592,
+        "zero_authority_fraction_post": 0.05434782608695652
+      },
+      {
+        "episode": 0,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007775642301725305,
+        "permitted_over_oracle": 1.0438958929834223,
+        "zero_authority_fraction_post": 0.06521739130434782
+      },
+      {
+        "episode": 0,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008105937229550404,
+        "permitted_over_oracle": 1.242476577540315,
+        "zero_authority_fraction_post": 0.06521739130434782
+      },
+      {
+        "episode": 0,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007388853184554888,
+        "permitted_over_oracle": 0.813954606846513,
+        "zero_authority_fraction_post": 0.010869565217391304
+      },
+      {
+        "episode": 0,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008142217345859694,
+        "permitted_over_oracle": 0.9260183478749819,
+        "zero_authority_fraction_post": 0.02717391304347826
+      },
+      {
+        "episode": 0,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.020002377745897873,
+        "permitted_over_oracle": 1.5951404247592433,
+        "zero_authority_fraction_post": 0.04891304347826087
+      },
+      {
+        "episode": 0,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007804768240970114,
+        "permitted_over_oracle": 1.3185999662169454,
+        "zero_authority_fraction_post": 0.03804347826086957
+      },
+      {
+        "episode": 0,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.00758267096851183,
+        "permitted_over_oracle": 0.9993461570662304,
+        "zero_authority_fraction_post": 0.03260869565217391
+      },
+      {
+        "episode": 0,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.00801984965801239,
+        "permitted_over_oracle": 1.2754779041562918,
+        "zero_authority_fraction_post": 0.043478260869565216
+      },
+      {
+        "episode": 0,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007530554157236348,
+        "permitted_over_oracle": 0.7121343370768285,
+        "zero_authority_fraction_post": 0.04891304347826087
+      },
+      {
+        "episode": 0,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.00815768961025321,
+        "permitted_over_oracle": 0.9619889298625524,
+        "zero_authority_fraction_post": 0.03260869565217391
+      },
+      {
+        "episode": 0,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 2,
+        "mean_width_post": 0.02328924316426982,
+        "permitted_over_oracle": 1.5955259151196948,
+        "zero_authority_fraction_post": 0.04891304347826087
+      },
+      {
+        "episode": 1,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007277598086091661,
+        "permitted_over_oracle": 1.1956666520616497,
+        "zero_authority_fraction_post": 0.015463917525773196
+      },
+      {
+        "episode": 1,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.00746464114828208,
+        "permitted_over_oracle": 0.9931818889504299,
+        "zero_authority_fraction_post": 0.02577319587628866
+      },
+      {
+        "episode": 1,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007970882138026129,
+        "permitted_over_oracle": 1.2152804325941113,
+        "zero_authority_fraction_post": 0.06701030927835051
+      },
+      {
+        "episode": 1,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007233418140214743,
+        "permitted_over_oracle": 0.7988411856882773,
+        "zero_authority_fraction_post": 0.015463917525773196
+      },
+      {
+        "episode": 1,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007877174419226106,
+        "permitted_over_oracle": 0.8637539068011664,
+        "zero_authority_fraction_post": 0.030927835051546393
+      },
+      {
+        "episode": 1,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.019527344666805464,
+        "permitted_over_oracle": 1.6283207583856993,
+        "zero_authority_fraction_post": 0.05154639175257732
+      },
+      {
+        "episode": 1,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007229045187075113,
+        "permitted_over_oracle": 1.2095827581564877,
+        "zero_authority_fraction_post": 0.020618556701030927
+      },
+      {
+        "episode": 1,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.00743974146154738,
+        "permitted_over_oracle": 1.0298265618831504,
+        "zero_authority_fraction_post": 0.03608247422680412
+      },
+      {
+        "episode": 1,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007737246985288011,
+        "permitted_over_oracle": 1.315347958692296,
+        "zero_authority_fraction_post": 0.03608247422680412
+      },
+      {
+        "episode": 1,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.0072051624661868385,
+        "permitted_over_oracle": 0.8122354891839176,
+        "zero_authority_fraction_post": 0.020618556701030927
+      },
+      {
+        "episode": 1,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007774876872288812,
+        "permitted_over_oracle": 0.81451967432739,
+        "zero_authority_fraction_post": 0.02577319587628866
+      },
+      {
+        "episode": 1,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.018542172060799354,
+        "permitted_over_oracle": 1.5602255694354425,
+        "zero_authority_fraction_post": 0.030927835051546393
+      },
+      {
+        "episode": 2,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.006989846775187782,
+        "permitted_over_oracle": 1.1601061145341054,
+        "zero_authority_fraction_post": 0.024875621890547265
+      },
+      {
+        "episode": 2,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.0071761720809177375,
+        "permitted_over_oracle": 0.9562335123514442,
+        "zero_authority_fraction_post": 0.03980099502487562
+      },
+      {
+        "episode": 2,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007821567319518892,
+        "permitted_over_oracle": 1.1400508782796202,
+        "zero_authority_fraction_post": 0.06467661691542288
+      },
+      {
+        "episode": 2,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007132531102023908,
+        "permitted_over_oracle": 0.7518767427300894,
+        "zero_authority_fraction_post": 0.029850746268656716
+      },
+      {
+        "episode": 2,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.0076090862501913045,
+        "permitted_over_oracle": 0.6942697583196442,
+        "zero_authority_fraction_post": 0.01990049751243781
+      },
+      {
+        "episode": 2,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.019491872384180476,
+        "permitted_over_oracle": 1.5633309011522756,
+        "zero_authority_fraction_post": 0.03980099502487562
+      },
+      {
+        "episode": 2,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.0070528856557400075,
+        "permitted_over_oracle": 1.1352259512318914,
+        "zero_authority_fraction_post": 0.029850746268656716
+      },
+      {
+        "episode": 2,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007127756799631451,
+        "permitted_over_oracle": 0.9774503605874946,
+        "zero_authority_fraction_post": 0.01990049751243781
+      },
+      {
+        "episode": 2,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007537593295918175,
+        "permitted_over_oracle": 1.2552603658870694,
+        "zero_authority_fraction_post": 0.04975124378109453
+      },
+      {
+        "episode": 2,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007432615282523691,
+        "permitted_over_oracle": 0.8126255200051242,
+        "zero_authority_fraction_post": 0.06467661691542288
+      },
+      {
+        "episode": 2,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007703776679821869,
+        "permitted_over_oracle": 0.8158047332033495,
+        "zero_authority_fraction_post": 0.024875621890547265
+      },
+      {
+        "episode": 2,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.018065959363434445,
+        "permitted_over_oracle": 1.3543927585455597,
+        "zero_authority_fraction_post": 0.04477611940298507
+      },
+      {
+        "episode": 3,
+        "actuator": 0,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007726468396990487,
+        "permitted_over_oracle": 1.1907992521693997,
+        "zero_authority_fraction_post": 0.028089887640449437
+      },
+      {
+        "episode": 3,
+        "actuator": 1,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.00785138700785262,
+        "permitted_over_oracle": 1.012844123695881,
+        "zero_authority_fraction_post": 0.0449438202247191
+      },
+      {
+        "episode": 3,
+        "actuator": 2,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008475209889786967,
+        "permitted_over_oracle": 1.1327283577591496,
+        "zero_authority_fraction_post": 0.10112359550561797
+      },
+      {
+        "episode": 3,
+        "actuator": 3,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007939194025618306,
+        "permitted_over_oracle": 0.7393265546192295,
+        "zero_authority_fraction_post": 0.06179775280898876
+      },
+      {
+        "episode": 3,
+        "actuator": 4,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008289919810348682,
+        "permitted_over_oracle": 0.8269011030049128,
+        "zero_authority_fraction_post": 0.028089887640449437
+      },
+      {
+        "episode": 3,
+        "actuator": 5,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.018973430890715525,
+        "permitted_over_oracle": 1.6404425786637757,
+        "zero_authority_fraction_post": 0.033707865168539325
+      },
+      {
+        "episode": 3,
+        "actuator": 6,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.0077882975005031975,
+        "permitted_over_oracle": 1.2301828910166384,
+        "zero_authority_fraction_post": 0.028089887640449437
+      },
+      {
+        "episode": 3,
+        "actuator": 7,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007770201463377878,
+        "permitted_over_oracle": 1.0064501062400282,
+        "zero_authority_fraction_post": 0.06179775280898876
+      },
+      {
+        "episode": 3,
+        "actuator": 8,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008096989286079836,
+        "permitted_over_oracle": 1.2687358623851899,
+        "zero_authority_fraction_post": 0.05056179775280899
+      },
+      {
+        "episode": 3,
+        "actuator": 9,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.007642468374766661,
+        "permitted_over_oracle": 0.7279517615462482,
+        "zero_authority_fraction_post": 0.016853932584269662
+      },
+      {
+        "episode": 3,
+        "actuator": 10,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.008352597108048,
+        "permitted_over_oracle": 0.8706096153579085,
+        "zero_authority_fraction_post": 0.028089887640449437
+      },
+      {
+        "episode": 3,
+        "actuator": 11,
+        "steps_to_exclude_healthy": 1,
+        "mean_width_post": 0.019176269850034393,
+        "permitted_over_oracle": 1.6084689852476346,
+        "zero_authority_fraction_post": 0.0449438202247191
+      }
+    ]
+  }
+}
