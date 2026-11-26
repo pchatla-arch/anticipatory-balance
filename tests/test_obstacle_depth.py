@@ -72,6 +72,23 @@ class DepthSelectionTests(unittest.TestCase):
         self.assertEqual(reason, "detour")
         self.assertGreaterEqual(vx, 0.)
 
+    def test_no_camera_frame_stops(self):
+        nav = ObstacleNavigator((6., 0.))
+        self.assertEqual(nav.command(0., 0., 0., 0)[2], "stop_stale_depth")
+
+    def test_fresh_empty_depth_allows_slow_approach(self):
+        nav = ObstacleNavigator((6., 0.))
+        nav.ingest(None, observed_step=1)
+        vx, wz, reason = nav.command(0., 0., 0., 2)
+        self.assertEqual(reason, "approach_slow")
+        self.assertGreater(vx, 0.)
+        self.assertLessEqual(vx, .25)
+
+    def test_stale_after_blank_frames_stops(self):
+        nav = ObstacleNavigator((6., 0.))
+        nav.ingest(None, observed_step=1)
+        self.assertEqual(nav.command(0., 0., 0., 13)[2], "stop_stale_depth")
+
     def test_missed_observation_does_not_clear_accepted_obstacle(self):
         nav = ObstacleNavigator((6., 0.))
         nav.ingest(DepthDetection((3, 0), 3., .3, 20, 1., 1))
