@@ -230,7 +230,14 @@ def main():
             raise SystemExit("RUNPOD_POD_ID required")
         pod_id = input("RunPod pod ID: ").strip()
     token = ask_secret("RUNPOD_API_KEY", SECRETS / "runpod")
-    pod = validate_pod(pod_id, token)
+    try:
+        pod = validate_pod(pod_id, token)
+    except Exception:
+        # Incompatible manually deployed pods must not accrue more billing
+        # while the operator reads the failure message.
+        log("UNAUTHORIZED CONFIGURATION OR PROVIDER READ FAILURE; attempting stop")
+        stop_pod(pod_id, token)
+        raise
     price = float(pod["cost"])
     pod_started = started_epoch(pod)
     # 5h20m maximum from pod START, never 6h from starting this script.
