@@ -19,6 +19,11 @@ class LanguageNavigationTests(unittest.TestCase):
         self.assertEqual(x, (5.0, 2.0))
         self.assertEqual(status, "grounded")
 
+    def test_instruction_mentions_obstacle_without_location_leak(self):
+        c = parse_instruction("Walk around the obstacle and reach the station")
+        self.assertTrue(c.accepted)
+        self.assertEqual(c.target, "station")
+
     def test_unsupported_instruction_stops(self):
         c = parse_instruction("jump over the obstacle")
         self.assertFalse(c.accepted)
