@@ -273,6 +273,11 @@ def setup_askpass():
     env = os.environ.copy()
     env["GIT_ASKPASS"] = str(script)
     env["GIT_TERMINAL_PROMPT"] = "0"
+    # Prevent stale pod/global Git credential helpers from taking precedence
+    # over this run's private askpass token.
+    env["GIT_CONFIG_COUNT"] = "1"
+    env["GIT_CONFIG_KEY_0"] = "credential.helper"
+    env["GIT_CONFIG_VALUE_0"] = ""
     return env
 
 
