@@ -86,7 +86,7 @@ def validate_pod(pod_id, token):
             or pod.get("cudaVersion") != "13.2"
             or gpu.get("count") != 1
             or gpu.get("id") != "NVIDIA RTX 6000 Ada Generation"
-            or float(pod.get("cost", 1000)) > PRICE_MAX):
+            or not (0 < float(pod.get("cost", 1000)) <= PRICE_MAX)):
         raise RuntimeError(
             "Pod does not match the approved one Community RTX 6000 Ada, CUDA 13.2, "
             "at <= $0.74/hr; scientific work withheld"
@@ -268,7 +268,12 @@ def main():
         stop_pod(pod_id, token)
         raise
     price = float(pod["cost"])
-    verify_no_competing_pod(pod_id, token)
+    try:
+        verify_no_competing_pod(pod_id, token)
+    except Exception:
+        log("Cannot establish exclusive project ownership; requesting provider stop")
+        stop_pod(pod_id, token)
+        raise
     pod_started = started_epoch(pod)
     # 5h20m maximum from pod START, never 6h from starting this script.
     max_budget_s = int(COST_MAX_USD / price * 3600) - 40 * 60
