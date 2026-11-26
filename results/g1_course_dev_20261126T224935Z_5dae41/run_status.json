@@ -1,0 +1,21 @@
+{
+  "bench_rows_observed": 32,
+  "exclusive_pod_check": "USER_CONFIRMED_API_UNAVAILABLE",
+  "frozen_heuristic_commit": "d756c37d0564837a74132c30f8e366320a6bb1a5",
+  "github_write_probe_sha": "9451fd246369cd1ed789c421a31724467d877e1e",
+  "gpu_rate_per_hr": 0.69,
+  "kind": "g1_course_development",
+  "note": "Main experiment launcher was absent at inspection and pod remained RUNNING; cause not yet established. All raw traces preserved without pretending 128 episodes finished.",
+  "obstacle_72_episode_trial": "NOT_EXECUTED",
+  "overall": "INCOMPLETE_MAIN_PROCESS_EXITED_BEFORE_FINALIZATION",
+  "pod_id": "9be02r81opb7nj",
+  "run_id": "20261126T224935Z_5dae41",
+  "scientific_claims": "Only recorded episode data from completed stages",
+  "source_commit": "b243154d8c28dbf69dfb0cf7dc8db641df2d808d",
+  "split": "dev",
+  "stages": {
+    "final_publication": "MANUAL_RECOVERY_AFTER_SUPERVISOR_EXIT",
+    "g1_bench": "PARTIAL_32_OF_128_EPISODES",
+    "github_write_preflight": "actual_published_commit_verified"
+  }
+}

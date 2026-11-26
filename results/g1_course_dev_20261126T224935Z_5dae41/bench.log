@@ -1,0 +1,4 @@
+gain_070 declared none: falls=0.000 loss=0.0745 harmful=0.0000 gain_err=0.300 time=65s
+gain_070 declared oracle: falls=0.000 loss=0.0282 harmful=0.0000 gain_err=0.300 time=36s
+gain_070 declared estimated_inverse: falls=0.000 loss=0.0295 harmful=0.0839 gain_err=0.076 time=36s
+gain_070 declared heuristic_gate: falls=0.000 loss=0.0333 harmful=0.0002 gain_err=0.079 time=37s
