@@ -11,6 +11,8 @@ This directory preserves **measured** CPU-development tuning results and the ear
 - [bench_cpu_raw_recomputed.json](bench_cpu_raw_recomputed.json): independently checked 256 raw CPU development benchmark episodes from the *earlier* estimator/heuristic comparison (32 cells, exact/declared telemetry, not WP 2.2 velocity envelope).
 - [bench_cpu_paired_bootstrap.json](bench_cpu_paired_bootstrap.json): 24 exploratory paired comparisons with 10,000-resample confidence intervals, on the same 256 historical dev records.
 - [PAPER_RESULTS_DRAFT.md](PAPER_RESULTS_DRAFT.md): paper-ready experimental setup, outcome table and limitations for the Dec 4 submission.
+- [figure_tuning_objective.svg](figure_tuning_objective.svg): chart of 17 measured development tuning objective evaluations.
+- [figure_bench_declared_loss.svg](figure_bench_declared_loss.svg): archived CPU benchmark loss comparison on gain-0.70 and return scenarios.
 - Underlying primary files: `oaa/claude-bench@d756c37d0564837a74132c30f8e366320a6bb1a5:results/tune_heuristic_dev_cpu_v0/{tuning_log.json,heuristic.json}`.
 - Preflight independent audit: `oaa/wp2.2-velocity-envelope-pilot@4b20e3e737b790bdb853faf6fc9c099c59f48316:results/velocity_pilot_wp22_preflight/wiring_audit.json`.
 
