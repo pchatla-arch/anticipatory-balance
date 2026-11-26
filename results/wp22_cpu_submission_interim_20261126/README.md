@@ -8,10 +8,13 @@ This directory preserves **measured** CPU-development tuning results and the ear
 
 - [evidence.json](evidence.json): 17 source-referenced tuning evaluations, frozen parameters, quantitative reductions, preflight and unresolved experiment state.
 - [tuning_metrics.csv](tuning_metrics.csv): 17 actual objective/loss/harm/fall measurements, suitable for the tuning plot.
+- [bench_cpu_raw_recomputed.json](bench_cpu_raw_recomputed.json): independently checked 256 raw CPU development benchmark episodes from the *earlier* estimator/heuristic comparison (32 cells, exact/declared telemetry, not WP 2.2 velocity envelope).
+- [bench_cpu_paired_bootstrap.json](bench_cpu_paired_bootstrap.json): 24 exploratory paired comparisons with 10,000-resample confidence intervals, on the same 256 historical dev records.
+- [PAPER_RESULTS_DRAFT.md](PAPER_RESULTS_DRAFT.md): paper-ready experimental setup, outcome table and limitations for the Dec 4 submission.
 - Underlying primary files: `oaa/claude-bench@d756c37d0564837a74132c30f8e366320a6bb1a5:results/tune_heuristic_dev_cpu_v0/{tuning_log.json,heuristic.json}`.
 - Preflight independent audit: `oaa/wp2.2-velocity-envelope-pilot@4b20e3e737b790bdb853faf6fc9c099c59f48316:results/velocity_pilot_wp22_preflight/wiring_audit.json`.
 
-**Reproducible facts:** start objective 0.0518674595374614; best objective 0.042785387802869085 (17.51% lower); start healthy intervention harm 0.04267326110973954; best 0.023494650311768055 (44.92% lower); locomotion loss increases from 0.03053082898259163 to 0.031038062646985054; zero falls in the recorded tuning evaluations. These are development-selection measurements, not confidence intervals or an unbiased generalization estimate. Tuning used the same development families; the selected configuration is a coordinate-descent result.
+**Reproducible facts:** start objective 0.0518674595374614; best objective 0.042785387802869085 (17.51% lower); start healthy intervention harm 0.04267326110973954; best 0.023494650311768055 (44.94% lower); locomotion loss increases from 0.03053082898259163 to 0.031038062646985054; zero falls in the recorded tuning evaluations. These are development-selection measurements, not confidence intervals or an unbiased generalization estimate. Tuning used the same development families; the selected configuration is a coordinate-descent result.
 
 ## One-attempt experiment recovery — do this BEFORE any physics
 
