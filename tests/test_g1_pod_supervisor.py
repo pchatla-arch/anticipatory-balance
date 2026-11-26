@@ -28,9 +28,23 @@ class PodSupervisorGuards(TestCase):
             got = module.validate_pod("test-pod", "unused")
         self.assertEqual(got["cloud"], "COMMUNITY")
 
-    def test_secure_pod_rejected_even_when_same_gpu(self):
+    def test_secure_ada_accepted_at_authorized_rate(self):
         with mock.patch.object(module, "runpod_request",
-                               return_value=self.pod(cloud="SECURE")):
+                               return_value=self.pod(cloud="SECURE", cost=1.09)):
+            got = module.validate_pod("test-pod", "unused")
+        self.assertEqual(got["cloud"], "SECURE")
+
+    def test_secure_a6000_accepted_at_authorized_rate(self):
+        with mock.patch.object(module, "runpod_request",
+                               return_value=self.pod(cloud="SECURE", cost=0.69,
+                                                     gpu={"id": "NVIDIA RTX A6000", "count": 1})):
+            got = module.validate_pod("test-pod", "unused")
+        self.assertEqual(got["gpu"]["id"], "NVIDIA RTX A6000")
+
+    def test_secure_a6000_rejected_above_ceiling(self):
+        with mock.patch.object(module, "runpod_request",
+                               return_value=self.pod(cloud="SECURE", cost=0.70,
+                                                     gpu={"id": "NVIDIA RTX A6000", "count": 1})):
             with self.assertRaises(RuntimeError):
                 module.validate_pod("test-pod", "unused")
 
