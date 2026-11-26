@@ -1,5 +1,5 @@
 {
-  "evaluations": 9,
+  "evaluations": 12,
   "log": [
     {
       "tag": "start",
@@ -189,10 +189,72 @@
       "falls": 0.0,
       "seconds": 0.0,
       "resumed": true
+    },
+    {
+      "tag": "s0_heuristic_max_age_steps_3",
+      "config": {
+        "rls": {
+          "forgetting": 0.9
+        },
+        "heuristic": {
+          "dead_band": 0.1,
+          "max_residual_rms": 0.02,
+          "max_age_steps": 3,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.04362199790620555,
+      "loss": 0.03158987860661,
+      "harm": 0.024064238599191108,
+      "falls": 0.0,
+      "seconds": 0.0,
+      "resumed": true
+    },
+    {
+      "tag": "s0_heuristic_max_age_steps_5",
+      "config": {
+        "rls": {
+          "forgetting": 0.9
+        },
+        "heuristic": {
+          "dead_band": 0.1,
+          "max_residual_rms": 0.02,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.0476057642744854,
+      "loss": 0.029125776491127908,
+      "harm": 0.03695997556671499,
+      "falls": 0.0,
+      "seconds": 0.0,
+      "resumed": true
+    },
+    {
+      "tag": "s0_heuristic_max_age_steps_10",
+      "config": {
+        "rls": {
+          "forgetting": 0.9
+        },
+        "heuristic": {
+          "dead_band": 0.1,
+          "max_residual_rms": 0.02,
+          "max_age_steps": 10,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.04751701806516696,
+      "loss": 0.029031848651356995,
+      "harm": 0.03697033882761994,
+      "falls": 0.0,
+      "seconds": 229.0
     }
   ],
   "best": {
-    "tag": "s0_heuristic_max_residual_rms_0.02",
+    "tag": "s0_heuristic_max_age_steps_3",
     "config": {
       "rls": {
         "forgetting": 0.9
@@ -200,14 +262,14 @@
       "heuristic": {
         "dead_band": 0.1,
         "max_residual_rms": 0.02,
-        "max_age_steps": 5,
+        "max_age_steps": 3,
         "min_samples": 5,
         "min_excitation_rad": 0.01
       }
     },
-    "objective": 0.0476057642744854,
-    "loss": 0.029125776491127908,
-    "harm": 0.03695997556671499,
+    "objective": 0.04362199790620555,
+    "loss": 0.03158987860661,
+    "harm": 0.024064238599191108,
     "falls": 0.0,
     "seconds": 0.0,
     "resumed": true

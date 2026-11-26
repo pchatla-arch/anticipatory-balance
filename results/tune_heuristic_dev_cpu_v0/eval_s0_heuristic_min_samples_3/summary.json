@@ -1,0 +1,229 @@
+{
+  "cells": {
+    "gain_070|declared|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.032270313473418355,
+      "mean_progress_m": 0.9477496817708015,
+      "mean_harmful_offset_rad": 0.00047951581746019656,
+      "mean_applied_offset_rad": 0.05657773852348328,
+      "mean_gain_abs_error": 0.07842450309544802,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 4.875
+    },
+    "gain_070_return|declared|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.029948993818834424,
+      "mean_progress_m": 0.7702766321599483,
+      "mean_harmful_offset_rad": 0.0036929557682015,
+      "mean_applied_offset_rad": 0.031429004867871604,
+      "mean_gain_abs_error": 0.08817775547504425,
+      "withdrawal_steps_median": 5.5,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 6.0
+    },
+    "healthy|declared|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.022934945300221443,
+      "mean_progress_m": 0.7353148572146893,
+      "mean_harmful_offset_rad": 0.0006930322269909084,
+      "mean_applied_offset_rad": 0.0006930322324236234,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 7.125
+    },
+    "sensor_scale_080|declared|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.032347509171813726,
+      "mean_progress_m": 0.8070089370012283,
+      "mean_harmful_offset_rad": 0.047708201222121716,
+      "mean_applied_offset_rad": 0.04770820140838623,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 4.75
+    }
+  },
+  "paired_vs_reference": {},
+  "reference": "heuristic_gate",
+  "meta": {
+    "split": "dev",
+    "seed": 11000,
+    "impl": "jax",
+    "steps": 300,
+    "schedule": "walk_turn_stop_resume",
+    "episodes": 8,
+    "devices": [
+      "cpu:0"
+    ],
+    "versions": {
+      "jax": "0.12.0.1",
+      "mujoco": "3.16.0",
+      "mujoco-mjx": "3.16.0",
+      "warp-lang": "1.18.0",
+      "brax": "0.14.2"
+    },
+    "checkpoint": "/home/claude/anticipatory-balance/checkpoints/nominal_s1/000202342400",
+    "source_commit": "a02c9f5af8604355f6719ff79e5eb007a837b60a",
+    "rls": {
+      "forgetting": 0.9,
+      "initial_cov": 1000.0,
+      "prior_gain": 1.0,
+      "gain_min": 0.2,
+      "gain_max": 1.5,
+      "ewma": 0.9,
+      "min_excitation_rad": 0.001
+    },
+    "heuristic": {
+      "min_samples": 3,
+      "max_residual_rms": 0.02,
+      "min_excitation_rad": 0.01,
+      "dead_band": 0.1,
+      "max_age_steps": 3
+    },
+    "telemetry": {
+      "declared": {
+        "position_noise_rad": 0.002,
+        "torque_noise_nm": 0.5,
+        "position_bias_rad": 0.0,
+        "torque_bias_nm": 0.0,
+        "torque_scale": 1.0,
+        "latency_min": 1,
+        "latency_max": 3,
+        "dropout": 0.02,
+        "bound_position_rad": 0.006,
+        "bound_torque_nm": 1.5,
+        "velocity_error_rad_s": 0.5,
+        "bound_velocity_rad_s": 0.5
+      }
+    },
+    "families": {
+      "gain_070": {
+        "name": "gain_070",
+        "gain": 0.7,
+        "joint_group": "legs",
+        "onset_range": [
+          75,
+          125
+        ],
+        "return_after": null,
+        "damping_scale": 1.0,
+        "telemetry": {
+          "position_noise_rad": 0.0,
+          "torque_noise_nm": 0.0,
+          "position_bias_rad": 0.0,
+          "torque_bias_nm": 0.0,
+          "torque_scale": 1.0,
+          "latency_min": 0,
+          "latency_max": 0,
+          "dropout": 0.0,
+          "bound_position_rad": 1e-05,
+          "bound_torque_nm": 0.001,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
+        },
+        "description": ""
+      },
+      "gain_070_return": {
+        "name": "gain_070_return",
+        "gain": 0.7,
+        "joint_group": "legs",
+        "onset_range": [
+          75,
+          125
+        ],
+        "return_after": [
+          100,
+          150
+        ],
+        "damping_scale": 1.0,
+        "telemetry": {
+          "position_noise_rad": 0.0,
+          "torque_noise_nm": 0.0,
+          "position_bias_rad": 0.0,
+          "torque_bias_nm": 0.0,
+          "torque_scale": 1.0,
+          "latency_min": 0,
+          "latency_max": 0,
+          "dropout": 0.0,
+          "bound_position_rad": 1e-05,
+          "bound_torque_nm": 0.001,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
+        },
+        "description": "unannounced return to healthy gain"
+      },
+      "healthy": {
+        "name": "healthy",
+        "gain": 1.0,
+        "joint_group": "legs",
+        "onset_range": [
+          75,
+          125
+        ],
+        "return_after": null,
+        "damping_scale": 1.0,
+        "telemetry": {
+          "position_noise_rad": 0.0,
+          "torque_noise_nm": 0.0,
+          "position_bias_rad": 0.0,
+          "torque_bias_nm": 0.0,
+          "torque_scale": 1.0,
+          "latency_min": 0,
+          "latency_max": 0,
+          "dropout": 0.0,
+          "bound_position_rad": 1e-05,
+          "bound_torque_nm": 0.001,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
+        },
+        "description": "no plant change; measures false adaptation at rest"
+      },
+      "sensor_scale_080": {
+        "name": "sensor_scale_080",
+        "gain": 1.0,
+        "joint_group": "legs",
+        "onset_range": [
+          75,
+          125
+        ],
+        "return_after": null,
+        "damping_scale": 1.0,
+        "telemetry": {
+          "position_noise_rad": 0.0,
+          "torque_noise_nm": 0.0,
+          "position_bias_rad": 0.0,
+          "torque_bias_nm": 0.0,
+          "torque_scale": 0.8,
+          "latency_min": 0,
+          "latency_max": 0,
+          "dropout": 0.0,
+          "bound_position_rad": 0.0,
+          "bound_torque_nm": 0.0,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
+        },
+        "description": "healthy motor, effort sensor reads 80%: identifiability confound"
+      }
+    },
+    "candidate_available": false
+  },
+  "elapsed_seconds": 238.1
+}
