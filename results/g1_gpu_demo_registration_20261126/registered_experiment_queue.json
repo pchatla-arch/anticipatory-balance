@@ -1,0 +1,673 @@
+{
+  "status": "REGISTERED_NOT_EXECUTED",
+  "date": "2026-11-26",
+  "split": "dev",
+  "scientific_attempt": "separate PR #51 G1 integrated demo, never a replay of WP2.2 PR #46",
+  "source_commit": "f360a7c61e6e6c5763882a0cc95a5b4029a83251",
+  "frozen_heuristic_commit": "d756c37d0564837a74132c30f8e366320a6bb1a5",
+  "checkpoint_tree_sha256": "14bd6650f06c4e3171b6e2d2403ef0da5d9dd3604709f0c22b488329dd0223de",
+  "controls": {
+    "one_pod": true,
+    "gpu": "RTX 6000 Ada 48 GB",
+    "cloud": "COMMUNITY",
+    "cuda": "13.2",
+    "hourly_max_usd": 0.74,
+    "total_gpu_compute_max_usd": 4.44,
+    "max_hours": 6,
+    "publication_stop_reserve_minutes": 30,
+    "independent_stop_required": true
+  },
+  "protocol": {
+    "layouts": [
+      "clear",
+      "static_cylinder"
+    ],
+    "faults": [
+      "healthy",
+      "gain_070_return"
+    ],
+    "methods": [
+      "none",
+      "heuristic_gate",
+      "candidate_velocity"
+    ],
+    "seed_ids": [
+      620101,
+      620102,
+      620103,
+      620104,
+      620105,
+      620106
+    ],
+    "steps_per_episode_max": 1200,
+    "expected_episode_rows": 72,
+    "expected_paired_scenarios": 24
+  },
+  "experiment_queue": [
+    {
+      "stage": "P0",
+      "gate": "Pod-specific community CUDA 13.2 availability, no active pods, immutable source/checkpoint and hard provider auto-stop preflight",
+      "on_failure": "No launch; notify and preserve budget"
+    },
+    {
+      "stage": "P1",
+      "gate": "Run existing route, depth and language CPU tests and confirm G1 frozen checkpoint/model",
+      "on_failure": "Do not start physics"
+    },
+    {
+      "stage": "P2",
+      "gate": "Contact-enabled cylinder, calibrated depth from actual head camera, contact predicate and detection metric verification",
+      "on_failure": "Publish failure evidence; no success claim"
+    },
+    {
+      "stage": "P3",
+      "gate": "Healthy G1 physically navigates clear/obstacle routes with true contact and collision logs",
+      "on_failure": "Publish faulted/failed nominal case; do not proceed to adaptation claims"
+    },
+    {
+      "stage": "P4",
+      "gate": "Run fixed 72 development episodes only after P0-P3 pass",
+      "on_failure": "Preserve incomplete runs and true episode count"
+    },
+    {
+      "stage": "P5",
+      "gate": "Reconstruct loss/falls/collisions/source-age/withdrawal per paired seed from raw CSV, traces and camera logs",
+      "on_failure": "Publish mismatch and withhold results claim"
+    },
+    {
+      "stage": "P6",
+      "gate": "Render measured MuJoCo RGB H.264, publish blobs and sha256 ledger; stop pod and verify provider EXITED",
+      "on_failure": "Stop pod even if publisher fails; preserve storage"
+    }
+  ],
+  "required_evidence": [
+    "manifest.json",
+    "episodes.csv",
+    "NPZ traces",
+    "camera_metrics.json",
+    "perceived depth frames or timestamped logs",
+    "source/checkpoint hashes",
+    "real MuJoCo video",
+    "raw-data audit",
+    "publish receipt",
+    "provider stop receipt"
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "clear|healthy|620101",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620101,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620101",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620101,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620101",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620101,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620102",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620102,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620102",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620102,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620102",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620102,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620103",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620103,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620103",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620103,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620103",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620103,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620104",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620104,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620104",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620104,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620104",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620104,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620105",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620105,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620105",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620105,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620105",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620105,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620106",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620106,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620106",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620106,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|healthy|620106",
+      "layout": "clear",
+      "fault": "healthy",
+      "seed": 620106,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620101",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620101,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620101",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620101,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620101",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620101,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620102",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620102,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620102",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620102,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620102",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620102,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620103",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620103,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620103",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620103,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620103",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620103,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620104",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620104,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620104",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620104,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620104",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620104,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620105",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620105,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620105",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620105,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620105",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620105,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620106",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620106,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620106",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620106,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "clear|gain_070_return|620106",
+      "layout": "clear",
+      "fault": "gain_070_return",
+      "seed": 620106,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620101",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620101,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620101",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620101,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620101",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620101,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620102",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620102,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620102",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620102,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620102",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620102,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620103",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620103,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620103",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620103,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620103",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620103,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620104",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620104,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620104",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620104,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620104",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620104,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620105",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620105,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620105",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620105,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620105",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620105,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620106",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620106,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620106",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620106,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|healthy|620106",
+      "layout": "static_cylinder",
+      "fault": "healthy",
+      "seed": 620106,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620101",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620101,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620101",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620101,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620101",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620101,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620102",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620102,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620102",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620102,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620102",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620102,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620103",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620103,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620103",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620103,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620103",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620103,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620104",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620104,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620104",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620104,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620104",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620104,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620105",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620105,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620105",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620105,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620105",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620105,
+      "method": "candidate_velocity",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620106",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620106,
+      "method": "none",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620106",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620106,
+      "method": "heuristic_gate",
+      "steps": 1200
+    },
+    {
+      "scenario_id": "static_cylinder|gain_070_return|620106",
+      "layout": "static_cylinder",
+      "fault": "gain_070_return",
+      "seed": 620106,
+      "method": "candidate_velocity",
+      "steps": 1200
+    }
+  ]
+}
