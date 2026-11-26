@@ -94,6 +94,24 @@ def validate_pod(pod_id, token):
     return pod
 
 
+def verify_no_competing_pod(pod_id, token):
+    req = urllib.request.Request(
+        "https://api.runpod.io/v2/pods?limit=100",
+        headers={"Authorization": "Bearer " + token})
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        data = json.loads(resp.read())
+    active = data.get("pods", [])
+    # If provider response format changes, do not silently assume zero pods.
+    if not isinstance(active, list):
+        raise RuntimeError("Cannot verify account's active pod list")
+    competitors = [p["id"] for p in active
+                   if p.get("id") != pod_id and p.get("status") == "RUNNING"
+                   and any(w in p.get("name", "").lower()
+                           for w in ("g1", "oaa", "foresight", "obstacle"))]
+    if competitors:
+        raise RuntimeError("Another project pod is running: " + ", ".join(competitors))
+
+
 def started_epoch(pod):
     s = (pod.get("startedAt") or pod.get("createdAt"))
     if not s:
@@ -195,9 +213,20 @@ def publish(run_dir, run_id, env, deadline):
     commit = git("commit", "-m", "data: publish G1 development run " + run_id)
     if commit.returncode:
         raise RuntimeError("Git result commit failed")
-    push = git("push", "origin", "HEAD:refs/heads/" + RESULT_BRANCH)
-    if push.returncode:
-        raise RuntimeError("Git result push failed; retry transport only, no physics replay")
+    # No force push; transport-only retry rebases the UNIQUE result directory
+    # onto a concurrently advanced results branch.
+    for attempt in range(3):
+        push = git("push", "origin", "HEAD:refs/heads/" + RESULT_BRANCH)
+        if push.returncode == 0:
+            break
+        if deadline - time.time() < 150:
+            raise RuntimeError("Result publication retry would exceed budget reserve")
+        fetch = git("fetch", "origin", RESULT_BRANCH)
+        rebase = git("rebase", "FETCH_HEAD") if fetch.returncode == 0 else fetch
+        if rebase.returncode:
+            raise RuntimeError("Publication conflict; preserve evidence, never force push")
+    else:
+        raise RuntimeError("Git publication failed after 3 transport retries")
     head = git("rev-parse", "HEAD")
     remote = git("ls-remote", "origin", "refs/heads/" + RESULT_BRANCH)
     if head.returncode or remote.returncode or head.stdout.strip() != remote.stdout.split()[0]:
@@ -239,6 +268,7 @@ def main():
         stop_pod(pod_id, token)
         raise
     price = float(pod["cost"])
+    verify_no_competing_pod(pod_id, token)
     pod_started = started_epoch(pod)
     # 5h20m maximum from pod START, never 6h from starting this script.
     max_budget_s = int(COST_MAX_USD / price * 3600) - 40 * 60
