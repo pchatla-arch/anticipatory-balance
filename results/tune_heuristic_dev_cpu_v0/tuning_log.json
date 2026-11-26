@@ -1,5 +1,5 @@
 {
-  "evaluations": 4,
+  "evaluations": 6,
   "log": [
     {
       "tag": "start",
@@ -84,27 +84,67 @@
       "falls": 0.0,
       "seconds": 0.0,
       "resumed": true
+    },
+    {
+      "tag": "s0_heuristic_dead_band_0.03",
+      "config": {
+        "rls": {
+          "forgetting": 0.9
+        },
+        "heuristic": {
+          "dead_band": 0.03,
+          "max_residual_rms": 0.05,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.050851286758358274,
+      "loss": 0.027887752512469888,
+      "harm": 0.04592706849177678,
+      "falls": 0.0,
+      "seconds": 0.0,
+      "resumed": true
+    },
+    {
+      "tag": "s0_heuristic_dead_band_0.1",
+      "config": {
+        "rls": {
+          "forgetting": 0.9
+        },
+        "heuristic": {
+          "dead_band": 0.1,
+          "max_residual_rms": 0.05,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.049527801088988785,
+      "loss": 0.02812002901919186,
+      "harm": 0.04281554413959385,
+      "falls": 0.0,
+      "seconds": 237.9
     }
   ],
   "best": {
-    "tag": "s0_rls_forgetting_0.9",
+    "tag": "s0_heuristic_dead_band_0.1",
     "config": {
       "rls": {
         "forgetting": 0.9
       },
       "heuristic": {
-        "dead_band": 0.05,
+        "dead_band": 0.1,
         "max_residual_rms": 0.05,
         "max_age_steps": 5,
         "min_samples": 5,
         "min_excitation_rad": 0.01
       }
     },
-    "objective": 0.05009953521812956,
-    "loss": 0.027697596233338118,
-    "harm": 0.04480387796958288,
+    "objective": 0.049527801088988785,
+    "loss": 0.02812002901919186,
+    "harm": 0.04281554413959385,
     "falls": 0.0,
-    "seconds": 0.0,
-    "resumed": true
+    "seconds": 237.9
   }
 }
