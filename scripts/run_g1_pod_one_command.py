@@ -275,10 +275,20 @@ def checkpoint_digest(directory):
 
 def setup_askpass():
     script = SECRETS / "askpass.sh"
-    script.write_text('#!/bin/sh\ncase "$1" in *Username*) echo x-access-token;; '
-                      '*Password*) cat /workspace/.g1-one-command-secrets/github;; '
-                      '*) exit 1;; esac\n')
-    script.chmod(0o700)
+    # Atomic replacement: the interim publisher and final publisher can
+    # construct their environments concurrently without a torn shell script.
+    SECRETS.mkdir(mode=0o700, parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(prefix=".askpass-", dir=SECRETS)
+    try:
+        with os.fdopen(fd, "w") as stream:
+            stream.write('#!/bin/sh\ncase "$1" in *Username*) echo x-access-token;; '
+                         '*Password*) cat /workspace/.g1-one-command-secrets/github;; '
+                         '*) exit 1;; esac\n')
+        os.chmod(temp_name, 0o700)
+        os.replace(temp_name, script)
+    finally:
+        if os.path.exists(temp_name):
+            os.unlink(temp_name)
     env = os.environ.copy()
     env["GIT_ASKPASS"] = str(script)
     env["GIT_TERMINAL_PROMPT"] = "0"
