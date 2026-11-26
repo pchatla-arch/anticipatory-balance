@@ -1,5 +1,5 @@
 {
-  "evaluations": 6,
+  "evaluations": 9,
   "log": [
     {
       "tag": "start",
@@ -124,27 +124,90 @@
       "loss": 0.02812002901919186,
       "harm": 0.04281554413959385,
       "falls": 0.0,
-      "seconds": 237.9
+      "seconds": 0.0,
+      "resumed": true
+    },
+    {
+      "tag": "s0_heuristic_max_residual_rms_0.02",
+      "config": {
+        "rls": {
+          "forgetting": 0.9
+        },
+        "heuristic": {
+          "dead_band": 0.1,
+          "max_residual_rms": 0.02,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.0476057642744854,
+      "loss": 0.029125776491127908,
+      "harm": 0.03695997556671499,
+      "falls": 0.0,
+      "seconds": 0.0,
+      "resumed": true
+    },
+    {
+      "tag": "s0_heuristic_max_residual_rms_0.05",
+      "config": {
+        "rls": {
+          "forgetting": 0.9
+        },
+        "heuristic": {
+          "dead_band": 0.1,
+          "max_residual_rms": 0.05,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.049527801088988785,
+      "loss": 0.02812002901919186,
+      "harm": 0.04281554413959385,
+      "falls": 0.0,
+      "seconds": 236.4
+    },
+    {
+      "tag": "s0_heuristic_max_residual_rms_0.1",
+      "config": {
+        "rls": {
+          "forgetting": 0.9
+        },
+        "heuristic": {
+          "dead_band": 0.1,
+          "max_residual_rms": 0.1,
+          "max_age_steps": 5,
+          "min_samples": 5,
+          "min_excitation_rad": 0.01
+        }
+      },
+      "objective": 0.0491774768413355,
+      "loss": 0.027800678508356214,
+      "harm": 0.042753596665958564,
+      "falls": 0.0,
+      "seconds": 244.0
     }
   ],
   "best": {
-    "tag": "s0_heuristic_dead_band_0.1",
+    "tag": "s0_heuristic_max_residual_rms_0.02",
     "config": {
       "rls": {
         "forgetting": 0.9
       },
       "heuristic": {
         "dead_band": 0.1,
-        "max_residual_rms": 0.05,
+        "max_residual_rms": 0.02,
         "max_age_steps": 5,
         "min_samples": 5,
         "min_excitation_rad": 0.01
       }
     },
-    "objective": 0.049527801088988785,
-    "loss": 0.02812002901919186,
-    "harm": 0.04281554413959385,
+    "objective": 0.0476057642744854,
+    "loss": 0.029125776491127908,
+    "harm": 0.03695997556671499,
     "falls": 0.0,
-    "seconds": 237.9
+    "seconds": 0.0,
+    "resumed": true
   }
 }
