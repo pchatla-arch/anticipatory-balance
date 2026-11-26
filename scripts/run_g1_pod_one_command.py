@@ -359,7 +359,8 @@ def main():
             raise RuntimeError("Pinned venv Python was not installed")
         env["PATH"] = str(py.parent) + os.pathsep + env.get("PATH", "")
         env["PYTHONPATH"] = str(ROOT)
-        command([str(py), "-m", "unittest", "tests.test_g1_pod_supervisor", "-v"],
+        command([str(py), "-m", "unittest", "discover", "-s", "tests", "-p",
+                 "test_g1_pod_supervisor.py", "-v"],
                 deadline=deadline, logfile=outdir / "supervisor_tests.log", env=env)
         status["stages"]["pod_supervisor_guard_tests"] = "passed"
         command(["bash", "scripts/g1_demo_preflight.sh"],
