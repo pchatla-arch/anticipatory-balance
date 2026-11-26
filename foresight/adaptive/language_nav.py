@@ -40,7 +40,13 @@ def parse_instruction(instruction: str) -> TaskChoice:
     clean = instruction.strip().rstrip(".!").strip()
     if clean.lower() in {"stop", "halt", "pause"}:
         return TaskChoice("stop", accepted=True, reason="user_stop")
-    match = _COMMAND.fullmatch(clean)
+    # Obstacles are detected by depth and avoided by the navigator; text does
+    # not supply their position or motor commands.
+    avoid = re.fullmatch(
+        r"(?:walk|navigate)\s+around\s+the\s+obstacle\s+and\s+"
+        r"(?:reach|go\s+to)\s+(?:the\s+)?([a-z][a-z0-9 _-]{0,39})",
+        clean, re.IGNORECASE)
+    match = avoid if avoid is not None else _COMMAND.fullmatch(clean)
     if match is None:
         return TaskChoice("stop", reason="unsupported_language")
     label = " ".join(match.group(1).lower().split())
