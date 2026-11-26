@@ -60,10 +60,19 @@ def write_json(path, obj):
 
 
 def ask_secret(name, path):
+    """Use a preauthenticated private file for detached runs, without a TTY.
+
+    Files are owned by the launcher and checked before reuse; no token goes
+    into process arguments, Git remotes or experiment logs.
+    """
     value = os.environ.pop(name, "")
+    if not value and path.exists():
+        if path.is_symlink() or not path.is_file() or path.stat().st_mode & 0o077:
+            raise RuntimeError("Unsafe private credential path for " + name)
+        value = path.read_text().strip()
     if not value:
         if not sys.stdin.isatty():
-            raise RuntimeError(name + " is required; rerun in an interactive pod terminal")
+            raise RuntimeError(name + " unavailable; use the interactive detached launcher")
         value = getpass.getpass(name + " (hidden): ").strip()
     if not value or "\n" in value:
         raise RuntimeError("Invalid " + name)
