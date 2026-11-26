@@ -277,10 +277,65 @@ def setup_askpass():
 
 
 def verify_git_write(env, deadline):
-    # Non-mutating dry run of a fresh branch name, never force push.
-    branch = "refs/heads/g1-publisher-probe-" + uuid.uuid4().hex[:10]
-    command(["git", "push", "--dry-run", "origin", "HEAD:" + branch],
-            deadline=deadline, env=env, logfile=None)
+    """Validate exact destination and demonstrate REAL publication before GPU work.
+
+    A dry-run is insufficient to confirm that a branch write is permitted.
+    Publish a unique, non-sensitive receipt to the existing results branch and
+    verify the remote SHA. Never force-push or change source checkout.
+    """
+    def git(argv, *, cwd=ROOT, max_seconds=45):
+        try:
+            r = subprocess.run(["git", "-c", "credential.helper=", *argv],
+                               cwd=cwd, env=env,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                               timeout=max_seconds)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise RuntimeError("GitHub write probe could not execute: "
+                               + type(exc).__name__) from None
+        if r.returncode:
+            # Git errors can contain credential-bearing rewritten URLs.
+            raise RuntimeError("GitHub write probe failed at "
+                               + argv[0] + " (exit " + str(r.returncode)
+                               + "). Check GitHub token: target repository "
+                               "Contents read/write, and branch permissions. "
+                               "No GPU experiment has started.")
+        return r.stdout.decode("utf-8", errors="replace").strip()
+
+    if deadline - time.time() < RESERVE_S + 120:
+        raise RuntimeError("Deadline too close for GitHub authentication preflight")
+    # Be explicit about where Git will publish and disallow strange rewrites.
+    configured = subprocess.check_output(["git", "remote", "get-url", "origin"],
+                                         cwd=ROOT, text=True).strip()
+    if configured not in (REPO_URL, REPO_URL[:-4]):
+        raise RuntimeError("Unexpected GitHub remote; refusing to authenticate")
+    refs = git(["ls-remote", "--heads", "origin", RESULT_BRANCH])
+    parts = refs.split()
+    if len(parts) != 2 or parts[1] != "refs/heads/" + RESULT_BRANCH:
+        raise RuntimeError("Existing GitHub results branch could not be verified")
+    target = OUTPUT_ROOT / "github_write_probe"
+    if target.exists():
+        raise RuntimeError("GitHub write probe directory already exists")
+    git(["clone", "--depth", "1", "--branch", RESULT_BRANCH, REPO_URL, str(target)],
+        max_seconds=75)
+    probe = target / "results" / "g1_auth_probes" / (uuid.uuid4().hex + ".json")
+    probe.parent.mkdir(parents=True, exist_ok=True)
+    probe.write_text(json.dumps({
+        "type": "github_write_preflight", "timestamp": datetime.now(timezone.utc).isoformat(),
+        "source_commit": git(["rev-parse", "HEAD"]),
+        "claim": "GitHub write permission tested; no physics or benchmark executed",
+    }, sort_keys=True) + "\n")
+    git(["config", "user.name", "G1 Experiment Publisher"], cwd=target)
+    git(["config", "user.email", "g1-results@users.noreply.github.com"], cwd=target)
+    git(["add", "--", str(probe.relative_to(target))], cwd=target)
+    git(["commit", "-m", "test: GitHub publishing access for G1 pod"], cwd=target)
+    new_sha = git(["rev-parse", "HEAD"], cwd=target)
+    git(["push", "origin", "HEAD:refs/heads/" + RESULT_BRANCH], cwd=target,
+        max_seconds=75)
+    remote = git(["ls-remote", "origin", "refs/heads/" + RESULT_BRANCH], cwd=target)
+    if remote.split()[0] != new_sha:
+        raise RuntimeError("GitHub publication probe SHA verification failed")
+    log("GITHUB REAL WRITE VERIFIED:", RESULT_BRANCH, new_sha)
+    return new_sha
 
 
 def publish(run_dir, run_id, env, deadline):
@@ -400,8 +455,8 @@ def main():
     try:
         env = setup_askpass()
         ask_secret("GH_TOKEN", SECRETS / "github")
-        verify_git_write(env, deadline)
-        status["stages"]["github_write_preflight"] = "passed"
+        status["github_write_probe_sha"] = verify_git_write(env, deadline)
+        status["stages"]["github_write_preflight"] = "actual_published_commit_verified"
         githead = subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip()
         if subprocess.check_output(["git", "-C", str(ROOT), "status", "--porcelain",
                                     "--untracked-files=no"], text=True).strip():
