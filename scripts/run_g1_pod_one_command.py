@@ -317,9 +317,8 @@ def verify_git_write(env, deadline):
     parts = refs.split()
     if len(parts) != 2 or parts[1] != "refs/heads/" + RESULT_BRANCH:
         raise RuntimeError("Existing GitHub results branch could not be verified")
-    target = OUTPUT_ROOT / "github_write_probe"
-    if target.exists():
-        raise RuntimeError("GitHub write probe directory already exists")
+    # Unique local checkout: a harmless earlier failed probe never prevents retry.
+    target = OUTPUT_ROOT / ("github_write_probe_" + uuid.uuid4().hex[:12])
     git(["clone", "--depth", "1", "--branch", RESULT_BRANCH, REPO_URL, str(target)],
         max_seconds=75)
     probe = target / "results" / "g1_auth_probes" / (uuid.uuid4().hex + ".json")
