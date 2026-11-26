@@ -288,6 +288,8 @@ def launch():
                                       start_new_session=True, close_fds=True)
         ticks = process_start_ticks(worker.pid)
         if ticks is None:
+            log("Detached worker failed to start; stopping provider pod")
+            R.stop_pod(pod_id, key)
             raise RuntimeError("Detached G1 worker exited before monitor was installed")
         atomic_json(pidfile, {"pid": worker.pid, "start_ticks": ticks,
                               "pod_id": pod_id, "started_utc": now()})
