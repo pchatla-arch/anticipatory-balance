@@ -9,7 +9,7 @@ fi
 for gid in $(id -G); do
   [[ $gid =~ ^[0-9]+$ ]] || continue
   if ! getent group "$gid" >/dev/null; then
-    name="runpod_extra_gid_\${gid}"
+    name="runpod_extra_gid_${gid}"
     if ! getent group "$name" >/dev/null; then
       printf '%s:x:%s:\n' "$name" "$gid" >> /etc/group
       printf 'Registered missing local group name for GID %s\n' "$gid"
