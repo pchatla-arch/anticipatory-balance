@@ -255,16 +255,20 @@ def launch():
                 raise RuntimeError("A G1 scientific worker is already active on this pod")
         pod_id = os.environ.get("RUNPOD_POD_ID") or input("RunPod pod ID: ").strip()
         key = R.ask_secret("RUNPOD_API_KEY", SECURE_DIR / "runpod")
-        pod = R.validate_pod(pod_id, key)
-        mode = R.verify_no_competing_pod(pod_id, key)
-        price = float(pod["cost"])
-        start = R.started_epoch(pod)
-        deadline = start + min(R.LIFETIME_LIMIT_S,
-                               int(R.COST_MAX_USD / price * 3600) - 40 * 60)
-        if deadline - time.time() < 45 * 60:
+        try:
+            pod = R.validate_pod(pod_id, key)
+            mode = R.verify_no_competing_pod(pod_id, key)
+            price = float(pod["cost"])
+            start = R.started_epoch(pod)
+            deadline = start + min(R.LIFETIME_LIMIT_S,
+                                   int(R.COST_MAX_USD / price * 3600) - 40 * 60)
+            if deadline - time.time() < 45 * 60:
+                raise RuntimeError("Insufficient authorized time for new G1 worker")
+            R.ask_secret("GH_TOKEN", SECURE_DIR / "github")
+        except BaseException:
+            log("ENROLLMENT FAILED: requesting provider stop immediately")
             R.stop_pod(pod_id, key)
-            raise RuntimeError("Insufficient authorized time for new G1 worker")
-        R.ask_secret("GH_TOKEN", SECURE_DIR / "github")
+            raise
         atomic_json(SECURE_DIR / "ownership_receipt.json", {
             "pod_id": pod_id, "started_at": pod.get("startedAt"),
             "timestamp": time.time(), "mode": mode,
