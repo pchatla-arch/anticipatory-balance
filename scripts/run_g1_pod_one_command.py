@@ -31,7 +31,13 @@ REPO_URL = "https://github.com/pchatla-arch/anticipatory-balance.git"
 RESULT_BRANCH = "foresight/experiment-results"
 FROZEN_BASELINE = "d756c37d0564837a74132c30f8e366320a6bb1a5"
 COST_MAX_USD = 4.44
-PRICE_MAX = 0.74
+# Authorized candidate GPU configurations. Prices are hard ceilings per pod,
+# and the overall $4.44 compute budget remains unchanged.
+AUTHORIZED_GPUS = {
+    ("COMMUNITY", "NVIDIA RTX 6000 Ada Generation"): 0.74,
+    ("SECURE", "NVIDIA RTX A6000"): 0.69,
+    ("SECURE", "NVIDIA RTX 6000 Ada Generation"): 1.09,
+}
 # Stop early to reserve publication time and leave margin below six hours.
 LIFETIME_LIMIT_S = 5 * 3600 + 20 * 60
 RESERVE_S = 25 * 60
@@ -81,18 +87,24 @@ def runpod_request(pod_id, token, *, stop=False):
 def validate_pod(pod_id, token):
     pod = runpod_request(pod_id, token)
     gpu = pod.get("gpu") or {}
+    configuration = (pod.get("cloud"), gpu.get("id"))
+    ceiling = AUTHORIZED_GPUS.get(configuration)
+    try:
+        rate = float(pod.get("cost", 0))
+    except (ValueError, TypeError):
+        rate = 0
     if (pod.get("id") != pod_id or pod.get("status") != "RUNNING"
-            or pod.get("cloud") != "COMMUNITY"
             or pod.get("cudaVersion") != "13.2"
-            or gpu.get("count") != 1
-            or gpu.get("id") != "NVIDIA RTX 6000 Ada Generation"
-            or not (0 < float(pod.get("cost", 1000)) <= PRICE_MAX)):
+            or gpu.get("count") != 1 or ceiling is None
+            or not (0 < rate <= ceiling)):
         raise RuntimeError(
-            "Pod does not match the approved one Community RTX 6000 Ada, CUDA 13.2, "
-            "at <= $0.74/hr; scientific work withheld"
+            "Pod fails authorized GPU/cloud/rate guard. Permitted: "
+            "Community RTX 6000 Ada <=$0.74/hr; "
+            "Secure RTX A6000 <=$0.69/hr; "
+            "Secure RTX 6000 Ada <=$1.09/hr. "
+            "All require CUDA host 13.2 and exactly one GPU."
         )
     return pod
-
 
 def verify_no_competing_pod(pod_id, token):
     req = urllib.request.Request(
