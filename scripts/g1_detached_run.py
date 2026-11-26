@@ -291,15 +291,23 @@ def launch():
             raise RuntimeError("Detached G1 worker exited before monitor was installed")
         atomic_json(pidfile, {"pid": worker.pid, "start_ticks": ticks,
                               "pod_id": pod_id, "started_utc": now()})
-        with (SESSION_DIR / "detached_monitor.log").open("a") as stream:
-            subprocess.Popen([sys.executable, str(Path(__file__).resolve()),
-                              "--monitor", "--pid", str(worker.pid),
-                              "--start-ticks", str(ticks),
-                              "--pod-id", pod_id, "--deadline", str(deadline)],
-                             cwd=ROOT, env=env, stdout=stream,
-                             stderr=subprocess.STDOUT,
-                             stdin=subprocess.DEVNULL,
-                             start_new_session=True, close_fds=True)
+        try:
+            with (SESSION_DIR / "detached_monitor.log").open("a") as stream:
+                watcher = subprocess.Popen(
+                    [sys.executable, str(Path(__file__).resolve()),
+                     "--monitor", "--pid", str(worker.pid),
+                     "--start-ticks", str(ticks),
+                     "--pod-id", pod_id, "--deadline", str(deadline)],
+                    cwd=ROOT, env=env, stdout=stream,
+                    stderr=subprocess.STDOUT,
+                    stdin=subprocess.DEVNULL,
+                    start_new_session=True, close_fds=True)
+            if process_start_ticks(watcher.pid) is None:
+                raise RuntimeError("Detached rescue monitor did not start")
+        except BaseException:
+            log("Cannot establish independent in-pod monitor; stopping pod")
+            R.stop_pod(pod_id, key)
+            raise
         log("DETACHED G1 worker PID", worker.pid, "monitor active")
         log("Watch log: tail -f", log_file)
         log("Progress: tail -f", SESSION_DIR / "detached_monitor.log")
