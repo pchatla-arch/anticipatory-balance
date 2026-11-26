@@ -1,0 +1,243 @@
+{
+  "evidence_type": "CPU development tuning and wiring; not WP2.2 scientific results",
+  "as_of": "2026-11-26",
+  "source": {
+    "tuning_commit": "d756c37d0564837a74132c30f8e366320a6bb1a5",
+    "pilot_code_commit": "4b20e3e737b790bdb853faf6fc9c099c59f48316",
+    "tuning_path": "results/tune_heuristic_dev_cpu_v0/tuning_log.json",
+    "heuristic_path": "results/tune_heuristic_dev_cpu_v0/heuristic.json",
+    "wiring_path": "results/velocity_pilot_wp22_preflight/wiring_audit.json"
+  },
+  "tuning": {
+    "evaluations": 17,
+    "objective_definition": "loss + 0.50*harm + 0.10*falls",
+    "start": {
+      "objective": 0.0518674595374614,
+      "loss": 0.03053082898259163,
+      "harm": 0.04267326110973954,
+      "falls": 0
+    },
+    "best": {
+      "tag": "s0_heuristic_min_excitation_rad_0.02",
+      "objective": 0.042785387802869085,
+      "loss": 0.031038062646985054,
+      "harm": 0.023494650311768055,
+      "falls": 0,
+      "parameters": {
+        "rls": {
+          "forgetting": 0.9
+        },
+        "heuristic": {
+          "dead_band": 0.1,
+          "max_residual_rms": 0.02,
+          "max_age_steps": 3,
+          "min_samples": 10,
+          "min_excitation_rad": 0.02
+        },
+        "tuned_on": {
+          "split": "dev",
+          "families": [
+            "gain_070",
+            "gain_070_return",
+            "healthy",
+            "sensor_scale_080"
+          ],
+          "telemetry": "declared",
+          "episodes": 8,
+          "evaluations": 17,
+          "objective": "loss + 0.50*harm + 0.10*falls"
+        }
+      }
+    },
+    "objective_relative_reduction_pct": 17.51015340944695,
+    "observed_zero_falls_in_logged_evaluations": true,
+    "table": [
+      {
+        "index": 0,
+        "tag": "start",
+        "objective": 0.0518674595374614,
+        "loss": 0.03053082898259163,
+        "harm": 0.04267326110973954,
+        "falls": 0
+      },
+      {
+        "index": 1,
+        "tag": "s0_rls_forgetting_0.9",
+        "objective": 0.05009953521812956,
+        "loss": 0.027697596233338118,
+        "harm": 0.04480387796958288,
+        "falls": 0
+      },
+      {
+        "index": 2,
+        "tag": "s0_rls_forgetting_0.95",
+        "objective": 0.05050885826194038,
+        "loss": 0.028938365750946105,
+        "harm": 0.04314098502198856,
+        "falls": 0
+      },
+      {
+        "index": 3,
+        "tag": "s0_rls_forgetting_0.98",
+        "objective": 0.0518674595374614,
+        "loss": 0.03053082898259163,
+        "harm": 0.04267326110973954,
+        "falls": 0
+      },
+      {
+        "index": 4,
+        "tag": "s0_heuristic_dead_band_0.03",
+        "objective": 0.050851286758358274,
+        "loss": 0.027887752512469888,
+        "harm": 0.04592706849177678,
+        "falls": 0
+      },
+      {
+        "index": 5,
+        "tag": "s0_heuristic_dead_band_0.1",
+        "objective": 0.049527801088988785,
+        "loss": 0.02812002901919186,
+        "harm": 0.04281554413959385,
+        "falls": 0
+      },
+      {
+        "index": 6,
+        "tag": "s0_heuristic_max_residual_rms_0.02",
+        "objective": 0.0476057642744854,
+        "loss": 0.029125776491127908,
+        "harm": 0.03695997556671499,
+        "falls": 0
+      },
+      {
+        "index": 7,
+        "tag": "s0_heuristic_max_residual_rms_0.05",
+        "objective": 0.049527801088988785,
+        "loss": 0.02812002901919186,
+        "harm": 0.04281554413959385,
+        "falls": 0
+      },
+      {
+        "index": 8,
+        "tag": "s0_heuristic_max_residual_rms_0.1",
+        "objective": 0.0491774768413355,
+        "loss": 0.027800678508356214,
+        "harm": 0.042753596665958564,
+        "falls": 0
+      },
+      {
+        "index": 9,
+        "tag": "s0_heuristic_max_age_steps_3",
+        "objective": 0.04362199790620555,
+        "loss": 0.03158987860661,
+        "harm": 0.024064238599191108,
+        "falls": 0
+      },
+      {
+        "index": 10,
+        "tag": "s0_heuristic_max_age_steps_5",
+        "objective": 0.0476057642744854,
+        "loss": 0.029125776491127908,
+        "harm": 0.03695997556671499,
+        "falls": 0
+      },
+      {
+        "index": 11,
+        "tag": "s0_heuristic_max_age_steps_10",
+        "objective": 0.04751701806516696,
+        "loss": 0.029031848651356995,
+        "harm": 0.03697033882761994,
+        "falls": 0
+      },
+      {
+        "index": 12,
+        "tag": "s0_heuristic_min_samples_3",
+        "objective": 0.043209962056328856,
+        "loss": 0.03110965364612639,
+        "harm": 0.02420061682040493,
+        "falls": 0
+      },
+      {
+        "index": 13,
+        "tag": "s0_heuristic_min_samples_5",
+        "objective": 0.04362199790620555,
+        "loss": 0.03158987860661,
+        "harm": 0.024064238599191108,
+        "falls": 0
+      },
+      {
+        "index": 14,
+        "tag": "s0_heuristic_min_samples_10",
+        "objective": 0.04317574466423442,
+        "loss": 0.03139748563989997,
+        "harm": 0.0235565180486689,
+        "falls": 0
+      },
+      {
+        "index": 15,
+        "tag": "s0_heuristic_min_excitation_rad_0.005",
+        "objective": 0.04317574466423442,
+        "loss": 0.03139748563989997,
+        "harm": 0.0235565180486689,
+        "falls": 0
+      },
+      {
+        "index": 16,
+        "tag": "s0_heuristic_min_excitation_rad_0.02",
+        "objective": 0.042785387802869085,
+        "loss": 0.031038062646985054,
+        "harm": 0.023494650311768055,
+        "falls": 0
+      }
+    ]
+  },
+  "preflight": {
+    "mode": "wiring",
+    "source": "aa51278507b4354cf6cb3a164ffb44b3f9642aa4",
+    "cells": 1,
+    "episode_rows": 1,
+    "control_transitions": 8,
+    "hip": {
+      "live": 48,
+      "available": 24,
+      "mean_age_ms": 50,
+      "covered": 24,
+      "coverage": 1
+    },
+    "knee": {
+      "live": 16,
+      "available": 8,
+      "mean_age_ms": 50,
+      "covered": 8,
+      "coverage": 1
+    },
+    "withdrawal": {
+      "scheduled": 0,
+      "reached": 0,
+      "withdrew": 0
+    }
+  },
+  "scientific_pilot": {
+    "publication_status": "not found on checked experiment-results branch",
+    "status": "not verified run/completed",
+    "protocol": {
+      "families": 4,
+      "channels": 2,
+      "methods": 5,
+      "episodes_per_cell": 8,
+      "steps_per_episode": 300,
+      "expected_cells": 40,
+      "expected_rows": 320,
+      "expected_control_transitions": 96000
+    },
+    "original_exclusive_claim_comment": 7087861171,
+    "workspace": "/workspace/scratch/a92174288b11/pilot_runtime",
+    "workspace_accessible_in_this_chat": false
+  },
+  "limitations": [
+    "Tuning uses dev data and its best objective is not held-out evidence",
+    "The preflight episode is an 8-tick wiring check, not a scientific trial",
+    "No new simulated G1 physics executed in this publication",
+    "The original scientific attempt and shared lock cannot be checked in this runtime",
+    "No held-out tests or GPU runs are authorized under Nov 25 decision"
+  ]
+}

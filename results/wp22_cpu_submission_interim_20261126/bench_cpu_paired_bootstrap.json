@@ -1,0 +1,423 @@
+{
+  "source": "results/bench_dev_cpu_v0/episodes.csv",
+  "source_commit": "d756c37d0564837a74132c30f8e366320a6bb1a5",
+  "analysis_date": "2026-11-26",
+  "type": "post-hoc exploratory paired bootstrap analysis of pre-existing CPU development benchmark; NOT WP2.2 scientific result",
+  "method": "10,000 seed-228 resamples of 8 matched scenario-id episode differences within each family/channel/method comparison; 2.5 and 97.5 percentile endpoints, deterministic mulberry32 PRNG",
+  "limitations": [
+    "Only 8 paired scenarios per cell",
+    "Exploratory post-hoc comparison, not held-out or WP2.2",
+    "Heuristic is the earlier pre-freeze baseline; compare not to frozen latest",
+    "CIs describe finite dev seed sampling, not simulator distribution shift or field reliability"
+  ],
+  "comparisons": [
+    {
+      "family": "gain_070",
+      "channel": "declared",
+      "method": "heuristic_gate",
+      "reference": "none",
+      "n": 8,
+      "paired_delta_loss": -0.02011276362463832,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.025194267538608983,
+        -0.015480030042817816
+      ],
+      "paired_delta_harm": 0.00208373046714172,
+      "paired_delta_harm_bootstrap_95ci": [
+        0.0013307082362638667,
+        0.0027963652741428632
+      ]
+    },
+    {
+      "family": "gain_070",
+      "channel": "declared",
+      "method": "estimated_inverse",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": -0.0007540746591985226,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.001962363347411156,
+        0.00044144829735159874
+      ],
+      "paired_delta_harm": 0.05891817849826708,
+      "paired_delta_harm_bootstrap_95ci": [
+        0.05317360901410808,
+        0.06492775383264497
+      ]
+    },
+    {
+      "family": "gain_070",
+      "channel": "declared",
+      "method": "oracle",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": -0.003443018766120076,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.005660820985212922,
+        -0.001923366915434599
+      ],
+      "paired_delta_harm": -0.00208373046714172,
+      "paired_delta_harm_bootstrap_95ci": [
+        -0.0027963652741428645,
+        -0.0013307082362638673
+      ]
+    },
+    {
+      "family": "gain_070",
+      "channel": "exact",
+      "method": "heuristic_gate",
+      "reference": "none",
+      "n": 8,
+      "paired_delta_loss": -0.02023523161187768,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.02586035841377452,
+        -0.01527463854290545
+      ],
+      "paired_delta_harm": 0,
+      "paired_delta_harm_bootstrap_95ci": [
+        0,
+        0
+      ]
+    },
+    {
+      "family": "gain_070",
+      "channel": "exact",
+      "method": "estimated_inverse",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": -0.001340528717264533,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.0019950042478740215,
+        -0.0007663697469979525
+      ],
+      "paired_delta_harm": 2.1905800423605015e-8,
+      "paired_delta_harm_bootstrap_95ci": [
+        1.3214125289817692e-8,
+        3.0464744282809875e-8
+      ]
+    },
+    {
+      "family": "gain_070",
+      "channel": "exact",
+      "method": "oracle",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": -0.0033205507788807154,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.004937883908860385,
+        -0.002121416386216879
+      ],
+      "paired_delta_harm": 0,
+      "paired_delta_harm_bootstrap_95ci": [
+        0,
+        0
+      ]
+    },
+    {
+      "family": "gain_070_return",
+      "channel": "declared",
+      "method": "heuristic_gate",
+      "reference": "none",
+      "n": 8,
+      "paired_delta_loss": -0.014398048166185617,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.019406798330601306,
+        -0.009318374563008547
+      ],
+      "paired_delta_harm": 0.027494477573782206,
+      "paired_delta_harm_bootstrap_95ci": [
+        0.02522325050085783,
+        0.029559201427036896
+      ]
+    },
+    {
+      "family": "gain_070_return",
+      "channel": "declared",
+      "method": "estimated_inverse",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": -0.0012872829101979733,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.001666783436667174,
+        -0.0008805685210973024
+      ],
+      "paired_delta_harm": 0.039571803994476795,
+      "paired_delta_harm_bootstrap_95ci": [
+        0.03570176635403186,
+        0.04349911888130009
+      ]
+    },
+    {
+      "family": "gain_070_return",
+      "channel": "declared",
+      "method": "oracle",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": -0.0012095917481929064,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.00204233547556214,
+        -0.00035851262509822845
+      ],
+      "paired_delta_harm": -0.026572602149826707,
+      "paired_delta_harm_bootstrap_95ci": [
+        -0.02863450913628185,
+        -0.024464591915602796
+      ]
+    },
+    {
+      "family": "gain_070_return",
+      "channel": "exact",
+      "method": "heuristic_gate",
+      "reference": "none",
+      "n": 8,
+      "paired_delta_loss": -0.015250575728714466,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.020320108393207192,
+        -0.009861852508038282
+      ],
+      "paired_delta_harm": 0.023312684381380677,
+      "paired_delta_harm_bootstrap_95ci": [
+        0.021307566564064472,
+        0.02514635561965406
+      ]
+    },
+    {
+      "family": "gain_070_return",
+      "channel": "exact",
+      "method": "estimated_inverse",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": -0.0006262618117034435,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.0015610393777024001,
+        0.00034614925389178094
+      ],
+      "paired_delta_harm": 0.003155117854475975,
+      "paired_delta_harm_bootstrap_95ci": [
+        0.0023585346061736345,
+        0.0039517011027783155
+      ]
+    },
+    {
+      "family": "gain_070_return",
+      "channel": "exact",
+      "method": "oracle",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": -0.00035706418566405773,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.0015448399353772402,
+        0.0009151066187769175
+      ],
+      "paired_delta_harm": -0.02239080895742518,
+      "paired_delta_harm_bootstrap_95ci": [
+        -0.02416428607866692,
+        -0.02055103660341047
+      ]
+    },
+    {
+      "family": "healthy",
+      "channel": "declared",
+      "method": "heuristic_gate",
+      "reference": "none",
+      "n": 8,
+      "paired_delta_loss": 0.0009114625863730907,
+      "paired_delta_loss_bootstrap_95ci": [
+        0.00027141949394717815,
+        0.0014869961480144412
+      ],
+      "paired_delta_harm": 0.002161763455660548,
+      "paired_delta_harm_bootstrap_95ci": [
+        0.0013900099656893872,
+        0.0030122029402264152
+      ]
+    },
+    {
+      "family": "healthy",
+      "channel": "declared",
+      "method": "estimated_inverse",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": -0.0004254670348018408,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.000901593454182148,
+        0.00003732345066964626
+      ],
+      "paired_delta_harm": 0.06708541853731731,
+      "paired_delta_harm_bootstrap_95ci": [
+        0.05969949354166602,
+        0.07499326897013817
+      ]
+    },
+    {
+      "family": "healthy",
+      "channel": "declared",
+      "method": "oracle",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": -0.0009114625863730907,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.0014869961480144412,
+        -0.00027141949394717885
+      ],
+      "paired_delta_harm": -0.002161763455660548,
+      "paired_delta_harm_bootstrap_95ci": [
+        -0.003012202940226416,
+        -0.0013900099656893872
+      ]
+    },
+    {
+      "family": "healthy",
+      "channel": "exact",
+      "method": "heuristic_gate",
+      "reference": "none",
+      "n": 8,
+      "paired_delta_loss": 0,
+      "paired_delta_loss_bootstrap_95ci": [
+        0,
+        0
+      ],
+      "paired_delta_harm": 0,
+      "paired_delta_harm_bootstrap_95ci": [
+        0,
+        0
+      ]
+    },
+    {
+      "family": "healthy",
+      "channel": "exact",
+      "method": "estimated_inverse",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": -0.000011189025826752186,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.00012195334711577744,
+        0.00010528095881454643
+      ],
+      "paired_delta_harm": 2.7808408464835566e-8,
+      "paired_delta_harm_bootstrap_95ci": [
+        2.002470456119454e-8,
+        3.467109688237713e-8
+      ]
+    },
+    {
+      "family": "healthy",
+      "channel": "exact",
+      "method": "oracle",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": 0,
+      "paired_delta_loss_bootstrap_95ci": [
+        0,
+        0
+      ],
+      "paired_delta_harm": 0,
+      "paired_delta_harm_bootstrap_95ci": [
+        0,
+        0
+      ]
+    },
+    {
+      "family": "sensor_scale_080",
+      "channel": "declared",
+      "method": "heuristic_gate",
+      "reference": "none",
+      "n": 8,
+      "paired_delta_loss": 0.0015360896941274405,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.000290094967931509,
+        0.003706316463649273
+      ],
+      "paired_delta_harm": 0.08325134683400393,
+      "paired_delta_harm_bootstrap_95ci": [
+        0.0796123226871714,
+        0.08707582205533981
+      ]
+    },
+    {
+      "family": "sensor_scale_080",
+      "channel": "declared",
+      "method": "estimated_inverse",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": -0.00026967073790729046,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.0006238490110263229,
+        0.00015113968402147293
+      ],
+      "paired_delta_harm": 0.015232019126415253,
+      "paired_delta_harm_bootstrap_95ci": [
+        0.009728465229272842,
+        0.022778517566621304
+      ]
+    },
+    {
+      "family": "sensor_scale_080",
+      "channel": "declared",
+      "method": "oracle",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": -0.0015360896941274405,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.003706316463649273,
+        0.00029009496793150867
+      ],
+      "paired_delta_harm": -0.08325134683400393,
+      "paired_delta_harm_bootstrap_95ci": [
+        -0.08707582205533981,
+        -0.0796123226871714
+      ]
+    },
+    {
+      "family": "sensor_scale_080",
+      "channel": "exact",
+      "method": "heuristic_gate",
+      "reference": "none",
+      "n": 8,
+      "paired_delta_loss": -0.00002989429049193859,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.0014788400614634157,
+        0.0014630281366407871
+      ],
+      "paired_delta_harm": 0.07975721824914217,
+      "paired_delta_harm_bootstrap_95ci": [
+        0.07625233195722103,
+        0.08348863222636282
+      ]
+    },
+    {
+      "family": "sensor_scale_080",
+      "channel": "exact",
+      "method": "estimated_inverse",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": 0.00046556699089705944,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.00020875921472907064,
+        0.001275338279083371
+      ],
+      "paired_delta_harm": 0.0034750038757920265,
+      "paired_delta_harm_bootstrap_95ci": [
+        0.002149139530956745,
+        0.005063891410827637
+      ]
+    },
+    {
+      "family": "sensor_scale_080",
+      "channel": "exact",
+      "method": "oracle",
+      "reference": "heuristic_gate",
+      "n": 8,
+      "paired_delta_loss": 0.00002989429049193859,
+      "paired_delta_loss_bootstrap_95ci": [
+        -0.0014630281366407871,
+        0.001478840061463415
+      ],
+      "paired_delta_harm": -0.07975721824914217,
+      "paired_delta_harm_bootstrap_95ci": [
+        -0.08348863222636282,
+        -0.07625233195722103
+      ]
+    }
+  ]
+}
