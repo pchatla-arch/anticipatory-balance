@@ -50,7 +50,7 @@ class OwnershipTests(unittest.TestCase):
     def test_scope_denial_requires_explicit_confirmation(self):
         denied = HTTPError("https://api.runpod.io/v2/pods", 403, "Forbidden", None, None)
         with patch.object(L.urllib.request, "urlopen", side_effect=denied):
-            with patch.object(L.sys.stdin, "isatty", return_value=True):
+            with patch.object(L.sys, "stdin", type("Terminal", (), {"isatty": lambda self: True})()):
                 with patch("builtins.input", return_value="ONLY ONE G1 POD"):
                     self.assertEqual(L.verify_no_competing_pod("current", "fake"),
                                      "USER_CONFIRMED_API_UNAVAILABLE")
@@ -58,14 +58,14 @@ class OwnershipTests(unittest.TestCase):
     def test_scope_denial_without_tty_fails(self):
         denied = HTTPError("https://api.runpod.io/v2/pods", 403, "Forbidden", None, None)
         with patch.object(L.urllib.request, "urlopen", side_effect=denied):
-            with patch.object(L.sys.stdin, "isatty", return_value=False):
+            with patch.object(L.sys, "stdin", type("Terminal", (), {"isatty": lambda self: False})()):
                 with self.assertRaisesRegex(RuntimeError, "interactive explicit"):
                     L.verify_no_competing_pod("current", "fake")
 
     def test_scope_denial_without_confirmation_fails(self):
         denied = HTTPError("https://api.runpod.io/v2/pods", 403, "Forbidden", None, None)
         with patch.object(L.urllib.request, "urlopen", side_effect=denied):
-            with patch.object(L.sys.stdin, "isatty", return_value=True):
+            with patch.object(L.sys, "stdin", type("Terminal", (), {"isatty": lambda self: True})()):
                 with patch("builtins.input", return_value=""):
                     with self.assertRaisesRegex(RuntimeError, "declined"):
                         L.verify_no_competing_pod("current", "fake")
