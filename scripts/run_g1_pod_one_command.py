@@ -431,7 +431,20 @@ def main():
         raise
     price = float(pod["cost"])
     try:
-        ownership_mode = verify_no_competing_pod(pod_id, token)
+        ownership_mode = None
+        receipt_path = SECRETS / "ownership_receipt.json"
+        if os.environ.pop("G1_DETACHED_WORKER", "") == "1" and receipt_path.is_file():
+            if receipt_path.is_symlink() or receipt_path.stat().st_mode & 0o077:
+                raise RuntimeError("Unsafe detached ownership receipt")
+            receipt = json.loads(receipt_path.read_text())
+            if (receipt.get("pod_id") == pod_id
+                    and receipt.get("started_at") == pod.get("startedAt")
+                    and receipt.get("mode") in ("API_VERIFIED", "USER_CONFIRMED_API_UNAVAILABLE")
+                    and 0 <= time.time() - float(receipt.get("timestamp", 0)) < 180):
+                ownership_mode = receipt["mode"]
+                log("Reusing fresh interactive ownership verification", ownership_mode)
+        if ownership_mode is None:
+            ownership_mode = verify_no_competing_pod(pod_id, token)
     except Exception as exc:
         log("Exclusive pod check failed:", type(exc).__name__, str(exc)[:180])
         stop_pod(pod_id, token)
