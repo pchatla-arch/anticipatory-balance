@@ -107,21 +107,66 @@ def validate_pod(pod_id, token):
     return pod
 
 def verify_no_competing_pod(pod_id, token):
-    req = urllib.request.Request(
-        "https://api.runpod.io/v2/pods?limit=100",
-        headers={"Authorization": "Bearer " + token})
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        data = json.loads(resp.read())
-    active = data.get("pods", [])
-    # If provider response format changes, do not silently assume zero pods.
-    if not isinstance(active, list):
-        raise RuntimeError("Cannot verify account's active pod list")
+    """Check running project pods, including pagination.
+
+    List visibility can require a broader API scope than GET one pod. On
+    genuine 401/403, a terminal confirmation is required; never silently
+    infer no competitors. Other errors remain fail-closed.
+    """
+    import urllib.parse
+    cursor = None
+    seen = set()
+    active = []
+    while True:
+        query = "?limit=100"
+        if cursor:
+            query += "&cursor=" + urllib.parse.quote(cursor, safe="")
+        req = urllib.request.Request(
+            "https://api.runpod.io/v2/pods" + query,
+            headers={"Authorization": "Bearer " + token})
+        try:
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json.loads(resp.read())
+        except urllib.error.HTTPError as exc:
+            if exc.code not in (401, 403):
+                raise RuntimeError("RunPod list-pods API returned HTTP "
+                                   + str(exc.code)) from None
+            log("RunPod account-wide list returned HTTP", exc.code,
+                "(API-key scope may lack pods:read)")
+            if not sys.stdin.isatty():
+                raise RuntimeError("Account-wide pod list unavailable; "
+                                   "requires an interactive explicit confirmation") from None
+            log("Only continue if you verified in RunPod that no OTHER "
+                "G1/OAA/Foresight experiment pod is running.")
+            answer = input('Type ONLY ONE G1 POD to confirm, or Enter to stop: ').strip()
+            if answer != "ONLY ONE G1 POD":
+                raise RuntimeError("Single project-pod confirmation declined") from None
+            log("USER CONFIRMED only one running project pod; "
+                "API account-wide exclusivity remains unverified")
+            return "USER_CONFIRMED_API_UNAVAILABLE"
+        if not isinstance(data, dict) or not isinstance(data.get("pods"), list):
+            raise RuntimeError("Unexpected RunPod pod-list response; not verified")
+        active.extend(data["pods"])
+        page = data.get("pagination") or {}
+        if not isinstance(page, dict):
+            raise RuntimeError("Invalid RunPod pagination response")
+        if not page.get("hasNextPage", False):
+            break
+        cursor = page.get("nextCursor")
+        if not isinstance(cursor, str) or not cursor or cursor in seen:
+            raise RuntimeError("Invalid/repeated RunPod continuation cursor")
+        seen.add(cursor)
     competitors = [p["id"] for p in active
-                   if p.get("id") != pod_id and p.get("status") == "RUNNING"
-                   and any(w in p.get("name", "").lower()
+                   if p.get("id") != pod_id and p.get("status") in
+                   ("RUNNING", "STARTING", "PROVISIONING")
+                   and any(w in (p.get("name") or "").lower()
                            for w in ("g1", "oaa", "foresight", "obstacle"))]
     if competitors:
-        raise RuntimeError("Another project pod is running: " + ", ".join(competitors))
+        raise RuntimeError("Another project pod is active: " + ", ".join(competitors))
+    if not any(p.get("id") == pod_id for p in active):
+        raise RuntimeError("Current pod was absent from account-wide pod list")
+    log("Exclusive project-pod check passed via RunPod list")
+    return "API_VERIFIED"
 
 
 def started_epoch(pod):
@@ -318,9 +363,9 @@ def main():
         raise
     price = float(pod["cost"])
     try:
-        verify_no_competing_pod(pod_id, token)
-    except Exception:
-        log("Cannot establish exclusive project ownership; requesting provider stop")
+        ownership_mode = verify_no_competing_pod(pod_id, token)
+    except Exception as exc:
+        log("Exclusive pod check failed:", type(exc).__name__, str(exc)[:180])
         stop_pod(pod_id, token)
         raise
     pod_started = started_epoch(pod)
@@ -330,7 +375,7 @@ def main():
     if deadline - time.time() < 45 * 60:
         stop_pod(pod_id, token)
         raise SystemExit("Pod already too old: no safe setup+experiment budget remains")
-    log("Verified approved Community pod", pod_id, "price", price,
+    log("Verified authorized pod", pod_id, "cloud", pod["cloud"], "price", price,
         "seconds remaining", int(deadline - time.time()))
 
     # Start detached pod-side deadline guard immediately after provider validation.
@@ -345,6 +390,7 @@ def main():
     outdir = OUTPUT_ROOT / run_id
     outdir.mkdir()
     status = {"kind": "g1_course_development", "run_id": run_id, "split": "dev",
+              "exclusive_pod_check": ownership_mode,
               "pod_id": pod_id, "gpu_rate_per_hr": price, "source_commit": "",
               "frozen_heuristic_commit": FROZEN_BASELINE,
               "obstacle_72_episode_trial": "NOT_EXECUTED", "stages": {},
