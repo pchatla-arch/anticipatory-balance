@@ -1,6 +1,6 @@
 # G1 obstacle navigation + actuator recovery: GPU demonstration execution plan
 
-**Status 2026-11-26:** obstacle detour prototype added. **Not yet connected to MuJoCo, not physics-tested, not a recorded video.** No pod launched. This document is a work plan, not an experimental result.
+**Status 2026-11-26:** depth-perception and conservative obstacle-detour implementation selected in [ADR_obstacle_detection_avoidance.md](ADR_obstacle_detection_avoidance.md). New prototype `obstacle_depth.py` and pure-NumPy regression tests have been committed. **Not yet connected to physical MuJoCo obstacle nor GPU physics-tested; no recorded video.** Live Pod-specific RTX 6000 Ada Community CUDA 13.2 availability was NONE; no pod launched. The user authorized one RTX 6000 Ada Community GPU up to 6h and $4.44, replacing the Nov 25 prohibition for this demo **only**. This is an execution plan, not a scientific result.
 
 ## Research claim and demonstration contract
 
@@ -8,17 +8,17 @@ The contribution is uncertainty-aware online actuator adaptation of a **frozen**
 
 Pipeline:
 
-`world pose + known obstacle -> deterministic waypoint planner -> (v_x, yaw rate) -> frozen G1 PPO walking actor -> nominal position targets -> gain estimator/uncertainty-aware execution adapter -> MJX servo + contacts`
+`rendered G1 head-depth + calibrated camera pose -> causal obstacle blob + age gate -> estimated obstacle center/radius -> conservative detour + simulator-odometry pose -> (v_x, yaw rate) -> frozen G1 PPO walking actor -> nominal position targets -> gain estimator/uncertainty-aware execution adapter -> MJX servo + contacts`
 
-Telemetry returns with delay/dropout. Gain labels remain hidden from methods. Task metrics include collisions and clearance, plus the existing actuator adaptation loss/harm/withdrawal metrics.
+Telemetry returns with delay/dropout. Gain labels and true obstacle location remain hidden from the online methods. Simulator pose and camera extrinsics are explicitly privileged localization assumptions. Task metrics include detection recall/error/latency, collisions and clearance, plus the existing actuator adaptation loss/harm/withdrawal metrics.
 
 ## Independent execution gates (sole implementation/review operator: ChatGPT; final authorization: Prasuna)
 
 **G0: workspace and provenance** (no physics). Record git SHA, JAX/MuJoCo/Playground/Menagerie versions, frozen `nominal_s1` checkpoint and SHA-256, GPU type, driver/CUDA, current published run contents and original WP2.2 attempt status/lock. Never replay an already-started WP2.2 scientific attempt. The original claim on PR #46 and `scientific_attempt.json` must be reconciled first.
 
-**G1: CPU route geometry**. Run `python -m unittest tests.test_obstacle_route_demo -v` on the proposed branch; test no-intersection, left/right detour, close-start rejection, waypoint advance, yaw saturation, stop. This is a *planning* gate only.
+**G1: CPU detection and route geometry**. Run `python -m unittest discover -s tests -p 'test_obstacle*py' -v` on the proposed branch. Verify pure NumPy synthetic depth/ground/false obstacle cases, stale/missing frames, near-field stop, detour clearance, waypoint advance, yaw saturation. This is a *unit* gate only; the new depth tests have not yet been executed in a MuJoCo workspace.
 
-**G2: MuJoCo obstacle integration / CPU smoke**. Add a physical fixed cylinder or box geom to the flat-terrain scene (with contact enabled), expose root world position/yaw in a demo-only wrapper, feed `target_command` outputs to the existing 50 Hz G1 action interface. Verify the prop actually collides when the robot is deliberately commanded through it; verify a safe detour at nominal gain. Record actual minimum torso/foot clearance and contacts, do not rely on waypoint geometry for physical collision safety. If nominal walker cannot reliably execute the route, simplify obstacle placement or fixed waypoints and document failure. Do not modify the frozen actor. Record video from actual MJX/MuJoCo states, not illustrative frames.
+**G2: MuJoCo depth + physical obstacle / CPU-GPU smoke**. Add a physical fixed cylinder geom to the flat-terrain scene (contact enabled), connect the G1 head camera (metric depth + camera extrinsics), calibrate depth conventions on ground pixels, and use `detect_from_depth` to feed the existing waypoint follower and 50 Hz G1 action interface. Use simulator root world pose for navigation but never use true obstacle geom position online. Verify the prop actually collides when the robot is deliberately commanded through it; verify a safe detour at nominal gain. Record actual minimum torso/foot clearance and contacts, do not rely on waypoint geometry for physical collision safety. If nominal walker cannot reliably execute the route, simplify obstacle placement or fixed waypoints and document failure. Do not modify the frozen actor. Record video from actual MJX/MuJoCo states, not illustrative frames.
 
 **G3: recover existing WP2.2 scientific attempt**. Frozen source `4b20e3e737b790bdb853faf6fc9c099c59f48316`, heuristic `d756c37d0564837a74132c30f8e366320a6bb1a5`, 40 cells, 320 episode rows, 300 control steps, two telemetry conditions, five methods. Original single attempt must be completed/published or explicitly released after verifying its lock. Use `complete_result.py` if physics already complete. Audit `episodes.csv`, `hold_*.json`, `trace_*.npz` and corrected age/withdrawal denominators; preserve failed evidence rather than replaying.
 
@@ -30,11 +30,9 @@ Telemetry returns with delay/dropout. Gain labels remain hidden from methods. Ta
 
 **G7: coursework paper**. Use the existing `paper/oaa_aa228.tex` as starting point, remove all unexecuted robust-PPO/held-out claims, include equations, primary baseline, separate auxiliary obstacle demo, limitations and AI-use disclosure. Cite explicit source hashes. Distinguish initial 256-row CPU baseline, the WP2.1 tuned 17-evaluation objective, full WP2.2 experiment if completed, and the new GPU demo if completed. No simulated evidence is a physical G1 result.
 
-## GPU choice and budget proposal (NOT an authorization to launch)
+## GPU authorization and allocation (November 26, 2026)
 
-Live RunPod CUDA 13.2 catalog on 2026-11-26: community RTX A6000 48 GB ~$0.33/h (Low stock); RTX 6000 Ada 48 GB ~$0.74/h (Low stock); L40S 48 GB ~$0.79/h (Low stock). Secure RTX 6000 Ada catalog ~$1.09/h. All existing pods EXITED at check time. The user previously suspended pod sessions in issue #31; the new request is to review options. **No billable resources may start without an explicit replacement budget authorization.**
-
-Recommend RTX 6000 Ada (48GB) for version continuity if available, or RTX A6000 48GB for budget smoke. Proposed **$8 hard GPU compute ceiling**, at most one GPU and one live pod, with hard stop and separate per-run max times. This is a proposed new budget, not inherited authorization. Container/volume/storage costs and provisioning availability need independent confirmation. Keep publication+stop time reserved, publish partial results and mark incomplete if ceiling reached; verify provider stop acknowledgment.
+Prasuna authorized a **new, separate** GPU demonstration on **one Community RTX 6000 Ada 48 GB**, host CUDA 13.2, **maximum six GPU-hours and $4.44 GPU compute**, up to $0.74/hour; do not exceed or change GPU without a new approval. No extra held-out test or duplicate WP 2.2 scientific attempt is authorized. Existing pods were EXITED at check time. General stock is Low, but POD-specific check was NONE: **no pod launched or billing started**. Hourly availability watch is active. Before any billable session, verify stock, immutable source+checkpoint, automatic shutdown/publication and one-pod exclusivity. Stop and record actual provider acknowledgement before budget limit. Container/storage/network charges are not included in the compute estimate. No background process may be claimed without actual automation/tool confirmation.
 
 ## Fallback before Dec 4
 
