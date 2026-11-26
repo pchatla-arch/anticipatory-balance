@@ -166,7 +166,8 @@
       "loss": 0.02812002901919186,
       "harm": 0.04281554413959385,
       "falls": 0.0,
-      "seconds": 236.4
+      "seconds": 0.0,
+      "resumed": true
     },
     {
       "tag": "s0_heuristic_max_residual_rms_0.1",
@@ -186,7 +187,8 @@
       "loss": 0.027800678508356214,
       "harm": 0.042753596665958564,
       "falls": 0.0,
-      "seconds": 244.0
+      "seconds": 0.0,
+      "resumed": true
     }
   ],
   "best": {

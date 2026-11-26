@@ -68,6 +68,6 @@
   },
   "primary": "paired mean difference in postfault_loss, candidate minus heuristic_gate, on gain families",
   "secondary": "harmful_offset_rad on healthy and nuisance families; fall_rate; withdrawal_steps on return families",
-  "git_commit": "c8111ed4d74cf0030b82dd4fcb319b9a39b20083",
-  "registered_at": "2026-11-26T07:16:31Z"
+  "git_commit": "77da4c28c46c1f55fd88e377a506945a797c5bfa",
+  "registered_at": "2026-11-26T07:18:07Z"
 }

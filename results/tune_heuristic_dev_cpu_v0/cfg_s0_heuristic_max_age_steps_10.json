@@ -1,0 +1,12 @@
+{
+  "rls": {
+    "forgetting": 0.9
+  },
+  "heuristic": {
+    "dead_band": 0.1,
+    "max_residual_rms": 0.02,
+    "max_age_steps": 10,
+    "min_samples": 5,
+    "min_excitation_rad": 0.01
+  }
+}
