@@ -10,6 +10,7 @@ python -m unittest discover -s tests -p 'test_obstacle*py' -v
 python -m unittest discover -s tests -p 'test_language_nav.py' -v
 python -m unittest discover -s tests -p 'test_task_stack.py' -v
 python -m unittest discover -s tests -p 'test_g1_pod_ownership.py' -v
+python -m unittest discover -s tests -p 'test_g1_github_auth.py' -v
 echo "=== Runtime versions / checkpoint ==="
 python - <<'PY'
 import hashlib, json, os, pathlib, sys
