@@ -115,12 +115,22 @@ class ObstacleNavigator:
         self.obstacle = None
         self.follower = None
         self.last_step = -1
+        self.last_frame_step = -1
         if self.min_confirmations < 1 or self.max_age_steps < 1:
             raise ValueError("invalid detector timing")
 
-    def ingest(self, detection):
+    def ingest(self, detection, observed_step=None):
+        """Register a depth frame even when it contains no detected obstacle."""
+        if observed_step is None and detection is not None:
+            observed_step = detection.observed_step
+        if observed_step is not None:
+            if observed_step <= self.last_frame_step:
+                raise ValueError("camera frame steps must increase")
+            self.last_frame_step = int(observed_step)
         if detection is None:
             return
+        if observed_step is not None and detection.observed_step != observed_step:
+            raise ValueError("detection and depth frame timestamps mismatch")
         if detection.observed_step <= self.last_step:
             raise ValueError("observation steps must increase")
         self.last_step = detection.observed_step
@@ -135,8 +145,8 @@ class ObstacleNavigator:
             self.obstacle = detection
 
     def command(self, x, y, yaw, step):
-        if self.last_step >= 0 and step - self.last_step > self.max_age_steps:
-            # Stale image stream is not safe evidence of free space.
+        if self.last_frame_step < 0 or step - self.last_frame_step > self.max_age_steps:
+            # Never drive without a fresh image, even when no obstacle is seen.
             return 0.0, 0.0, "stop_stale_depth"
         if self.obstacle is None:
             if self.pending is not None and self.pending.range_m <= self.stop_range_m:
