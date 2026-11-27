@@ -1,8 +1,8 @@
 # Draft research framing — Stanford AA228/CS238, December 4, 2026
 
-**Working title:** *When to Correct: Reliable Language-Guided Humanoid Navigation Under Actuator Uncertainty*
+**Working title:** *Reliable Humanoid Navigation Under Actuator Uncertainty: Perception-Guided Planning and Adaptive Execution*
 
-**Status:** draft outline only. Measured CPU evidence is sourced from PR #50; end-to-end language/depth/MuJoCo experiments have not yet been completed. Do not use past-tense claims about any unrun evaluation. This draft **does not** assert a trained VLA.
+**Status:** historical planning outline, superseded by Course_Report_20261127_Draft.md. Measured CPU evidence is sourced from PR #50; end-to-end depth-guided G1 navigation and a one-seed G3 fault-navigation comparison have since been completed; a learned VLA has not been demonstrated. Do not use past-tense claims about any unrun evaluation. This draft **does not** assert a trained VLA.
 
 ## Proposed abstract (update after integrated results)
 
