@@ -1,0 +1,57 @@
+{
+  "id": "G1-G2C2-20261127",
+  "status": "REGISTERED_NOT_EXECUTED",
+  "goal": "Test whether a depth-built STATIC obstacle map can safely finish a G1 nominal detour when camera loses visual contact",
+  "baseline": {
+    "run": "G1-G2b nominal pilot",
+    "source": "1fd2d776cd06b270c1b099c6ce8d474d55ec4931",
+    "result": "not goal, no contacts, 22/160 detections, 800 ticks, stop_lost_obstacle",
+    "result_commit": "eff258a3e11129fbf31a64388229acd5ac8becb2"
+  },
+  "candidate": {
+    "method": "post-first-waypoint static-map memory with remaining-segment clearance >= route inflated radius+0.25 m, fresh depth frames mandatory",
+    "simulation": "MuJoCo G1 JAX GPU",
+    "seed": 1,
+    "steps": 1200,
+    "control_hz": 50,
+    "capture_every": 5,
+    "nominal_gain_only": true,
+    "goal": [
+      5,
+      0
+    ],
+    "static_cylinder": {
+      "center": [
+        2.8,
+        0
+      ],
+      "radius_m": 0.3,
+      "height_m": 1.05
+    },
+    "no_privileged_geom_input": true
+  },
+  "metrics": [
+    "goal_reached",
+    "contact_ticks",
+    "depth_detected_frames",
+    "detour_memory vs stop_lost_obstacle frequencies",
+    "forward_distance vs baseline",
+    "video verified decoder",
+    "per_frame_pose+commands"
+  ],
+  "gate": {
+    "safety": "stop on stale depth frames or uncertified segment clearance",
+    "pass": "goal reached and zero cylinder contacts, whole clip from real simulator",
+    "unacceptable": "using evaluator true cylinder coordinates in navigation"
+  },
+  "budget": {
+    "new_attempt_gpu_compute_ceiling_usd": 0.45,
+    "hourly_gpu_rate_max_usd": 0.69,
+    "max_provider_minutes": 35,
+    "project_total_cap_usd": 4.44,
+    "posted_total_20261120_27_at_registration_usd": 2.4751,
+    "billing_may_lag": true,
+    "save_and_stop": true
+  },
+  "status_rule": "Do not claim successful route or VLA merely because the MP4 exists; preserve negative result and stop provider"
+}
