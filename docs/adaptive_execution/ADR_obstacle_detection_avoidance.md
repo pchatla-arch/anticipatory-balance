@@ -1,5 +1,7 @@
 # ADR-005: Obstacle detection, avoidance, and recovery for the simulated G1
 
+> **Historical decision/execution record.** The [current project plan and Claude handoff](PROJECT_PLAN_AND_REVIEW_HANDOFF.md) supersedes the prospective status, reviewer roles, and scheduling statements below. G2a/G2b/G2c and one G3 fault-navigation pair have since run; the original 72-row matrix remains unfinished. Prasuna has requested Claude's independent review and possible help with execution and result updates. Original registrations and historical observations remain unchanged.
+
 **Decision status:** Selected for implementation (2026-11-26). **Validated scope:** existing source interfaces and historical depth-rendering implementation inspected; the new detector and planner still require integrated unit/physics tests. **Never call this a completed perception or collision-avoidance demonstration before the GPU run.**
 
 ## Scientific objective

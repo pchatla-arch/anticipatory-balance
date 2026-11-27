@@ -1,5 +1,7 @@
 # G1 obstacle navigation + actuator recovery: GPU demonstration execution plan
 
+> **Historical decision/execution record.** The [current project plan and Claude handoff](PROJECT_PLAN_AND_REVIEW_HANDOFF.md) supersedes the prospective status, reviewer roles, and scheduling statements below. G2a/G2b/G2c and one G3 fault-navigation pair have since run; the original 72-row matrix remains unfinished. Prasuna has requested Claude's independent review and possible help with execution and result updates. Original registrations and historical observations remain unchanged.
+
 **Status 2026-11-26:** depth-perception and conservative obstacle-detour implementation selected in [ADR_obstacle_detection_avoidance.md](ADR_obstacle_detection_avoidance.md). New prototype `obstacle_depth.py` and pure-NumPy regression tests have been committed. **Not yet connected to physical MuJoCo obstacle nor GPU physics-tested; no recorded video.** Live Pod-specific RTX 6000 Ada Community CUDA 13.2 availability was NONE; no pod launched. The user authorized one RTX 6000 Ada Community GPU up to 6h and $4.44, replacing the Nov 25 prohibition for this demo **only**. This is an execution plan, not a scientific result.
 
 ## Research claim and demonstration contract

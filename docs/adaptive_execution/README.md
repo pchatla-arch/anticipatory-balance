@@ -2,15 +2,23 @@
 
 **Current AA228/CS238 project title and submission framing.** The earlier online-actuator-adaptation proposals remain the underlying method and historical design record; they are not separate competing course-paper titles.
 
-**Primary artifacts:** [Course report draft](Course_Report_20261127_Draft.md) · [Executed experiment tracker](EXPERIMENT_TRACKER.md) · [Independent Claude review brief](CLAUDE_INDEPENDENT_REVIEW_BRIEF.md).
+**Start here:** [Project plan, expectations, experiments, results, and Claude handoff](PROJECT_PLAN_AND_REVIEW_HANDOFF.md).
 
-## Earlier actuator-adaptation proposals and design reviews
+**Supporting artifacts:** [Course report draft](Course_Report_20261127_Draft.md) · [Executed experiment tracker](EXPERIMENT_TRACKER.md) · [Claude review and execution brief](CLAUDE_INDEPENDENT_REVIEW_BRIEF.md).
 
 ## Current project status and experimental evidence (November 26, 2026)
 
 The [canonical experiment tracker](EXPERIMENT_TRACKER.md) is the single place to check completed, pending and deferred G1 experiments. [S1b negative-results analysis](S1b_raw_data_diagnosis.md) summarizes independently recomputed S1a fault/return/progress metrics. The latest [physical obstacle demo plan](G1_obstacle_recovery_demo_plan.md) specifies contact, rendered-depth, navigation, video and reporting gates.
 
-S0 (12-row CUDA smoke) and S1a (32-row long-horizon actuator comparison) are **measured and published**. Real stationary-cylinder contact and head-depth integration is being implemented, but a successful physical obstacle route or authentic video has **not** been established. The original 72-episode obstacle matrix remains unexecuted. The existing research proposal below predates these newer measurements; cite the tracker for current evidence.
+S0 (12-row CUDA smoke) and S1a (32-row actuator comparison) are **measured and published**. G2a verified the configured physical cylinder contacts; G2b produced an authentic failed navigation pilot; G2c reached the goal in one healthy development rollout. G3 compared correction-off and the frozen heuristic under a hidden gain fault/recovery: both reached the goal, with zero recorded contacts under the configured coverage. Actual simulator videos and raw records are linked in the handoff. This one-seed comparison does not establish general reliability or superiority.
+
+**Analysis correction:** the earlier description of shorter S1a forward distance as a performance penalty was unsupported. Saved traces show unwanted motion during commanded stops in the uncorrected arm. The [new segment audit](review_audits/2026-11-26/s1a_segment_audit.json) preserves the heuristic's inconsistent stopping and effort-sensor confound as limitations.
+
+The original 72-episode obstacle matrix, stronger multi-seed evaluation, final report PDF, and final comparison video remain unfinished. Claude is invited to review, recommend corrections, and help with implementation, execution, and results updates; the current handoff supersedes older reviewer-role restrictions.
+
+## Earlier actuator-adaptation proposals and design reviews
+
+The proposals below are historical design records; they do not describe the latest experiment status.
 
 
 The selected [proposal 0.3, revision 0.3.1](research_candidate/README.md) strengthens
@@ -46,7 +54,7 @@ force-error result, classical and learned estimation, PPO comparisons, held-out
 instance evaluation, runtime requirements, Foresight lessons, acceptance artifacts,
 and a technical discussion guide.
 
-## Evidence boundary
+## Historical evidence boundary — November 15, 2026
 
 The reviewed implementation baseline is `aac06996b8bab2980234c4c5fb63a7c78025806f`;
 the preceding roadmap baseline is `16c3296249dd6b87993b4a2e39462b877663f59d`.

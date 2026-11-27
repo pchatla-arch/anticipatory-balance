@@ -1,5 +1,7 @@
 # ADR-006 — Language-conditioned navigation and actuator-aware execution
 
+> **Historical decision/execution record.** The [current project plan and Claude handoff](PROJECT_PLAN_AND_REVIEW_HANDOFF.md) supersedes the prospective status, reviewer roles, and scheduling statements below. G2a/G2b/G2c and one G3 fault-navigation pair have since run; the original 72-row matrix remains unfinished. Prasuna has requested Claude's independent review and possible help with execution and result updates. Original registrations and historical observations remain unchanged.
+
 **Date:** 2026-11-26  
 **Status:** Architectural selection and first CPU interface tests complete; actual VLM inference, rendered scene grounding, and G1 end-to-end physics are **not** yet run.  
 **Scope:** Stanford AA228/CS238 course submission due Dec 4, plus a separable portfolio research continuation.

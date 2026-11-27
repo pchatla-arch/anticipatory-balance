@@ -6,6 +6,8 @@
 **Source commit:** `89b6d0dd31020f00032330c76684c727b1f697a0`.  
 **Evidence:** published result commit `896000b68aa9c7ea6efcd33ea33b4973ed629bb0`.
 
+**Interpretation corrected November 26, 2026 Pacific:** the prior version's loss-versus-distance trade-off conclusion was unsupported. A [new NPZ segment audit](review_audits/2026-11-26/s1a_segment_audit.json) confirms continued motion during commanded stops; the [project handoff](PROJECT_PLAN_AND_REVIEW_HANDOFF.md) records the review and remaining work.
+
 This report independently groups the raw CSV on (family, method), pairs on scenario_id within each family, and calculates means for velocity tracking loss, forward progress and healthy-plant correction. It does not re-use published summary cells as its inputs. There are only two distinct scenario IDs per family, so all contrasts are development observations rather than inferential proof.
 
 ## Paired mean results
@@ -31,7 +33,7 @@ This report independently groups the raw CSV on (family, method), pairs on scena
 
 ## Conclusions permitted by the raw data
 
-1. **Gain fault:** heuristic gate reduces the recorded velocity-loss mean by **55.18%** relative to no correction (0.085517 to 0.038328). However, mean forward progress decreases **32.61%** (3.62195 to 2.44093 m). The two metrics disagree; controller efficacy is not established at a matched task or distance budget. The oracle similarly trades loss for distance, strengthening the possibility that the error metric rewards different speed/profile outcomes. Do not present loss improvement alone as locomotion or navigation success.
+1. **Gain fault:** heuristic gate reduces the recorded velocity-loss mean by **55.18%** relative to no correction (0.085517 to 0.038328). Recorded forward distance decreases **32.61%** (3.62195 to 2.44093 m), but this is not an established performance penalty. The progress metric includes movement during commanded stops, and raw traces show overspeed/continued motion in the uncorrected arm. The oracle's lower distance can likewise reflect better command following. Neither shorter distance nor lower loss alone establishes navigation success.
 2. **Return to healthy:** heuristic's recorded correction withdrawal ticks are **6 and 5** (2/2 withdrew; median 5.5 control ticks = 110 ms). Estimated inverse has no successful withdrawal (2/2 never withdrew), despite a somewhat smaller tracking loss. The none arm has zero correction by definition; it is not evidence of successful adaptive withdrawal.
 3. **Effort miscalibration:** in healthy gain with sensor scale 0.8, heuristic's velocity loss rises from 0.026801 to 0.031044 versus no correction (~15.8% worse), with mean harmful correction 0.043697 rad. Inverse is similarly worse and has 0.107939 rad harmful correction. The measurement channel cannot be assumed to uniquely distinguish a true servo-gain fault from a scale error; this is an identifiability risk.
 4. **Healthy baseline:** heuristic produces near-zero correction (0.000321 rad) but a small higher loss than none (0.022658 vs 0.022096). Inverse acts strongly despite healthy gain (0.075119 rad), motivating an abstention mechanism.
@@ -43,15 +45,27 @@ This report independently groups the raw CSV on (family, method), pairs on scena
 
 This is a direction for future controlled ablation; it is not shown to work in S1a.
 
-## Highest-value next tests
+## Raw command-segment audit
 
-**S2a:** compile an actual static cylinder into G1 MJCF; verify collision pairs and head camera using real simulator data. Do not drive the robot until the collider/contact gate passes.
+The [CPU reproduction script](../../scripts/reanalyze_s1a_segments.py) reads four saved NPZ files: healthy/none and gain-0.70/{none, oracle, heuristic}. This covers eight episodes, not all 32 traces. Their saved per-tick losses reproduce the corresponding CSV means with maximum absolute difference 7.45×10⁻⁹. Source hashes and phase calculations are retained in the [audit JSON](review_audits/2026-11-26/s1a_segment_audit.json).
 
-**S2b:** calibrate real head-depth rendering on the stationary cylinder using nonprivileged detection, then count missed detections and false alarms. Privileged true cylinder position is evaluation-only.
+For the gain-0.70 cases, commanded phases are walk (ticks 0–99, 0.60 m/s), turn (100–199, 0.36 m/s plus yaw command), stop (200–274, zero), and resume (275–399, 0.60 m/s). Methods are paired within scenario; command magnitudes can differ in other families/scenario IDs.
 
-**S2c:** attempt a healthy frozen-walker detour with actual contacts and save real trajectory/video, even if it fails. Use the same forward/yaw limits and report failure cases; only after healthy locomotion is verified should paired actuator-fault navigation be attempted.
+| Method | Stop forward velocity, scenario 0 | Stop forward velocity, scenario 1 |
+| --- | ---: | ---: |
+| None | 0.329 m/s | 0.349 m/s |
+| Heuristic | 0.054 m/s | 0.274 m/s |
+| Oracle | 0.073 m/s | 0.122 m/s |
 
-**Paper:** position the contribution as a real-GPU empirical study of selective actuator correction under delayed/noisy effort telemetry, with an identified loss-versus-progress trade-off and an important nuisance-calibration failure. Distinguish conjectures, executable code, synthetic tests, GPU physics and unexecuted experiments.
+The heuristic improves stopping far more in the first case than the second. Integrating these logged local velocities gives approximate stop travel; it is not the exact heading-projected displacement used by `progress_m`. The loss measures planar velocity error and excludes yaw error; a commanded yaw trace does not provide realized yaw performance.
+
+## Highest-value next work
+
+The former proposed cylinder/contact, depth and nominal-route gates were subsequently executed as G2a/G2b/G2c; G3 added one paired fault-navigation trial. Current results and exact limitations are in the [tracker](EXPERIMENT_TRACKER.md) and [consolidated handoff](PROJECT_PLAN_AND_REVIEW_HANDOFF.md).
+
+Extend phase-wise analysis to all saved families/arms, plot commands and measured forward/lateral velocity, and preserve paired scenario IDs, stopping failures, withdrawal denominators and nuisance-sensor harm. Add the missing full-rate G3 traces and validate fall/contact reporting before a new comparative batch.
+
+Position the paper around measured command tracking and system integration, with inconsistent stopping and an unresolved nuisance-calibration failure. The proposed abstention method is unevaluated; the original 72-row navigation matrix remains unfinished.
 
 ## Methodological caveats
 
