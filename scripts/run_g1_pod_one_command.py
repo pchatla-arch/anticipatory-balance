@@ -260,6 +260,45 @@ BENCH_PROFILES = {
 }
 
 
+S1A_QUEUE_ID = "G1-S1A-20261126"
+S1A_QUEUE_MANIFEST = ROOT / "docs/adaptive_execution/experiment_queue_G1_S1A_20261126.json"
+PROFILE_LIFETIME_S = {"smoke": 3600, "s1_screen": 5400}
+S1A_MAX_NEW_COMPUTE_USD = 1.05
+
+
+def validate_queued_profile():
+    """Require explicit, registered S1a selection; never silently run dev."""
+    profile = os.environ.get("G1_BENCH_PROFILE", "smoke").strip()
+    if profile == "smoke":
+        return profile, None
+    if profile != "s1_screen":
+        raise RuntimeError("Only smoke or registered s1_screen is permitted")
+    if os.environ.get("G1_QUEUE_JOB_ID") != S1A_QUEUE_ID:
+        raise RuntimeError("S1a requires registered G1_QUEUE_JOB_ID")
+    if os.environ.get("G1_PROJECT_BILLING_REVIEWED") != "YES":
+        raise RuntimeError("S1a requires a fresh cumulative project billing review")
+    manifest = json.loads(S1A_QUEUE_MANIFEST.read_text())
+    spec = BENCH_PROFILES["s1_screen"]
+    plan = manifest.get("experiment") or {}
+    if (manifest.get("id") != S1A_QUEUE_ID
+            or manifest.get("status") != "QUEUED_NOT_LAUNCHED"
+            or plan.get("profile") != "s1_screen"
+            or plan.get("split") != "dev"
+            or plan.get("families") != list(spec["families"])
+            or plan.get("methods") != list(spec["methods"])
+            or plan.get("paired_scenarios_per_cell") != spec["episodes"]
+            or plan.get("steps_per_episode") != spec["steps"]
+            or plan.get("expected_episode_rows") != spec["expected_rows"]):
+        raise RuntimeError("S1a registration differs from frozen experiment profile")
+    try:
+        budget = float(os.environ.get("G1_AUTHORIZED_RUN_BUDGET_USD", ""))
+    except ValueError:
+        budget = 0.0
+    if not 0 < budget <= S1A_MAX_NEW_COMPUTE_USD:
+        raise RuntimeError("S1a requires a new-attempt limit <= $1.05")
+    return profile, budget
+
+
 def verify_bench_rows(bench_dir, profile="dev"):
     """Independently verify all cells, loss summaries, and scenario pairing."""
     import csv
