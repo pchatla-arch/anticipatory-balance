@@ -226,40 +226,71 @@ def command(argv, *, cwd=ROOT, deadline, logfile=None, env=None):
     return p.returncode
 
 
-def verify_bench_rows(bench_dir):
+BENCH_PROFILES = {
+    # Bounded *development-only* physics smoke: all 12 episodes share paired seeds,
+    # the gain onset is 75-125 ticks, and 160 steps capture post-onset behavior.
+    "smoke": {
+        "families": ("gain_070", "healthy"),
+        "methods": ("none", "oracle", "heuristic_gate"),
+        "episodes": 2,
+        "steps": 160,
+        "expected_rows": 12,
+    },
+    # Existing development benchmark; never conflate with the separately
+    # registered 72-episode depth-obstacle and 320-row WP2.2 studies.
+    "dev": {
+        "families": ("gain_070", "gain_070_return", "healthy",
+                     "sensor_scale_080"),
+        "methods": ("none", "oracle", "estimated_inverse", "heuristic_gate"),
+        "episodes": 8,
+        "steps": 300,
+        "expected_rows": 128,
+    },
+}
+
+
+def verify_bench_rows(bench_dir, profile="dev"):
+    """Independently verify all cells, loss summaries, and scenario pairing."""
     import csv
     from collections import defaultdict
+    spec = BENCH_PROFILES[profile]
     with (bench_dir / "episodes.csv").open(newline="") as f:
         rows = list(csv.DictReader(f))
     summary = json.loads((bench_dir / "summary.json").read_text())
-    expected_families = ("gain_070", "gain_070_return", "healthy", "sensor_scale_080")
-    expected_methods = ("none", "oracle", "estimated_inverse", "heuristic_gate")
-    if len(rows) != 128:
-        raise RuntimeError("Incomplete development benchmark: expected 128 rows")
+    if len(rows) != spec["expected_rows"]:
+        raise RuntimeError("Incomplete " + profile + " benchmark: expected "
+                           + str(spec["expected_rows"]) + " rows; got "
+                           + str(len(rows)))
     groups = defaultdict(list)
     for row in rows:
         if row["split"] != "dev" or row["telemetry"] != "declared":
             raise RuntimeError("Unexpected benchmark split or telemetry")
         groups[(row["family"], row["method"])].append(row)
-    if len(groups) != 16:
-        raise RuntimeError("Incomplete development benchmark grid")
-    for family in expected_families:
+    if len(groups) != len(spec["families"]) * len(spec["methods"]):
+        raise RuntimeError("Incomplete " + profile + " benchmark grid")
+    all_keys = {(r["family"], r["method"], r["scenario_id"], r["telemetry"])
+                for r in rows}
+    if len(all_keys) != len(rows):
+        raise RuntimeError("Duplicate benchmark episode rows")
+    for family in spec["families"]:
         paired = []
-        for method in expected_methods:
+        for method in spec["methods"]:
             rr = groups[(family, method)]
-            if len(rr) != 8:
-                raise RuntimeError("Missing or duplicate benchmark episode")
+            if len(rr) != spec["episodes"]:
+                raise RuntimeError("Missing or repeated benchmark cell")
             ids = [row["scenario_id"] for row in rr]
-            if len(set(ids)) != 8:
+            if len(set(ids)) != spec["episodes"]:
                 raise RuntimeError("Repeated scenario ID")
             paired.append(set(ids))
             published = summary["cells"][family + "|declared|" + method]
-            observed = sum(float(row["postfault_loss"]) for row in rr) / 8
+            observed = sum(float(row["postfault_loss"]) for row in rr) / len(rr)
             if abs(published["mean_postfault_loss"] - observed) > 1e-8:
-                raise RuntimeError("Raw benchmark mean disagrees with reported summary")
+                raise RuntimeError("Raw benchmark mean disagrees with summary")
         if any(ids != paired[0] for ids in paired[1:]):
-            raise RuntimeError("Development methods were not paired on scenarios")
-    return {"episode_rows": 128, "cells": 16, "paired_scenarios_per_family": 8,
+            raise RuntimeError("Methods were not paired on scenarios")
+    return {"episode_rows": len(rows), "cells": len(groups),
+            "paired_scenarios_per_family": spec["episodes"],
+            "profile": profile,
             "audit": "recomputed episode losses and pairing checked"}
 
 
@@ -481,7 +512,14 @@ def main():
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "_" + uuid.uuid4().hex[:6]
     outdir = OUTPUT_ROOT / run_id
     outdir.mkdir()
+    profile = os.environ.get("G1_BENCH_PROFILE", "smoke").strip()
+    if profile != "smoke":
+        # Not yet authorized in this relaunch recipe; never start a larger
+        # scientific/dev run simply because the operator reused the script.
+        raise RuntimeError("Only the smoke profile is enabled on this revision")
+    bench_spec = BENCH_PROFILES[profile]
     status = {"kind": "g1_course_development", "run_id": run_id, "split": "dev",
+              "bench_profile": profile,
               "exclusive_pod_check": ownership_mode,
               "pod_id": pod_id, "gpu_rate_per_hr": price, "source_commit": "",
               "frozen_heuristic_commit": FROZEN_BASELINE,
@@ -530,27 +568,30 @@ def main():
         (outdir / "frozen_heuristic.json").write_bytes(frozen)
         bench = outdir / "bench_dev"
         command([str(py), "scripts/eval_adaptive_bench.py",
-                 "--split", "dev", "--impl", "jax", "--allow-cpu",
+                 "--split", "dev", "--impl", "jax",
                  "--out", str(bench), "--families",
-                 "gain_070,gain_070_return,healthy,sensor_scale_080",
-                 "--methods", "none,oracle,estimated_inverse,heuristic_gate",
-                 "--telemetry", "declared", "--episodes", "8", "--batch", "8",
-                 "--steps", "300", "--schedule", "walk_turn_stop_resume",
+                 ",".join(bench_spec["families"]),
+                 "--methods", ",".join(bench_spec["methods"]),
+                 "--telemetry", "declared",
+                 "--episodes", str(bench_spec["episodes"]),
+                 "--batch", str(bench_spec["episodes"]),
+                 "--steps", str(bench_spec["steps"]),
+                 "--schedule", "walk_turn_stop_resume",
                  "--heuristic", str(outdir / "frozen_heuristic.json"),
                  "--trace"], deadline=deadline, logfile=outdir / "bench.log", env=env)
-        status["independent_bench_audit"] = verify_bench_rows(bench)
-        status["stages"]["frozen_heuristic_g1_dev_bench"] = "completed_128_rows"
-        status["bench_rows"] = 128
+        status["independent_bench_audit"] = verify_bench_rows(bench, profile=profile)
+        status["stages"]["g1_gpu_physics_smoke"] = "passed_" + str(bench_spec["expected_rows"]) + "_rows"
+        status["bench_rows"] = bench_spec["expected_rows"]
         # No physical obstacle runner exists in the reviewed branch.
         if not (ROOT / "scripts/eval_g1_obstacle_demo.py").is_file():
             status["stages"]["depth_obstacle_g1_demo"] = "BLOCKED_missing_integrated_runner"
             status["obstacle_72_episode_trial"] = "NOT_EXECUTED"
-            status["overall"] = "PARTIAL_REAL_G1_BENCH_NO_OBSTACLE_VIDEO"
+            status["overall"] = "COMPLETE_G1_GPU_SMOKE_NO_OBSTACLE_VIDEO"
         else:
             # No unreviewed interface guessed; new runner requires its own CLI,
             # independent tests, registration and staging.
             status["stages"]["depth_obstacle_g1_demo"] = "PENDING_separate_reviewed_protocol"
-            status["overall"] = "PARTIAL_REAL_G1_BENCH"
+            status["overall"] = "COMPLETE_G1_GPU_SMOKE_OBSTACLE_NOT_EVALUATED"
     except Exception as exc:
         status["overall"] = "FAILED_OR_INCOMPLETE"
         status["error_type"] = type(exc).__name__
@@ -575,9 +616,11 @@ def main():
         if not stopped:
             log("URGENT: provider EXITED not independently confirmed. Check RunPod console.")
         # Do not claim a successful integrated demonstration from a partial run.
-    if status.get("overall") != "COMPLETE_REGISTERED_OBSTACLE_DEMO" or not published:
-        # An honest partial run always has a non-success exit code, even if
-        # useful development data and its GitHub receipt were published.
+    if status.get("overall") not in (
+            "COMPLETE_G1_GPU_SMOKE_NO_OBSTACLE_VIDEO",
+            "COMPLETE_G1_GPU_SMOKE_OBSTACLE_NOT_EVALUATED") or not published:
+        # No science success is claimed unless the smoke row audit and the
+        # GitHub remote-readback both passed.
         raise SystemExit(3)
 
 
