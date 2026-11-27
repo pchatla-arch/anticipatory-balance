@@ -52,8 +52,10 @@ def arm(path: Path, expected_method: str):
         raise ValueError("Incorrect success result code")
     if not goal and status.get("result") == "G3_GOAL_REACHED_NO_RECORDED_CYLINDER_CONTACTS":
         raise ValueError("Reported goal success without actual arrival")
-    if not status.get("confirmed_obstacle"):
-        raise ValueError("No confirmed depth-derived obstacle")
+    if goal and not status.get("confirmed_obstacle"):
+        raise ValueError("Goal success without confirmed depth-derived obstacle")
+    # A camera that never confirms an obstacle is a valid NEGATIVE task
+    # outcome if the recorded run stopped safely; retain those failures.
     video = path / "real_simulator_g3.mp4"
     if config.get("render_video"):
         if not video.is_file():
@@ -79,6 +81,7 @@ def arm(path: Path, expected_method: str):
             "final_xy":last_xy,"control_steps_completed":status.get("ended_at_step",-1)+1,
             "collision_frames":contacts,"physical_contact_ticks":status.get("physical_contact_ticks",0),
             "detected_frames":detects,"frames":len(frames),
+            "confirmed_obstacle":bool(status.get("confirmed_obstacle")),
             "adapter_nonzero_control_ticks":status.get("adapter_nonzero_control_ticks",0),
             "telemetry":status.get("causal_telemetry_evidence"),
             "last_reason":status.get("last_reason"),"video":video_proof}
