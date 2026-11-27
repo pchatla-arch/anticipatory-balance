@@ -23,9 +23,13 @@ def frozen_heuristic_configs(record):
     """Read a registered heuristic record without silently changing defaults."""
     if not isinstance(record, dict):
         raise ValueError("frozen heuristic must be a JSON dictionary")
-    allowed = {"rls", "heuristic"}
+    # The baseline JSON also carries a provenance-only "tuned_on" block.
+    # Accept it but NEVER treat tuning metadata as a live controller input.
+    allowed = {"rls", "heuristic", "tuned_on"}
     if not set(record).issubset(allowed):
         raise ValueError("unexpected fields in frozen heuristic")
+    if "tuned_on" in record and not isinstance(record["tuned_on"], dict):
+        raise ValueError("frozen heuristic tuned_on must be provenance metadata")
     return E.RLSConfig(**record.get("rls", {})), E.HeuristicConfig(**record.get("heuristic", {}))
 
 
