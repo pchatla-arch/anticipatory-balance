@@ -144,6 +144,32 @@ class ObstacleNavigator:
         if self.confirmations >= self.min_confirmations:
             self.obstacle = detection
 
+    def _memory_route_clear(self, x, y, margin_m=0.25):
+        """Recheck full remaining route against last depth-estimated cylinder.
+
+        Only apply after first detour waypoint is reached, only for this
+        single STATIC obstacle experiment and only while camera frames remain
+        fresh. Recheck all upcoming route segments with extra 0.25m margin;
+        never use ground-truth geom or let a stale CAMERA frame drive.
+        """
+        from foresight.adaptive.obstacle_route import _segment_distance
+        follower = self.follower
+        if follower is None or follower.index < 1 or self.obstacle is None:
+            return False
+        route = follower.route
+        if route.side == 0:
+            return False
+        remaining = tuple(route.waypoints[follower.index:])
+        if not remaining:
+            return False
+        points = ((x, y),) + remaining
+        radius = route.inflated_radius + margin_m
+        if hypot(x-self.obstacle.center_xy[0],
+                 y-self.obstacle.center_xy[1]) <= radius:
+            return False
+        return all(_segment_distance(self.obstacle.center_xy, a, b) >= radius
+                   for a, b in zip(points, points[1:]))
+
     def command(self, x, y, yaw, step):
         if self.last_frame_step < 0 or step - self.last_frame_step > self.max_age_steps:
             # Never drive without a fresh image, even when no obstacle is seen.
@@ -156,9 +182,13 @@ class ObstacleNavigator:
             vx, wz, reached = target_command(x, y, yaw, self.goal, speed=0.25)
             return vx, wz, "goal_reached" if reached else "approach_slow"
         dist = hypot(x-self.obstacle.center_xy[0], y-self.obstacle.center_xy[1])
-        if (step-self.obstacle.observed_step > self.max_age_steps
-                and dist < self.stop_range_m):
-            return 0.0, 0.0, "stop_lost_obstacle"
+        lost_near = (step-self.obstacle.observed_step > self.max_age_steps
+                     and dist < self.stop_range_m)
+        remembered_detour = False
+        if lost_near:
+            remembered_detour = self._memory_route_clear(x, y)
+            if not remembered_detour:
+                return 0.0, 0.0, "stop_lost_obstacle"
         if self.follower is None:
             try:
                 route = plan_route((x, y), self.goal, self.obstacle.center_xy,
@@ -167,7 +197,9 @@ class ObstacleNavigator:
                 return 0.0, 0.0, "stop_unsafe_geometry"
             self.follower = WaypointFollower(route)
         vx, wz, done = self.follower.command(x, y, yaw)
-        return vx, wz, "goal_reached" if done else "detour"
+        if done:
+            return vx, wz, "goal_reached"
+        return vx, wz, "detour_memory" if remembered_detour else "detour"
 
 
 def detect_from_depth(depth, camera_position, camera_rotation, fovy_degrees,
