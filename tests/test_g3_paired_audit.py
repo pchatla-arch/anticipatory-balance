@@ -54,6 +54,16 @@ class G3PairAuditTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,"No causal telemetry"):
                 arm(p,"heuristic_gate")
 
+    def test_unconfirmed_obstacle_stopped_run_is_valid_negative_outcome(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)/"none";fixture(p,"none")
+            st=json.loads((p/"run_status.json").read_text())
+            st["confirmed_obstacle"]=False
+            (p/"run_status.json").write_text(json.dumps(st))
+            result=arm(p,"none")
+            self.assertFalse(result["goal_reached"])
+            self.assertFalse(result["confirmed_obstacle"])
+
     def test_false_goal_claim_rejected(self):
         with tempfile.TemporaryDirectory() as d:
             p=Path(d)/"none";fixture(p,"none")
