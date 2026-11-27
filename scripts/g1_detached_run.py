@@ -257,6 +257,7 @@ def launch():
         key = R.ask_secret("RUNPOD_API_KEY", SECURE_DIR / "runpod")
         try:
             pod = R.validate_pod(pod_id, key)
+            profile, attempt_ceiling = R.validate_queued_profile()
             mode = R.verify_no_competing_pod(pod_id, key)
             price = float(pod["cost"])
             start = R.started_epoch(pod)
@@ -310,7 +311,8 @@ def launch():
             log("Cannot establish independent in-pod monitor; stopping pod")
             R.stop_pod(pod_id, key)
             raise
-        log("DETACHED G1 worker PID", worker.pid, "monitor active")
+        log("DETACHED G1 worker PID", worker.pid, "monitor active",
+            "profile", profile, "budget_usd", attempt_ceiling)
         log("Watch log: tail -f", log_file)
         log("Progress: tail -f", SESSION_DIR / "detached_monitor.log")
         log("The original development benchmark may take time to compile; "
