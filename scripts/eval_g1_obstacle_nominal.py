@@ -147,6 +147,10 @@ def main(argv=None):
         model = env.mj_model
         obstacle_id = model.geom(OBSTACLE_GEOM).id
         camera_id = model.camera("head_cam").id
+        from foresight.adaptive.obstacle_scene_xml import COLLISION_TARGETS
+        contact_sensor_indices = [
+            int(model.sensor_adr[model.sensor("g1_obstacle_" + tag + "_found").id])
+            for _, tag in COLLISION_TARGETS]
         if not any(obstacle_id in (int(model.pair_geom1[i]),
                                   int(model.pair_geom2[i]))
                    for i in range(model.npair)):
@@ -174,6 +178,8 @@ def main(argv=None):
         nav = ObstacleNavigator(goal=(args.goal_x, 0.0))
         calibration = None
         reason = "startup"
+        status["physical_contact_ticks"] = 0
+        status["confirmed_obstacle"] = False
         for t in range(args.steps):
             data = state.data
             pos = np.asarray(data.xpos[env._pelvis_body])
@@ -199,6 +205,7 @@ def main(argv=None):
                     depth_is_ray=calibration["depth_is_ray"],
                     flip_rows=calibration["flip_rows"], radius_m=0.30)
                 nav.ingest(detected, observed_step=t)
+                status["confirmed_obstacle"] = nav.obstacle is not None
                 collisions = collision_count(model, cpu_data, obstacle_id)
                 status["collision_frames"] += int(collisions > 0)
                 log.append({
@@ -214,7 +221,14 @@ def main(argv=None):
                     video_renderer.update_scene(cpu_data, camera=free_cam)
                     frames.append(np.asarray(video_renderer.render()).copy())
                     status["frames"] = len(frames)
+            if t >= 30 and nav.obstacle is None:
+                reason = "stop_no_confirmed_depth_obstacle"
+                break
             vx, wz, reason = nav.command(float(pos[0]), float(pos[1]), yaw, t)
+            if t % args.capture_every == 0 and log:
+                log[-1]["command_forward_mps"] = vx
+                log[-1]["command_yaw_rps"] = wz
+                log[-1]["navigator_reason"] = reason
             cmd = jp.array([vx, 0.0, wz], dtype=jp.float32)
             obs = R._with_command(state.obs, cmd)
             info = dict(state.info)
@@ -224,6 +238,11 @@ def main(argv=None):
             rng, key = jax.random.split(rng)
             action, _ = act_fn(obs, key)
             state = step_fn(state, action)
+            live_sensor = np.asarray(state.data.sensordata)[contact_sensor_indices]
+            if np.any(live_sensor > 0):
+                status["physical_contact_ticks"] += 1
+                reason = "stop_actual_cylinder_contact"
+                break
             if bool(np.asarray(state.done)) or bool(np.asarray(state.info["fell"])):
                 reason = "terminated_or_fell"
                 break
@@ -243,7 +262,9 @@ def main(argv=None):
             status["rendered_video_bytes"] = encode_real_frames(
                 frames, mp4, max(1, round(50 / args.capture_every)))
         status["result"] = "COMPLETED_DIAGNOSTIC_NOT_VALIDATED_AVOIDANCE"
-        if status["goal_reached"] and status["collision_frames"] == 0:
+        if (status["goal_reached"] and status["confirmed_obstacle"]
+                and status["collision_frames"] == 0
+                and status["physical_contact_ticks"] == 0):
             status["result"] = "GOAL_REACHED_NO_RECORDED_CYLINDER_CONTACTS"
     except BaseException as exc:
         status["error_type"] = type(exc).__name__
