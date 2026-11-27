@@ -95,6 +95,55 @@ class DetachedReliabilityTests(unittest.TestCase):
                                     self.assertTrue(publish.called)
                                     stop.assert_called_once_with("pod-id", "dummy")
 
+    def test_actual_launch_path_detaches_worker_and_monitor(self):
+        """Exercise the launcher control path with fake provider and processes."""
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            session = root / "outputs"
+            secrets = root / "secrets"
+            old_env = {"RUNPOD_POD_ID": "unit-pod"}
+            test_pod = {"id": "unit-pod", "cloud": "SECURE", "cost": 0.69,
+                        "startedAt": "2026-11-26T22:00:00Z"}
+            class Child:
+                def __init__(self, pid): self.pid = pid
+            children = iter([Child(12345), Child(12346)])
+            with patch.dict(os.environ, old_env, clear=False):
+                with patch.object(M, "SESSION_DIR", session):
+                    with patch.object(M, "SECURE_DIR", secrets):
+                        with patch.object(M.R, "ask_secret", return_value="not-a-real-token"):
+                            with patch.object(M.R, "validate_pod", return_value=test_pod):
+                                with patch.object(M.R, "verify_no_competing_pod", return_value="API_VERIFIED"):
+                                    with patch.object(M.R, "started_epoch", return_value=99999900000):
+                                        with patch.object(M, "process_start_ticks", return_value=5678):
+                                            with patch.object(M.subprocess, "Popen",
+                                                              side_effect=lambda *a, **k: next(children)) as spawn:
+                                                M.launch()
+            self.assertEqual(spawn.call_count, 2)
+            for call in spawn.call_args_list:
+                self.assertTrue(call.kwargs["start_new_session"])
+                self.assertTrue(call.kwargs["close_fds"])
+            worker = json.loads((session / "active_worker.json").read_text())
+            self.assertEqual(worker["pid"], 12345)
+            self.assertEqual(worker["start_ticks"], 5678)
+            receipt = json.loads((secrets / "ownership_receipt.json").read_text())
+            self.assertEqual(receipt["pod_id"], "unit-pod")
+
+    def test_provider_rejection_stops_without_worker_spawn(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            with patch.dict(os.environ, {"RUNPOD_POD_ID": "unit-pod"}, clear=False):
+                with patch.object(M, "SESSION_DIR", root / "outputs"):
+                    with patch.object(M, "SECURE_DIR", root / "secrets"):
+                        with patch.object(M.R, "ask_secret", return_value="test-only"):
+                            with patch.object(M.R, "validate_pod",
+                                              side_effect=RuntimeError("invalid pod")):
+                                with patch.object(M.R, "stop_pod", return_value=True) as stop:
+                                    with patch.object(M.subprocess, "Popen") as spawn:
+                                        with self.assertRaisesRegex(RuntimeError, "invalid pod"):
+                                            M.launch()
+                                    spawn.assert_not_called()
+                                    stop.assert_called_once_with("unit-pod", "test-only")
+
     def test_snapshot_missing_git_token_refused(self):
         with tempfile.TemporaryDirectory() as temp:
             run = Path(temp) / "20261126T100000Z_test"
