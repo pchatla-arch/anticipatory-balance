@@ -23,6 +23,11 @@ class StaticMemoryReplay(unittest.TestCase):
         self.assertGreaterEqual(nav.follower.index, 1)
         nav.ingest(DepthDetection((2.9076, .280378), 2.03, .3, 24, 1., 105))
         nav.ingest(None, observed_step=515)  # real fresh blank head frame
+        from math import hypot
+        self.assertEqual(nav.obstacle.observed_step, 105)
+        self.assertLess(hypot(1.963219 - nav.obstacle.center_xy[0],
+                              1.569092 - nav.obstacle.center_xy[1]),
+                        nav.stop_range_m)
         vx, wz, why = nav.command(1.963219, 1.569092, .28, 515)
         self.assertEqual(why, "detour_memory")
         self.assertGreaterEqual(vx, 0.)
