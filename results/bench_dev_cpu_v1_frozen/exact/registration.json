@@ -1,0 +1,88 @@
+{
+  "split": "dev",
+  "split_seed": 11000,
+  "family_seeds": {
+    "gain_085": 42746,
+    "gain_070": 29204,
+    "gain_055": 32053,
+    "gain_070_return": 41562,
+    "healthy": 45114,
+    "sensor_scale_080": 16772,
+    "sensor_bias": 43486,
+    "damping_x3": 41377,
+    "stale_telemetry": 18585
+  },
+  "families": [
+    "gain_085",
+    "gain_070",
+    "gain_055",
+    "gain_070_return",
+    "healthy",
+    "sensor_scale_080",
+    "sensor_bias",
+    "damping_x3",
+    "stale_telemetry"
+  ],
+  "methods": [
+    "none",
+    "oracle",
+    "estimated_inverse",
+    "heuristic_gate"
+  ],
+  "telemetry": [
+    "exact"
+  ],
+  "telemetry_configs": {
+    "exact": {
+      "position_noise_rad": 0.0,
+      "torque_noise_nm": 0.0,
+      "position_bias_rad": 0.0,
+      "torque_bias_nm": 0.0,
+      "torque_scale": 1.0,
+      "latency_min": 0,
+      "latency_max": 0,
+      "dropout": 0.0,
+      "bound_position_rad": 1e-05,
+      "bound_torque_nm": 0.001,
+      "velocity_error_rad_s": 0.0,
+      "bound_velocity_rad_s": 0.0
+    }
+  },
+  "episodes": 8,
+  "steps": 300,
+  "schedule": "walk_turn_stop_resume",
+  "impl": "jax",
+  "rls": {
+    "forgetting": 0.9,
+    "initial_cov": 1000.0,
+    "prior_gain": 1.0,
+    "gain_min": 0.2,
+    "gain_max": 1.5,
+    "ewma": 0.9,
+    "min_excitation_rad": 0.001
+  },
+  "heuristic": {
+    "min_samples": 10,
+    "max_residual_rms": 0.02,
+    "min_excitation_rad": 0.02,
+    "dead_band": 0.1,
+    "max_age_steps": 3
+  },
+  "checkpoint_sha256": "fcd359f9ecd8f26fbb3703c3d7016d74c971e14eee3a0cca587e324ab104323e",
+  "reference_method": "heuristic_gate",
+  "paired_metrics": [
+    "postfault_loss",
+    "harmful_offset_rad",
+    "progress_m"
+  ],
+  "noninferiority_margins_loss": {
+    "healthy": 0.005,
+    "sensor_scale_080": 0.005,
+    "sensor_bias": 0.005,
+    "damping_x3": 0.005
+  },
+  "primary": "paired mean difference in postfault_loss, candidate minus heuristic_gate, on gain families",
+  "secondary": "harmful_offset_rad on healthy and nuisance families; fall_rate; withdrawal_steps on return families",
+  "git_commit": "aec7f18c11deb9de98a4ead15f988d602878165f",
+  "registered_at": "2026-11-27T07:19:51Z"
+}

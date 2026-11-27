@@ -1,0 +1,1770 @@
+{
+  "cells": {
+    "damping_x3|exact|estimated_inverse": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.03428225964307785,
+      "mean_progress_m": 0.9580511152744293,
+      "mean_harmful_offset_rad": 1.206314953483556e-08,
+      "mean_applied_offset_rad": 1.2063149673243364e-08,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "damping_x3|exact|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.03456786344759166,
+      "mean_progress_m": 0.9605805352330208,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "damping_x3|exact|none": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.03456786344759166,
+      "mean_progress_m": 0.9605805352330208,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "damping_x3|exact|oracle": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.03456786344759166,
+      "mean_progress_m": 0.9605805352330208,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_055|exact|estimated_inverse": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.04123234050348401,
+      "mean_progress_m": 0.8655643165111542,
+      "mean_harmful_offset_rad": 2.0545283585526875e-08,
+      "mean_applied_offset_rad": 0.1290162738164266,
+      "mean_gain_abs_error": 0.01852118712849915,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_055|exact|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.375,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 1.076968116685748,
+      "mean_progress_m": 2.1388261020183563,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.10621196366296216,
+      "mean_gain_abs_error": 0.02440542820841074,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_055|exact|none": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 1.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 2.635512262582779,
+      "mean_progress_m": 1.872492477297783,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.4500003941357136,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_055|exact|oracle": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.04125599516555667,
+      "mean_progress_m": 0.843937236815691,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.12986185709635417,
+      "mean_gain_abs_error": 0.44999951869249344,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_070|exact|estimated_inverse": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.029318501008674502,
+      "mean_progress_m": 0.7869330458343029,
+      "mean_harmful_offset_rad": 1.8234137699746356e-08,
+      "mean_applied_offset_rad": 0.09490453163782755,
+      "mean_gain_abs_error": 0.013458702364005148,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_070|exact|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.0324884201399982,
+      "mean_progress_m": 0.8082490414381027,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.09031384229660033,
+      "mean_gain_abs_error": 0.013914254144765437,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_070|exact|none": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.07342024333775043,
+      "mean_progress_m": 1.477306604385376,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.29999952763319016,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_070|exact|oracle": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.02828409313224256,
+      "mean_progress_m": 0.7831642031669617,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0963379955291748,
+      "mean_gain_abs_error": 0.29999952763319016,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_070_return|exact|estimated_inverse": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.02559546078555286,
+      "mean_progress_m": 0.6884179413318634,
+      "mean_harmful_offset_rad": 0.008123783976770937,
+      "mean_applied_offset_rad": 0.06121770977973938,
+      "mean_gain_abs_error": 0.023419604636728764,
+      "withdrawal_steps_median": 31.5,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_070_return|exact|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.026647961232811213,
+      "mean_progress_m": 0.7170506417751312,
+      "mean_harmful_offset_rad": 0.0038971512694843113,
+      "mean_applied_offset_rad": 0.052439539829889935,
+      "mean_gain_abs_error": 0.024114857893437147,
+      "withdrawal_steps_median": 9.5,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_070_return|exact|none": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.05023777671158314,
+      "mean_progress_m": 1.0689312368631363,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.2999996580183506,
+      "withdrawal_steps_median": 0.0,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_070_return|exact|oracle": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.026115785352885723,
+      "mean_progress_m": 0.67847740650177,
+      "mean_harmful_offset_rad": 0.0008557712244510185,
+      "mean_applied_offset_rad": 0.05955864946047465,
+      "mean_gain_abs_error": 0.2999996580183506,
+      "withdrawal_steps_median": 2.0,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_085|exact|estimated_inverse": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.026693513384088874,
+      "mean_progress_m": 0.7406113259494305,
+      "mean_harmful_offset_rad": 2.3996328146758117e-08,
+      "mean_applied_offset_rad": 0.040310020049413045,
+      "mean_gain_abs_error": 0.007454849837813526,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_085|exact|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.026625592494383454,
+      "mean_progress_m": 0.742455244064331,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.039523358742396035,
+      "mean_gain_abs_error": 0.007561268052086234,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_085|exact|none": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.029024674789980054,
+      "mean_progress_m": 0.8177562430500984,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.14999975264072418,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "gain_085|exact|oracle": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.02688769344240427,
+      "mean_progress_m": 0.7367236576974392,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.041711520751317344,
+      "mean_gain_abs_error": 0.14999975264072418,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "healthy|exact|estimated_inverse": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.02269168454222381,
+      "mean_progress_m": 0.7459860257804394,
+      "mean_harmful_offset_rad": 1.7919310146830014e-08,
+      "mean_applied_offset_rad": 1.79193102667341e-08,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "healthy|exact|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.022439823020249605,
+      "mean_progress_m": 0.7559361606836319,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "healthy|exact|none": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.022439823020249605,
+      "mean_progress_m": 0.7559361606836319,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "healthy|exact|oracle": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.022439823020249605,
+      "mean_progress_m": 0.7559361606836319,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "sensor_bias|exact|estimated_inverse": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.025658984202891588,
+      "mean_progress_m": 0.8608999997377396,
+      "mean_harmful_offset_rad": 0.1607031561434269,
+      "mean_applied_offset_rad": 0.16070315996805828,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "sensor_bias|exact|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.02663640887476504,
+      "mean_progress_m": 0.7403932251036167,
+      "mean_harmful_offset_rad": 0.014519599732011557,
+      "mean_applied_offset_rad": 0.014519599477450053,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "sensor_bias|exact|none": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.027147251646965742,
+      "mean_progress_m": 0.73597676679492,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "sensor_bias|exact|oracle": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.027147251646965742,
+      "mean_progress_m": 0.73597676679492,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "sensor_scale_080|exact|estimated_inverse": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.03182494593784213,
+      "mean_progress_m": 0.8221054524183273,
+      "mean_harmful_offset_rad": 0.08168605901300907,
+      "mean_applied_offset_rad": 0.0816860580444336,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "sensor_scale_080|exact|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.031141003593802452,
+      "mean_progress_m": 0.8311712220311165,
+      "mean_harmful_offset_rad": 0.0787145309150219,
+      "mean_applied_offset_rad": 0.07871453126271566,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "sensor_scale_080|exact|none": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.030863877153024077,
+      "mean_progress_m": 0.8483845926821232,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "sensor_scale_080|exact|oracle": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.030863877153024077,
+      "mean_progress_m": 0.8483845926821232,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.0,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "stale_telemetry|exact|estimated_inverse": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.030538836028426886,
+      "mean_progress_m": 0.7534460052847862,
+      "mean_harmful_offset_rad": 4.155957245011166e-08,
+      "mean_applied_offset_rad": 0.1021718184153239,
+      "mean_gain_abs_error": 0.026523456908762455,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "stale_telemetry|exact|heuristic_gate": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.05704254424199462,
+      "mean_progress_m": 1.3778383657336235,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.026735260151326656,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "stale_telemetry|exact|none": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.05704254424199462,
+      "mean_progress_m": 1.3778383657336235,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.0,
+      "mean_gain_abs_error": 0.29999952018260956,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    },
+    "stale_telemetry|exact|oracle": {
+      "n": 8,
+      "invalid_episodes": 0,
+      "fall_rate": 0.0,
+      "pre_fault_failures": 0,
+      "mean_postfault_loss": 0.030040941666811705,
+      "mean_progress_m": 0.7071151733398438,
+      "mean_harmful_offset_rad": 0.0,
+      "mean_applied_offset_rad": 0.09889029820760091,
+      "mean_gain_abs_error": 0.29999952018260956,
+      "withdrawal_steps_median": null,
+      "never_withdrew": 0,
+      "control_bound_violations": 0,
+      "lost_packets_mean": 0.0
+    }
+  },
+  "paired_vs_reference": {
+    "damping_x3|exact|estimated_inverse": {
+      "postfault_loss": {
+        "mean_difference": -0.00028560380451381207,
+        "ci95": [
+          -0.000644319225102663,
+          -1.9528187112882758e-05
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 1.206314953483556e-08,
+        "ci95": [
+          8.002343022950331e-09,
+          1.7033259025467373e-08
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.002529419958591461,
+        "ci95": [
+          -0.006027623824775219,
+          0.0010741380974650372
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true
+    },
+    "damping_x3|exact|none": {
+      "postfault_loss": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true
+    },
+    "damping_x3|exact|oracle": {
+      "postfault_loss": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true
+    },
+    "gain_055|exact|estimated_inverse": {
+      "postfault_loss": {
+        "mean_difference": -1.035735776182264,
+        "ci95": [
+          -1.9010982187930494,
+          -0.3653743509144993
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 2.0545283585526875e-08,
+        "ci95": [
+          1.5786718490784502e-08,
+          2.475743131058472e-08
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -1.2732617855072021,
+        "ci95": [
+          -1.912010681256652,
+          -0.6307295067235829
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": -0.375,
+        "ci95": [
+          -0.75,
+          -0.125
+        ],
+        "n": 8
+      }
+    },
+    "gain_055|exact|none": {
+      "postfault_loss": {
+        "mean_difference": 1.5585441458970308,
+        "ci95": [
+          0.816856222692877,
+          2.197496865922585
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.2663336247205734,
+        "ci95": [
+          -1.0528676997870208,
+          0.562582781910896
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.625,
+        "ci95": [
+          0.25,
+          0.875
+        ],
+        "n": 8
+      }
+    },
+    "gain_055|exact|oracle": {
+      "postfault_loss": {
+        "mean_difference": -1.0357121215201914,
+        "ci95": [
+          -1.8991620852204505,
+          -0.3663558881729847
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -1.2948888652026653,
+        "ci95": [
+          -1.945746310427785,
+          -0.6474122566170993
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": -0.375,
+        "ci95": [
+          -0.75,
+          -0.125
+        ],
+        "n": 8
+      }
+    },
+    "gain_070|exact|estimated_inverse": {
+      "postfault_loss": {
+        "mean_difference": -0.003169919131323695,
+        "ci95": [
+          -0.00586395975551568,
+          -0.0009756007231771947
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 1.8234137699746356e-08,
+        "ci95": [
+          1.1305355746005218e-08,
+          2.5883407195337327e-08
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.02131599560379982,
+        "ci95": [
+          -0.062354654911905526,
+          0.015407832153141496
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    },
+    "gain_070|exact|none": {
+      "postfault_loss": {
+        "mean_difference": 0.04093182319775224,
+        "ci95": [
+          0.023171241709496825,
+          0.06087611638940871
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.6690575629472733,
+        "ci95": [
+          0.5041702443733811,
+          0.8285892564803362
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    },
+    "gain_070|exact|oracle": {
+      "postfault_loss": {
+        "mean_difference": -0.004204327007755637,
+        "ci95": [
+          -0.006360068538924679,
+          -0.002181476121768357
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.025084838271141052,
+        "ci95": [
+          -0.06957360310479999,
+          0.012908681761473396
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    },
+    "gain_070_return|exact|estimated_inverse": {
+      "postfault_loss": {
+        "mean_difference": -0.0010525004472583532,
+        "ci95": [
+          -0.0023532668070401996,
+          0.00015163085772655776
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.004226632707286626,
+        "ci95": [
+          0.0037081916234456003,
+          0.004721946240169927
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.028632700443267822,
+        "ci95": [
+          -0.049394965171813965,
+          -0.008480265550315384
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    },
+    "gain_070_return|exact|none": {
+      "postfault_loss": {
+        "mean_difference": 0.023589815478771925,
+        "ci95": [
+          0.016076823865296318,
+          0.03465965669602155
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": -0.0038971512694843113,
+        "ci95": [
+          -0.004173880587768508,
+          -0.003616643072018633
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.35188059508800507,
+        "ci95": [
+          0.2853051245212555,
+          0.42696228772401806
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    },
+    "gain_070_return|exact|oracle": {
+      "postfault_loss": {
+        "mean_difference": -0.0005321758799254894,
+        "ci95": [
+          -0.0020038864051457493,
+          0.0006347287737298751
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": -0.003041380045033293,
+        "ci95": [
+          -0.0032847611179931844,
+          -0.0027523541114533147
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.038573235273361206,
+        "ci95": [
+          -0.06290572062134743,
+          -0.016266170889139175
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    },
+    "gain_085|exact|estimated_inverse": {
+      "postfault_loss": {
+        "mean_difference": 6.792088970541954e-05,
+        "ci95": [
+          -0.0005716889398172497,
+          0.0006387688394170253
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 2.3996328146758117e-08,
+        "ci95": [
+          1.9079165783364437e-08,
+          2.8619048242362055e-08
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.001843918114900589,
+        "ci95": [
+          -0.0118632678873837,
+          0.007978606969118118
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    },
+    "gain_085|exact|none": {
+      "postfault_loss": {
+        "mean_difference": 0.0023990822955965996,
+        "ci95": [
+          5.6212826166301966e-05,
+          0.004565723601263016
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.07530099898576736,
+        "ci95": [
+          0.05348329897969961,
+          0.10486983191221944
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    },
+    "gain_085|exact|oracle": {
+      "postfault_loss": {
+        "mean_difference": 0.00026210094802081585,
+        "ci95": [
+          -0.0005903875571675599,
+          0.001024198596132919
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.005731586366891861,
+        "ci95": [
+          -0.015360948722809553,
+          0.005128208454698308
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    },
+    "healthy|exact|estimated_inverse": {
+      "postfault_loss": {
+        "mean_difference": 0.00025186152197420597,
+        "ci95": [
+          -0.0006118098157458007,
+          0.0012730449845548715
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 1.7919310146830014e-08,
+        "ci95": [
+          1.2331983864632967e-08,
+          2.4224245850912313e-08
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.00995013490319252,
+        "ci95": [
+          -0.026031184662133455,
+          0.0019899277016520484
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true
+    },
+    "healthy|exact|none": {
+      "postfault_loss": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true
+    },
+    "healthy|exact|oracle": {
+      "postfault_loss": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true
+    },
+    "sensor_bias|exact|estimated_inverse": {
+      "postfault_loss": {
+        "mean_difference": -0.0009774246718734503,
+        "ci95": [
+          -0.0017185802571475506,
+          -0.00018416668754071074
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.14618355641141534,
+        "ci95": [
+          0.14441325468942523,
+          0.14784061369136905
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.12050677463412285,
+        "ci95": [
+          0.09166792705655098,
+          0.15609005540609358
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true
+    },
+    "sensor_bias|exact|none": {
+      "postfault_loss": {
+        "mean_difference": 0.0005108427722007036,
+        "ci95": [
+          -0.00022838899749331177,
+          0.0012436387594789249
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": -0.014519599732011557,
+        "ci95": [
+          -0.015746580183622426,
+          -0.013034742907620966
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.004416458308696747,
+        "ci95": [
+          -0.01229942198842764,
+          0.002231387235224243
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true
+    },
+    "sensor_bias|exact|oracle": {
+      "postfault_loss": {
+        "mean_difference": 0.0005108427722007036,
+        "ci95": [
+          -0.00022838899749331177,
+          0.0012436387594789249
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": -0.014519599732011557,
+        "ci95": [
+          -0.015746580183622426,
+          -0.013034742907620966
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.004416458308696747,
+        "ci95": [
+          -0.01229942198842764,
+          0.002231387235224243
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true
+    },
+    "sensor_scale_080|exact|estimated_inverse": {
+      "postfault_loss": {
+        "mean_difference": 0.0006839423440396786,
+        "ci95": [
+          -0.0010666521382518112,
+          0.002364210382802411
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.002971528097987175,
+        "ci95": [
+          0.0018153735902160407,
+          0.004137161606922746
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.009065769612789154,
+        "ci95": [
+          -0.024889512546360494,
+          0.006499276496469938
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true
+    },
+    "sensor_scale_080|exact|none": {
+      "postfault_loss": {
+        "mean_difference": -0.00027712644077837467,
+        "ci95": [
+          -0.002550734905526042,
+          0.00196141800843179
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": -0.0787145309150219,
+        "ci95": [
+          -0.08118978820275516,
+          -0.075964679941535
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.0172133706510067,
+        "ci95": [
+          -0.00434161676093936,
+          0.03818168882280587
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true
+    },
+    "sensor_scale_080|exact|oracle": {
+      "postfault_loss": {
+        "mean_difference": -0.00027712644077837467,
+        "ci95": [
+          -0.002550734905526042,
+          0.00196141800843179
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": -0.0787145309150219,
+        "ci95": [
+          -0.08118978820275516,
+          -0.075964679941535
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.0172133706510067,
+        "ci95": [
+          -0.00434161676093936,
+          0.03818168882280587
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "noninferior_loss": true
+    },
+    "stale_telemetry|exact|estimated_inverse": {
+      "postfault_loss": {
+        "mean_difference": -0.026503708213567734,
+        "ci95": [
+          -0.03766353013343178,
+          -0.017536450183251878
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 4.155957245011166e-08,
+        "ci95": [
+          3.228607555194607e-08,
+          5.157951377121605e-08
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.6243923604488373,
+        "ci95": [
+          -0.7411048110574484,
+          -0.5102325156331062
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    },
+    "stale_telemetry|exact|none": {
+      "postfault_loss": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    },
+    "stale_telemetry|exact|oracle": {
+      "postfault_loss": {
+        "mean_difference": -0.027001602575182915,
+        "ci95": [
+          -0.03970040954882279,
+          -0.01707797411363572
+        ],
+        "n": 8
+      },
+      "harmful_offset_rad": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      },
+      "progress_m": {
+        "mean_difference": -0.6707231923937798,
+        "ci95": [
+          -0.8127273408696055,
+          -0.5301745487377048
+        ],
+        "n": 8
+      },
+      "fall_rate": {
+        "mean_difference": 0.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "n": 8
+      }
+    }
+  },
+  "reference": "heuristic_gate",
+  "meta": {
+    "split": "dev",
+    "seed": 11000,
+    "impl": "jax",
+    "steps": 300,
+    "schedule": "walk_turn_stop_resume",
+    "episodes": 8,
+    "devices": [
+      "cpu:0"
+    ],
+    "versions": {
+      "jax": "0.12.0.1",
+      "mujoco": "3.16.0",
+      "mujoco-mjx": "3.16.0",
+      "warp-lang": "1.18.0",
+      "brax": "0.14.2"
+    },
+    "checkpoint": "/home/claude/anticipatory-balance/checkpoints/nominal_s1/000202342400",
+    "source_commit": "aec7f18c11deb9de98a4ead15f988d602878165f",
+    "rls": {
+      "forgetting": 0.9,
+      "initial_cov": 1000.0,
+      "prior_gain": 1.0,
+      "gain_min": 0.2,
+      "gain_max": 1.5,
+      "ewma": 0.9,
+      "min_excitation_rad": 0.001
+    },
+    "heuristic": {
+      "min_samples": 10,
+      "max_residual_rms": 0.02,
+      "min_excitation_rad": 0.02,
+      "dead_band": 0.1,
+      "max_age_steps": 3
+    },
+    "telemetry": {
+      "exact": {
+        "position_noise_rad": 0.0,
+        "torque_noise_nm": 0.0,
+        "position_bias_rad": 0.0,
+        "torque_bias_nm": 0.0,
+        "torque_scale": 1.0,
+        "latency_min": 0,
+        "latency_max": 0,
+        "dropout": 0.0,
+        "bound_position_rad": 1e-05,
+        "bound_torque_nm": 0.001,
+        "velocity_error_rad_s": 0.0,
+        "bound_velocity_rad_s": 0.0
+      }
+    },
+    "families": {
+      "gain_085": {
+        "name": "gain_085",
+        "gain": 0.85,
+        "joint_group": "legs",
+        "onset_range": [
+          75,
+          125
+        ],
+        "return_after": null,
+        "damping_scale": 1.0,
+        "telemetry": {
+          "position_noise_rad": 0.0,
+          "torque_noise_nm": 0.0,
+          "position_bias_rad": 0.0,
+          "torque_bias_nm": 0.0,
+          "torque_scale": 1.0,
+          "latency_min": 0,
+          "latency_max": 0,
+          "dropout": 0.0,
+          "bound_position_rad": 1e-05,
+          "bound_torque_nm": 0.001,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
+        },
+        "description": ""
+      },
+      "gain_070": {
+        "name": "gain_070",
+        "gain": 0.7,
+        "joint_group": "legs",
+        "onset_range": [
+          75,
+          125
+        ],
+        "return_after": null,
+        "damping_scale": 1.0,
+        "telemetry": {
+          "position_noise_rad": 0.0,
+          "torque_noise_nm": 0.0,
+          "position_bias_rad": 0.0,
+          "torque_bias_nm": 0.0,
+          "torque_scale": 1.0,
+          "latency_min": 0,
+          "latency_max": 0,
+          "dropout": 0.0,
+          "bound_position_rad": 1e-05,
+          "bound_torque_nm": 0.001,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
+        },
+        "description": ""
+      },
+      "gain_055": {
+        "name": "gain_055",
+        "gain": 0.55,
+        "joint_group": "legs",
+        "onset_range": [
+          75,
+          125
+        ],
+        "return_after": null,
+        "damping_scale": 1.0,
+        "telemetry": {
+          "position_noise_rad": 0.0,
+          "torque_noise_nm": 0.0,
+          "position_bias_rad": 0.0,
+          "torque_bias_nm": 0.0,
+          "torque_scale": 1.0,
+          "latency_min": 0,
+          "latency_max": 0,
+          "dropout": 0.0,
+          "bound_position_rad": 1e-05,
+          "bound_torque_nm": 0.001,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
+        },
+        "description": ""
+      },
+      "gain_070_return": {
+        "name": "gain_070_return",
+        "gain": 0.7,
+        "joint_group": "legs",
+        "onset_range": [
+          75,
+          125
+        ],
+        "return_after": [
+          100,
+          150
+        ],
+        "damping_scale": 1.0,
+        "telemetry": {
+          "position_noise_rad": 0.0,
+          "torque_noise_nm": 0.0,
+          "position_bias_rad": 0.0,
+          "torque_bias_nm": 0.0,
+          "torque_scale": 1.0,
+          "latency_min": 0,
+          "latency_max": 0,
+          "dropout": 0.0,
+          "bound_position_rad": 1e-05,
+          "bound_torque_nm": 0.001,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
+        },
+        "description": "unannounced return to healthy gain"
+      },
+      "healthy": {
+        "name": "healthy",
+        "gain": 1.0,
+        "joint_group": "legs",
+        "onset_range": [
+          75,
+          125
+        ],
+        "return_after": null,
+        "damping_scale": 1.0,
+        "telemetry": {
+          "position_noise_rad": 0.0,
+          "torque_noise_nm": 0.0,
+          "position_bias_rad": 0.0,
+          "torque_bias_nm": 0.0,
+          "torque_scale": 1.0,
+          "latency_min": 0,
+          "latency_max": 0,
+          "dropout": 0.0,
+          "bound_position_rad": 1e-05,
+          "bound_torque_nm": 0.001,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
+        },
+        "description": "no plant change; measures false adaptation at rest"
+      },
+      "sensor_scale_080": {
+        "name": "sensor_scale_080",
+        "gain": 1.0,
+        "joint_group": "legs",
+        "onset_range": [
+          75,
+          125
+        ],
+        "return_after": null,
+        "damping_scale": 1.0,
+        "telemetry": {
+          "position_noise_rad": 0.0,
+          "torque_noise_nm": 0.0,
+          "position_bias_rad": 0.0,
+          "torque_bias_nm": 0.0,
+          "torque_scale": 0.8,
+          "latency_min": 0,
+          "latency_max": 0,
+          "dropout": 0.0,
+          "bound_position_rad": 0.0,
+          "bound_torque_nm": 0.0,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
+        },
+        "description": "healthy motor, effort sensor reads 80%: identifiability confound"
+      },
+      "sensor_bias": {
+        "name": "sensor_bias",
+        "gain": 1.0,
+        "joint_group": "legs",
+        "onset_range": [
+          75,
+          125
+        ],
+        "return_after": null,
+        "damping_scale": 1.0,
+        "telemetry": {
+          "position_noise_rad": 0.0,
+          "torque_noise_nm": 0.0,
+          "position_bias_rad": 0.0,
+          "torque_bias_nm": 2.0,
+          "torque_scale": 1.0,
+          "latency_min": 0,
+          "latency_max": 0,
+          "dropout": 0.0,
+          "bound_position_rad": 0.0,
+          "bound_torque_nm": 0.0,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
+        },
+        "description": "healthy motor, constant effort bias"
+      },
+      "damping_x3": {
+        "name": "damping_x3",
+        "gain": 1.0,
+        "joint_group": "legs",
+        "onset_range": [
+          75,
+          125
+        ],
+        "return_after": null,
+        "damping_scale": 3.0,
+        "telemetry": {
+          "position_noise_rad": 0.0,
+          "torque_noise_nm": 0.0,
+          "position_bias_rad": 0.0,
+          "torque_bias_nm": 0.0,
+          "torque_scale": 1.0,
+          "latency_min": 0,
+          "latency_max": 0,
+          "dropout": 0.0,
+          "bound_position_rad": 1e-05,
+          "bound_torque_nm": 0.001,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
+        },
+        "description": "healthy actuators, tripled passive joint losses after onset"
+      },
+      "stale_telemetry": {
+        "name": "stale_telemetry",
+        "gain": 0.7,
+        "joint_group": "legs",
+        "onset_range": [
+          75,
+          125
+        ],
+        "return_after": null,
+        "damping_scale": 1.0,
+        "telemetry": {
+          "position_noise_rad": 0.0,
+          "torque_noise_nm": 0.0,
+          "position_bias_rad": 0.0,
+          "torque_bias_nm": 0.0,
+          "torque_scale": 1.0,
+          "latency_min": 5,
+          "latency_max": 10,
+          "dropout": 0.0,
+          "bound_position_rad": 0.0,
+          "bound_torque_nm": 0.0,
+          "velocity_error_rad_s": 0.0,
+          "bound_velocity_rad_s": 0.0
+        },
+        "description": "gain fault seen through 100-200 ms old packets"
+      }
+    },
+    "candidate_available": false
+  },
+  "elapsed_seconds": 1973.6
+}
