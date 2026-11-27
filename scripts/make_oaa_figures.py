@@ -115,11 +115,114 @@ def fig_timeseries(bench_dir, out, actuators):
     fig.savefig(out / "timeseries.png")
 
 
+def segments_from_command(cmd):
+    """Boundaries of the command schedule, read from the commanded (vx, vy, yaw) signal itself.
+
+    Returns a list of (name, start, end) with end exclusive. Names follow the walk-turn-stop-resume
+    schedule when four segments are found; otherwise they are numbered.
+    """
+    change = np.any(np.abs(np.diff(cmd, axis=0)) > 1e-6, axis=1)
+    starts = [0] + [int(i) + 1 for i in np.flatnonzero(change)]
+    ends = starts[1:] + [cmd.shape[0]]
+    names = ["walk", "turn", "stop", "resume"] if len(starts) == 4 else [f"seg{i}" for i in range(len(starts))]
+    return list(zip(names, starts, ends))
+
+
+def segment_speeds(trace_path):
+    """Per schedule segment: mean achieved forward speed, mean |commanded forward speed| and the
+    mean speed-command error (achieved minus commanded), each averaged over episodes after the
+    per-episode means. Ticks before each episode's onset index are excluded from every segment,
+    for every family (the healthy family carries a nominal onset), so that all arms are compared
+    over the same post-onset window. Commanded speed can differ between scenarios, so the error
+    column is the like-for-like quantity; during the commanded stop it equals the achieved speed.
+    """
+    d = np.load(trace_path)
+    cmd, vel, onset = d["command"], d["velocity"], d["onset"]
+    rows = []
+    for name, a, b in segments_from_command(cmd[:, 0, :]):
+        ach, com, err = [], [], []
+        for e in range(cmd.shape[1]):
+            lo = max(a, int(onset[e]) + 1)
+            if lo >= b:
+                continue
+            v = vel[lo:b, e, 0]
+            c = np.abs(cmd[lo:b, e, 0])
+            ach.append(float(v.mean())); com.append(float(c.mean())); err.append(float((v - c).mean()))
+        f = lambda xs: float(np.mean(xs)) if xs else np.nan
+        rows.append((name, f(ach), f(com), f(err)))
+    return rows
+
+
+def fig_command_following(bench_dir, out, family="gain_070", telemetry="declared",
+                          healthy_family="healthy"):
+    """Speed-command error per schedule segment, by method, with the healthy walker as the
+    reference. Reads the per-step traces written with --trace. The uncorrected faulted walker is
+    expected to overshoot the command and to keep moving during the commanded stop."""
+    plt = style()
+    bench_dir = Path(bench_dir)
+    methods = ["none", "estimated_inverse", "heuristic_gate", "oracle"]
+    data = {}
+    ph = bench_dir / f"trace_{healthy_family}_{telemetry}_none.npz"
+    if ph.exists():
+        data["healthy_none"] = segment_speeds(ph)
+    for m in methods:
+        p = bench_dir / f"trace_{family}_{telemetry}_{m}.npz"
+        if p.exists():
+            data[m] = segment_speeds(p)
+    if not any(m in data for m in methods):
+        return
+    segs = [r[0] for r in next(iter(data.values()))]
+    x = np.arange(len(segs))
+    width = 0.8 / len(data)
+    fig, ax = plt.subplots(figsize=(3.6, 2.7), constrained_layout=True)
+    for k, (m, rows) in enumerate(data.items()):
+        color = "#cfd4da" if m == "healthy_none" else COLORS[m]
+        label = "healthy walker, no correction" if m == "healthy_none" else LABELS[m]
+        ax.bar(x + k * width, [r[3] for r in rows], width, color=color, label=label)
+    ax.axhline(0, color="k", lw=1.0, ls="--")
+    ax.set_xticks(x + 0.4 - width / 2)
+    ax.set_xticklabels(segs)
+    ax.set_ylabel("achieved − commanded speed (m/s)")
+    ax.set_title(f"Speed-command error, {family.replace('gain_0', 'gain 0.')}, {telemetry.replace('_', ' ')} telemetry",
+                 loc="left", fontsize=8)
+    ax.legend(fontsize=6, loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=3)
+    fig.savefig(out / f"command_following_{family}_{telemetry}.pdf")
+    fig.savefig(out / f"command_following_{family}_{telemetry}.png")
+    return data
+
+
+def fig_telemetry_curve(bench_dirs, out, families=("gain_085", "gain_070", "gain_055")):
+    """Post-fault loss per method across telemetry presets: the value of timely, accurate
+    information. bench_dirs maps preset name -> directory with summary.json."""
+    plt = style()
+    order = [p for p in ("exact", "declared_fast", "declared") if p in bench_dirs]
+    summaries = {p: json.load(open(Path(bench_dirs[p]) / "summary.json")) for p in order}
+    methods = ["none", "estimated_inverse", "heuristic_gate", "oracle"]
+    fig, axes = plt.subplots(1, len(families), figsize=(2.3 * len(families), 2.4), constrained_layout=True, sharey=True)
+    axes = np.atleast_1d(axes)
+    for ax, fam in zip(axes, families):
+        for m in methods:
+            ys = []
+            for p in order:
+                cell = summaries[p]["cells"].get(f"{fam}|{p}|{m}")
+                ys.append(cell["mean_postfault_loss"] if cell else np.nan)
+            ax.plot(range(len(order)), ys, "o-", color=COLORS[m], label=LABELS[m], ms=4, lw=1)
+        ax.set_xticks(range(len(order)))
+        ax.set_xticklabels([{"exact": "exact", "declared_fast": "declared,\nno latency", "declared": "declared,\n20–60 ms"}[p] for p in order], fontsize=6)
+        ax.set_title(fam.replace("_", " "), loc="left", fontsize=8)
+    axes[0].set_ylabel("post-fault tracking loss (m/s)$^2$")
+    axes[0].legend(fontsize=6)
+    fig.savefig(out / "telemetry_curve.pdf")
+    fig.savefig(out / "telemetry_curve.png")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bench", type=Path, required=True)
     parser.add_argument("--authority", default="")
     parser.add_argument("--actuators", type=Path, default=None)
+    parser.add_argument("--telemetry-benches", default="",
+                        help="comma-separated preset=dir pairs for the telemetry curve, e.g. exact=results/x/exact,declared=results/x/declared")
     parser.add_argument("--out", type=Path, default=Path("paper/figures"))
     args = parser.parse_args(argv)
     args.out.mkdir(parents=True, exist_ok=True)
@@ -133,6 +236,12 @@ def main(argv=None):
     if args.authority:
         fig_authority(args.authority.split(","), args.out, actuators)
     fig_timeseries(args.bench, args.out, actuators)
+    cf = fig_command_following(args.bench, args.out)
+    if cf:
+        json.dump(cf, open(args.out / "command_following_gain_070_declared.json", "w"), indent=1)
+    if args.telemetry_benches:
+        pairs = dict(kv.split("=", 1) for kv in args.telemetry_benches.split(","))
+        fig_telemetry_curve(pairs, args.out)
     print("figures written to", args.out)
     return 0
 
