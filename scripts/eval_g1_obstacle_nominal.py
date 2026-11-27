@@ -230,7 +230,13 @@ def main(argv=None):
                 log[-1]["command_yaw_rps"] = wz
                 log[-1]["navigator_reason"] = reason
             cmd = jp.array([vx, 0.0, wz], dtype=jp.float32)
-            obs = R._with_command(state.obs, cmd)
+            # The frozen G1 pilot is a SINGLE environment (unbatched):
+            # rollout._with_command uses [:, CMD_SLICE] for vmapped benches
+            # and therefore raises IndexError for the (features,) state here.
+            obs = dict(state.obs)
+            if obs["state"].ndim != 1 or cmd.shape != (3,):
+                raise ValueError("Expected one unbatched G1 observation and 3D command")
+            obs["state"] = obs["state"].at[R.CMD_SLICE].set(cmd)
             info = dict(state.info)
             info["command"] = cmd
             info["command_nominal"] = cmd
