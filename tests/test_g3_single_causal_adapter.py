@@ -79,6 +79,16 @@ class CausalAdapterTests(unittest.TestCase):
             adapter.assimilate_captured(exact_packet(.72),t)
         self.assertGreater(adapter.evidence()["released_packets"],0)
 
+    def test_real_baseline_tuning_provenance_accepted_but_not_controlled(self):
+        original = self.config()
+        tagged = dict(original, tuned_on={
+            "split": "dev", "families": ["gain_070"], "telemetry": "declared",
+            "episodes": 8, "evaluations": 17, "objective": "development"})
+        r1, h1 = frozen_heuristic_configs(original)
+        r2, h2 = frozen_heuristic_configs(tagged)
+        self.assertEqual(r1, r2)
+        self.assertEqual(h1, h2)
+
     def test_unknown_frozen_fields_rejected(self):
         with self.assertRaisesRegex(ValueError,"unexpected"):
             frozen_heuristic_configs({"rls":{}, "adaptive_gain_truth":.7})
