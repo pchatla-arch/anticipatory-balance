@@ -1,0 +1,11 @@
+test_gain_estimate_changes_from_causal_effort_packets_only (test_g3_single_causal_adapter.CausalAdapterTests.test_gain_estimate_changes_from_causal_effort_packets_only) ... ok
+test_healthy_effort_cannot_trigger_correction (test_g3_single_causal_adapter.CausalAdapterTests.test_healthy_effort_cannot_trigger_correction) ... ok
+test_no_true_gain_or_onset_required (test_g3_single_causal_adapter.CausalAdapterTests.test_no_true_gain_or_onset_required) ... ok
+test_real_baseline_tuning_provenance_accepted_but_not_controlled (test_g3_single_causal_adapter.CausalAdapterTests.test_real_baseline_tuning_provenance_accepted_but_not_controlled) ... ok
+test_starts_without_correction_before_any_observation (test_g3_single_causal_adapter.CausalAdapterTests.test_starts_without_correction_before_any_observation) ... ok
+test_unknown_frozen_fields_rejected (test_g3_single_causal_adapter.CausalAdapterTests.test_unknown_frozen_fields_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 6.422s
+
+OK

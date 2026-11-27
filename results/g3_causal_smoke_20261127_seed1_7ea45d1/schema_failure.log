@@ -1,0 +1,36 @@
+{
+  "adapter_method": "heuristic_gate",
+  "collision_frames": 0,
+  "completed_utc": "2026-11-27T05:06:40.472602+00:00",
+  "contact_definition": "evaluator-only explicit MJCF contact pairs",
+  "error": "unexpected fields in frozen heuristic",
+  "error_type": "ValueError",
+  "fault_gain_evaluation_only": 0.7,
+  "fault_onset_evaluation_only": 60,
+  "fault_return_evaluation_only": 240,
+  "frames": 0,
+  "gain_fault": true,
+  "hardware": [
+    "cuda:0"
+  ],
+  "kind": "G3_DEPTH_ACTUATOR_DEVELOPMENT_PAIRED",
+  "matched_seed": 1,
+  "obstacle_ground_truth_available_to_policy": false,
+  "registered_control": "frozen_nominal_joystick",
+  "result": "FAILED_OR_INCOMPLETE",
+  "sensing": "real_Renderer_head_depth",
+  "source_commit": "107b807f4ec5b37ef8a96a174aeeaed4f1ed3561",
+  "started_utc": "2026-11-27T05:06:39.938617+00:00"
+}
+Traceback (most recent call last):
+  File "/workspace/anticipatory-balance/scripts/eval_g3_depth_actuator.py", line 340, in <module>
+    main()
+  File "/workspace/anticipatory-balance/scripts/eval_g3_depth_actuator.py", line 168, in main
+    adapter = (SingleCausalAdapter(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/anticipatory-balance/foresight/adaptive/single_causal_controller.py", line 37, in __init__
+    self.rls_config, self.heuristic_config = frozen_heuristic_configs(frozen_record)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/anticipatory-balance/foresight/adaptive/single_causal_controller.py", line 28, in frozen_heuristic_configs
+    raise ValueError("unexpected fields in frozen heuristic")
+ValueError: unexpected fields in frozen heuristic
