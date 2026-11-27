@@ -1,0 +1,58 @@
+{
+  "experiment": "G1-G2C2-20261127",
+  "status": "G2C_GOAL_REACHED_ZERO_RECORDED_CYLINDER_CONTACTS",
+  "pod": "sjeltg0z9rw6op",
+  "source_commit": "6d75add0f2b6ceb601f90a5376818edcce10cfee",
+  "source_ref": "oaa/g1-obstacle-demo-prototype-20261126",
+  "run": {
+    "control_ticks": 1186,
+    "control_hz": 50,
+    "nominal_healthy_gain_only": true,
+    "goal": [
+      5,
+      0
+    ],
+    "goal_reached": true,
+    "final_xy": [
+      5.012953281402588,
+      0.18535979092121124
+    ],
+    "physical_contact_ticks": 0,
+    "sampled_obstacle_contact_frames": 0,
+    "depth_detections": 22,
+    "frames": 238,
+    "video_bytes": 131636,
+    "video_decode": "ffmpeg decoded without errors",
+    "render_method": "actual MuJoCo RGB, H.264, 10 frames/s",
+    "depth_resolution": [
+      96,
+      96
+    ],
+    "camera_calibration": "actual ground pixels calibrated",
+    "real_G1_jax_cuda": true
+  },
+  "independent_analysis_from_raw_frames": {
+    "navigator_reason_frame_counts": {
+      "approach_slow": 1,
+      "detour": 161,
+      "detour_memory": 75,
+      "goal_reached": 1
+    },
+    "minimum_obstacle_center_distance_m": 1.434303866982326,
+    "clearance_metric": "evaluator-only distance between G1 pelvis XY and cylinder center at 5-tick sampled frames; not full-body swept-volume safety guarantee",
+    "detector_not_visible_after_turn": "memory of last depth-estimated stationary obstacle, no evaluator-only true cylinder coordinate fed online"
+  },
+  "baseline": {
+    "source_commit": "1fd2d776cd06b270c1b099c6ce8d474d55ec4931",
+    "end_reason": "stop_lost_obstacle",
+    "goal_reached": false,
+    "frames": 160
+  },
+  "limitations": [
+    "One healthy nominal development seed only",
+    "Four explicit torso/pelvis/thigh cylinder contact pairs; not exhaustive all limbs",
+    "No actuator fault injection in this scene",
+    "Real camera/rendering and robot simulation, not physical robot hardware",
+    "Does not establish 72-episode obstacle benchmark or trained VLA"
+  ]
+}

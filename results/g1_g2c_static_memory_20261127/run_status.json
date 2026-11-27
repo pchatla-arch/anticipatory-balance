@@ -1,0 +1,30 @@
+{
+  "collision_frames": 0,
+  "completed_utc": "2026-11-27T04:57:28.421276+00:00",
+  "confirmed_obstacle": true,
+  "contact_definition": "evaluator-only explicit MJCF contact pairs",
+  "detected_frames": 22,
+  "elapsed_wall_s": 243.25815097498707,
+  "ended_at_step": 1185,
+  "final_xy": [
+    5.012953281402588,
+    0.18535979092121124
+  ],
+  "frames": 238,
+  "frames_checked": 238,
+  "gain_fault": false,
+  "goal_reached": true,
+  "hardware": [
+    "cuda:0"
+  ],
+  "kind": "G1_OBSTACLE_NOMINAL_PILOT",
+  "last_reason": "goal_reached",
+  "obstacle_ground_truth_available_to_policy": false,
+  "physical_contact_ticks": 0,
+  "registered_control": "frozen_nominal_joystick",
+  "rendered_video_bytes": 131636,
+  "result": "GOAL_REACHED_NO_RECORDED_CYLINDER_CONTACTS",
+  "sensing": "real_Renderer_head_depth",
+  "source_commit": "6d75add0f2b6ceb601f90a5376818edcce10cfee",
+  "started_utc": "2026-11-27T04:53:24.128600+00:00"
+}

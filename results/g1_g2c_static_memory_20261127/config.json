@@ -1,0 +1,10 @@
+{
+  "capture_every": 5,
+  "depth_res": 96,
+  "goal_x": 5.0,
+  "obstacle_x": 2.8,
+  "out": "/workspace/g2c_attempt_20261127/nominal",
+  "render_video": true,
+  "seed": 1,
+  "steps": 1200
+}
