@@ -21,6 +21,11 @@ class G1SmokeContract(unittest.TestCase):
         self.assertLess(p["expected_rows"], L.BENCH_PROFILES["dev"]["expected_rows"])
         self.assertNotIn("candidate_velocity", p["methods"])
 
+    def test_provider_lifetime_is_short_and_reserves_publication_time(self):
+        self.assertLessEqual(L.LIFETIME_LIMIT_S, 3600)
+        self.assertGreaterEqual(L.RESERVE_S, 15 * 60)
+        self.assertLess(L.RESERVE_S, L.LIFETIME_LIMIT_S)
+
     def test_dev_retains_original_128_rows(self):
         p = L.BENCH_PROFILES["dev"]
         self.assertEqual(p["expected_rows"], 128)
