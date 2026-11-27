@@ -238,6 +238,15 @@ BENCH_PROFILES = {
         "steps": 160,
         "expected_rows": 12,
     },
+    # The next registered, paired long-horizon development screen.
+    "s1_screen": {
+        "families": ("healthy", "gain_070", "gain_070_return",
+                     "sensor_scale_080"),
+        "methods": ("none", "oracle", "estimated_inverse", "heuristic_gate"),
+        "episodes": 2,
+        "steps": 400,
+        "expected_rows": 32,
+    },
     # Existing development benchmark; never conflate with the separately
     # registered 72-episode depth-obstacle and 320-row WP2.2 studies.
     "dev": {
