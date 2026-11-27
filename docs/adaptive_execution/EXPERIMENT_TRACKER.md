@@ -1,7 +1,7 @@
-# G1 online actuator adaptation — experiment tracker and Nov 27 completion gates
+# Reliable Humanoid Navigation Under Actuator Uncertainty: Perception-Guided Planning and Adaptive Execution — experiment tracker
 
 **Author:** Prasuna Chatla  
-**Project:** Online Actuator Adaptation for Reliable Humanoid Locomotion  
+**Project:** Reliable Humanoid Navigation Under Actuator Uncertainty: Perception-Guided Planning and Adaptive Execution  
 **Checkpoint:** frozen G1 PPO, `checkpoints/nominal_s1/000202342400`  
 **Evidence cutoff:** Nov 26, 2026 Pacific / Nov 27 UTC (including independently audited G3 paired CUDA navigation and two video clips)  
 **Submission strategy:** credible actuator-adaptation empirical study first, genuine navigation demonstration second; no invented results.
