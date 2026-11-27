@@ -62,7 +62,7 @@
     "run_config",
     "software_source_commit"
   ],
-  "decision_rule": "Two-arm development feasibility only. No robustness/generalization claim. If either arm fails, preserve failure and stop. The 72-row registered obstacle experiment remains NOT_EXECUTED.",
+  "decision_rule": "Execute both registered arms on the same seed even if one has a valid task-level failure (fall, collision, or goal not reached); preserve all outcomes. Stop and diagnose on software exception, nonfinite state, missing depth, invalid contact instrument, missing publisher/audit or budget limit. This remains a two-arm development feasibility trial with no robustness claim; 72-row obstacle experiment NOT_EXECUTED.",
   "budget": {
     "gpu": "single Secure RTX A6000",
     "ceiling_usd_per_hour": 0.69,
