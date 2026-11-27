@@ -77,6 +77,9 @@ def default_config() -> config_dict.ConfigDict:
       azimuth_range_deg=180.0,        # launch direction within +-this of the pelvis heading
                                       # (180 = any direction; 60 = inside a 120-deg camera FOV)
   )
+  cfg.impact.static_obstacle = config_dict.create(
+      enabled=False, x=2.8, y=0.0, radius_m=0.30, height_m=1.05
+  )  # Opt-in physical stationary cylinder; never changes legacy experiments.
   cfg.skill = "nominal"               # "nominal" (walk) or "brace"
   cfg.brace = config_dict.create(
       base_height_target=0.65,        # m; nominal keyframe pelvis height is 0.755
@@ -153,8 +156,17 @@ class ImpactJoystick(JoystickRobotSliced):
     if task != "flat_terrain":
       raise NotImplementedError("impact scenario is flat-terrain only for now")
     scene_dir = Path(scene_dir or tempfile.mkdtemp(prefix="foresight_scene_"))
+    obstacle_cfg = getattr(config.impact, "static_obstacle", None)
+    static_obstacle = None
+    if obstacle_cfg is not None and bool(obstacle_cfg.enabled):
+      static_obstacle = dict(
+          x=float(obstacle_cfg.x), y=float(obstacle_cfg.y),
+          radius_m=float(obstacle_cfg.radius_m),
+          height_m=float(obstacle_cfg.height_m),
+      )
     scene_path, _ = impact_scene.build_scene(
-        scene_dir, proj_radius=config.impact.proj_radius
+        scene_dir, proj_radius=config.impact.proj_radius,
+        static_obstacle=static_obstacle,
     )
     # Bypass Joystick.__init__ (which hardcodes Playground's scene) and call G1Env directly.
     g1_joystick.g1_base.G1Env.__init__(
