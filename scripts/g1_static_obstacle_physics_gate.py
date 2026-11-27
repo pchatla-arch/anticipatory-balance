@@ -71,41 +71,48 @@ def run_fixture():
 
 def run_g1():
     import mujoco
-    from foresight.envs.g1_impact import scene
-    with tempfile.TemporaryDirectory(prefix="g1_static_physics_") as tmp:
-        scene_path, _ = scene.build_scene(
-            Path(tmp), static_obstacle={
-                "x": 2.8, "y": 0.0, "radius_m": 0.30, "height_m": 1.05})
-        model = mujoco.MjModel.from_xml_path(str(scene_path))
-        # A compile check verifies the actual pinned G1 world asset, camera,
-        # obstacle contact pairs and sensor names, not just the fixture XML.
-        if model.camera("head_cam").id < 0:
-            raise RuntimeError("G1 head camera missing")
-        obstacle = model.geom(OBSTACLE_GEOM).id
-        pairs = [i for i in range(model.npair)
-                 if obstacle in (int(model.pair_geom1[i]),
-                                 int(model.pair_geom2[i]))]
-        if len(pairs) < len(COLLISION_TARGETS):
-            raise RuntimeError("G1 static obstacle lacks contact-pair coverage")
-        data = mujoco.MjData(model)
-        mujoco.mj_resetDataKeyframe(model, data, model.key("knees_bent").id)
-        mujoco.mj_forward(model, data)
-        initial = collision_stats(model, data)
-        # Proof that the G1 capsule and static cylinder physically collide:
-        # force overlap in a separate throwaway evaluation state, NOT online.
-        torso = model.geom("torso_impact_geom").id
-        torso_xy = data.geom_xpos[torso, :2].copy()
-        model.geom_pos[obstacle, :2] = torso_xy
-        mujoco.mj_forward(model, data)
-        forced = collision_stats(model, data)
-        if not forced:
-            raise RuntimeError("G1 static cylinder does not physically contact torso")
-        return {"mode": "g1", "nq": int(model.nq), "nv": int(model.nv),
-                "nu": int(model.nu), "cameras": int(model.ncam),
-                "collision_pairs": len(pairs),
-                "initial_obstacle_contacts": len(initial),
-                "forced_overlap_contacts": len(forced),
-                "warning": "Real G1 model collision smoke, NOT closed-loop walking"}
+    # Load through the *real* supported G1Env path, rather than
+    # MjModel.from_xml_path: Playground resolves Menagerie mesh assets via
+    # its own asset dictionary and the raw XML loader does not know that map.
+    from foresight.adaptive.actuator_env import AdaptiveJoystick
+    from foresight.envs.g1_impact import default_config
+    cfg = default_config()
+    cfg.impact.static_obstacle.enabled = True
+    cfg.impact.static_obstacle.x = 2.8
+    cfg.impact.static_obstacle.y = 0.0
+    cfg.impact.static_obstacle.radius_m = 0.30
+    cfg.impact.static_obstacle.height_m = 1.05
+    env = AdaptiveJoystick(config=cfg, config_overrides={"impl": "jax"})
+    model = env.mj_model
+    # A compile check verifies the actual pinned G1 world asset, camera,
+    # obstacle contact pairs and sensor names, not just the fixture XML.
+    if model.camera("head_cam").id < 0:
+        raise RuntimeError("G1 head camera missing")
+    obstacle = model.geom(OBSTACLE_GEOM).id
+    pairs = [i for i in range(model.npair)
+             if obstacle in (int(model.pair_geom1[i]),
+                             int(model.pair_geom2[i]))]
+    if len(pairs) < len(COLLISION_TARGETS):
+        raise RuntimeError("G1 static obstacle lacks contact-pair coverage")
+    data = mujoco.MjData(model)
+    mujoco.mj_resetDataKeyframe(model, data, model.key("knees_bent").id)
+    mujoco.mj_forward(model, data)
+    initial = collision_stats(model, data)
+    # Proof that the G1 capsule and static cylinder physically collide:
+    # force overlap in a separate throwaway evaluation state, NOT online.
+    torso = model.geom("torso_impact_geom").id
+    torso_xy = data.geom_xpos[torso, :2].copy()
+    model.geom_pos[obstacle, :2] = torso_xy
+    mujoco.mj_forward(model, data)
+    forced = collision_stats(model, data)
+    if not forced:
+        raise RuntimeError("G1 static cylinder does not physically contact torso")
+    return {"mode": "g1", "nq": int(model.nq), "nv": int(model.nv),
+            "nu": int(model.nu), "cameras": int(model.ncam),
+            "collision_pairs": len(pairs),
+            "initial_obstacle_contacts": len(initial),
+            "forced_overlap_contacts": len(forced),
+            "warning": "Real G1 model collision smoke, NOT closed-loop walking"}
 
 
 def main():
