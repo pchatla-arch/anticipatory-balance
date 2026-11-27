@@ -20,6 +20,7 @@ from pathlib import Path
 import shutil
 import signal
 import subprocess
+import tempfile
 import sys
 import time
 import traceback
