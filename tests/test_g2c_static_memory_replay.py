@@ -21,7 +21,7 @@ class StaticMemoryReplay(unittest.TestCase):
         first = nav.follower.route.waypoints[0]
         nav.follower.command(*first, .3)
         self.assertGreaterEqual(nav.follower.index, 1)
-        nav.ingest(DepthDetection((2.9076, .28), 2.03, .3, 24, 1., 105))
+        nav.ingest(DepthDetection((2.9076, .280378), 2.03, .3, 24, 1., 105))
         nav.ingest(None, observed_step=515)  # real fresh blank head frame
         vx, wz, why = nav.command(1.96, 1.57, .28, 515)
         self.assertEqual(why, "detour_memory")
@@ -29,6 +29,7 @@ class StaticMemoryReplay(unittest.TestCase):
 
     def test_no_memory_before_first_waypoint(self):
         nav = make_confirmed_nav()
+        nav.ingest(DepthDetection((2.9076, .280378), 2.03, .3, 24, 1., 105))
         nav.ingest(None, observed_step=515)
         self.assertEqual(nav.command(2.0, 1.5, .2, 515)[2], "stop_lost_obstacle")
 
