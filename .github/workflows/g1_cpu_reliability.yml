@@ -32,6 +32,8 @@ jobs:
           python -m unittest discover -s tests -p 'test_obstacle*py' -v
           python -m unittest discover -s tests -p 'test_language_nav.py' -v
           python -m unittest discover -s tests -p 'test_task_stack.py' -v
+      - name: Verify contact-enabled stationary obstacle MJCF scene generation
+        run: python -m unittest discover -s tests -p 'test_g1_static_cylinder.py' -v
       - name: Verify atomic CSV recovery after a simulated writer failure
         run: python -m unittest discover -s tests -p 'test_g1_atomic_results.py' -v
       - name: Check 12-row GPU smoke study and paired-result auditor
