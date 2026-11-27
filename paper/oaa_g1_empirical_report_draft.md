@@ -1,7 +1,7 @@
-# Selective Online Actuator Correction for a Frozen G1 Humanoid Walker
+# Reliable Humanoid Navigation Under Actuator Uncertainty: Perception-Guided Planning and Adaptive Execution
 **Prasuna Chatla — Stanford University**  
 AA228/CS238 empirical paper working draft, 26 November 2026  
-**Status: based on executed S0/S1a GPU data; depth-navigation demo still under validation.**
+**Status: auxiliary actuator-adaptation analysis based on S0/S1a GPU data. For the current integrated navigation and G3 evidence, see the primary Course_Report_20261127_Draft.md.**
 
 ## Abstract
 
