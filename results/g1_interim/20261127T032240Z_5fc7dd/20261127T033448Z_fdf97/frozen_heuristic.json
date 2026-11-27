@@ -1,0 +1,25 @@
+{
+  "rls": {
+    "forgetting": 0.9
+  },
+  "heuristic": {
+    "dead_band": 0.1,
+    "max_residual_rms": 0.02,
+    "max_age_steps": 3,
+    "min_samples": 10,
+    "min_excitation_rad": 0.02
+  },
+  "tuned_on": {
+    "split": "dev",
+    "families": [
+      "gain_070",
+      "gain_070_return",
+      "healthy",
+      "sensor_scale_080"
+    ],
+    "telemetry": "declared",
+    "episodes": 8,
+    "evaluations": 17,
+    "objective": "loss + 0.50*harm + 0.10*falls"
+  }
+}
