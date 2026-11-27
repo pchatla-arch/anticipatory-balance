@@ -1,0 +1,31 @@
+test_behind_robot_rejected (test_obstacle_depth.DepthSelectionTests.test_behind_robot_rejected) ... ok
+test_confirmed_detour (test_obstacle_depth.DepthSelectionTests.test_confirmed_detour) ... ok
+test_fresh_empty_depth_allows_slow_approach (test_obstacle_depth.DepthSelectionTests.test_fresh_empty_depth_allows_slow_approach) ... ok
+test_ground_is_not_obstacle (test_obstacle_depth.DepthSelectionTests.test_ground_is_not_obstacle) ... ok
+test_missed_observation_does_not_clear_accepted_obstacle (test_obstacle_depth.DepthSelectionTests.test_missed_observation_does_not_clear_accepted_obstacle) ... ok
+test_near_unconfirmed_stop (test_obstacle_depth.DepthSelectionTests.test_near_unconfirmed_stop) ... ok
+test_nearest_depth_blob_without_truth (test_obstacle_depth.DepthSelectionTests.test_nearest_depth_blob_without_truth) ... ok
+test_no_camera_frame_stops (test_obstacle_depth.DepthSelectionTests.test_no_camera_frame_stops) ... ok
+test_nonfinite_depth_ignored (test_obstacle_depth.DepthSelectionTests.test_nonfinite_depth_ignored) ... ok
+test_requires_repeat_observation (test_obstacle_depth.DepthSelectionTests.test_requires_repeat_observation) ... ok
+test_single_pixel_noise_rejected (test_obstacle_depth.DepthSelectionTests.test_single_pixel_noise_rejected) ... ok
+test_stale_after_blank_frames_stops (test_obstacle_depth.DepthSelectionTests.test_stale_after_blank_frames_stops) ... ok
+test_stale_depth_stop (test_obstacle_depth.DepthSelectionTests.test_stale_depth_stop) ... ok
+test_before_first_waypoint_near_lost_object_stops (test_obstacle_memory_release.PostDetourMemoryTests.test_before_first_waypoint_near_lost_object_stops) ... ok
+test_exact_observed_g2b_stall_releases_on_clear_future_route (test_obstacle_memory_release.PostDetourMemoryTests.test_exact_observed_g2b_stall_releases_on_clear_future_route) ... ok
+test_stale_camera_frame_still_stops_on_clear_route (test_obstacle_memory_release.PostDetourMemoryTests.test_stale_camera_frame_still_stops_on_clear_route) ... ok
+test_too_close_to_stale_estimate_does_not_release (test_obstacle_memory_release.PostDetourMemoryTests.test_too_close_to_stale_estimate_does_not_release) ... ok
+test_unsafe_remaining_path_still_stops (test_obstacle_memory_release.PostDetourMemoryTests.test_unsafe_remaining_path_still_stops) ... ok
+test_clear_straight_route (test_obstacle_route_demo.ObstacleRouteTests.test_clear_straight_route) ... ok
+test_detour_both_sides_clear (test_obstacle_route_demo.ObstacleRouteTests.test_detour_both_sides_clear) ... ok
+test_follower_advances (test_obstacle_route_demo.ObstacleRouteTests.test_follower_advances) ... ok
+test_forward (test_obstacle_route_demo.ObstacleRouteTests.test_forward) ... ok
+test_reject_close_obstacle_start (test_obstacle_route_demo.ObstacleRouteTests.test_reject_close_obstacle_start) ... ok
+test_reject_invalid_radius (test_obstacle_route_demo.ObstacleRouteTests.test_reject_invalid_radius) ... ok
+test_stop_at_waypoint (test_obstacle_route_demo.ObstacleRouteTests.test_stop_at_waypoint) ... ok
+test_turn_in_place_before_unsafe_forward (test_obstacle_route_demo.ObstacleRouteTests.test_turn_in_place_before_unsafe_forward) ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 0.008s
+
+OK

@@ -1,0 +1,10 @@
+Cloning into 'anticipatory-balance'...
+From https://github.com/pchatla-arch/anticipatory-balance
+ * branch            oaa/g1-obstacle-demo-prototype-20261126 -> FETCH_HEAD
+HEAD is now at 6d75add test: verify replay obstruction is confirmed and in near field before asserting memory behavior
+STAGE=BOOTSTRAP 2026-11-27T04:52:19Z
+STAGE=EGL 2026-11-27T04:53:04Z
+STAGE=CPU_REGRESSION 2026-11-27T04:53:09Z
+STAGE=REAL_G1_CONTACT 2026-11-27T04:53:10Z
+STAGE=REAL_G1_1200_STEP_ROUTE 2026-11-27T04:53:18Z
+STAGE=FINISHED 2026-11-27T04:57:31Z

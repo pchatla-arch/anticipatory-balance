@@ -1,0 +1,9 @@
+test_collision_clearance_gates_out_memory (test_g2c_static_memory_replay.StaticMemoryReplay.test_collision_clearance_gates_out_memory) ... ok
+test_missing_fresh_camera_never_allows_memory (test_g2c_static_memory_replay.StaticMemoryReplay.test_missing_fresh_camera_never_allows_memory) ... ok
+test_no_memory_before_first_waypoint (test_g2c_static_memory_replay.StaticMemoryReplay.test_no_memory_before_first_waypoint) ... ok
+test_static_detour_after_first_waypoint_is_safe_to_continue (test_g2c_static_memory_replay.StaticMemoryReplay.test_static_detour_after_first_waypoint_is_safe_to_continue) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+OK

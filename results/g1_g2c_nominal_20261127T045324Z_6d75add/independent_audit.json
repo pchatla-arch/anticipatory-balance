@@ -1,0 +1,56 @@
+{
+  "calibration": {
+    "candidate_ground_pixel_counts": [
+      {
+        "count": 4183,
+        "flip": false,
+        "ray": false
+      },
+      {
+        "count": 0,
+        "flip": true,
+        "ray": false
+      },
+      {
+        "count": 123,
+        "flip": false,
+        "ray": true
+      },
+      {
+        "count": 28,
+        "flip": true,
+        "ray": true
+      }
+    ],
+    "depth_is_ray": false,
+    "flip_rows": false,
+    "ground_pixels": 4183
+  },
+  "contact_positive_frames": 0,
+  "detector_fraction": 0.09243697478991597,
+  "detector_positive_frames": 22,
+  "first_source_step": 0,
+  "frame_count": 238,
+  "goal_reached": true,
+  "last_source_step": 1185,
+  "navigator_reasons": {
+    "approach_slow": 1,
+    "detour": 161,
+    "detour_memory": 75,
+    "goal_reached": 1
+  },
+  "observed_goal_distance_m": 0.1858118392068971,
+  "physical_contact_ticks": 0,
+  "scope": "independent post-hoc integrity check; no hardware/safety guarantee",
+  "source_commit": "6d75add0f2b6ceb601f90a5376818edcce10cfee",
+  "status": "GOAL_REACHED_NO_RECORDED_CYLINDER_CONTACTS",
+  "video": {
+    "codec": "h264",
+    "duration_seconds": 23.8,
+    "frame_count": 238,
+    "height": 240,
+    "present": true,
+    "size_bytes": 131636,
+    "width": 320
+  }
+}

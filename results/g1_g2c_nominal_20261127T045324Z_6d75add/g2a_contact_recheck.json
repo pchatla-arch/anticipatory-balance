@@ -1,0 +1,11 @@
+{
+  "cameras": 2,
+  "collision_pairs": 4,
+  "forced_overlap_contacts": 4,
+  "initial_obstacle_contacts": 0,
+  "mode": "g1",
+  "nq": 43,
+  "nu": 29,
+  "nv": 41,
+  "warning": "Real G1 model collision smoke, NOT closed-loop walking"
+}
