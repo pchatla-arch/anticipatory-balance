@@ -1,0 +1,86 @@
+{
+  "id": "G1-S1A-20261126",
+  "status": "QUEUED_NOT_LAUNCHED",
+  "purpose": "Paired actuator recovery development screening after validated S0 smoke",
+  "source_branch": "oaa/g1-obstacle-demo-prototype-20261126",
+  "source_at_registration": "43ca493bb5e7ca5e7397b1059a1eb922514cca50",
+  "pr": 51,
+  "parent_stage": {
+    "id": "S0",
+    "status": "PASSED",
+    "pod_id": "7h36awbj20e4wf",
+    "result_branch": "foresight/experiment-results",
+    "result_path": "results/g1_course_dev_20261127T024308Z_104a34",
+    "result_commit": "9a9ed5ea3b3626d709c05d622f0e7e20ec85f876",
+    "audit_episode_rows": 12
+  },
+  "experiment": {
+    "profile": "s1_screen",
+    "split": "dev",
+    "impl": "jax",
+    "hardware_gpu": 1,
+    "telemetry": "declared",
+    "families": [
+      "healthy",
+      "gain_070",
+      "gain_070_return",
+      "sensor_scale_080"
+    ],
+    "methods": [
+      "none",
+      "oracle",
+      "estimated_inverse",
+      "heuristic_gate"
+    ],
+    "paired_scenarios_per_cell": 2,
+    "steps_per_episode": 400,
+    "controller_hz": 50,
+    "command_schedule": "walk_turn_stop_resume",
+    "expected_episode_rows": 32,
+    "random_seeds": "frozen family_seed split=dev, matched across methods",
+    "reference_method": "heuristic_gate",
+    "frozen_controller_checkpoint": "checkpoints/nominal_s1/000202342400",
+    "checkpoint_tree_sha256": "14bd6650f06c4e3171b6e2d2403ef0da5d9dd3604709f0c22b488329dd0223de",
+    "heuristic_commit": "d756c37d0564837a74132c30f8e366320a6bb1a5"
+  },
+  "budget": {
+    "project_ceiling_usd": 4.44,
+    "posted_pod_total_20261120_20261127_usd_at_queue_check": 2.1654546934878454,
+    "posted_charges_may_lag": true,
+    "per_pod_requested_gpu_rate_usd_per_hr_ceiling": 0.69,
+    "new_attempt_max_lifetime_minutes": 90,
+    "new_attempt_max_gpu_compute_usd": 1.035,
+    "new_attempt_max_authorized_spend_usd": 1.05,
+    "publication_stop_reserve_minutes": 20,
+    "storage_additional": true
+  },
+  "queue_gates": {
+    "requires_fresh_account_billing_review": true,
+    "requires_one_approved_secure_a6000_cuda13_2": true,
+    "requires_no_active_project_pod": true,
+    "requires_real_github_write_probe": true,
+    "requires_cpu_ci_pass_on_exact_commit": true,
+    "requires_operator_pod_credentials": true,
+    "requires_verified_provider_shutdown": true,
+    "requires_experiment_outputs_published_to_results_branch": true
+  },
+  "outputs": [
+    "episodes.csv",
+    "summary.json",
+    "report.md",
+    "NPZ traces",
+    "run_status.json",
+    "paired progress/velocity loss",
+    "healthy false offsets",
+    "return-to-healthy withdrawal and never-withdrew metrics",
+    "control clipping and contact/fall metrics"
+  ],
+  "exclusions": [
+    "No real obstacle camera integration",
+    "No real H264 video",
+    "No trained VLA claim",
+    "Not the final 128-row development experiment",
+    "Not held-out WP2.2 science"
+  ],
+  "execution": "WAIT_FOR_NEXT_APPROVED_POD_AND_CREDENTIALS; no RunPod pod created by registration"
+}
