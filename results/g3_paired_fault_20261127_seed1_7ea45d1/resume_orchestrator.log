@@ -1,0 +1,11 @@
+From https://github.com/pchatla-arch/anticipatory-balance
+ * branch            oaa/g1-obstacle-demo-prototype-20261126 -> FETCH_HEAD
+   107b807..7ea45d1  oaa/g1-obstacle-demo-prototype-20261126 -> origin/oaa/g1-obstacle-demo-prototype-20261126
+Previous HEAD position was 107b807 research: require both paired arms even when task fails; stop on software or safety-gate failure
+HEAD is now at 7ea45d1 test: frozen G3 heuristic metadata matches deployed JSON schema without control influence
+STAGE=FIXED_G3_CPU_TESTS 2026-11-27T05:08:14Z
+STAGE=FIXED_G3_SMOKE 2026-11-27T05:08:23Z
+G3_CAUSAL_SMOKE_PASSED: G3_COMPLETED_DEVELOPMENT_NOT_GOAL_REACHED packets 291
+STAGE=G3_NONE 2026-11-27T05:12:52Z
+STAGE=G3_HEURISTIC 2026-11-27T05:17:34Z
+STAGE=FINISHED 2026-11-27T05:22:37Z

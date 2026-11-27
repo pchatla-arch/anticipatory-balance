@@ -1,0 +1,15 @@
+{
+  "adapter": "heuristic_gate",
+  "capture_every": 5,
+  "depth_res": 96,
+  "fault_gain": 0.7,
+  "fault_onset": 200,
+  "fault_return": 900,
+  "goal_x": 5.0,
+  "heuristic_json": "/workspace/g3_paired_20261127/frozen_heuristic.json",
+  "obstacle_x": 2.8,
+  "out": "/workspace/g3_paired_20261127/fault_heuristic_seed1",
+  "render_video": true,
+  "seed": 1,
+  "steps": 1200
+}

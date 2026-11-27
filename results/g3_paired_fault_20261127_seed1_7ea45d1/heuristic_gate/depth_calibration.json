@@ -1,0 +1,27 @@
+{
+  "ground_pixels": 4183,
+  "depth_is_ray": false,
+  "flip_rows": false,
+  "candidate_ground_pixel_counts": [
+    {
+      "count": 4183,
+      "ray": false,
+      "flip": false
+    },
+    {
+      "count": 0,
+      "ray": false,
+      "flip": true
+    },
+    {
+      "count": 123,
+      "ray": true,
+      "flip": false
+    },
+    {
+      "count": 28,
+      "ray": true,
+      "flip": true
+    }
+  ]
+}
