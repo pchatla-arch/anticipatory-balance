@@ -38,6 +38,11 @@ jobs:
         run: python -m pip install --disable-pip-version-check 'mujoco==3.16.0'
       - name: Validate actual contact generation in stationary-cylinder fixture
         run: PYTHONPATH=. python scripts/g1_static_obstacle_physics_gate.py --mode fixture --out /tmp/g1_obstacle_contact_fixture.json
+      - name: Validate the real-G1 diagnostic runner CLI without buying GPU compute
+        run: |
+          python -m py_compile scripts/eval_g1_obstacle_nominal.py scripts/g1_static_obstacle_physics_gate.py
+          python scripts/eval_g1_obstacle_nominal.py --help > /dev/null
+          PYTHONPATH=. python scripts/g1_static_obstacle_physics_gate.py --help > /dev/null
       - name: Verify atomic CSV recovery after a simulated writer failure
         run: python -m unittest discover -s tests -p 'test_g1_atomic_results.py' -v
       - name: Check 12-row GPU smoke study and paired-result auditor
