@@ -1,0 +1,47 @@
+{
+  "experiment_id": "G1-G2A-20261126",
+  "result": "PASS_MODEL_COMPILE_AND_CONTACT_PROOF",
+  "date_utc": "2026-11-27",
+  "pod": {
+    "id": "e9tnqh3jnvdwww",
+    "gpu": "NVIDIA RTX A6000",
+    "cloud": "SECURE",
+    "hourly_gpu_price_usd": 0.69,
+    "host_cuda": "13.2"
+  },
+  "source_commit": "15bfd72603d5dac6cecaf2d3cc192d0d10904291",
+  "method": "MuJoCo CPU MjModel/forward on the real G1 Playground asset loader (executed inside GPU-hosted pod); no GPU rollouts",
+  "obstacle": {
+    "type": "static_cylinder",
+    "world_xy": [
+      2.8,
+      0
+    ],
+    "radius_m": 0.3,
+    "height_m": 1.05
+  },
+  "observations": {
+    "cameras": 2,
+    "collision_pairs": 4,
+    "forced_overlap_contacts": 4,
+    "initial_obstacle_contacts": 0,
+    "nq": 43,
+    "nv": 41,
+    "nu": 29
+  },
+  "provenance": {
+    "bootstrap": "pinned fresh_environment",
+    "bootstrap_exit": 0,
+    "revised_g2a_exit": 0,
+    "initial_g2a_exit": 1,
+    "initial_failure": "raw MjModel.from_xml_path could not locate Menagerie mesh; fixed by loading through AdaptiveJoystick which resolves Playground assets"
+  },
+  "limitations": [
+    "Evaluation-only overlap intentionally relocates obstacle in a throwaway model; location never used by online planner",
+    "Does not prove a physical G1 robot collision avoidance trajectory",
+    "Does not yet execute G2b real head-camera depth calibration, G2c closed-loop route or an authentic MP4",
+    "No actuator-gain fault tested in this stage"
+  ],
+  "next_gate": "G2b real G1 depth-render calibration and initial detection; then G2c conservative nominal route",
+  "publication_kind": "assistant-fetched live stdout, verified provider execution exit 0, committed by connected GitHub integration"
+}
