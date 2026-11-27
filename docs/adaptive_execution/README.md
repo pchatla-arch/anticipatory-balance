@@ -1,5 +1,12 @@
 # Online Actuator Adaptation: proposals and design reviews
 
+## Current project status and experimental evidence (November 26, 2026)
+
+The [canonical experiment tracker](EXPERIMENT_TRACKER.md) is the single place to check completed, pending and deferred G1 experiments. [S1b negative-results analysis](S1b_raw_data_diagnosis.md) summarizes independently recomputed S1a fault/return/progress metrics. The latest [physical obstacle demo plan](G1_obstacle_recovery_demo_plan.md) specifies contact, rendered-depth, navigation, video and reporting gates.
+
+S0 (12-row CUDA smoke) and S1a (32-row long-horizon actuator comparison) are **measured and published**. Real stationary-cylinder contact and head-depth integration is being implemented, but a successful physical obstacle route or authentic video has **not** been established. The original 72-episode obstacle matrix remains unexecuted. The existing research proposal below predates these newer measurements; cite the tracker for current evidence.
+
+
 The selected [proposal 0.3, revision 0.3.1](research_candidate/README.md) strengthens
 **Online Actuator Adaptation for Reliable Humanoid Locomotion** with an explicit
 uncertainty/command-hold correction rule, analytical reference, matched
