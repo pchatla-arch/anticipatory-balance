@@ -36,6 +36,8 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_g1_atomic_results.py' -v
       - name: Check 12-row GPU smoke study and paired-result auditor
         run: python -m unittest discover -s tests -p 'test_g1_smoke_matrix.py' -v
+      - name: Gate the queued S1a experiment and per-attempt spending
+        run: python -m unittest discover -s tests -p 'test_g1_s1a_queue.py' -v
       - name: Validate benchmark entrypoint options
         run: python scripts/eval_adaptive_bench.py --help > /dev/null
       - name: Run pure-CPU launcher and failure-recovery tests
