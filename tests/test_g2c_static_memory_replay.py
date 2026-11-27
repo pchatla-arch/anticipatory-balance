@@ -23,7 +23,7 @@ class StaticMemoryReplay(unittest.TestCase):
         self.assertGreaterEqual(nav.follower.index, 1)
         nav.ingest(DepthDetection((2.9076, .280378), 2.03, .3, 24, 1., 105))
         nav.ingest(None, observed_step=515)  # real fresh blank head frame
-        vx, wz, why = nav.command(1.96, 1.57, .28, 515)
+        vx, wz, why = nav.command(1.963219, 1.569092, .28, 515)
         self.assertEqual(why, "detour_memory")
         self.assertGreaterEqual(vx, 0.)
 
