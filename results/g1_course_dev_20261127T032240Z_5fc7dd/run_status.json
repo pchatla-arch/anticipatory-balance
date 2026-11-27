@@ -1,0 +1,34 @@
+{
+  "bench_profile": "s1_screen",
+  "bench_rows": 32,
+  "checkpoint_sha": "14bd6650f06c4e3171b6e2d2403ef0da5d9dd3604709f0c22b488329dd0223de",
+  "exclusive_pod_check": "USER_CONFIRMED_API_UNAVAILABLE",
+  "frozen_heuristic_commit": "d756c37d0564837a74132c30f8e366320a6bb1a5",
+  "github_write_probe_sha": "0da5ae5ad1bb578b298850c311e7c348efdef8dc",
+  "gpu_rate_per_hr": 0.69,
+  "independent_bench_audit": {
+    "audit": "recomputed episode losses and pairing checked",
+    "cells": 16,
+    "episode_rows": 32,
+    "paired_scenarios_per_family": 2,
+    "profile": "s1_screen"
+  },
+  "kind": "g1_course_development",
+  "new_attempt_gpu_ceiling_usd": 1.05,
+  "obstacle_72_episode_trial": "NOT_EXECUTED",
+  "overall": "COMPLETE_G1_S1A_SCREEN_NO_OBSTACLE_VIDEO",
+  "pod_id": "z5ozde27m0ggg9",
+  "queue_job_id": "G1-S1A-20261126",
+  "run_id": "20261127T032240Z_5fc7dd",
+  "scientific_claims": "Only recorded episode data from completed stages",
+  "source_commit": "89b6d0dd31020f00032330c76684c727b1f697a0",
+  "split": "dev",
+  "stages": {
+    "cpu_preflight_checkpoint": "passed",
+    "depth_obstacle_g1_demo": "BLOCKED_missing_integrated_runner",
+    "g1_s1a_long_horizon_screen": "passed_32_rows",
+    "github_write_preflight": "actual_published_commit_verified",
+    "pinned_bootstrap": "passed",
+    "pod_supervisor_guard_tests": "passed"
+  }
+}
