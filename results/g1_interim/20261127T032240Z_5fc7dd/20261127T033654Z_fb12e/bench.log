@@ -1,0 +1,14 @@
+healthy declared none: falls=0.000 loss=0.0221 harmful=0.0000 gain_err=0.000 time=100s
+healthy declared oracle: falls=0.000 loss=0.0216 harmful=0.0000 gain_err=0.000 time=48s
+healthy declared estimated_inverse: falls=0.000 loss=0.0213 harmful=0.0751 gain_err=0.000 time=59s
+healthy declared heuristic_gate: falls=0.000 loss=0.0227 harmful=0.0003 gain_err=0.000 time=64s
+gain_070 declared none: falls=0.000 loss=0.0855 harmful=0.0000 gain_err=0.300 time=55s
+gain_070 declared oracle: falls=0.000 loss=0.0287 harmful=0.0000 gain_err=0.300 time=44s
+gain_070 declared estimated_inverse: falls=0.000 loss=0.0314 harmful=0.0832 gain_err=0.072 time=55s
+gain_070 declared heuristic_gate: falls=0.000 loss=0.0383 harmful=0.0001 gain_err=0.073 time=47s
+gain_070_return declared none: falls=0.000 loss=0.0610 harmful=0.0000 gain_err=0.300 time=52s
+gain_070_return declared oracle: falls=0.000 loss=0.0309 harmful=0.0007 gain_err=0.300 time=45s
+gain_070_return declared estimated_inverse: falls=0.000 loss=0.0315 harmful=0.0833 gain_err=0.079 time=44s
+gain_070_return declared heuristic_gate: falls=0.000 loss=0.0363 harmful=0.0024 gain_err=0.076 time=52s
+sensor_scale_080 declared none: falls=0.000 loss=0.0268 harmful=0.0000 gain_err=0.000 time=50s
+sensor_scale_080 declared oracle: falls=0.000 loss=0.0268 harmful=0.0000 gain_err=0.000 time=42s

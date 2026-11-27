@@ -1,0 +1,16 @@
+test_authorized_pod (test_g1_pod_supervisor.PodSupervisorGuards.test_authorized_pod) ... ok
+test_checkpoint_digest_deterministic (test_g1_pod_supervisor.PodSupervisorGuards.test_checkpoint_digest_deterministic) ... ok
+test_higher_price_rejected (test_g1_pod_supervisor.PodSupervisorGuards.test_higher_price_rejected) ... ok
+test_missing_checkpoint_rejected (test_g1_pod_supervisor.PodSupervisorGuards.test_missing_checkpoint_rejected) ... ok
+test_provider_start_time_in_utc (test_g1_pod_supervisor.PodSupervisorGuards.test_provider_start_time_in_utc) ... ok
+test_secure_a6000_accepted_at_authorized_rate (test_g1_pod_supervisor.PodSupervisorGuards.test_secure_a6000_accepted_at_authorized_rate) ... ok
+test_secure_a6000_rejected_above_ceiling (test_g1_pod_supervisor.PodSupervisorGuards.test_secure_a6000_rejected_above_ceiling) ... ok
+test_secure_ada_accepted_at_authorized_rate (test_g1_pod_supervisor.PodSupervisorGuards.test_secure_ada_accepted_at_authorized_rate) ... ok
+test_unavailable_cuda_rejected (test_g1_pod_supervisor.PodSupervisorGuards.test_unavailable_cuda_rejected) ... ok
+test_wrong_gpu_rejected (test_g1_pod_supervisor.PodSupervisorGuards.test_wrong_gpu_rejected) ... ok
+test_zero_price_is_not_accepted_as_verified_quote (test_g1_pod_supervisor.PodSupervisorGuards.test_zero_price_is_not_accepted_as_verified_quote) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.003s
+
+OK
