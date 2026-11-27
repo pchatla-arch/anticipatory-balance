@@ -1,0 +1,33 @@
+name: G1 CPU reliability gates
+on:
+  push:
+    branches:
+      - oaa/g1-obstacle-demo-prototype-20261126
+  pull_request:
+    paths:
+      - 'scripts/g1_detached_run.py'
+      - 'scripts/run_g1_pod_one_command.py'
+      - 'tests/test_g1_*.py'
+      - '.github/workflows/g1_cpu_reliability.yml'
+  workflow_dispatch:
+
+jobs:
+  cpu-reliability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Syntax-check G1 launcher code and tests
+        run: |
+          python -m py_compile scripts/run_g1_pod_one_command.py scripts/g1_detached_run.py tests/test_g1_pod_supervisor.py tests/test_g1_pod_ownership.py tests/test_g1_github_auth.py tests/test_g1_detached_run.py
+      - name: Run pure-CPU launcher and failure-recovery tests
+        run: |
+          python -m unittest discover -s tests -p 'test_g1_pod_supervisor.py' -v
+          python -m unittest discover -s tests -p 'test_g1_pod_ownership.py' -v
+          python -m unittest discover -s tests -p 'test_g1_github_auth.py' -v
+          python -m unittest discover -s tests -p 'test_g1_detached_run.py' -v
