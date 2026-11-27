@@ -74,6 +74,37 @@ class S1AQueueContract(unittest.TestCase):
                     with self.assertRaisesRegex(RuntimeError, "registration differs"):
                         R.validate_queued_profile()
 
+    def test_32_episode_auditor_accepts_paired_complete_s1a(self):
+        import csv
+        spec = R.BENCH_PROFILES["s1_screen"]
+        with tempfile.TemporaryDirectory() as folder:
+            p = Path(folder)
+            rows = []
+            cells = {}
+            for family in spec["families"]:
+                for method in spec["methods"]:
+                    cells[family + "|declared|" + method] = {"mean_postfault_loss": 0.25}
+                    for seed in range(spec["episodes"]):
+                        rows.append({"split": "dev", "telemetry": "declared",
+                                     "family": family, "method": method,
+                                     "scenario_id": family + "-seed-" + str(seed),
+                                     "postfault_loss": "0.25"})
+            with (p / "episodes.csv").open("w", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=list(rows[0]))
+                writer.writeheader()
+                writer.writerows(rows)
+            (p / "summary.json").write_text(json.dumps({"cells": cells}))
+            audit = R.verify_bench_rows(p, profile="s1_screen")
+            self.assertEqual(audit["episode_rows"], 32)
+            self.assertEqual(audit["cells"], 16)
+            rows[0]["postfault_loss"] = "0.75"
+            with (p / "episodes.csv").open("w", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=list(rows[0]))
+                writer.writeheader()
+                writer.writerows(rows)
+            with self.assertRaisesRegex(RuntimeError, "disagrees with summary"):
+                R.verify_bench_rows(p, profile="s1_screen")
+
     def test_lifetime_and_publication_reserve(self):
         self.assertEqual(R.PROFILE_LIFETIME_S["s1_screen"], 90 * 60)
         self.assertEqual(R.PROFILE_LIFETIME_S["smoke"], 60 * 60)
