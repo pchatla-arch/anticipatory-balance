@@ -144,6 +144,40 @@ class DetachedReliabilityTests(unittest.TestCase):
                                     spawn.assert_not_called()
                                     stop.assert_called_once_with("unit-pod", "test-only")
 
+    def test_detached_child_survives_parent_session_hangup(self):
+        """Actual Linux OS process-group test, no GPU or provider connection."""
+        import signal
+        import subprocess
+        import sys
+        parent_program = (
+            "import subprocess,sys,time;"
+            "p=subprocess.Popen([sys.executable,'-c','import time;time.sleep(8)'],"
+            "start_new_session=True,stdin=subprocess.DEVNULL,"
+            "stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL);"
+            "print(p.pid,flush=True);time.sleep(8)"
+        )
+        parent = subprocess.Popen(
+            [sys.executable, "-c", parent_program],
+            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL, text=True, start_new_session=True)
+        child_pid = None
+        try:
+            child_pid = int(parent.stdout.readline().strip())
+            self.assertIsNotNone(M.process_start_ticks(child_pid))
+            os.killpg(parent.pid, signal.SIGHUP)
+            parent.wait(timeout=3)
+            self.assertIsNotNone(M.process_start_ticks(child_pid))
+        finally:
+            if parent.poll() is None:
+                parent.kill()
+                parent.wait(timeout=3)
+            if child_pid is not None:
+                try:
+                    os.kill(child_pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    pass
+            parent.stdout.close()
+
     def test_snapshot_missing_git_token_refused(self):
         with tempfile.TemporaryDirectory() as temp:
             run = Path(temp) / "20261126T100000Z_test"
