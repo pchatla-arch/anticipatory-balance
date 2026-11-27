@@ -541,21 +541,23 @@ def main():
         log("Exclusive pod check failed:", type(exc).__name__, str(exc)[:180])
         stop_pod(pod_id, token)
         raise
+    try:
+        profile, attempt_ceiling_usd = validate_queued_profile()
+    except Exception as exc:
+        log("Unapproved experiment registration:", type(exc).__name__, str(exc)[:180])
+        stop_pod(pod_id, token)
+        raise
     pod_started = started_epoch(pod)
-    # One-hour smoke budget from pod START, never from starting this script.
     max_budget_s = int(COST_MAX_USD / price * 3600) - 40 * 60
-    deadline = pod_started + min(LIFETIME_LIMIT_S, max_budget_s)
+    if attempt_ceiling_usd is not None:
+        max_budget_s = min(max_budget_s,
+                           int(attempt_ceiling_usd / price * 3600) - 120)
+    deadline = pod_started + min(PROFILE_LIFETIME_S[profile], max_budget_s)
     if deadline - time.time() < 45 * 60:
         stop_pod(pod_id, token)
         raise SystemExit("Pod already too old: no safe setup+experiment budget remains")
     log("Verified authorized pod", pod_id, "cloud", pod["cloud"], "price", price,
-        "seconds remaining", int(deadline - time.time()))
-
-    profile = os.environ.get("G1_BENCH_PROFILE", "smoke").strip()
-    if profile != "smoke":
-        log("Unapproved benchmark profile; stopping provider before experiment setup")
-        stop_pod(pod_id, token)
-        raise RuntimeError("Only the 12-row smoke profile is enabled on this revision")
+        "profile", profile, "seconds remaining", int(deadline - time.time()))
     bench_spec = BENCH_PROFILES[profile]
     # Start detached pod-side deadline guard immediately after provider validation.
     guard_log = OUTPUT_ROOT / "watchdog.log"
