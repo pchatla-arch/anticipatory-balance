@@ -1,0 +1,74 @@
+{
+  "id": "G3-P1-20261127",
+  "state": "REGISTERED_NOT_EXECUTED",
+  "purpose": "Minimal paired real-depth contact-enabled Unitree G1 actuator-fault navigation feasibility check",
+  "parent_evidence": {
+    "G2c_status": "GOAL_REACHED_NO_RECORDED_CYLINDER_CONTACTS",
+    "source_sha": "6d75add0f2b6ceb601f90a5376818edcce10cfee",
+    "result_commit": "b90253190c36024e3daef9bcf4c25c8d84dc781f",
+    "video": "results/g1_g2c_nominal_20261127T045324Z_6d75add/real_simulator_nominal.mp4"
+  },
+  "registration": {
+    "scene": "one static physical cylinder at (2.8,0), radius 0.30m, height 1.05m",
+    "goal_xy": [
+      5,
+      0
+    ],
+    "same_renderer": "MuJoCo head_cam 96x96 depth 10Hz",
+    "same_planner": "ObstacleNavigator memory safety checks; simulator pose for disclosed localization only",
+    "same_frozen_PPO": "checkpoints/nominal_s1/000202342400",
+    "gain_schedule": {
+      "leg_servo_gain": 0.7,
+      "onset_tick": 200,
+      "return_tick": 900
+    },
+    "methods": [
+      "none",
+      "heuristic_gate"
+    ],
+    "seeds": [
+      1
+    ],
+    "control_ticks": 1200,
+    "control_hz": 50,
+    "telemetry": "DECLARED sensor model; heuristic receives source-indexed delayed packets only",
+    "heuristic_source": "d756c37d0564837a74132c30f8e366320a6bb1a5",
+    "expected_episode_count": 2
+  },
+  "gates": {
+    "preflight_cpu_jax_and_cli": true,
+    "explicit_pod_authorization": true,
+    "source_hash_pinned": true,
+    "real_camera_frames_not_cached": true,
+    "physical_contact_pair_checked": true,
+    "same_seed_and_fault_schedule": true,
+    "no_true_gain_return_or_obstacle_position_in_heuristic": true,
+    "no_replay_of_WP22": true,
+    "archive_each_arm_before_second": true,
+    "confirmed_provider_stop": true
+  },
+  "outcomes": [
+    "goal_reached",
+    "goal_distance",
+    "falls",
+    "recorded_physical_cylinder_contacts",
+    "head_depth_detections",
+    "detour_memory_frames",
+    "postfault_velocity_loss_and_progress_if_auditable",
+    "withdrawal_after_return",
+    "adjustment_nonzero_ticks",
+    "video_integrity",
+    "walltime",
+    "run_config",
+    "software_source_commit"
+  ],
+  "decision_rule": "Two-arm development feasibility only. No robustness/generalization claim. If either arm fails, preserve failure and stop. The 72-row registered obstacle experiment remains NOT_EXECUTED.",
+  "budget": {
+    "gpu": "single Secure RTX A6000",
+    "ceiling_usd_per_hour": 0.69,
+    "desired_attempt_compute_usd": 0.5,
+    "absolute_project_cumulative_compute_ceiling_usd": 4.44,
+    "provider_stop": "external connected RunPod action with independent provider EXITED readback"
+  },
+  "author_approval": "Plan-execute-validate-fix-retry user request, bounded by earlier project budget; no additional/expanded study authorization"
+}
