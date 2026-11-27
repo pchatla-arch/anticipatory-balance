@@ -1,4 +1,10 @@
-# Online Actuator Adaptation: proposals and design reviews
+# Reliable Humanoid Navigation Under Actuator Uncertainty: Perception-Guided Planning and Adaptive Execution
+
+**Current AA228/CS238 project title and submission framing.** The earlier online-actuator-adaptation proposals remain the underlying method and historical design record; they are not separate competing course-paper titles.
+
+**Primary artifacts:** [Course report draft](Course_Report_20261127_Draft.md) · [Executed experiment tracker](EXPERIMENT_TRACKER.md) · [Independent Claude review brief](CLAUDE_INDEPENDENT_REVIEW_BRIEF.md).
+
+## Earlier actuator-adaptation proposals and design reviews
 
 ## Current project status and experimental evidence (November 26, 2026)
 
