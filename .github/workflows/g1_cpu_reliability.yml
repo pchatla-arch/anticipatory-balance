@@ -25,6 +25,15 @@ jobs:
       - name: Syntax-check G1 launcher code and tests
         run: |
           python -m py_compile scripts/run_g1_pod_one_command.py scripts/g1_detached_run.py tests/test_g1_pod_supervisor.py tests/test_g1_pod_ownership.py tests/test_g1_github_auth.py tests/test_g1_detached_run.py
+      - name: Install CPU-only perception dependencies
+        run: python -m pip install --disable-pip-version-check 'numpy==2.3.5'
+      - name: Run pure-CPU perception and task-stack tests
+        run: |
+          python -m unittest discover -s tests -p 'test_obstacle*py' -v
+          python -m unittest discover -s tests -p 'test_language_nav.py' -v
+          python -m unittest discover -s tests -p 'test_task_stack.py' -v
+      - name: Validate benchmark entrypoint options
+        run: python scripts/eval_adaptive_bench.py --help > /dev/null
       - name: Run pure-CPU launcher and failure-recovery tests
         run: |
           python -m unittest discover -s tests -p 'test_g1_pod_supervisor.py' -v
