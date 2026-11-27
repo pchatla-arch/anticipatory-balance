@@ -1,9 +1,12 @@
-# Online Actuator Adaptation Under Uncertain Effort Telemetry: A Unitree G1 Simulator Study
+# Reliable Humanoid Navigation Under Actuator Uncertainty: Perception-Guided Planning and Adaptive Execution
+
 
 **Draft course research report — evidence cutoff November 26, 2026 (Pacific)**  
 **Prasuna Chatla**  
 Stanford University · AA228/CS238  
 *Status: S0/S1a actuator GPU evidence verified; healthy G2c navigation and one paired G3 actuator-fault navigation development trial completed and independently audited. Full multi-seed obstacle study remains unexecuted.*
+
+**Research focus:** A frozen humanoid locomotion policy follows a depth-perceived obstacle route while an online actuator-execution layer compensates for hidden servo-gain changes. The reported contribution is system integration plus a limited empirical evaluation, not a newly trained VLA or a general safety guarantee.
 
 ## Abstract
 
