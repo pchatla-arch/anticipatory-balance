@@ -572,6 +572,8 @@ def main():
     outdir.mkdir()
     status = {"kind": "g1_course_development", "run_id": run_id, "split": "dev",
               "bench_profile": profile,
+              "queue_job_id": S1A_QUEUE_ID if profile == "s1_screen" else None,
+              "new_attempt_gpu_ceiling_usd": attempt_ceiling_usd,
               "exclusive_pod_check": ownership_mode,
               "pod_id": pod_id, "gpu_rate_per_hr": price, "source_commit": "",
               "frozen_heuristic_commit": FROZEN_BASELINE,
@@ -632,18 +634,15 @@ def main():
                  "--heuristic", str(outdir / "frozen_heuristic.json"),
                  "--trace"], deadline=deadline, logfile=outdir / "bench.log", env=env)
         status["independent_bench_audit"] = verify_bench_rows(bench, profile=profile)
-        status["stages"]["g1_gpu_physics_smoke"] = "passed_" + str(bench_spec["expected_rows"]) + "_rows"
+        stage_name = ("g1_gpu_physics_smoke" if profile == "smoke"
+                      else "g1_s1a_long_horizon_screen")
+        status["stages"][stage_name] = "passed_" + str(bench_spec["expected_rows"]) + "_rows"
         status["bench_rows"] = bench_spec["expected_rows"]
-        # No physical obstacle runner exists in the reviewed branch.
-        if not (ROOT / "scripts/eval_g1_obstacle_demo.py").is_file():
-            status["stages"]["depth_obstacle_g1_demo"] = "BLOCKED_missing_integrated_runner"
-            status["obstacle_72_episode_trial"] = "NOT_EXECUTED"
-            status["overall"] = "COMPLETE_G1_GPU_SMOKE_NO_OBSTACLE_VIDEO"
-        else:
-            # No unreviewed interface guessed; new runner requires its own CLI,
-            # independent tests, registration and staging.
-            status["stages"]["depth_obstacle_g1_demo"] = "PENDING_separate_reviewed_protocol"
-            status["overall"] = "COMPLETE_G1_GPU_SMOKE_OBSTACLE_NOT_EVALUATED"
+        status["obstacle_72_episode_trial"] = "NOT_EXECUTED"
+        status["stages"]["depth_obstacle_g1_demo"] = "BLOCKED_missing_integrated_runner"
+        status["overall"] = ("COMPLETE_G1_GPU_SMOKE_NO_OBSTACLE_VIDEO"
+                             if profile == "smoke"
+                             else "COMPLETE_G1_S1A_SCREEN_NO_OBSTACLE_VIDEO")
     except Exception as exc:
         status["overall"] = "FAILED_OR_INCOMPLETE"
         status["error_type"] = type(exc).__name__
@@ -670,7 +669,7 @@ def main():
         # Do not claim a successful integrated demonstration from a partial run.
     if status.get("overall") not in (
             "COMPLETE_G1_GPU_SMOKE_NO_OBSTACLE_VIDEO",
-            "COMPLETE_G1_GPU_SMOKE_OBSTACLE_NOT_EVALUATED") or not published:
+            "COMPLETE_G1_S1A_SCREEN_NO_OBSTACLE_VIDEO") or not published:
         # No science success is claimed unless the smoke row audit and the
         # GitHub remote-readback both passed.
         raise SystemExit(3)
