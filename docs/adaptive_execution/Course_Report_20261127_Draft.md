@@ -3,7 +3,7 @@
 **Draft course research report — evidence cutoff November 26, 2026 (Pacific)**  
 **Prasuna Chatla**  
 Stanford University · AA228/CS238  
-*Status: Actuator-adaptation GPU data verified; physical cylinder navigation experiment pending.*
+*Status: S0/S1a actuator GPU evidence verified; one healthy G1 depth-guided physical-cylinder route completed and audited; paired actuator-fault navigation remains unexecuted.*
 
 ## Abstract
 
@@ -99,7 +99,7 @@ The run includes an independent recomputation of every mean loss directly from r
 - S1b independent descriptive readout: [S1b_raw_data_diagnosis.md](S1b_raw_data_diagnosis.md).
 - Full execution/status record: [EXPERIMENT_TRACKER.md](EXPERIMENT_TRACKER.md).
 
-## 6. Physical obstacle navigation follow-on — pending experimental gate
+## 6. Physical obstacle navigation follow-on — healthy nominal gate completed
 
 The current branch contains optional static-cylinder scene insertion and explicit contact pairs for the G1 torso, pelvis and thighs. The stage sequence is: (G2a) compile the **real G1 MJCF** and prove contacts under evaluation-only forced overlap; (G2b) render and calibrate actual G1 head-camera metric depth and detect the stationary obstacle without privileged geom state; (G2c) navigate the healthy frozen G1 around it, measuring contact and genuine route completion; (G3) use identical navigation/perception with hidden gain changes, then compare recovery against correction-off. An original 72-episode obstacle evaluation registration exists but is *not yet executed*.
 
@@ -140,4 +140,4 @@ AI assistance supported technical discussion, architecture and test review, codi
 - MuJoCo Playground and its pinned Unitree G1 locomotion implementation (source revision and license in the repository).
 - Frozen 2026 experiment protocols, scripts, run logs and source commits linked above.
 
-*Report is a reproducible research draft. It is not yet a finalized submission PDF, a held-out evaluation, a physical robotics demonstration or a video.*
+*Report is a reproducible research draft, not a finalized submission PDF or held-out evaluation. A genuine simulator RGB video and one healthy depth-guided obstacle-route demonstration have been validated; hardware deployment, fault-conditioned navigation and a trained VLA have not.*
