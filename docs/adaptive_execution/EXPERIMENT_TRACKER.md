@@ -3,7 +3,7 @@
 **Author:** Prasuna Chatla  
 **Project:** Online Actuator Adaptation for Reliable Humanoid Locomotion  
 **Checkpoint:** frozen G1 PPO, `checkpoints/nominal_s1/000202342400`  
-**Evidence cutoff:** Nov 26, 2026 (Pacific; live results through Nov 27 UTC)  
+**Evidence cutoff:** Nov 26, 2026 (Pacific; G2a real G1 contact verification Nov 27 UTC)  
 **Submission strategy:** credible actuator-adaptation empirical study first, genuine navigation demonstration second; no invented results.
 
 This is the **canonical experiment checklist** for GitHub PR #51. Existing historical notes and older proposals are background, not separate executed experiments.
@@ -15,7 +15,7 @@ This is the **canonical experiment checklist** for GitHub PR #51. Existing histo
 | E0 / S0 | P0 | Frozen G1/JAX GPU smoke: 2 families × 3 methods × 2 seeds | 12/12 paired rows, CUDA, full audit, GitHub result commit `9a9ed5ea3b3626d709c05d622f0e7e20ec85f876` | **PASS** | Do not rerun |
 | E1 / S1a | P0 | Longer 400-step actuator fault, restoration, healthy control and sensor confound | 32/32 paired rows, 16 cells, source `89b6d0dd31020f00032330c76684c727b1f697a0`, published commit `896000b68aa9c7ea6efcd33ea33b4973ed629bb0` | **PASS: data collection** | Analyze progress and false-intervention tradeoff |
 | E2 / S1b | P0 | Independent failure-mode analysis, progress/loss balance, truthful withdrawal denominators | S1a summary and raw CSV available, n=2 per cell | **ANALYSIS OPEN** | Recompute per-seed contrasts and decide if a repeat is needed |
-| E3 / G2a | P0 | Real static cylinder added to G1 MJCF, explicit physical contacts and sensors, head-camera retained | Pure-Python XML generator implemented, model compile/contacts not yet verified on actual G1 | **CODE IN PROGRESS** | CPU physics fixture passes; pinned G1 compile+forced-contact smoke |
+| E3 / G2a | P0 | Real static cylinder added to G1 MJCF, explicit physical contacts and sensors, head-camera retained | Actual G1 model compiled, 4 static-cylinder contact pairs, 4/4 evaluator-only forced contacts, 0 initial; [result evidence](https://github.com/pchatla-arch/anticipatory-balance/blob/foresight/experiment-results/results/g1_g2a_model_contact_20261127/physical_contact.json) | **PASS: G1 contact model** | Next: real head-depth calibration and nominal walking route |
 | E4 / G2b | P0 | Real head-camera depth frame and detector calibration against static cylinder | Depth detector and backprojection primitives unit-tested; not tested on stationary collider | **NOT EXECUTED** | Head-camera frame rendered, floor-depth convention calibrated, detection evidence saved |
 | E5 / G2c | P1 | Healthy frozen G1 joystick follows conservative detour around physical cylinder | Known-map waypoint planning only, unit-tested; no contact-enabled G1 route | **NOT EXECUTED** | Scene + navigation integrated and held to conservative stopping rules |
 | E6 / G3 | P1 | Paired healthy/fault navigation with identical perception/route (none vs heuristic) | No integrated obstacle-and-actuator runner | **NOT EXECUTED** | Only after E5 healthy route works |
@@ -34,6 +34,8 @@ Sensor-scale confound (healthy gain, effort readings ×0.8): no correction loss 
 All S1a episodes have **0 falls / 32**, but only two paired seeds per cell: no generalization or population-confidence claim. No physical G1 hardware experiment.
 
 S1b CPU-only task: recompute per-scenario paired differences, report the tracking-error/progress Pareto tradeoff and the missed-restoration counts, diagnose whether the loss metric is speed-sensitive, and specify a candidate sensor-confidence abstention rule **without** silently tuning on held-out outcomes. A new model training or held-out test should not be assumed from the existing development data.
+
+**G2a verification:** Real G1 scene check sourced from `15bfd72603d5dac6cecaf2d3cc192d0d10904291` ran in Secure A6000 pod `e9tnqh3jnvdwww`; the CPU MuJoCo model compiled with 29 actuators, two cameras, four explicit static-obstacle contact pairs, zero contacts in the start pose and four contacts under an evaluation-only overlap. The first attempt using raw XML loading failed to resolve a Menagerie asset path; using the same `AdaptiveJoystick` environment asset loader as S1a fixed it. The successful test exited 0 and the RunPod provider verified `EXITED`. **This does not establish closed-loop obstacle detection or route completion.**
 
 ## 3. November 27 (Pacific) minimum deliverable
 
