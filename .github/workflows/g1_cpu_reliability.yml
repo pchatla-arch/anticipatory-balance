@@ -34,6 +34,10 @@ jobs:
           python -m unittest discover -s tests -p 'test_task_stack.py' -v
       - name: Verify contact-enabled stationary obstacle MJCF scene generation
         run: python -m unittest discover -s tests -p 'test_g1_static_cylinder.py' -v
+      - name: Install CPU-only MuJoCo physics engine
+        run: python -m pip install --disable-pip-version-check 'mujoco==3.16.0'
+      - name: Validate actual contact generation in stationary-cylinder fixture
+        run: PYTHONPATH=. python scripts/g1_static_obstacle_physics_gate.py --mode fixture --out /tmp/g1_obstacle_contact_fixture.json
       - name: Verify atomic CSV recovery after a simulated writer failure
         run: python -m unittest discover -s tests -p 'test_g1_atomic_results.py' -v
       - name: Check 12-row GPU smoke study and paired-result auditor
