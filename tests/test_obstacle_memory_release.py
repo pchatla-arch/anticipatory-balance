@@ -15,6 +15,8 @@ class PostDetourMemoryTests(unittest.TestCase):
         for t in (0, 5):
             nav.ingest(DepthDetection((2.839, -0.016), 2.5, .30, 20, 1., t))
         self.assertEqual(nav.command(*start, 0., 6)[2], "detour")
+        # Final G2b camera center at tick 105 shifted ~0.3 m laterally.
+        nav.ingest(DepthDetection((2.907596, 0.280378), 2.2, .30, 20, 1., 105))
         first = nav.follower.route.waypoints[0]
         nav.ingest(None, observed_step=300)
         nav.command(*first, 0., 300)
@@ -49,6 +51,7 @@ class PostDetourMemoryTests(unittest.TestCase):
             nav.ingest(DepthDetection((2.839, -0.016), 2.5, .3, 20, 1., t))
         nav.command(0.331, -0.322, 0., 6)
         self.assertEqual(nav.follower.index, 0)
+        nav.ingest(DepthDetection((2.907596, 0.280378), 2.2, .30, 20, 1., 105))
         nav.ingest(None, observed_step=515)
         self.assertEqual(nav.command(1.963219, 1.569092, 0.28, 515)[2],
                          "stop_lost_obstacle")
