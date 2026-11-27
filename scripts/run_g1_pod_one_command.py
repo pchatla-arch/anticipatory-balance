@@ -39,9 +39,11 @@ AUTHORIZED_GPUS = {
     ("SECURE", "NVIDIA RTX A6000"): 0.69,
     ("SECURE", "NVIDIA RTX 6000 Ada Generation"): 1.09,
 }
-# Stop early to reserve publication time and leave margin below six hours.
-LIFETIME_LIMIT_S = 5 * 3600 + 20 * 60
-RESERVE_S = 25 * 60
+# This revision is intentionally a limited development smoke only.
+# The one-hour clock begins at the provider's pod startedAt, not Python launch.
+# Publication/stop reserve begins with 20 minutes remaining.
+LIFETIME_LIMIT_S = 60 * 60
+RESERVE_S = 20 * 60
 CHECKPOINT_SHA = "14bd6650f06c4e3171b6e2d2403ef0da5d9dd3604709f0c22b488329dd0223de"
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_ROOT = Path("/workspace/g1_run_outputs")
@@ -492,7 +494,7 @@ def main():
         stop_pod(pod_id, token)
         raise
     pod_started = started_epoch(pod)
-    # 5h20m maximum from pod START, never 6h from starting this script.
+    # One-hour smoke budget from pod START, never from starting this script.
     max_budget_s = int(COST_MAX_USD / price * 3600) - 40 * 60
     deadline = pod_started + min(LIFETIME_LIMIT_S, max_budget_s)
     if deadline - time.time() < 45 * 60:
