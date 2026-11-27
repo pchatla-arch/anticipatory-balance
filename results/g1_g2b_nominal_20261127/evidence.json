@@ -1,0 +1,42 @@
+{
+  "stage": "G2b/G2c",
+  "classification": "COMPLETED_DIAGNOSTIC_NOT_VALIDATED_AVOIDANCE",
+  "observed_at_utc": "2026-11-27T04:45:42Z",
+  "pod_id": "99h1c1frn973no",
+  "source_commit": "1fd2d776cd06b270c1b099c6ce8d474d55ec4931",
+  "evidence": {
+    "video": "actual MuJoCo RGB renderer video, 160 frames, 10fps; ffmpeg decode verified",
+    "depth": "actual G1 head camera 96x96 z-depth, 4183 ground support pixels",
+    "obstacle_detected_frames": 22,
+    "frames_examined": 160,
+    "confirmed_obstacle": true,
+    "goal_reached": false,
+    "collision_frames": 0,
+    "physical_contact_ticks": 0,
+    "control_end_reason": "stop_lost_obstacle",
+    "last_xy": [
+      2.1110312938690186,
+      1.5738698244094849
+    ]
+  },
+  "claims": [
+    "G1 nominal closed-loop G2b depth renderer and anti-leakage perception path executed on real JAX cuda:0",
+    "Physical static obstacle detected initially and detour controller issued commands",
+    "Actual simulator MP4 created and decoded",
+    "No obstacle contacts were recorded, but safe full route completion NOT achieved"
+  ],
+  "limits": [
+    "Not proof of successful obstacle avoidance or safe clearance throughout environment",
+    "Depth target lost late in route, nominal robot did not reach goal",
+    "No actuator gain fault or adaptation tested in navigation",
+    "Development diagnostic only, not registered paired obstacle study"
+  ],
+  "raw_files": [
+    "config.json",
+    "run_status.json",
+    "depth_calibration.json",
+    "frames.jsonl",
+    "head_depth_first.npy",
+    "real_simulator_nominal.mp4"
+  ]
+}

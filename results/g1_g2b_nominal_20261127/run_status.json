@@ -1,0 +1,30 @@
+{
+  "collision_frames": 0,
+  "completed_utc": "2026-11-27T04:45:42.525982+00:00",
+  "confirmed_obstacle": true,
+  "contact_definition": "evaluator-only explicit MJCF contact pairs",
+  "detected_frames": 22,
+  "elapsed_wall_s": 213.57956244202796,
+  "ended_at_step": 799,
+  "final_xy": [
+    2.1110312938690186,
+    1.5738698244094849
+  ],
+  "frames": 160,
+  "frames_checked": 160,
+  "gain_fault": false,
+  "goal_reached": false,
+  "hardware": [
+    "cuda:0"
+  ],
+  "kind": "G1_OBSTACLE_NOMINAL_PILOT",
+  "last_reason": "stop_lost_obstacle",
+  "obstacle_ground_truth_available_to_policy": false,
+  "physical_contact_ticks": 0,
+  "registered_control": "frozen_nominal_joystick",
+  "rendered_video_bytes": 75125,
+  "result": "COMPLETED_DIAGNOSTIC_NOT_VALIDATED_AVOIDANCE",
+  "sensing": "real_Renderer_head_depth",
+  "source_commit": "1fd2d776cd06b270c1b099c6ce8d474d55ec4931",
+  "started_utc": "2026-11-27T04:42:07.908086+00:00"
+}
