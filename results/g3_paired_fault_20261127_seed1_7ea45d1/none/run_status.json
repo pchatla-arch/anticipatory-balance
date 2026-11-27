@@ -1,0 +1,36 @@
+{
+  "adapter_method": "none",
+  "adapter_nonzero_control_ticks": 0,
+  "collision_frames": 0,
+  "completed_utc": "2026-11-27T05:17:29.520652+00:00",
+  "confirmed_obstacle": true,
+  "contact_definition": "evaluator-only explicit MJCF contact pairs",
+  "detected_frames": 23,
+  "elapsed_wall_s": 269.31704432703555,
+  "ended_at_step": 1158,
+  "fault_gain_evaluation_only": 0.7,
+  "fault_onset_evaluation_only": 200,
+  "fault_return_evaluation_only": 900,
+  "final_xy": [
+    5.164855480194092,
+    0.10324955731630325
+  ],
+  "frames": 232,
+  "frames_checked": 232,
+  "gain_fault": true,
+  "goal_reached": true,
+  "hardware": [
+    "cuda:0"
+  ],
+  "kind": "G3_DEPTH_ACTUATOR_DEVELOPMENT_PAIRED",
+  "last_reason": "goal_reached",
+  "matched_seed": 1,
+  "obstacle_ground_truth_available_to_policy": false,
+  "physical_contact_ticks": 0,
+  "registered_control": "frozen_nominal_joystick",
+  "rendered_video_bytes": 128020,
+  "result": "G3_GOAL_REACHED_NO_RECORDED_CYLINDER_CONTACTS",
+  "sensing": "real_Renderer_head_depth",
+  "source_commit": "7ea45d1522e3d70ee950b98eb4aee1fe35013fd5",
+  "started_utc": "2026-11-27T05:12:59.545279+00:00"
+}

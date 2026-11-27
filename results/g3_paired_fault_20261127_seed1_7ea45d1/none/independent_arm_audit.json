@@ -1,0 +1,39 @@
+{
+  "adapter_nonzero_control_ticks": 0,
+  "collision_frames": 0,
+  "config": {
+    "adapter": "none",
+    "capture_every": 5,
+    "depth_res": 96,
+    "fault_gain": 0.7,
+    "fault_onset": 200,
+    "fault_return": 900,
+    "goal_x": 5.0,
+    "heuristic_json": null,
+    "obstacle_x": 2.8,
+    "out": "/workspace/g3_paired_20261127/fault_none_seed1",
+    "render_video": true,
+    "seed": 1,
+    "steps": 1200
+  },
+  "control_steps_completed": 1159,
+  "detected_frames": 23,
+  "final_xy": [
+    5.164855480194092,
+    0.10324955731630325
+  ],
+  "frames": 232,
+  "goal_distance_m": 0.19451940889288447,
+  "goal_reached": true,
+  "last_reason": "goal_reached",
+  "method": "none",
+  "physical_contact_ticks": 0,
+  "source_commit": "7ea45d1522e3d70ee950b98eb4aee1fe35013fd5",
+  "telemetry": null,
+  "video": {
+    "bytes": 128020,
+    "codec": "h264",
+    "frames": 232,
+    "seconds": 23.2
+  }
+}
