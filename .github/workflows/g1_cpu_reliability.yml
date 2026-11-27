@@ -51,6 +51,8 @@ jobs:
         run: |
           python -m py_compile scripts/eval_g3_depth_actuator.py
           python scripts/eval_g3_depth_actuator.py --help > /dev/null
+      - name: Independently audit paired G3 failure and success labels
+        run: python -m unittest discover -s tests -p 'test_g3_paired_audit.py' -v
       - name: Verify atomic CSV recovery after a simulated writer failure
         run: python -m unittest discover -s tests -p 'test_g1_atomic_results.py' -v
       - name: Check 12-row GPU smoke study and paired-result auditor
