@@ -5,7 +5,8 @@
       --authority results/authority_dev_v1_speed3.0,results/authority_dev_v1_speed1.0 --out paper/figures
 
 Every number plotted is read from summary.json / authority.json / trace npz files; nothing is
-typed in. Figures: (1) recovery vs harmful intervention per method; (2) authority study:
+typed in. Figures: (1) bench overview: loss (falls annotated) and healthy-plant offset per
+family and method; (2) authority study:
 requested/oracle and zero-authority steps by fault level, speed bound and joint group;
 (3) time series of one return-to-healthy episode and one sensor-scale episode.
 """
@@ -34,23 +35,56 @@ def style():
     return plt
 
 
-def fig_tradeoff(summary, out, telemetry="declared"):
+FAMILY_ORDER = ["healthy", "gain_085", "gain_070", "gain_055", "gain_070_return",
+                "stale_telemetry", "sensor_scale_080", "sensor_bias", "damping_x3"]
+FAMILY_LABELS = {"healthy": "healthy", "gain_085": "gain\n0.85", "gain_070": "gain\n0.70", "gain_055": "gain\n0.55",
+                 "gain_070_return": "gain 0.70\nthen returns", "stale_telemetry": "gain 0.70\nstale packets",
+                 "sensor_scale_080": "sensor\nreads 80%", "sensor_bias": "sensor\nbias 2 N·m",
+                 "damping_x3": "damping\n×3"}
+METHOD_ORDER = ["none", "estimated_inverse", "heuristic_gate", "oracle"]
+
+
+def fig_bench_overview(summary, out, telemetry="declared"):
+    """Main result: per family, post-fault loss (log scale, falls annotated) and the mean
+    correction applied while the plant is healthy, for every method. Every bar is a cell of
+    summary.json; the fall counts are n * fall_rate from the same cell."""
     plt = style()
     cells = summary["cells"]
-    fault = [k for k in cells if k.split("|")[0].startswith("gain") and k.split("|")[1] == telemetry]
-    healthy = [k for k in cells if not k.split("|")[0].startswith("gain") and k.split("|")[1] == telemetry]
-    methods = sorted({k.split("|")[2] for k in cells})
-    fig, ax = plt.subplots(figsize=(3.4, 2.8), constrained_layout=True)
-    for m in methods:
-        loss = np.mean([cells[k]["mean_postfault_loss"] for k in fault if k.endswith("|" + m) and cells[k]["mean_postfault_loss"] is not None])
-        harm = np.mean([cells[k]["mean_applied_offset_rad"] for k in healthy if k.endswith("|" + m) and cells[k]["mean_applied_offset_rad"] is not None])
-        ax.plot(harm, loss, "o", ms=7, color=COLORS.get(m, "k"), label=LABELS.get(m, m))
-    ax.set_xlabel("mean correction applied to a healthy plant (rad)")
-    ax.set_ylabel("post-fault tracking loss on gain faults (m/s)$^2$")
-    ax.set_title(f"Recovery against harmful intervention ({telemetry} telemetry)", loc="left", fontsize=8)
-    ax.legend(fontsize=7)
-    fig.savefig(out / "tradeoff.pdf")
-    fig.savefig(out / "tradeoff.png")
+    fams = [f for f in FAMILY_ORDER if any(k.startswith(f + "|" + telemetry + "|") for k in cells)]
+    methods = [m for m in METHOD_ORDER if any(k.endswith("|" + m) for k in cells)]
+    width = 0.8 / len(methods)
+    fig, axes = plt.subplots(2, 1, figsize=(7.0, 4.2), constrained_layout=True, sharex=True,
+                             gridspec_kw={"height_ratios": [1.35, 1.0]})
+    x = np.arange(len(fams))
+    for i, m in enumerate(methods):
+        xs = x + (i - (len(methods) - 1) / 2) * width
+        loss, harm, falls, ns = [], [], [], []
+        for f in fams:
+            c = cells.get(f"{f}|{telemetry}|{m}")
+            loss.append(c["mean_postfault_loss"] if c else np.nan)
+            harm.append(c["mean_harmful_offset_rad"] if c else np.nan)
+            falls.append(round(c["n"] * c["fall_rate"]) if c else 0)
+            ns.append(c["n"] if c else 0)
+        axes[0].bar(xs, loss, width, color=COLORS[m], label=LABELS[m])
+        axes[1].bar(xs, harm, width, color=COLORS[m])
+        for xi, yi, k, n in zip(xs, loss, falls, ns):
+            if k > 0:
+                axes[0].annotate(f"{k}/{n}\nfell", (xi, yi), xytext=(0, 2), textcoords="offset points",
+                                 ha="center", va="bottom", fontsize=5.5, color=COLORS[m])
+    axes[0].set_yscale("log")
+    axes[0].set_ylim(0.012, 30)   # room above the fall-capped bars for the annotation and legend
+    axes[0].set_ylabel("post-fault tracking loss (m/s)$^2$, log")
+    axes[0].set_title(f"Dev split, {telemetry.replace('_', ' ')} telemetry, {summary['meta']['episodes']} episodes per cell; "
+                      "loss is capped per episode, so a fall is the 2–3 range", loc="left", fontsize=7.5)
+    axes[0].legend(fontsize=6.5, ncol=2, loc="upper left")
+    axes[1].set_ylabel("mean |offset| while the\nplant is healthy (rad)")
+    axes[1].axhline(0.2, color="#999999", lw=0.6, ls=":")
+    axes[1].annotate("0.20 rad bound", (len(fams) - 0.5, 0.2), xytext=(0, 2), textcoords="offset points",
+                     ha="right", va="bottom", fontsize=6, color="#777777")
+    axes[1].set_xticks(x)
+    axes[1].set_xticklabels([FAMILY_LABELS.get(f, f) for f in fams], fontsize=6.5)
+    fig.savefig(out / "bench_overview.pdf")
+    fig.savefig(out / "bench_overview.png")
 
 
 def fig_authority(auth_dirs, out, actuators):
@@ -183,7 +217,7 @@ def fig_command_following(bench_dir, out, family="gain_070", telemetry="declared
     ax.set_xticks(x + 0.4 - width / 2)
     ax.set_xticklabels(segs)
     ax.set_ylabel("achieved − commanded speed (m/s)")
-    ax.set_title(f"Speed-command error, {family.replace('gain_0', 'gain 0.')}, {telemetry.replace('_', ' ')} telemetry",
+    ax.set_title(f"Speed-command error, {family.replace('gain_0', 'gain 0.')}, {telemetry.replace('_', ' ')}",
                  loc="left", fontsize=8)
     ax.legend(fontsize=6, loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=3)
     fig.savefig(out / f"command_following_{family}_{telemetry}.pdf")
@@ -198,18 +232,25 @@ def fig_telemetry_curve(bench_dirs, out, families=("gain_085", "gain_070", "gain
     order = [p for p in ("exact", "declared_fast", "declared") if p in bench_dirs]
     summaries = {p: json.load(open(Path(bench_dirs[p]) / "summary.json")) for p in order}
     methods = ["none", "estimated_inverse", "heuristic_gate", "oracle"]
-    fig, axes = plt.subplots(1, len(families), figsize=(2.3 * len(families), 2.4), constrained_layout=True, sharey=True)
+    # independent y-axes: a fall is capped near 2.5 and would flatten the moderate-fault panels
+    fig, axes = plt.subplots(1, len(families), figsize=(2.3 * len(families), 2.4), constrained_layout=True, sharey=False)
     axes = np.atleast_1d(axes)
     for ax, fam in zip(axes, families):
         for m in methods:
-            ys = []
+            ys, falls = [], []
             for p in order:
                 cell = summaries[p]["cells"].get(f"{fam}|{p}|{m}")
                 ys.append(cell["mean_postfault_loss"] if cell else np.nan)
+                falls.append((round(cell["n"] * cell["fall_rate"]), cell["n"]) if cell else (0, 0))
             ax.plot(range(len(order)), ys, "o-", color=COLORS[m], label=LABELS[m], ms=4, lw=1)
+            for xi, (yi, (k, n)) in enumerate(zip(ys, falls)):
+                if k > 0:
+                    ax.annotate(f"{k}/{n} fell", (xi, yi), xytext=(0, 4), textcoords="offset points",
+                                ha="center", va="bottom", fontsize=5.5, color=COLORS[m])
         ax.set_xticks(range(len(order)))
         ax.set_xticklabels([{"exact": "exact", "declared_fast": "declared,\nno latency", "declared": "declared,\n20–60 ms"}[p] for p in order], fontsize=6)
-        ax.set_title(fam.replace("_", " "), loc="left", fontsize=8)
+        ax.set_title(fam.replace("gain_0", "gain 0."), loc="left", fontsize=8)
+        ax.set_ylim(bottom=0)
     axes[0].set_ylabel("post-fault tracking loss (m/s)$^2$")
     axes[0].legend(fontsize=6)
     fig.savefig(out / "telemetry_curve.pdf")
@@ -232,7 +273,7 @@ def main(argv=None):
         candidates = glob.glob(str(args.bench.parent / "*/actuators.json"))
         actuators_path = Path(candidates[0])
     actuators = json.load(open(actuators_path))
-    fig_tradeoff(summary, args.out)
+    fig_bench_overview(summary, args.out)
     if args.authority:
         fig_authority(args.authority.split(","), args.out, actuators)
     fig_timeseries(args.bench, args.out, actuators)
