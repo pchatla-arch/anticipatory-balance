@@ -1,0 +1,59 @@
+{
+  "id": "G1-G2A-20261126",
+  "status": "REGISTERED_NOT_EXECUTED",
+  "stage": "G2a",
+  "title": "Physical static cylinder contact / real G1 MJCF compilation gate",
+  "source_branch": "oaa/g1-obstacle-demo-prototype-20261126",
+  "experiment_type": "real_MuJoCo_G1_model_contact_smoke",
+  "script": "scripts/g1_static_obstacle_physics_gate.py",
+  "command": [
+    "python",
+    "scripts/g1_static_obstacle_physics_gate.py",
+    "--mode",
+    "g1",
+    "--out",
+    "/workspace/g1_g2a_results/g2a_contact.json"
+  ],
+  "hardware": {
+    "gpu": "NVIDIA RTX A6000",
+    "cloud": "SECURE",
+    "max_hourly_gpu_usd": 0.69,
+    "required_cuda_host": "13.2"
+  },
+  "budget": {
+    "project_total_usd": 4.44,
+    "posted_spend_at_registration_usd": 2.3098599980585277,
+    "max_new_attempt_usd": 0.25,
+    "max_provider_runtime_minutes": 20,
+    "actual_unposted_charges_possible": true
+  },
+  "scene": {
+    "type": "contact_enabled_static_cylinder",
+    "center_world_xy": [
+      2.8,
+      0
+    ],
+    "radius_m": 0.3,
+    "height_m": 1.05,
+    "online_true_geom_location": "FORBIDDEN"
+  },
+  "acceptance": {
+    "real_G1_model_compile": true,
+    "head_camera_exists": true,
+    "explicit_contact_pairs_minimum": 4,
+    "evaluation_forced_contact_count_minimum": 1,
+    "real_G1_closed_loop_walking_claim": false
+  },
+  "outputs": [
+    "g2a_contact.json",
+    "installation_log",
+    "source_sha",
+    "provider_pod_id",
+    "provider_exit_confirmation"
+  ],
+  "fail_policy": "Publish diagnostic and stop pod. No science/retraining/nav execution when model invalid.",
+  "next_stages": [
+    "G2b render real head depth",
+    "G2c execute nominal G1 detour and save authentic MP4"
+  ]
+}

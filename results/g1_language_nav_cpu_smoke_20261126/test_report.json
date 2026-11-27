@@ -1,0 +1,40 @@
+{
+  "kind": "unit_test_report",
+  "date": "2026-11-26",
+  "scope": "local Python CPU tests only; NOT MuJoCo G1 physics, depth camera, real VLM inference or learned-VLA control",
+  "python": "3.13.5",
+  "command": "python -m unittest discover -s tests -q",
+  "working_tree": "/mnt/data/g1_language_validation",
+  "observed": {
+    "tests": 21,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds_approx": 0.001
+  },
+  "source_files": [
+    "foresight/adaptive/language_nav.py",
+    "foresight/adaptive/task_stack.py"
+  ],
+  "test_files": [
+    "tests/test_language_nav.py",
+    "tests/test_task_stack.py"
+  ],
+  "safety_cases": [
+    "invalid language stop",
+    "unsupported actuator action stop",
+    "arbitrary motor command field rejected",
+    "unknown goal stop",
+    "duplicate goal stop",
+    "stale/future landmark stop",
+    "low confidence stop",
+    "missing goal stops navigation",
+    "validated model action schema accepted only for known target",
+    "natural obstacle instruction maps to station goal, not obstacle coordinate"
+  ],
+  "limitations": [
+    "Landmark positions are synthetic in local unit tests, not visually detected in actual MuJoCo camera",
+    "The high-level model interface is a strict grammar and a schema checker, not a deployed VLM",
+    "The existing obstacle detection, MuJoCo cylinder, frozen G1 PPO, actuator adaptation and video pipeline were not exercised by these 21 tests",
+    "GitHub-hosted files should additionally be run in the pinned project environment before recording an integrated pass"
+  ]
+}

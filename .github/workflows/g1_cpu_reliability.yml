@@ -1,0 +1,71 @@
+name: G1 CPU reliability gates
+on:
+  push:
+    branches:
+      - oaa/g1-obstacle-demo-prototype-20261126
+  pull_request:
+    paths:
+      - 'scripts/g1_detached_run.py'
+      - 'scripts/run_g1_pod_one_command.py'
+      - 'tests/test_g1_*.py'
+      - '.github/workflows/g1_cpu_reliability.yml'
+  workflow_dispatch:
+
+jobs:
+  cpu-reliability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Syntax-check G1 launcher code and tests
+        run: |
+          python -m py_compile scripts/run_g1_pod_one_command.py scripts/g1_detached_run.py tests/test_g1_pod_supervisor.py tests/test_g1_pod_ownership.py tests/test_g1_github_auth.py tests/test_g1_detached_run.py
+      - name: Install CPU-only perception dependencies
+        run: python -m pip install --disable-pip-version-check 'numpy==2.3.5'
+      - name: Run pure-CPU perception and task-stack tests
+        run: |
+          python -m unittest discover -s tests -p 'test_obstacle*py' -v
+          python -m unittest discover -s tests -p 'test_language_nav.py' -v
+          python -m unittest discover -s tests -p 'test_task_stack.py' -v
+      - name: Verify contact-enabled stationary obstacle MJCF scene generation
+        run: python -m unittest discover -s tests -p 'test_g1_static_cylinder.py' -v
+      - name: Install CPU-only MuJoCo physics engine
+        run: python -m pip install --disable-pip-version-check 'mujoco==3.16.0'
+      - name: Validate actual contact generation in stationary-cylinder fixture
+        run: PYTHONPATH=. python scripts/g1_static_obstacle_physics_gate.py --mode fixture --out /tmp/g1_obstacle_contact_fixture.json
+      - name: Validate the real-G1 diagnostic runner CLI without buying GPU compute
+        run: |
+          python -m py_compile scripts/eval_g1_obstacle_nominal.py scripts/g1_static_obstacle_physics_gate.py
+          python scripts/eval_g1_obstacle_nominal.py --help > /dev/null
+          PYTHONPATH=. python scripts/g1_static_obstacle_physics_gate.py --help > /dev/null
+      - name: Install pinned CPU JAX for causal G3 adapter tests
+        run: python -m pip install --disable-pip-version-check 'jax==0.12.0.1'
+      - name: Verify G3 causal delayed telemetry adaptation
+        run: python -m unittest discover -s tests -p 'test_g3_single_causal_adapter.py' -v
+      - name: Check G3 paired physics runner CLI and syntax
+        run: |
+          python -m py_compile scripts/eval_g3_depth_actuator.py
+          python scripts/eval_g3_depth_actuator.py --help > /dev/null
+      - name: Independently audit paired G3 failure and success labels
+        run: python -m unittest discover -s tests -p 'test_g3_paired_audit.py' -v
+      - name: Verify atomic CSV recovery after a simulated writer failure
+        run: python -m unittest discover -s tests -p 'test_g1_atomic_results.py' -v
+      - name: Check 12-row GPU smoke study and paired-result auditor
+        run: python -m unittest discover -s tests -p 'test_g1_smoke_matrix.py' -v
+      - name: Gate the queued S1a experiment and per-attempt spending
+        run: python -m unittest discover -s tests -p 'test_g1_s1a_queue.py' -v
+      - name: Replay safe depth-only static map memory from real G2b geometry
+        run: python -m unittest discover -s tests -p 'test_g2c_static_memory_replay.py' -v
+      - name: Validate benchmark entrypoint options
+        run: python scripts/eval_adaptive_bench.py --help > /dev/null
+      - name: Run pure-CPU launcher and failure-recovery tests
+        run: |
+          python -m unittest discover -s tests -p 'test_g1_pod_supervisor.py' -v
+          python -m unittest discover -s tests -p 'test_g1_pod_ownership.py' -v
+          python -m unittest discover -s tests -p 'test_g1_github_auth.py' -v
+          python -m unittest discover -s tests -p 'test_g1_detached_run.py' -v

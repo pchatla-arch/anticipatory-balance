@@ -1,0 +1,769 @@
+{
+  "analysis": "CPU reanalysis of existing saved traces; no new physics experiment",
+  "result_commit": "896000b68aa9c7ea6efcd33ea33b4973ed629bb0",
+  "physics_source_commit": "89b6d0dd31020f00032330c76684c727b1f697a0",
+  "source_directory": "results/g1_course_dev_20261127T032240Z_5fc7dd/bench_dev",
+  "csv_fingerprints": {
+    "sha256": "43272e9c4e39982976006382c6e848031368797d1b3f1ffac57cb0759bc351e0",
+    "git_blob_sha1": "9406941b8d987d079a547b2246efde91992f57da"
+  },
+  "dt_s": 0.02,
+  "caveats": [
+    "Two paired scenario IDs per family; descriptive development observations only.",
+    "NPZ velocity is local pelvis planar velocity after each simulation step.",
+    "Integrated logged forward velocity is an approximation to forward travel.",
+    "CSV progress_m sums actual planar displacement projected on the normalized previous pelvis heading after onset; it is not goal success.",
+    "NPZ has commanded yaw rate but no measured yaw-rate series.",
+    "Healthy scenarios have different commands/scenario IDs from gain cases and are contextual, not matched controls."
+  ],
+  "cases": [
+    {
+      "family": "healthy",
+      "method": "none",
+      "trace": "trace_healthy_declared_none.npz",
+      "fingerprints": {
+        "sha256": "2f54984b279fa7efe8cee44444c025ec22452782c5bc3272705f71c12a8de554",
+        "git_blob_sha1": "857fc6421b0810b8de4628fce635da948fc5e76d"
+      },
+      "scenarios": [
+        {
+          "scenario_id": "healthy_seed45114_env00000",
+          "environment_index": 0,
+          "onset_tick": 77,
+          "alive_ticks": 400,
+          "reported_postfault_loss": 0.026798924431204796,
+          "recomputed_postfault_loss": 0.026798928156495094,
+          "loss_absolute_difference": 3.725290298461914e-09,
+          "reported_progress_m": 2.189363956451416,
+          "phases": [
+            {
+              "phase": "walk",
+              "first_tick": 0,
+              "end_tick_exclusive": 100,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.5039379000663757,
+              "mean_vy_m_s": 0.033379215747117996,
+              "signed_forward_bias_m_s": -0.09606216102838516,
+              "forward_mae_m_s": 0.11748006194829941,
+              "forward_rmse_m_s": 0.14491888880729675,
+              "planar_velocity_rmse_m_s": 0.17564406991004944,
+              "approx_forward_travel_from_logged_velocity_m": 1.007875680923462
+            },
+            {
+              "phase": "turn",
+              "first_tick": 100,
+              "end_tick_exclusive": 200,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.36000001430511475,
+                0.0,
+                0.5
+              ],
+              "mean_vx_m_s": 0.3409501910209656,
+              "mean_vy_m_s": -0.06083456054329872,
+              "signed_forward_bias_m_s": -0.01904980093240738,
+              "forward_mae_m_s": 0.07637801766395569,
+              "forward_rmse_m_s": 0.09169336408376694,
+              "planar_velocity_rmse_m_s": 0.1320010870695114,
+              "approx_forward_travel_from_logged_velocity_m": 0.6819003820419312
+            },
+            {
+              "phase": "stop",
+              "first_tick": 200,
+              "end_tick_exclusive": 275,
+              "n_ticks": 75,
+              "duration_s": 1.5,
+              "command_vx_vy_yawrate": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.05782308056950569,
+              "mean_vy_m_s": -0.016424987465143204,
+              "signed_forward_bias_m_s": 0.05782308056950569,
+              "forward_mae_m_s": 0.0658593624830246,
+              "forward_rmse_m_s": 0.10039903223514557,
+              "planar_velocity_rmse_m_s": 0.12360208481550217,
+              "approx_forward_travel_from_logged_velocity_m": 0.08673461526632309
+            },
+            {
+              "phase": "resume",
+              "first_tick": 275,
+              "end_tick_exclusive": 400,
+              "n_ticks": 125,
+              "duration_s": 2.5,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.4690631628036499,
+              "mean_vy_m_s": -0.00888241920620203,
+              "signed_forward_bias_m_s": -0.13093684613704681,
+              "forward_mae_m_s": 0.14162886142730713,
+              "forward_rmse_m_s": 0.1862141638994217,
+              "planar_velocity_rmse_m_s": 0.2103632688522339,
+              "approx_forward_travel_from_logged_velocity_m": 1.17265784740448
+            }
+          ]
+        },
+        {
+          "scenario_id": "healthy_seed45114_env00001",
+          "environment_index": 1,
+          "onset_tick": 78,
+          "alive_ticks": 400,
+          "reported_postfault_loss": 0.01739300973713398,
+          "recomputed_postfault_loss": 0.017393004149198532,
+          "loss_absolute_difference": 5.587935447692871e-09,
+          "reported_progress_m": 1.465212345123291,
+          "phases": [
+            {
+              "phase": "walk",
+              "first_tick": 0,
+              "end_tick_exclusive": 100,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.4000000059604645,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.12240846455097198,
+              "mean_vy_m_s": 0.007880506105720997,
+              "signed_forward_bias_m_s": -0.2775915563106537,
+              "forward_mae_m_s": 0.2778730094432831,
+              "forward_rmse_m_s": 0.3791200816631317,
+              "planar_velocity_rmse_m_s": 0.39591658115386963,
+              "approx_forward_travel_from_logged_velocity_m": 0.24481692910194397
+            },
+            {
+              "phase": "turn",
+              "first_tick": 100,
+              "end_tick_exclusive": 200,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.24000000953674316,
+                0.0,
+                0.5
+              ],
+              "mean_vx_m_s": 0.2010611593723297,
+              "mean_vy_m_s": -0.015643777325749397,
+              "signed_forward_bias_m_s": -0.038938816636800766,
+              "forward_mae_m_s": 0.050316885113716125,
+              "forward_rmse_m_s": 0.06499428302049637,
+              "planar_velocity_rmse_m_s": 0.0986805111169815,
+              "approx_forward_travel_from_logged_velocity_m": 0.40212228894233704
+            },
+            {
+              "phase": "stop",
+              "first_tick": 200,
+              "end_tick_exclusive": 275,
+              "n_ticks": 75,
+              "duration_s": 1.5,
+              "command_vx_vy_yawrate": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.07300207018852234,
+              "mean_vy_m_s": -0.0028540566563606262,
+              "signed_forward_bias_m_s": 0.07300207018852234,
+              "forward_mae_m_s": 0.08043278753757477,
+              "forward_rmse_m_s": 0.10295230150222778,
+              "planar_velocity_rmse_m_s": 0.11719215661287308,
+              "approx_forward_travel_from_logged_velocity_m": 0.10950310528278351
+            },
+            {
+              "phase": "resume",
+              "first_tick": 275,
+              "end_tick_exclusive": 400,
+              "n_ticks": 125,
+              "duration_s": 2.5,
+              "command_vx_vy_yawrate": [
+                0.4000000059604645,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.3242935538291931,
+              "mean_vy_m_s": -0.04317622631788254,
+              "signed_forward_bias_m_s": -0.07570643723011017,
+              "forward_mae_m_s": 0.08242396265268326,
+              "forward_rmse_m_s": 0.11286172270774841,
+              "planar_velocity_rmse_m_s": 0.15781433880329132,
+              "approx_forward_travel_from_logged_velocity_m": 0.8107338547706604
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "gain_070",
+      "method": "none",
+      "trace": "trace_gain_070_declared_none.npz",
+      "fingerprints": {
+        "sha256": "fcc635e07bea7aecdefd41a11f2b043d3759bfa42ddffda527b63c6f38995466",
+        "git_blob_sha1": "7da16d64c467d9f61bf9ebe226c4a4ee5e6bca4e"
+      },
+      "scenarios": [
+        {
+          "scenario_id": "gain_070_seed29204_env00000",
+          "environment_index": 0,
+          "onset_tick": 76,
+          "alive_ticks": 400,
+          "reported_postfault_loss": 0.08595100790262222,
+          "recomputed_postfault_loss": 0.08595100790262222,
+          "loss_absolute_difference": 0.0,
+          "reported_progress_m": 3.6721537113189697,
+          "phases": [
+            {
+              "phase": "walk",
+              "first_tick": 0,
+              "end_tick_exclusive": 100,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.2601633667945862,
+              "mean_vy_m_s": -0.035430777817964554,
+              "signed_forward_bias_m_s": -0.33983665704727173,
+              "forward_mae_m_s": 0.3411332666873932,
+              "forward_rmse_m_s": 0.4773915410041809,
+              "planar_velocity_rmse_m_s": 0.4887531101703644,
+              "approx_forward_travel_from_logged_velocity_m": 0.5203267335891724
+            },
+            {
+              "phase": "turn",
+              "first_tick": 100,
+              "end_tick_exclusive": 200,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.36000001430511475,
+                0.0,
+                0.5
+              ],
+              "mean_vx_m_s": 0.5231522917747498,
+              "mean_vy_m_s": -0.04698830097913742,
+              "signed_forward_bias_m_s": 0.163152277469635,
+              "forward_mae_m_s": 0.1634334921836853,
+              "forward_rmse_m_s": 0.18483315408229828,
+              "planar_velocity_rmse_m_s": 0.22133508324623108,
+              "approx_forward_travel_from_logged_velocity_m": 1.0463045835494995
+            },
+            {
+              "phase": "stop",
+              "first_tick": 200,
+              "end_tick_exclusive": 275,
+              "n_ticks": 75,
+              "duration_s": 1.5,
+              "command_vx_vy_yawrate": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.32885247468948364,
+              "mean_vy_m_s": -0.023107020184397697,
+              "signed_forward_bias_m_s": 0.32885247468948364,
+              "forward_mae_m_s": 0.32885247468948364,
+              "forward_rmse_m_s": 0.36003008484840393,
+              "planar_velocity_rmse_m_s": 0.3793748617172241,
+              "approx_forward_travel_from_logged_velocity_m": 0.49327871203422546
+            },
+            {
+              "phase": "resume",
+              "first_tick": 275,
+              "end_tick_exclusive": 400,
+              "n_ticks": 125,
+              "duration_s": 2.5,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.7579483389854431,
+              "mean_vy_m_s": -0.02399868331849575,
+              "signed_forward_bias_m_s": 0.1579483449459076,
+              "forward_mae_m_s": 0.22814534604549408,
+              "forward_rmse_m_s": 0.2819696366786957,
+              "planar_velocity_rmse_m_s": 0.3004350960254669,
+              "approx_forward_travel_from_logged_velocity_m": 1.8948708772659302
+            }
+          ]
+        },
+        {
+          "scenario_id": "gain_070_seed29204_env00001",
+          "environment_index": 1,
+          "onset_tick": 77,
+          "alive_ticks": 400,
+          "reported_postfault_loss": 0.0850832462310791,
+          "recomputed_postfault_loss": 0.0850832462310791,
+          "loss_absolute_difference": 0.0,
+          "reported_progress_m": 3.5717391967773438,
+          "phases": [
+            {
+              "phase": "walk",
+              "first_tick": 0,
+              "end_tick_exclusive": 100,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.39471617341041565,
+              "mean_vy_m_s": 0.031257543712854385,
+              "signed_forward_bias_m_s": -0.20528385043144226,
+              "forward_mae_m_s": 0.20565807819366455,
+              "forward_rmse_m_s": 0.27768078446388245,
+              "planar_velocity_rmse_m_s": 0.30602332949638367,
+              "approx_forward_travel_from_logged_velocity_m": 0.7894323468208313
+            },
+            {
+              "phase": "turn",
+              "first_tick": 100,
+              "end_tick_exclusive": 200,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.36000001430511475,
+                0.0,
+                0.5
+              ],
+              "mean_vx_m_s": 0.557102382183075,
+              "mean_vy_m_s": -0.1361430138349533,
+              "signed_forward_bias_m_s": 0.1971023976802826,
+              "forward_mae_m_s": 0.2020496428012848,
+              "forward_rmse_m_s": 0.23368585109710693,
+              "planar_velocity_rmse_m_s": 0.31005990505218506,
+              "approx_forward_travel_from_logged_velocity_m": 1.11420476436615
+            },
+            {
+              "phase": "stop",
+              "first_tick": 200,
+              "end_tick_exclusive": 275,
+              "n_ticks": 75,
+              "duration_s": 1.5,
+              "command_vx_vy_yawrate": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.34902140498161316,
+              "mean_vy_m_s": -0.03445236384868622,
+              "signed_forward_bias_m_s": 0.34902140498161316,
+              "forward_mae_m_s": 0.34902140498161316,
+              "forward_rmse_m_s": 0.36705732345581055,
+              "planar_velocity_rmse_m_s": 0.383475661277771,
+              "approx_forward_travel_from_logged_velocity_m": 0.5235320925712585
+            },
+            {
+              "phase": "resume",
+              "first_tick": 275,
+              "end_tick_exclusive": 400,
+              "n_ticks": 125,
+              "duration_s": 2.5,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.676780641078949,
+              "mean_vy_m_s": -0.013051172718405724,
+              "signed_forward_bias_m_s": 0.07678057253360748,
+              "forward_mae_m_s": 0.1639523059129715,
+              "forward_rmse_m_s": 0.1915612816810608,
+              "planar_velocity_rmse_m_s": 0.22494818270206451,
+              "approx_forward_travel_from_logged_velocity_m": 1.6919515132904053
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "gain_070",
+      "method": "oracle",
+      "trace": "trace_gain_070_declared_oracle.npz",
+      "fingerprints": {
+        "sha256": "717e892a9ca30430544f51d9bf5a21f15ef9431eee6614fd9dbcefa571ebee00",
+        "git_blob_sha1": "c56513e327cae7ba2718b546383b84b609c48d32"
+      },
+      "scenarios": [
+        {
+          "scenario_id": "gain_070_seed29204_env00000",
+          "environment_index": 0,
+          "onset_tick": 76,
+          "alive_ticks": 400,
+          "reported_postfault_loss": 0.027564899995923042,
+          "recomputed_postfault_loss": 0.02756490185856819,
+          "loss_absolute_difference": 1.862645149230957e-09,
+          "reported_progress_m": 2.194021463394165,
+          "phases": [
+            {
+              "phase": "walk",
+              "first_tick": 0,
+              "end_tick_exclusive": 100,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.26543423533439636,
+              "mean_vy_m_s": -0.038746707141399384,
+              "signed_forward_bias_m_s": -0.33456575870513916,
+              "forward_mae_m_s": 0.33576297760009766,
+              "forward_rmse_m_s": 0.47427454590797424,
+              "planar_velocity_rmse_m_s": 0.4855741262435913,
+              "approx_forward_travel_from_logged_velocity_m": 0.5308684706687927
+            },
+            {
+              "phase": "turn",
+              "first_tick": 100,
+              "end_tick_exclusive": 200,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.36000001430511475,
+                0.0,
+                0.5
+              ],
+              "mean_vx_m_s": 0.32623574137687683,
+              "mean_vy_m_s": -0.008678157813847065,
+              "signed_forward_bias_m_s": -0.033764228224754333,
+              "forward_mae_m_s": 0.076128289103508,
+              "forward_rmse_m_s": 0.09039030224084854,
+              "planar_velocity_rmse_m_s": 0.1176954135298729,
+              "approx_forward_travel_from_logged_velocity_m": 0.6524714231491089
+            },
+            {
+              "phase": "stop",
+              "first_tick": 200,
+              "end_tick_exclusive": 275,
+              "n_ticks": 75,
+              "duration_s": 1.5,
+              "command_vx_vy_yawrate": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.07261954993009567,
+              "mean_vy_m_s": -0.018333908170461655,
+              "signed_forward_bias_m_s": 0.07261954993009567,
+              "forward_mae_m_s": 0.07611846923828125,
+              "forward_rmse_m_s": 0.09628143906593323,
+              "planar_velocity_rmse_m_s": 0.12784309685230255,
+              "approx_forward_travel_from_logged_velocity_m": 0.10892932862043381
+            },
+            {
+              "phase": "resume",
+              "first_tick": 275,
+              "end_tick_exclusive": 400,
+              "n_ticks": 125,
+              "duration_s": 2.5,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.4827500283718109,
+              "mean_vy_m_s": -0.03648330643773079,
+              "signed_forward_bias_m_s": -0.11724995076656342,
+              "forward_mae_m_s": 0.12761732935905457,
+              "forward_rmse_m_s": 0.1883738934993744,
+              "planar_velocity_rmse_m_s": 0.21055583655834198,
+              "approx_forward_travel_from_logged_velocity_m": 1.2068750858306885
+            }
+          ]
+        },
+        {
+          "scenario_id": "gain_070_seed29204_env00001",
+          "environment_index": 1,
+          "onset_tick": 77,
+          "alive_ticks": 400,
+          "reported_postfault_loss": 0.029872160404920578,
+          "recomputed_postfault_loss": 0.029872167855501175,
+          "loss_absolute_difference": 7.450580596923828e-09,
+          "reported_progress_m": 2.2476909160614014,
+          "phases": [
+            {
+              "phase": "walk",
+              "first_tick": 0,
+              "end_tick_exclusive": 100,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.3889283239841461,
+              "mean_vy_m_s": 0.024846570566296577,
+              "signed_forward_bias_m_s": -0.2110716998577118,
+              "forward_mae_m_s": 0.21166034042835236,
+              "forward_rmse_m_s": 0.2801826596260071,
+              "planar_velocity_rmse_m_s": 0.308167427778244,
+              "approx_forward_travel_from_logged_velocity_m": 0.7778566479682922
+            },
+            {
+              "phase": "turn",
+              "first_tick": 100,
+              "end_tick_exclusive": 200,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.36000001430511475,
+                0.0,
+                0.5
+              ],
+              "mean_vx_m_s": 0.31763702630996704,
+              "mean_vy_m_s": -0.010191547684371471,
+              "signed_forward_bias_m_s": -0.04236298426985741,
+              "forward_mae_m_s": 0.06757813692092896,
+              "forward_rmse_m_s": 0.08611371368169785,
+              "planar_velocity_rmse_m_s": 0.1159924566745758,
+              "approx_forward_travel_from_logged_velocity_m": 0.6352740526199341
+            },
+            {
+              "phase": "stop",
+              "first_tick": 200,
+              "end_tick_exclusive": 275,
+              "n_ticks": 75,
+              "duration_s": 1.5,
+              "command_vx_vy_yawrate": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.12188119441270828,
+              "mean_vy_m_s": 0.007305836770683527,
+              "signed_forward_bias_m_s": 0.12188119441270828,
+              "forward_mae_m_s": 0.14019806683063507,
+              "forward_rmse_m_s": 0.17768338322639465,
+              "planar_velocity_rmse_m_s": 0.19679023325443268,
+              "approx_forward_travel_from_logged_velocity_m": 0.18282178044319153
+            },
+            {
+              "phase": "resume",
+              "first_tick": 275,
+              "end_tick_exclusive": 400,
+              "n_ticks": 125,
+              "duration_s": 2.5,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.48683080077171326,
+              "mean_vy_m_s": -0.006575944367796183,
+              "signed_forward_bias_m_s": -0.11316923052072525,
+              "forward_mae_m_s": 0.12015493214130402,
+              "forward_rmse_m_s": 0.1707022488117218,
+              "planar_velocity_rmse_m_s": 0.196279376745224,
+              "approx_forward_travel_from_logged_velocity_m": 1.2170770168304443
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "gain_070",
+      "method": "heuristic_gate",
+      "trace": "trace_gain_070_declared_heuristic_gate.npz",
+      "fingerprints": {
+        "sha256": "bb931f535a11572df461da39ac90a1fd5ff1f74494298327275a6501773b0635",
+        "git_blob_sha1": "e2d058f88adc1f4c870edda8f6818ef838183f3b"
+      },
+      "scenarios": [
+        {
+          "scenario_id": "gain_070_seed29204_env00000",
+          "environment_index": 0,
+          "onset_tick": 76,
+          "alive_ticks": 400,
+          "reported_postfault_loss": 0.02869516797363758,
+          "recomputed_postfault_loss": 0.02869517356157303,
+          "loss_absolute_difference": 5.587935447692871e-09,
+          "reported_progress_m": 2.290100336074829,
+          "phases": [
+            {
+              "phase": "walk",
+              "first_tick": 0,
+              "end_tick_exclusive": 100,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.2628641724586487,
+              "mean_vy_m_s": -0.03885362669825554,
+              "signed_forward_bias_m_s": -0.3371358811855316,
+              "forward_mae_m_s": 0.338535338640213,
+              "forward_rmse_m_s": 0.4763997197151184,
+              "planar_velocity_rmse_m_s": 0.48848065733909607,
+              "approx_forward_travel_from_logged_velocity_m": 0.5257283449172974
+            },
+            {
+              "phase": "turn",
+              "first_tick": 100,
+              "end_tick_exclusive": 200,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.36000001430511475,
+                0.0,
+                0.5
+              ],
+              "mean_vx_m_s": 0.3567110300064087,
+              "mean_vy_m_s": -0.04133700951933861,
+              "signed_forward_bias_m_s": -0.0032889514695852995,
+              "forward_mae_m_s": 0.08381368964910507,
+              "forward_rmse_m_s": 0.10592395812273026,
+              "planar_velocity_rmse_m_s": 0.15595583617687225,
+              "approx_forward_travel_from_logged_velocity_m": 0.7134220600128174
+            },
+            {
+              "phase": "stop",
+              "first_tick": 200,
+              "end_tick_exclusive": 275,
+              "n_ticks": 75,
+              "duration_s": 1.5,
+              "command_vx_vy_yawrate": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.05431846156716347,
+              "mean_vy_m_s": -0.02513805404305458,
+              "signed_forward_bias_m_s": 0.05431846156716347,
+              "forward_mae_m_s": 0.06471902132034302,
+              "forward_rmse_m_s": 0.07473274320363998,
+              "planar_velocity_rmse_m_s": 0.11054189503192902,
+              "approx_forward_travel_from_logged_velocity_m": 0.08147768676280975
+            },
+            {
+              "phase": "resume",
+              "first_tick": 275,
+              "end_tick_exclusive": 400,
+              "n_ticks": 125,
+              "duration_s": 2.5,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.5070832371711731,
+              "mean_vy_m_s": -0.049657296389341354,
+              "signed_forward_bias_m_s": -0.09291684627532959,
+              "forward_mae_m_s": 0.1135026291012764,
+              "forward_rmse_m_s": 0.1713663786649704,
+              "planar_velocity_rmse_m_s": 0.2008679360151291,
+              "approx_forward_travel_from_logged_velocity_m": 1.2677080631256104
+            }
+          ]
+        },
+        {
+          "scenario_id": "gain_070_seed29204_env00001",
+          "environment_index": 1,
+          "onset_tick": 77,
+          "alive_ticks": 400,
+          "reported_postfault_loss": 0.047960054129362106,
+          "recomputed_postfault_loss": 0.047960057854652405,
+          "loss_absolute_difference": 3.725290298461914e-09,
+          "reported_progress_m": 2.5917558670043945,
+          "phases": [
+            {
+              "phase": "walk",
+              "first_tick": 0,
+              "end_tick_exclusive": 100,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.39284273982048035,
+              "mean_vy_m_s": 0.025649072602391243,
+              "signed_forward_bias_m_s": -0.20715725421905518,
+              "forward_mae_m_s": 0.20752641558647156,
+              "forward_rmse_m_s": 0.2782381772994995,
+              "planar_velocity_rmse_m_s": 0.3061445653438568,
+              "approx_forward_travel_from_logged_velocity_m": 0.7856854796409607
+            },
+            {
+              "phase": "turn",
+              "first_tick": 100,
+              "end_tick_exclusive": 200,
+              "n_ticks": 100,
+              "duration_s": 2.0,
+              "command_vx_vy_yawrate": [
+                0.36000001430511475,
+                0.0,
+                0.5
+              ],
+              "mean_vx_m_s": 0.3302901089191437,
+              "mean_vy_m_s": -0.05547064170241356,
+              "signed_forward_bias_m_s": -0.029709890484809875,
+              "forward_mae_m_s": 0.11728304624557495,
+              "forward_rmse_m_s": 0.13322146236896515,
+              "planar_velocity_rmse_m_s": 0.18291643261909485,
+              "approx_forward_travel_from_logged_velocity_m": 0.6605802178382874
+            },
+            {
+              "phase": "stop",
+              "first_tick": 200,
+              "end_tick_exclusive": 275,
+              "n_ticks": 75,
+              "duration_s": 1.5,
+              "command_vx_vy_yawrate": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.27350959181785583,
+              "mean_vy_m_s": -0.002996488707140088,
+              "signed_forward_bias_m_s": 0.27350959181785583,
+              "forward_mae_m_s": 0.27350959181785583,
+              "forward_rmse_m_s": 0.30449870228767395,
+              "planar_velocity_rmse_m_s": 0.32222965359687805,
+              "approx_forward_travel_from_logged_velocity_m": 0.41026437282562256
+            },
+            {
+              "phase": "resume",
+              "first_tick": 275,
+              "end_tick_exclusive": 400,
+              "n_ticks": 125,
+              "duration_s": 2.5,
+              "command_vx_vy_yawrate": [
+                0.6000000238418579,
+                0.0,
+                0.0
+              ],
+              "mean_vx_m_s": 0.5160144567489624,
+              "mean_vy_m_s": -0.02914956398308277,
+              "signed_forward_bias_m_s": -0.08398554474115372,
+              "forward_mae_m_s": 0.09962742030620575,
+              "forward_rmse_m_s": 0.12995180487632751,
+              "planar_velocity_rmse_m_s": 0.17634227871894836,
+              "approx_forward_travel_from_logged_velocity_m": 1.2900360822677612
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

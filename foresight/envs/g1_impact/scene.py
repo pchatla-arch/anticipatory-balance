@@ -69,6 +69,7 @@ def build_scene(
     # walker closed on it, so the rendered detector reported it (E17b false alarms).
     park_x: float = -80.0,
     park_z: float = 0.9,
+    static_obstacle=None,
 ) -> tuple[Path, dict[str, str]]:
   """Write a patched robot xml and the impact scene xml into out_dir.
 
@@ -96,6 +97,9 @@ def build_scene(
       PARK_X=park_x,
       PARK_Z=park_z,
   )
+  if static_obstacle is not None:
+    from foresight.adaptive.obstacle_scene_xml import StaticCylinder, add_static_cylinder
+    scene = add_static_cylinder(scene, StaticCylinder(**static_obstacle))
   scene_path = out_dir / "scene_impact_flat.xml"
   scene_path.write_text(scene)
   return scene_path, {}

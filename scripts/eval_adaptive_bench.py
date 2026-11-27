@@ -24,6 +24,8 @@ import csv
 import hashlib
 from importlib import metadata
 import json
+import os
+import tempfile
 from pathlib import Path
 import subprocess
 import sys
@@ -55,13 +57,29 @@ def write_json(path, value):
 
 
 def write_rows(path, rows):
+    """Publish only complete episode-row snapshots to concurrent monitors.
+
+    The monitor must never read a truncated CSV while the benchmark rewrites
+    accumulated rows at the end of each completed controller cell.
+    """
     if not rows:
         return
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     keys = list(rows[0].keys())
-    with open(path, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=keys)
-        w.writeheader()
-        w.writerows(rows)
+    fd, name = tempfile.mkstemp(prefix="." + path.name + ".", suffix=".tmp",
+                                dir=str(path.parent))
+    try:
+        with os.fdopen(fd, "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=keys)
+            w.writeheader()
+            w.writerows(rows)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(name, path)
+    finally:
+        if os.path.exists(name):
+            os.unlink(name)
 
 
 def paired_ci(a, b, draws=2000, seed=228):
