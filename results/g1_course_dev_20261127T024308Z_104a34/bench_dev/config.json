@@ -1,0 +1,107 @@
+{
+  "split": "dev",
+  "seed": 11000,
+  "impl": "jax",
+  "steps": 160,
+  "schedule": "walk_turn_stop_resume",
+  "episodes": 2,
+  "devices": [
+    "cuda:0"
+  ],
+  "versions": {
+    "jax": "0.12.0.1",
+    "mujoco": "3.16.0",
+    "mujoco-mjx": "3.16.0",
+    "warp-lang": "1.18.0",
+    "brax": "0.14.2"
+  },
+  "checkpoint": "/workspace/anticipatory-balance/checkpoints/nominal_s1/000202342400",
+  "source_commit": "43ca493bb5e7ca5e7397b1059a1eb922514cca50",
+  "rls": {
+    "forgetting": 0.9,
+    "initial_cov": 1000.0,
+    "prior_gain": 1.0,
+    "gain_min": 0.2,
+    "gain_max": 1.5,
+    "ewma": 0.9,
+    "min_excitation_rad": 0.001
+  },
+  "heuristic": {
+    "min_samples": 10,
+    "max_residual_rms": 0.02,
+    "min_excitation_rad": 0.02,
+    "dead_band": 0.1,
+    "max_age_steps": 3
+  },
+  "telemetry": {
+    "declared": {
+      "position_noise_rad": 0.002,
+      "torque_noise_nm": 0.5,
+      "position_bias_rad": 0.0,
+      "torque_bias_nm": 0.0,
+      "torque_scale": 1.0,
+      "latency_min": 1,
+      "latency_max": 3,
+      "dropout": 0.02,
+      "bound_position_rad": 0.006,
+      "bound_torque_nm": 1.5,
+      "velocity_error_rad_s": 0.5,
+      "bound_velocity_rad_s": 0.5
+    }
+  },
+  "families": {
+    "gain_070": {
+      "name": "gain_070",
+      "gain": 0.7,
+      "joint_group": "legs",
+      "onset_range": [
+        75,
+        125
+      ],
+      "return_after": null,
+      "damping_scale": 1.0,
+      "telemetry": {
+        "position_noise_rad": 0.0,
+        "torque_noise_nm": 0.0,
+        "position_bias_rad": 0.0,
+        "torque_bias_nm": 0.0,
+        "torque_scale": 1.0,
+        "latency_min": 0,
+        "latency_max": 0,
+        "dropout": 0.0,
+        "bound_position_rad": 1e-05,
+        "bound_torque_nm": 0.001,
+        "velocity_error_rad_s": 0.0,
+        "bound_velocity_rad_s": 0.0
+      },
+      "description": ""
+    },
+    "healthy": {
+      "name": "healthy",
+      "gain": 1.0,
+      "joint_group": "legs",
+      "onset_range": [
+        75,
+        125
+      ],
+      "return_after": null,
+      "damping_scale": 1.0,
+      "telemetry": {
+        "position_noise_rad": 0.0,
+        "torque_noise_nm": 0.0,
+        "position_bias_rad": 0.0,
+        "torque_bias_nm": 0.0,
+        "torque_scale": 1.0,
+        "latency_min": 0,
+        "latency_max": 0,
+        "dropout": 0.0,
+        "bound_position_rad": 1e-05,
+        "bound_torque_nm": 0.001,
+        "velocity_error_rad_s": 0.0,
+        "bound_velocity_rad_s": 0.0
+      },
+      "description": "no plant change; measures false adaptation at rest"
+    }
+  },
+  "candidate_available": true
+}
