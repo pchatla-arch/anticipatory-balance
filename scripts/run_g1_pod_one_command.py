@@ -501,6 +501,12 @@ def main():
     log("Verified authorized pod", pod_id, "cloud", pod["cloud"], "price", price,
         "seconds remaining", int(deadline - time.time()))
 
+    profile = os.environ.get("G1_BENCH_PROFILE", "smoke").strip()
+    if profile != "smoke":
+        log("Unapproved benchmark profile; stopping provider before experiment setup")
+        stop_pod(pod_id, token)
+        raise RuntimeError("Only the 12-row smoke profile is enabled on this revision")
+    bench_spec = BENCH_PROFILES[profile]
     # Start detached pod-side deadline guard immediately after provider validation.
     guard_log = OUTPUT_ROOT / "watchdog.log"
     with open(guard_log, "a") as out:
@@ -512,12 +518,6 @@ def main():
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "_" + uuid.uuid4().hex[:6]
     outdir = OUTPUT_ROOT / run_id
     outdir.mkdir()
-    profile = os.environ.get("G1_BENCH_PROFILE", "smoke").strip()
-    if profile != "smoke":
-        # Not yet authorized in this relaunch recipe; never start a larger
-        # scientific/dev run simply because the operator reused the script.
-        raise RuntimeError("Only the smoke profile is enabled on this revision")
-    bench_spec = BENCH_PROFILES[profile]
     status = {"kind": "g1_course_development", "run_id": run_id, "split": "dev",
               "bench_profile": profile,
               "exclusive_pod_check": ownership_mode,
