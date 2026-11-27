@@ -1,0 +1,64 @@
+{
+  "id": "G1-G2B-G2C-20261126",
+  "status": "REGISTERED_NOT_EXECUTED",
+  "stage": "G2b_depth_and_G2c_nominal_route_diagnostic",
+  "source_branch": "oaa/g1-obstacle-demo-prototype-20261126",
+  "purpose": "Real G1 head-camera depth calibration, detection of physical cylinder, conservative nominal locomotion route and authentic simulation video",
+  "hardware": {
+    "gpu_type": "NVIDIA RTX A6000",
+    "cloud": "SECURE",
+    "max_rate_usd_per_hour": 0.69,
+    "host_cuda": "13.2"
+  },
+  "cost": {
+    "total_project_limit_usd": 4.44,
+    "posted_billable_pods_at_stage_usd": 2.3098599980585277,
+    "prior_g2a_unposted_possible": true,
+    "new_attempt_target_max_usd": 0.45,
+    "maximum_runtime_minutes": 35,
+    "manual_provider_stop_required": true
+  },
+  "scene": {
+    "type": "static_cylinder",
+    "world_xy": [
+      2.8,
+      0
+    ],
+    "radius_m": 0.3,
+    "height_m": 1.05,
+    "head_cam": "head_cam",
+    "true_obstacle_geom_online": "DISALLOWED"
+  },
+  "protocol": {
+    "profile": "nominal_only",
+    "gain_schedule": "healthy",
+    "frozen_actor": "checkpoints/nominal_s1/000202342400",
+    "seed": 1,
+    "steps": 800,
+    "control_hz": 50,
+    "depth_capture_every_ticks": 5,
+    "depth_resolution": 96,
+    "goal_world_xy": [
+      5,
+      0
+    ],
+    "max_speed_mps": 0.4,
+    "max_yaw_rps": 0.5,
+    "hold_if_unconfirmed": true
+  },
+  "gates": [
+    "G2a real-G1 model collision contacts PASS",
+    "G2b actual head camera depth frame and ground-pixel depth calibration",
+    "G2b >=2 consistent obstacle detections from pixels",
+    "G2c frozen G1 joystick rollout with recorded command/contact frames",
+    "H264 MP4 encoded from simulator scene, playback verified",
+    "raw log and video immutably published to GitHub, pod EXITED"
+  ],
+  "explicit_nonclaims": [
+    "No actuator-gain adaptation tested in this diagnostic",
+    "No trained VLA",
+    "No obstacle success until detector and actual route pass",
+    "No robot hardware"
+  ],
+  "source_status": "code CPU syntax/CLI and fixture tested; actual render/navigation untested before this run"
+}
