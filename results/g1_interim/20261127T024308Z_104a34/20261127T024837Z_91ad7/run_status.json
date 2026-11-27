@@ -1,0 +1,17 @@
+{
+  "bench_profile": "smoke",
+  "exclusive_pod_check": "USER_CONFIRMED_API_UNAVAILABLE",
+  "frozen_heuristic_commit": "d756c37d0564837a74132c30f8e366320a6bb1a5",
+  "github_write_probe_sha": "fcdfac47cd838d160831eb52a3ae54eea0cbfb64",
+  "gpu_rate_per_hr": 0.69,
+  "kind": "g1_course_development",
+  "obstacle_72_episode_trial": "NOT_EXECUTED",
+  "pod_id": "7h36awbj20e4wf",
+  "run_id": "20261127T024308Z_104a34",
+  "scientific_claims": "Only recorded episode data from completed stages",
+  "source_commit": "43ca493bb5e7ca5e7397b1059a1eb922514cca50",
+  "split": "dev",
+  "stages": {
+    "github_write_preflight": "actual_published_commit_verified"
+  }
+}
