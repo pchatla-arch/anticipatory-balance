@@ -1,0 +1,158 @@
+=== Git source ===
+89b6d0dd31020f00032330c76684c727b1f697a0
+=== Python geometry/depth/language tests ===
+test_behind_robot_rejected (test_obstacle_depth.DepthSelectionTests.test_behind_robot_rejected) ... ok
+test_confirmed_detour (test_obstacle_depth.DepthSelectionTests.test_confirmed_detour) ... ok
+test_fresh_empty_depth_allows_slow_approach (test_obstacle_depth.DepthSelectionTests.test_fresh_empty_depth_allows_slow_approach) ... ok
+test_ground_is_not_obstacle (test_obstacle_depth.DepthSelectionTests.test_ground_is_not_obstacle) ... ok
+test_missed_observation_does_not_clear_accepted_obstacle (test_obstacle_depth.DepthSelectionTests.test_missed_observation_does_not_clear_accepted_obstacle) ... ok
+test_near_unconfirmed_stop (test_obstacle_depth.DepthSelectionTests.test_near_unconfirmed_stop) ... ok
+test_nearest_depth_blob_without_truth (test_obstacle_depth.DepthSelectionTests.test_nearest_depth_blob_without_truth) ... ok
+test_no_camera_frame_stops (test_obstacle_depth.DepthSelectionTests.test_no_camera_frame_stops) ... ok
+test_nonfinite_depth_ignored (test_obstacle_depth.DepthSelectionTests.test_nonfinite_depth_ignored) ... ok
+test_requires_repeat_observation (test_obstacle_depth.DepthSelectionTests.test_requires_repeat_observation) ... ok
+test_single_pixel_noise_rejected (test_obstacle_depth.DepthSelectionTests.test_single_pixel_noise_rejected) ... ok
+test_stale_after_blank_frames_stops (test_obstacle_depth.DepthSelectionTests.test_stale_after_blank_frames_stops) ... ok
+test_stale_depth_stop (test_obstacle_depth.DepthSelectionTests.test_stale_depth_stop) ... ok
+test_clear_straight_route (test_obstacle_route_demo.ObstacleRouteTests.test_clear_straight_route) ... ok
+test_detour_both_sides_clear (test_obstacle_route_demo.ObstacleRouteTests.test_detour_both_sides_clear) ... ok
+test_follower_advances (test_obstacle_route_demo.ObstacleRouteTests.test_follower_advances) ... ok
+test_forward (test_obstacle_route_demo.ObstacleRouteTests.test_forward) ... ok
+test_reject_close_obstacle_start (test_obstacle_route_demo.ObstacleRouteTests.test_reject_close_obstacle_start) ... ok
+test_reject_invalid_radius (test_obstacle_route_demo.ObstacleRouteTests.test_reject_invalid_radius) ... ok
+test_stop_at_waypoint (test_obstacle_route_demo.ObstacleRouteTests.test_stop_at_waypoint) ... ok
+test_turn_in_place_before_unsafe_forward (test_obstacle_route_demo.ObstacleRouteTests.test_turn_in_place_before_unsafe_forward) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.012s
+
+OK
+test_ambiguous_goal (test_language_nav.LanguageNavigationTests.test_ambiguous_goal) ... ok
+test_future_packet (test_language_nav.LanguageNavigationTests.test_future_packet) ... ok
+test_goal_grounded (test_language_nav.LanguageNavigationTests.test_goal_grounded) ... ok
+test_instruction_mentions_obstacle_without_location_leak (test_language_nav.LanguageNavigationTests.test_instruction_mentions_obstacle_without_location_leak) ... ok
+test_language_goal (test_language_nav.LanguageNavigationTests.test_language_goal) ... ok
+test_long_instruction (test_language_nav.LanguageNavigationTests.test_long_instruction) ... ok
+test_low_confidence_goal (test_language_nav.LanguageNavigationTests.test_low_confidence_goal) ... ok
+test_reject_coordinates_and_motor_commands (test_language_nav.LanguageNavigationTests.test_reject_coordinates_and_motor_commands) ... ok
+test_reject_vlm_actuator_action (test_language_nav.LanguageNavigationTests.test_reject_vlm_actuator_action) ... ok
+test_stale_goal (test_language_nav.LanguageNavigationTests.test_stale_goal) ... ok
+test_stop (test_language_nav.LanguageNavigationTests.test_stop) ... ok
+test_unknown_goal (test_language_nav.LanguageNavigationTests.test_unknown_goal) ... ok
+test_unsupported_instruction_stops (test_language_nav.LanguageNavigationTests.test_unsupported_instruction_stops) ... ok
+test_vlm_known_target (test_language_nav.LanguageNavigationTests.test_vlm_known_target) ... ok
+test_vlm_nan_confidence (test_language_nav.LanguageNavigationTests.test_vlm_nan_confidence) ... ok
+test_vlm_unknown_target (test_language_nav.LanguageNavigationTests.test_vlm_unknown_target) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.001s
+
+OK
+test_grounded_task_drives_navigation (test_task_stack.TaskStackTests.test_grounded_task_drives_navigation) ... ok
+test_invalid_instruction_stops (test_task_stack.TaskStackTests.test_invalid_instruction_stops) ... ok
+test_model_proposal_accepted_only_when_grounded (test_task_stack.TaskStackTests.test_model_proposal_accepted_only_when_grounded) ... ok
+test_no_model_direct_motor_controls (test_task_stack.TaskStackTests.test_no_model_direct_motor_controls) ... ok
+test_stale_goal_stops (test_task_stack.TaskStackTests.test_stale_goal_stops) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+OK
+test_bad_response_fail_closed (test_g1_pod_ownership.OwnershipTests.test_bad_response_fail_closed) ... ok
+test_competitor_in_next_page_fails (test_g1_pod_ownership.OwnershipTests.test_competitor_in_next_page_fails) ... ok
+test_empty_list_not_verified (test_g1_pod_ownership.OwnershipTests.test_empty_list_not_verified) ... ok
+test_named_competitor_fails (test_g1_pod_ownership.OwnershipTests.test_named_competitor_fails) ... ok
+test_one_pod_is_verified (test_g1_pod_ownership.OwnershipTests.test_one_pod_is_verified) ... 2026-11-27T03:23:35.812373+00:00 Exclusive project-pod check passed via RunPod list
+ok
+test_other_http_error_does_not_bypass (test_g1_pod_ownership.OwnershipTests.test_other_http_error_does_not_bypass) ... ok
+test_scope_denial_requires_explicit_confirmation (test_g1_pod_ownership.OwnershipTests.test_scope_denial_requires_explicit_confirmation) ... 2026-11-27T03:23:35.813295+00:00 RunPod account-wide list returned HTTP 403 (API-key scope may lack pods:read)
+2026-11-27T03:23:35.813347+00:00 Only continue if you verified in RunPod that no OTHER G1/OAA/Foresight experiment pod is running.
+2026-11-27T03:23:35.813377+00:00 USER CONFIRMED only one running project pod; API account-wide exclusivity remains unverified
+ok
+test_scope_denial_without_confirmation_fails (test_g1_pod_ownership.OwnershipTests.test_scope_denial_without_confirmation_fails) ... 2026-11-27T03:23:35.813751+00:00 RunPod account-wide list returned HTTP 403 (API-key scope may lack pods:read)
+2026-11-27T03:23:35.813786+00:00 Only continue if you verified in RunPod that no OTHER G1/OAA/Foresight experiment pod is running.
+ok
+test_scope_denial_without_tty_fails (test_g1_pod_ownership.OwnershipTests.test_scope_denial_without_tty_fails) ... 2026-11-27T03:23:35.814082+00:00 RunPod account-wide list returned HTTP 403 (API-key scope may lack pods:read)
+ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.004s
+
+OK
+test_ask_secret_file_permissions (test_g1_github_auth.GitHubAuthenticationTests.test_ask_secret_file_permissions) ... ok
+test_askpass_only_reads_private_token_file (test_g1_github_auth.GitHubAuthenticationTests.test_askpass_only_reads_private_token_file) ... ok
+test_preflight_refuses_insufficient_budget (test_g1_github_auth.GitHubAuthenticationTests.test_preflight_refuses_insufficient_budget) ... ok
+test_repo_auth_preflight_never_runs_with_wrong_origin (test_g1_github_auth.GitHubAuthenticationTests.test_repo_auth_preflight_never_runs_with_wrong_origin) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.003s
+
+OK
+test_actual_launch_path_detaches_worker_and_monitor (test_g1_detached_run.DetachedReliabilityTests.test_actual_launch_path_detaches_worker_and_monitor)
+Exercise the launcher control path with fake provider and processes. ... 2026-11-27T03:23:36.057453+00:00 DETACHED G1 worker PID 12345 monitor active profile s1_screen budget_usd 1.05
+2026-11-27T03:23:36.057528+00:00 Watch log: tail -f /tmp/tmp_85k_p8h/outputs/detached_session.log
+2026-11-27T03:23:36.057553+00:00 Progress: tail -f /tmp/tmp_85k_p8h/outputs/detached_monitor.log
+2026-11-27T03:23:36.057585+00:00 The original development benchmark may take time to compile; GitHub interim commits follow completed result cells.
+ok
+test_detached_child_survives_parent_session_hangup (test_g1_detached_run.DetachedReliabilityTests.test_detached_child_survives_parent_session_hangup)
+Actual Linux OS process-group test, no GPU or provider connection. ... ok
+test_duplicate_episode_keys_marked_unverified (test_g1_detached_run.DetachedReliabilityTests.test_duplicate_episode_keys_marked_unverified) ... ok
+test_empty_run_has_zero_rows (test_g1_detached_run.DetachedReliabilityTests.test_empty_run_has_zero_rows) ... ok
+test_latest_run_prefers_newest (test_g1_detached_run.DetachedReliabilityTests.test_latest_run_prefers_newest) ... ok
+test_monitor_normal_provider_stop_no_rescue (test_g1_detached_run.DetachedReliabilityTests.test_monitor_normal_provider_stop_no_rescue) ... 2026-11-27T03:23:36.091508+00:00 MONITOR worker_exited observed_episode_rows 0
+2026-11-27T03:23:36.091650+00:00 MONITOR verified provider EXITED
+ok
+test_monitor_on_parent_exit_rescues_and_stops (test_g1_detached_run.DetachedReliabilityTests.test_monitor_on_parent_exit_rescues_and_stops) ... 2026-11-27T03:23:36.094255+00:00 MONITOR worker_exited observed_episode_rows 32
+ok
+test_no_process_returns_none (test_g1_detached_run.DetachedReliabilityTests.test_no_process_returns_none) ... ok
+test_own_process_has_start_ticks (test_g1_detached_run.DetachedReliabilityTests.test_own_process_has_start_ticks) ... ok
+test_provider_rejection_stops_without_worker_spawn (test_g1_detached_run.DetachedReliabilityTests.test_provider_rejection_stops_without_worker_spawn) ... 2026-11-27T03:23:36.096406+00:00 ENROLLMENT FAILED: requesting provider stop immediately
+ok
+test_snapshot_missing_git_token_refused (test_g1_detached_run.DetachedReliabilityTests.test_snapshot_missing_git_token_refused) ... ok
+test_unique_episode_keys_counted (test_g1_detached_run.DetachedReliabilityTests.test_unique_episode_keys_counted) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.044s
+
+OK
+test_correct_12_rows_pass_paired_audit (test_g1_smoke_matrix.G1SmokeContract.test_correct_12_rows_pass_paired_audit) ... ok
+test_dev_retains_original_128_rows (test_g1_smoke_matrix.G1SmokeContract.test_dev_retains_original_128_rows) ... ok
+test_duplicate_scenario_rejected (test_g1_smoke_matrix.G1SmokeContract.test_duplicate_scenario_rejected) ... ok
+test_missing_cell_rejected (test_g1_smoke_matrix.G1SmokeContract.test_missing_cell_rejected) ... ok
+test_missing_summary_rejected (test_g1_smoke_matrix.G1SmokeContract.test_missing_summary_rejected) ... ok
+test_provider_lifetime_is_short_and_reserves_publication_time (test_g1_smoke_matrix.G1SmokeContract.test_provider_lifetime_is_short_and_reserves_publication_time) ... ok
+test_smoke_is_twelve_rows_and_not_the_obstacle_study (test_g1_smoke_matrix.G1SmokeContract.test_smoke_is_twelve_rows_and_not_the_obstacle_study) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.004s
+
+OK
+test_32_episode_auditor_accepts_paired_complete_s1a (test_g1_s1a_queue.S1AQueueContract.test_32_episode_auditor_accepts_paired_complete_s1a) ... ok
+test_account_budget_acknowledgement_mandatory (test_g1_s1a_queue.S1AQueueContract.test_account_budget_acknowledgement_mandatory) ... ok
+test_cost_limit_not_exceeded (test_g1_s1a_queue.S1AQueueContract.test_cost_limit_not_exceeded) ... ok
+test_frozen_profile_matches_registered_queue (test_g1_s1a_queue.S1AQueueContract.test_frozen_profile_matches_registered_queue) ... ok
+test_lifetime_and_publication_reserve (test_g1_s1a_queue.S1AQueueContract.test_lifetime_and_publication_reserve) ... ok
+test_modified_registration_denied (test_g1_s1a_queue.S1AQueueContract.test_modified_registration_denied) ... ok
+test_queue_id_is_mandatory (test_g1_s1a_queue.S1AQueueContract.test_queue_id_is_mandatory) ... ok
+test_smoke_default_retained (test_g1_s1a_queue.S1AQueueContract.test_smoke_default_retained) ... ok
+test_unregistered_dev_and_typo_rejected (test_g1_s1a_queue.S1AQueueContract.test_unregistered_dev_and_typo_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.011s
+
+OK
+=== Runtime versions / checkpoint ===
+{
+  "python": "3.12.16",
+  "jax": "0.12.0.1",
+  "mujoco": "3.16.0",
+  "devices": [
+    "cuda:0"
+  ]
+}
+{
+  "checkpoint": "checkpoints/nominal_s1/000202342400",
+  "files": 17,
+  "tree_sha256": "14bd6650f06c4e3171b6e2d2403ef0da5d9dd3604709f0c22b488329dd0223de"
+}
+PREFLIGHT SUCCEEDED. Contact-enabled camera/obstacle integration, physics and video are NOT tested here.

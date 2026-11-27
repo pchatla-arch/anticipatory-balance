@@ -1,0 +1,25 @@
+{
+  "captured_utc": "2026-11-27T03:30:36.598351+00:00",
+  "episode_rows_observed": 12,
+  "expected_full_dev_rows": 128,
+  "files_copied": [
+    "run_status.json",
+    "bench.log",
+    "supervisor_tests.log",
+    "preflight.log",
+    "frozen_heuristic.json",
+    "bench_dev/episodes.csv",
+    "bench_dev/registration.json",
+    "bench_dev/trace_gain_070_declared_none.npz",
+    "bench_dev/trace_gain_070_declared_oracle.npz",
+    "bench_dev/trace_healthy_declared_estimated_inverse.npz",
+    "bench_dev/trace_healthy_declared_heuristic_gate.npz",
+    "bench_dev/trace_healthy_declared_none.npz",
+    "bench_dev/trace_healthy_declared_oracle.npz"
+  ],
+  "final_rescue": false,
+  "kind": "G1_INTERIM_DEVELOPMENT_SNAPSHOT",
+  "run_id": "20261127T032240Z_5fc7dd",
+  "science_complete": false,
+  "warning": "Partial snapshot. Not a completed 128-row run; no obstacle/VLA experiment or video claim."
+}
